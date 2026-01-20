@@ -12,6 +12,10 @@ interface Tour {
   slug: string;
   summary: string;
   description: string;
+  descriptionImage?: string;
+  whatsIncluded?: string;
+  transportation?: string;
+  staffExperts?: string;
   price: {
     amount: number;
     currency: string;
@@ -62,6 +66,11 @@ interface Tour {
       rating?: number;
       description?: string;
     }>;
+    meals?: {
+      breakfast: boolean;
+      lunch: boolean;
+      dinner: boolean;
+    };
   }>;
   highlights: string[];
   location: {
@@ -261,30 +270,81 @@ export default function TourDetailPage() {
           {/* Photo Gallery (preview grid with booking panel) */}
           {tour.images && tour.images.length > 0 && (
             <div className="mt-6 mb-6 bg-white">
-              <h1 className="text-4xl font-semibold text-gray-900 mb-2">
-                {tour.name} - {tour.duration.days} days
-              </h1>
               <div className="max-w-7xl mx-auto py-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                  {/* Images Grid (left) */}
+                  {/* Images Grid (left) - Show description image if available, otherwise show gallery */}
                   <div className="lg:col-span-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {tour.images.map((image, idx) => (
-                        <div
-                          key={idx}
-                          className="relative aspect-[4/2] rounded-sm overflow-hidden"
-                        >
-                          <Image
-                            src={image.url || "/placeholder-image.jpg"}
-                            alt={
-                              image.caption || `${tour.name} photo ${idx + 1}`
-                            }
-                            fill
-                            className="object-cover"
-                          />
+                    <h1 className="text-4xl font-semibold text-gray-900 mb-4">
+                      {tour.name} - {tour.duration.days} days
+                    </h1>
+                    {/* Rating */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex flex-col items-center pr-3 border-r">
+                        <div className="text-2xl font-bold text-gray-900">
+                          {tour.ratingsAverage.toFixed(1)}
                         </div>
-                      ))}
+                        <div className="text-xs text-gray-500">avg</div>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <svg
+                              key={i}
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              width="18"
+                              height="18"
+                              className="inline-block"
+                            >
+                              <path
+                                d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.79 1.402 8.172L12 18.896l-7.336 3.976 1.402-8.172L.132 9.21l8.2-1.192z"
+                                fill={
+                                  i < Math.round(tour.ratingsAverage)
+                                    ? "#fbbf24"
+                                    : "none"
+                                }
+                                stroke="#fbbf24"
+                                strokeWidth="0.5"
+                              />
+                            </svg>
+                          ))}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {tour.ratingsQuantity.toLocaleString()} reviews
+                        </div>
+                      </div>
                     </div>
+                    {tour.descriptionImage ? (
+                      // Show single description image
+                      <div className="relative aspect-[4/2] rounded-sm overflow-hidden">
+                        <Image
+                          src={tour.descriptionImage || "/placeholder-image.jpg"}
+                          alt={`${tour.name} description`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      // Show image gallery if no description image
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {tour.images.map((image, idx) => (
+                          <div
+                            key={idx}
+                            className="relative aspect-[4/2] rounded-sm overflow-hidden"
+                          >
+                            <Image
+                              src={image.url || "/placeholder-image.jpg"}
+                              alt={
+                                image.caption || `${tour.name} photo ${idx + 1}`
+                              }
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Booking Panel (right) */}
@@ -336,7 +396,7 @@ export default function TourDetailPage() {
                       </div>
 
                       {/* Valid Date and Trip Code */}
-                      {/* <div className="mb-6 pb-6 border-b space-y-4">
+                      <div className="mb-6 pb-6 border-b space-y-4">
                         {tour.startDates && tour.startDates.length > 0 && (
                           <div>
                             <div className="text-xs text-gray-600 font-medium">
@@ -353,10 +413,10 @@ export default function TourDetailPage() {
                             </div>
                           </div>
                         )}
-                      </div> */}
+                      </div>
 
                       {/* Rating */}
-                      {/* <div className="mb-6 pb-6 border-b flex items-center gap-3">
+                      <div className="mb-6 pb-6 border-b flex items-center gap-3">
                         <div className="flex items-center gap-1">
                           {[...Array(5)].map((_, i) => (
                             <span key={i} className="text-lg">
@@ -367,7 +427,7 @@ export default function TourDetailPage() {
                         <div className="text-sm text-gray-600">
                           {tour.ratingsQuantity.toLocaleString()} reviews
                         </div>
-                      </div> */}
+                      </div>
 
                       {/* CTA Buttons */}
                       <div className="space-y-3">
@@ -387,109 +447,7 @@ export default function TourDetailPage() {
             </div>
           )}
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
-                {/* Professional rating card using inline Phosphor-style SVG stars */}
-                <div className="flex items-center gap-4">
-                  <div className="bg-white border rounded-lg px-4 py-3 flex items-center gap-4 shadow-sm">
-                    <div className="flex flex-col items-center pr-3 border-r">
-                      <div className="text-2xl font-bold text-gray-900">
-                        {tour.ratingsAverage.toFixed(1)}
-                      </div>
-                      <div className="text-xs text-gray-500">avg</div>
-                    </div>
 
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <svg
-                            key={i}
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            width="18"
-                            height="18"
-                            className="inline-block"
-                          >
-                            <path
-                              d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.79 1.402 8.172L12 18.896l-7.336 3.976 1.402-8.172L.132 9.21l8.2-1.192z"
-                              fill={
-                                i < Math.round(tour.ratingsAverage)
-                                  ? "#fbbf24"
-                                  : "none"
-                              }
-                              stroke="#fbbf24"
-                              strokeWidth="0.5"
-                            />
-                          </svg>
-                        ))}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {tour.ratingsQuantity.toLocaleString()} reviews
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="hidden sm:flex flex-col text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="16"
-                        height="16"
-                        className="text-gray-500"
-                      >
-                        <path
-                          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <span>{tour.country.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="16"
-                        height="16"
-                        className="text-gray-500"
-                      >
-                        <path
-                          d="M12 8a1 1 0 0 1 1 1v3.586l2.707 2.707a1 1 0 0 1-1.414 1.414L11 13.414V9a1 1 0 0 1 1-1z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0zm-2 0A7 7 0 1 0 5 12a7 7 0 0 0 14 0z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <span>
-                        {tour.duration.days} days, {tour.duration.nights} nights
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="16"
-                        height="16"
-                        className="text-gray-500"
-                      >
-                        <path
-                          d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zM8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zM16 13c-.29 0-.62.02-.97.05C15.4 13.36 16 14.12 16 15v2h6v-2.5c0-2.33-4.67-3.5-6-3.5z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <span>Max {tour.maxGroupSize} people</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p className="text-base text-gray-700">{tour.summary}</p>
-            </div>
-
-            {/* removed small booking widget from header; booking panel moved to Photos area */}
-          </div>
         </div>
       </div>
 
@@ -499,31 +457,28 @@ export default function TourDetailPage() {
           <nav className="flex space-x-8">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${
-                activeTab === "overview"
-                  ? "border-blue-500 underline text-blue-600"
-                  : "border-transparent  text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${activeTab === "overview"
+                ? "border-blue-500 underline text-blue-600"
+                : "border-transparent  text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
             >
               Overview
             </button>
             <button
               onClick={() => setActiveTab("itinerary")}
-              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${
-                activeTab === "itinerary"
-                  ? "border-blue-500  underline text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${activeTab === "itinerary"
+                ? "border-blue-500  underline text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
             >
               Full Itinerary
             </button>
             <button
               onClick={() => setActiveTab("details")}
-              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${
-                activeTab === "details"
-                  ? "border-blue-500 underline text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
+              className={`py-2 px-1 cursor-pointer underline-offset-6 font-medium text-sm ${activeTab === "details"
+                ? "border-blue-500 underline text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
             >
               Tour Details
             </button>
@@ -587,114 +542,6 @@ export default function TourDetailPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Concise Itinerary (Overview) - same structure as full itinerary but abbreviated */}
-                {tour.itinerary && tour.itinerary.length > 0 && (
-                  <div className="bg-white mt-6">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      Itinerary (Preview)
-                    </h3>
-
-                    <div className="space-y-6">
-                      {tour.itinerary.map((day, index) => (
-                        <div
-                          key={index}
-                          className="border-l-4 border-blue-500 pl-6 pb-6 relative"
-                        >
-                          <div className="absolute -left-3 top-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-xs font-semibold text-white">
-                              {day.day}
-                            </span>
-                          </div>
-
-                          <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                            {day.title}
-                          </h4>
-                          <p className="text-gray-700 mb-3 line-clamp-2">
-                            {day.description?.split(".")[0] || ""}.
-                          </p>
-
-                          {/* Activities - show names only, limited */}
-                          {day.activities && day.activities.length > 0 && (
-                            <div className="mb-2">
-                              <div className="text-sm font-semibold text-gray-900 mb-2">
-                                Activities
-                              </div>
-                              <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-                                {day.activities.slice(0, 2).map((act, i) => (
-                                  <li key={i}>{act.name}</li>
-                                ))}
-                                {day.activities.length > 2 && (
-                                  <li className="text-gray-500">
-                                    +{day.activities.length - 2} more
-                                  </li>
-                                )}
-                              </ul>
-                            </div>
-                          )}
-
-                          {/* Optional Activities - names and price only */}
-                          {day.optionalActivities &&
-                            day.optionalActivities.length > 0 && (
-                              <div className="mb-2">
-                                <div className="text-sm font-semibold text-gray-900 mb-2">
-                                  Optional Activities
-                                </div>
-                                <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-                                  {day.optionalActivities
-                                    .slice(0, 2)
-                                    .map((opt, i) => (
-                                      <li key={i}>
-                                        {opt.name} — {opt.price?.currency}{" "}
-                                        {opt.price?.amount}
-                                      </li>
-                                    ))}
-                                  {day.optionalActivities.length > 2 && (
-                                    <li className="text-gray-500">
-                                      +{day.optionalActivities.length - 2} more
-                                    </li>
-                                  )}
-                                </ul>
-                              </div>
-                            )}
-
-                          {/* Accommodations - name and type only */}
-                          {day.accommodations &&
-                            day.accommodations.length > 0 && (
-                              <div>
-                                <div className="text-sm font-semibold text-gray-900 mb-2">
-                                  Accommodation
-                                </div>
-                                <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
-                                  {day.accommodations
-                                    .slice(0, 2)
-                                    .map((acc, i) => (
-                                      <li key={i}>
-                                        {acc.name} ({acc.type})
-                                      </li>
-                                    ))}
-                                  {day.accommodations.length > 2 && (
-                                    <li className="text-gray-500">
-                                      +{day.accommodations.length - 2} more
-                                    </li>
-                                  )}
-                                </ul>
-                              </div>
-                            )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-4">
-                      <button
-                        onClick={() => setActiveTab("itinerary")}
-                        className="text-sm text-blue-600 font-medium hover:underline"
-                      >
-                        View full itinerary
-                      </button>
-                    </div>
-                  </div>
-                )}
               </>
             )}
 
@@ -1062,7 +909,7 @@ export default function TourDetailPage() {
                   <div className="relative w-full aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
                     {tour.itinerary[currentDay - 1]?.imageUrl ? (
                       <Image
-                        src={tour.itinerary[currentDay - 1].imageUrl}
+                        src={tour.itinerary[currentDay - 1].imageUrl || "/placeholder-image.jpg"}
                         alt={`Day ${currentDay}`}
                         fill
                         className="object-cover"
@@ -1091,11 +938,10 @@ export default function TourDetailPage() {
                       <button
                         key={day.day}
                         onClick={() => scrollToDay(day.day)}
-                        className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                          currentDay === day.day
-                            ? "bg-blue-600 text-white shadow-lg scale-105"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
+                        className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentDay === day.day
+                          ? "bg-blue-600 text-white shadow-lg scale-105"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
                       >
                         {day.day}
                       </button>
@@ -1176,203 +1022,718 @@ export default function TourDetailPage() {
         </div>
       </div>
 
-      {/* Check Availability Section */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-12">
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {/* Section Header */}
-          <div className="px-6 py-6 border-b bg-gradient-to-r from-gray-50 to-white">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Check Availability
-            </h2>
-            <p className="text-gray-600">
-              Select your preferred dates and secure your spot on this tour
-            </p>
-          </div>
+      {/* Community Impact Section - Full Width, Only visible in Overview tab */}
+      {activeTab === "overview" && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-12">
+          <div className="rounded-lg">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                See how your trip uplifts communities
+              </h2>
+              <p className="text-gray-600">
+                In a number of impactful ways, your adventure directly benefits the local people and places we visit.
+              </p>
+            </div>
 
-          {/* Availability Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              {/* Table Header */}
-              <thead>
-                <tr className="bg-gray-100 border-b">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Dates
-                    <div className="text-xs font-normal text-gray-500">
-                      Start-End
+            <div className="space-y-4">
+              {/* Trees for Days Card */}
+              <div className="bg-white rounded-lg p-6">
+                <div className="flex gap-6">
+                  <div className="w-20 h-20 bg-teal-600 rounded flex-shrink-0"></div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Heading
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Help us spread love around the world with Trees for Days. Together with Planeterra, we'll plant one tree in your name for every travel day.
+                    </p>
+                    <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded transition-colors mb-3">
+                      Learn more
+                    </button>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Trees planted for this trip: <strong>8</strong></span>
                     </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Availability
-                    <div className="text-xs font-normal text-gray-500">
-                      Remaining Spaces
+                  </div>
+                </div>
+              </div>
+
+              {/* Ripple Score Card */}
+              <div className="bg-white rounded-lg p-6">
+                <div className="flex gap-6">
+                  <div className="w-20 h-20 bg-lime-400 rounded flex-shrink-0"></div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      Heading
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Create ripples that change lives. The higher the Ripple Score percentage, the more money stays in the local communities you visit.
+                    </p>
+                    <button className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded transition-colors mb-3">
+                      Learn more
+                    </button>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span>Ripple Score for this trip: <strong>100</strong></span>
                     </div>
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                    Price
-                    <div className="text-xs font-normal text-gray-500">
-                      Per Person
-                    </div>
-                  </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              {/* Table Body - Grouped by Month */}
-              <tbody>
-                {tour.startDates && tour.startDates.length > 0 ? (
-                  (() => {
-                    // Group dates by month
-                    const groupedByMonth: {
-                      [key: string]: typeof tour.startDates;
-                    } = {};
-                    tour.startDates.forEach((date) => {
-                      const monthYear = new Date(
-                        date.startDate,
-                      ).toLocaleDateString("en-US", {
-                        month: "long",
-                        year: "numeric",
-                      });
-                      if (!groupedByMonth[monthYear]) {
-                        groupedByMonth[monthYear] = [];
-                      }
-                      groupedByMonth[monthYear].push(date);
-                    });
-
-                    // Sort months chronologically
-                    const sortedMonths = Object.keys(groupedByMonth).sort(
-                      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-                    );
-
-                    return sortedMonths
-                      .map((month, monthIndex) => [
-                        // Month Header Row
-                        <tr key={`month-${month}`} className="bg-gray-200">
-                          <td
-                            colSpan={4}
-                            className="px-6 py-3 text-sm font-bold text-gray-800 uppercase tracking-wide"
-                          >
-                            {month}
-                          </td>
-                        </tr>,
-                        // Dates in this month
-                        ...groupedByMonth[month].map((date, dateIndex) => {
-                          const isSoldOut =
-                            date.availableSpots === 0 || !date.isActive;
-                          const originalPrice = tour.price.amount;
-                          const discountedPrice =
-                            tour.price.discountPercent > 0
-                              ? originalPrice *
-                                (1 - tour.price.discountPercent / 100)
-                              : originalPrice;
-
-                          return (
-                            <tr
-                              key={`${month}-${dateIndex}`}
-                              className={`border-b ${
-                                isSoldOut
-                                  ? "bg-gray-50 opacity-50"
-                                  : "bg-white hover:bg-blue-50"
-                              } transition-colors`}
-                            >
-                              <td className="px-6 py-4">
-                                <div
-                                  className={`text-sm font-medium ${
-                                    isSoldOut
-                                      ? "text-gray-400"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  {new Date(date.startDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      weekday: "short",
-                                      month: "short",
-                                      day: "numeric",
-                                    },
-                                  )}{" "}
-                                  -{" "}
-                                  {new Date(date.endDate).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      weekday: "short",
-                                      month: "short",
-                                      day: "numeric",
-                                    },
-                                  )}
-                                </div>
-                              </td>
-
-                              <td className="px-6 py-4">
-                                {isSoldOut ? (
-                                  <span className="text-sm text-gray-400 font-medium">
-                                    Sold Out
-                                  </span>
-                                ) : (
-                                  <span className="text-sm text-gray-700 font-medium">
-                                    {date.availableSpots}{" "}
-                                    <span className="text-gray-500">
-                                      Available
-                                    </span>
-                                  </span>
-                                )}
-                              </td>
-
-                              <td className="px-6 py-4">
-                                {isSoldOut ? (
-                                  <div className="text-sm text-gray-400">
-                                    ${originalPrice}
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold text-gray-900">
-                                      $
-                                      {Math.round(
-                                        date.price.amount || discountedPrice,
-                                      )}
-                                    </span>
-                                    {tour.price.discountPercent > 0 && (
-                                      <span className="text-xs text-gray-500 line-through">
-                                        ${originalPrice}
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </td>
-
-                              <td className="px-6 py-4 text-center">
-                                {isSoldOut ? (
-                                  <span className="text-xs text-gray-400 font-medium">
-                                    Unavailable
-                                  </span>
-                                ) : (
-                                  <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors">
-                                    Book now
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        }),
-                      ])
-                      .flat();
-                  })()
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="px-6 py-8 text-center text-gray-500"
-                    >
-                      No dates available at the moment
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Photo Gallery Section - Full Width, Only visible in Overview tab */}
+      {activeTab === "overview" && tour.images && tour.images.length > 0 && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 pb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 h-[400px]">
+            {/* Large Image - Left Side */}
+            <div className="relative h-full rounded-lg overflow-hidden group cursor-pointer">
+              {tour.images[0] && (
+                <Image
+                  src={tour.images[0].url || "/placeholder-image.jpg"}
+                  alt={tour.images[0].caption || tour.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              )}
+            </div>
+
+            {/* Grid of Smaller Images - Right Side */}
+            <div className="grid grid-cols-2 gap-2 h-full">
+              {tour.images.slice(1, 5).map((image, idx) => (
+                <div
+                  key={idx}
+                  className={`relative rounded-lg overflow-hidden group cursor-pointer ${idx === 3 ? 'after:absolute after:inset-0 after:bg-black after:bg-opacity-50' : ''
+                    }`}
+                >
+                  <Image
+                    src={image.url || "/placeholder-image.jpg"}
+                    alt={image.caption || `${tour.name} photo ${idx + 2}`}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {/* Show "+X MORE" overlay on last image if there are more photos */}
+                  {idx === 3 && tour.images.length > 5 && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-60 z-10">
+                      <div className="text-white text-3xl font-bold">
+                        +{tour.images.length - 5} MORE
+                      </div>
+                      <div className="text-white text-sm mt-1">
+                        FROM THIS TRIP
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Itinerary Preview Section - Only visible in Overview tab */}
+      {activeTab === "overview" && tour.itinerary && tour.itinerary.length > 0 && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-12">
+          <div className="bg-white">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              Itinerary (Preview)
+            </h3>
+
+            <div className="space-y-6">
+              {tour.itinerary.map((day, index) => (
+                <div
+                  key={index}
+                  className="border-l-4 border-blue-500 pl-6 pb-6 relative"
+                >
+                  <div className="absolute -left-3 top-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-semibold text-white">
+                      {day.day}
+                    </span>
+                  </div>
+
+                  <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                    {day.title}
+                  </h4>
+                  <p className="text-gray-700 mb-3 line-clamp-2">
+                    {day.description?.split(".")[0] || ""}.
+                  </p>
+
+                  {/* Activities - show names only, limited */}
+                  {day.activities && day.activities.length > 0 && (
+                    <div className="mb-2">
+                      <div className="text-sm font-semibold text-gray-900 mb-2">
+                        Activities
+                      </div>
+                      <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
+                        {day.activities.slice(0, 2).map((act, i) => (
+                          <li key={i}>{act.name}</li>
+                        ))}
+                        {day.activities.length > 2 && (
+                          <li className="text-gray-500">
+                            +{day.activities.length - 2} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Optional Activities - names and price only */}
+                  {day.optionalActivities &&
+                    day.optionalActivities.length > 0 && (
+                      <div className="mb-2">
+                        <div className="text-sm font-semibold text-gray-900 mb-2">
+                          Optional Activities
+                        </div>
+                        <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
+                          {day.optionalActivities
+                            .slice(0, 2)
+                            .map((opt, i) => (
+                              <li key={i}>
+                                {opt.name} — {opt.price?.currency}{" "}
+                                {opt.price?.amount}
+                              </li>
+                            ))}
+                          {day.optionalActivities.length > 2 && (
+                            <li className="text-gray-500">
+                              +{day.optionalActivities.length - 2} more
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                  {/* Accommodations - name and type only */}
+                  {day.accommodations &&
+                    day.accommodations.length > 0 && (
+                      <div>
+                        <div className="text-sm font-semibold text-gray-900 mb-2">
+                          Accommodation
+                        </div>
+                        <ul className="text-sm text-gray-700 list-disc list-inside space-y-1">
+                          {day.accommodations
+                            .slice(0, 2)
+                            .map((acc, i) => (
+                              <li key={i}>
+                                {acc.name} ({acc.type})
+                              </li>
+                            ))}
+                          {day.accommodations.length > 2 && (
+                            <li className="text-gray-500">
+                              +{day.accommodations.length - 2} more
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <button
+                onClick={() => setActiveTab("itinerary")}
+                className="text-sm text-blue-600 font-medium hover:underline"
+              >
+                View full itinerary
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* What's Included & Reviews Section - Only visible in Overview tab */}
+      {activeTab === "overview" && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 pb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {/* Left Column: What's Included, Transportation, Staff & Experts */}
+            <div className="lg:col-span-2 space-y-10">
+              {/* What's Included */}
+              {(tour.whatsIncluded || true) && (
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                    What&apos;s Included
+                  </h3>
+                  {tour.whatsIncluded ? (
+                    <ul className="space-y-4 mb-8">
+                      {tour.whatsIncluded.split(/\n\s*\n/).map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="mr-3 mt-2 w-1.5 h-1.5 bg-gray-900 rounded-full flex-shrink-0"></span>
+                          <span className="text-gray-700 leading-relaxed">
+                            {item.trim()}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 italic mb-8">
+                      Information about what&apos;s included will be added soon.
+                    </p>
+                  )}
+
+                  <div className="border-t border-gray-200 pt-6">
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">
+                      Accommodations
+                    </h4>
+                    <p className="text-gray-700">
+                      {tour.itinerary &&
+                        tour.itinerary.some(
+                          (day) =>
+                            day.accommodations && day.accommodations.length > 0,
+                        )
+                        ? Array.from(
+                          new Set(
+                            tour.itinerary.flatMap(
+                              (day) =>
+                                day.accommodations?.map((acc) => acc.type) ||
+                                [],
+                            ),
+                          ),
+                        ).join(", ")
+                        : "Standard accommodation"}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-6 mt-6">
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">
+                      Meals
+                    </h4>
+                    <p className="text-gray-700 mb-1">
+                      {tour.itinerary?.reduce(
+                        (acc, day) => acc + (day.meals?.breakfast ? 1 : 0),
+                        0,
+                      )}{" "}
+                      breakfasts,{" "}
+                      {tour.itinerary?.reduce(
+                        (acc, day) => acc + (day.meals?.lunch ? 1 : 0),
+                        0,
+                      )}{" "}
+                      lunches,{" "}
+                      {tour.itinerary?.reduce(
+                        (acc, day) => acc + (day.meals?.dinner ? 1 : 0),
+                        0,
+                      )}{" "}
+                      dinners
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Allow USD345-450 for meals not included.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Transportation */}
+              <div className="border-t border-gray-200 pt-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  Transportation
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {tour.transportation ||
+                    "Train, local bus, private vehicle, auto-rickshaw, small riverboat, plane."}
+                </p>
+              </div>
+
+              {/* Staff & Experts */}
+              <div className="border-t border-gray-200 pt-8">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">
+                  Staff & experts
+                </h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {tour.staffExperts ||
+                    "CEO (Chief Experience Officer) throughout, local guides."}
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Reviews (Placeholder) */}
+            <div className="lg:col-span-1">
+              <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Reviews{" "}
+                    <span className="text-gray-500 font-normal">
+                      {tour.ratingsQuantity}
+                    </span>
+                  </h3>
+                </div>
+
+                <div className="flex items-center mb-6">
+                  <div className="flex text-green-500 mr-3">
+                    {[...Array(5)].map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`w-6 h-6 ${i < Math.round(tour.ratingsAverage)
+                          ? "fill-current"
+                          : "text-gray-300 fill-current"
+                          }`}
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {tour.ratingsAverage}
+                    <span className="text-sm text-gray-500 font-normal ml-1">
+                      / 5
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-8">
+                  {["Excellent", "Great", "Average", "Poor", "Bad"].map(
+                    (label, i) => (
+                      <div key={label} className="flex items-center text-sm">
+                        <div className="w-5 h-5 border rounded mr-3 flex items-center justify-center"></div>
+                        <span className="w-20 text-gray-600">{label}</span>
+                        <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden mx-2">
+                          <div
+                            className="h-full bg-gray-600"
+                            style={{
+                              width:
+                                i === 0
+                                  ? "81%"
+                                  : i === 1
+                                    ? "15%"
+                                    : i === 2
+                                      ? "4%"
+                                      : "0%",
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-gray-500 w-8 text-right">
+                          {i === 0
+                            ? "81%"
+                            : i === 1
+                              ? "15%"
+                              : i === 2
+                                ? "4%"
+                                : "0%"}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  {/* Sample Review 1 */}
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-900">
+                        Charles C.
+                      </span>
+                      <span className="text-gray-500 text-xs">June 22</span>
+                    </div>
+                    <div className="flex text-green-500 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-4 h-4 fill-current"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      I had an eye opening tour through India that made me not
+                      only realize how valuable the culture and people are but
+                      also gave me a rudimentary understanding of the society...
+                    </p>
+                  </div>
+
+                  {/* Sample Review 2 */}
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-900">
+                        John M.
+                      </span>
+                      <span className="text-gray-500 text-xs">June 22</span>
+                    </div>
+                    <div className="flex text-green-500 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className="w-4 h-4 fill-current"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      I thoroughly enjoyed my trip to India with Nothing But
+                      Adventures...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Available Extras Section - Only visible in Overview tab */}
+      {activeTab === "overview" &&
+        tour.itinerary &&
+        tour.itinerary.some(
+          (day) => day.optionalActivities && day.optionalActivities.length > 0,
+        ) && (
+          <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 pb-12">
+            <div className="bg-white">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                Available extras{" "}
+                <span className="text-gray-500 font-normal text-lg">
+                  (Add these to your tour when you book)
+                </span>
+              </h3>
+
+              <div className="mt-8 space-y-8">
+                {tour.itinerary.flatMap((day) =>
+                  (day.optionalActivities || []).map((activity, idx) => (
+                    <div
+                      key={`${day.day}-${idx}`}
+                      className="flex items-start gap-4"
+                    >
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-10 h-10 rounded-full bg-purple-900 flex items-center justify-center text-white">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">
+                          {activity.name}{" "}
+                          <span className="text-gray-500 font-normal">
+                            - From {activity.price.currency}{" "}
+                            {activity.price.amount.toFixed(2)}
+                          </span>
+                        </h4>
+                        <p className="text-gray-700 leading-relaxed max-w-4xl">
+                          {activity.description}
+                        </p>
+                      </div>
+                    </div>
+                  )),
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* Check Availability Section - Only visible in Overview tab */}
+      {activeTab === "overview" && (
+        <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-12">
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            {/* Section Header */}
+            <div className="px-6 py-6 border-b bg-gradient-to-r from-gray-50 to-white">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Check Availability
+              </h2>
+              <p className="text-gray-600">
+                Select your preferred dates and secure your spot on this tour
+              </p>
+            </div>
+
+            {/* Availability Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                {/* Table Header */}
+                <thead>
+                  <tr className="bg-gray-100 border-b">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      Dates
+                      <div className="text-xs font-normal text-gray-500">
+                        Start-End
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      Availability
+                      <div className="text-xs font-normal text-gray-500">
+                        Remaining Spaces
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      Price
+                      <div className="text-xs font-normal text-gray-500">
+                        Per Person
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+
+                {/* Table Body - Grouped by Month */}
+                <tbody>
+                  {tour.startDates && tour.startDates.length > 0 ? (
+                    (() => {
+                      // Group dates by month
+                      const groupedByMonth: {
+                        [key: string]: typeof tour.startDates;
+                      } = {};
+                      tour.startDates.forEach((date) => {
+                        const monthYear = new Date(
+                          date.startDate,
+                        ).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        });
+                        if (!groupedByMonth[monthYear]) {
+                          groupedByMonth[monthYear] = [];
+                        }
+                        groupedByMonth[monthYear].push(date);
+                      });
+
+                      // Sort months chronologically
+                      const sortedMonths = Object.keys(groupedByMonth).sort(
+                        (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                      );
+
+                      return sortedMonths
+                        .map((month, monthIndex) => [
+                          // Month Header Row
+                          <tr key={`month-${month}`} className="bg-gray-200">
+                            <td
+                              colSpan={4}
+                              className="px-6 py-3 text-sm font-bold text-gray-800 uppercase tracking-wide"
+                            >
+                              {month}
+                            </td>
+                          </tr>,
+                          // Dates in this month
+                          ...groupedByMonth[month].map((date, dateIndex) => {
+                            const isSoldOut =
+                              date.availableSpots === 0 || !date.isActive;
+                            const originalPrice = tour.price.amount;
+                            const discountedPrice =
+                              tour.price.discountPercent > 0
+                                ? originalPrice *
+                                (1 - tour.price.discountPercent / 100)
+                                : originalPrice;
+
+                            return (
+                              <tr
+                                key={`${month}-${dateIndex}`}
+                                className={`border-b ${isSoldOut
+                                  ? "bg-gray-50 opacity-50"
+                                  : "bg-white hover:bg-blue-50"
+                                  } transition-colors`}
+                              >
+                                <td className="px-6 py-4">
+                                  <div
+                                    className={`text-sm font-medium ${isSoldOut
+                                      ? "text-gray-400"
+                                      : "text-gray-900"
+                                      }`}
+                                  >
+                                    {new Date(date.startDate).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        weekday: "short",
+                                        month: "short",
+                                        day: "numeric",
+                                      },
+                                    )}{" "}
+                                    -{" "}
+                                    {new Date(date.endDate).toLocaleDateString(
+                                      "en-US",
+                                      {
+                                        weekday: "short",
+                                        month: "short",
+                                        day: "numeric",
+                                      },
+                                    )}
+                                  </div>
+                                </td>
+
+                                <td className="px-6 py-4">
+                                  {isSoldOut ? (
+                                    <span className="text-sm text-gray-400 font-medium">
+                                      Sold Out
+                                    </span>
+                                  ) : (
+                                    <span className="text-sm text-gray-700 font-medium">
+                                      {date.availableSpots}{" "}
+                                      <span className="text-gray-500">
+                                        Available
+                                      </span>
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="px-6 py-4">
+                                  {isSoldOut ? (
+                                    <div className="text-sm text-gray-400">
+                                      ${originalPrice}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-sm font-bold text-gray-900">
+                                        $
+                                        {Math.round(
+                                          date.price.amount || discountedPrice,
+                                        )}
+                                      </span>
+                                      {tour.price.discountPercent > 0 && (
+                                        <span className="text-xs text-gray-500 line-through">
+                                          ${originalPrice}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </td>
+
+                                <td className="px-6 py-4 text-center">
+                                  {isSoldOut ? (
+                                    <span className="text-xs text-gray-400 font-medium">
+                                      Unavailable
+                                    </span>
+                                  ) : (
+                                    <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors">
+                                      Book now
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          }),
+                        ])
+                        .flat();
+                    })()
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-6 py-8 text-center text-gray-500"
+                      >
+                        No dates available at the moment
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recommended Tours Section */}
       <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-16 ">
@@ -1394,7 +1755,7 @@ export default function TourDetailPage() {
               const discountedPrice =
                 recommendedTour.price.discountPercent > 0
                   ? recommendedTour.price.amount *
-                    (1 - recommendedTour.price.discountPercent / 100)
+                  (1 - recommendedTour.price.discountPercent / 100)
                   : recommendedTour.price.amount;
 
               return (
@@ -1475,6 +1836,6 @@ export default function TourDetailPage() {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }

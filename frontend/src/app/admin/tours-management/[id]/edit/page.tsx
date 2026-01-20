@@ -23,15 +23,48 @@ interface ImageUpload {
   url: string;
 }
 
+interface Activity {
+  name: string;
+  description: string;
+  placeName: string;
+  duration: string;
+  icon: string;
+}
+
+interface OptionalActivity {
+  name: string;
+  price: {
+    amount: number;
+    currency: string;
+  };
+  place: string;
+  description: string;
+  duration: string;
+  icon: string;
+}
+
+interface Accommodation {
+  name: string;
+  type: string;
+  rating?: number;
+  description?: string;
+}
+
 interface ItineraryDay {
   day: number;
   title: string;
   description: string;
-  activities: string;
+  imageUrl?: string;
+  imageFile?: File | null;
+  imagePreview?: string;
+  activities: Activity[];
+  optionalActivities: OptionalActivity[];
+  accommodations: Accommodation[];
 }
 
-interface StartDate {
-  date: string;
+interface AvailableDate {
+  startDate: string;
+  endDate: string;
   availableSpots: number;
   priceAmount: number;
 }
@@ -39,15 +72,32 @@ interface StartDate {
 export default function EditTourPage() {
   const router = useRouter();
   const params = useParams();
-  const tourId = params?.id;
-
+  const tourId = params?.id as string;
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Image uploads
   const [images, setImages] = useState<ImageUpload[]>([]);
+
+  // Description Image
+  const [descriptionImage, setDescriptionImage] = useState<{
+    file: File | null;
+    preview: string;
+    uploading: boolean;
+    url: string;
+  }>({
+    file: null,
+    preview: "",
+    uploading: false,
+    url: "",
+  });
+
+  // Itinerary
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
-  const [startDates, setStartDates] = useState<StartDate[]>([]);
+
+  // Available Dates
+  const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -57,36 +107,27 @@ export default function EditTourPage() {
     durationDays: "",
     durationNights: "",
     maxGroupSize: "",
-    difficulty: "moderate",
     physicalRatingLevel: "3",
-    physicalRatingDescription: "",
     priceAmount: "",
     priceCurrency: "USD",
     discountPercent: "0",
     travelStyle: "Classic",
-    serviceLevel: "Standard",
-    tripType: "Small Group",
     startCity: "",
     endCity: "",
     visitedCities: "",
     highlights: "",
-    inclusionsAccommodation: "",
-    inclusionsMeals: "",
-    inclusionsTransport: "",
-    inclusionsActivities: "",
-    inclusionsGuides: "",
-    inclusionsOther: "",
-    exclusions: "",
+    whatsIncluded: "",
+    transportation: "",
+    staffExperts: "",
     ageMin: "0",
     ageMax: "99",
-    ageDescription: "",
     isFeatured: false,
     isActive: true,
   });
 
   useEffect(() => {
     checkAuthAndFetchData();
-  }, []);
+  }, [tourId]);
 
   const checkAuthAndFetchData = async () => {
     try {
@@ -112,7 +153,6 @@ export default function EditTourPage() {
         return;
       }
 
-      // Fetch countries
       const countriesResponse = await fetch(`${api.baseURL}/countries`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -131,6 +171,7 @@ export default function EditTourPage() {
         const tourData = await tourResponse.json();
         const tour = tourData.data.tour;
 
+        // Populate form data
         setFormData({
           name: tour.name || "",
           summary: tour.summary || "",
@@ -139,32 +180,33 @@ export default function EditTourPage() {
           durationDays: tour.duration?.days?.toString() || "",
           durationNights: tour.duration?.nights?.toString() || "",
           maxGroupSize: tour.maxGroupSize?.toString() || "",
-          difficulty: tour.difficulty || "moderate",
           physicalRatingLevel: tour.physicalRating?.level?.toString() || "3",
-          physicalRatingDescription: tour.physicalRating?.description || "",
           priceAmount: tour.price?.amount?.toString() || "",
           priceCurrency: tour.price?.currency || "USD",
           discountPercent: tour.price?.discountPercent?.toString() || "0",
           travelStyle: tour.travelStyle || "Classic",
-          serviceLevel: tour.serviceLevel || "Standard",
-          tripType: tour.tripType || "Small Group",
           startCity: tour.location?.startCity || "",
           endCity: tour.location?.endCity || "",
           visitedCities: tour.location?.visitedCities?.join(", ") || "",
           highlights: tour.highlights?.join("\n") || "",
-          inclusionsAccommodation: tour.inclusions?.accommodation || "",
-          inclusionsMeals: tour.inclusions?.meals?.join("\n") || "",
-          inclusionsTransport: tour.inclusions?.transport?.join("\n") || "",
-          inclusionsActivities: tour.inclusions?.activities?.join("\n") || "",
-          inclusionsGuides: tour.inclusions?.guides || "",
-          inclusionsOther: tour.inclusions?.other?.join("\n") || "",
-          exclusions: tour.exclusions?.join("\n") || "",
+          whatsIncluded: tour.whatsIncluded || "",
+          transportation: tour.transportation || "",
+          staffExperts: tour.staffExperts || "",
           ageMin: tour.ageRequirement?.min?.toString() || "0",
           ageMax: tour.ageRequirement?.max?.toString() || "99",
-          ageDescription: tour.ageRequirement?.description || "",
           isFeatured: tour.isFeatured || false,
-          isActive: tour.isActive !== false,
+          isActive: tour.isActive !== undefined ? tour.isActive : true,
         });
+
+        // Load existing description image
+        if (tour.descriptionImage) {
+          setDescriptionImage({
+            file: null,
+            preview: tour.descriptionImage,
+            uploading: false,
+            url: tour.descriptionImage,
+          });
+        }
 
         // Load existing images
         if (tour.images && tour.images.length > 0) {
@@ -187,17 +229,25 @@ export default function EditTourPage() {
               day: day.day,
               title: day.title || "",
               description: day.description || "",
-              activities: day.activities?.join(", ") || "",
+              imageUrl: day.imageUrl || "",
+              imageFile: null,
+              imagePreview: day.imageUrl || "",
+              activities: day.activities || [],
+              optionalActivities: day.optionalActivities || [],
+              accommodations: day.accommodations || [],
             })),
           );
         }
 
         // Load start dates
         if (tour.startDates && tour.startDates.length > 0) {
-          setStartDates(
+          setAvailableDates(
             tour.startDates.map((sd: any) => ({
-              date: sd.date
-                ? new Date(sd.date).toISOString().split("T")[0]
+              startDate: sd.startDate
+                ? new Date(sd.startDate).toISOString().split("T")[0]
+                : "",
+              endDate: sd.endDate
+                ? new Date(sd.endDate).toISOString().split("T")[0]
                 : "",
               availableSpots: sd.availableSpots || 0,
               priceAmount: sd.price?.amount || 0,
@@ -255,8 +305,8 @@ export default function EditTourPage() {
     const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
     const filePath = `tours/${fileName}`;
 
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
     const response = await fetch(
       `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${filePath}`,
@@ -265,7 +315,7 @@ export default function EditTourPage() {
         headers: {
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
-        body: formDataUpload,
+        body: formData,
       },
     );
 
@@ -292,6 +342,34 @@ export default function EditTourPage() {
     );
   };
 
+  // Description Image Functions
+  const handleDescriptionImageSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDescriptionImage({
+          file,
+          preview: reader.result as string,
+          uploading: false,
+          url: "",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeDescriptionImage = () => {
+    setDescriptionImage({
+      file: null,
+      preview: "",
+      uploading: false,
+      url: "",
+    });
+  };
+
   // Itinerary Functions
   const addItineraryDay = () => {
     setItinerary((prev) => [
@@ -300,7 +378,12 @@ export default function EditTourPage() {
         day: prev.length + 1,
         title: "",
         description: "",
-        activities: "",
+        imageUrl: "",
+        imageFile: null,
+        imagePreview: "",
+        activities: [],
+        optionalActivities: [],
+        accommodations: [],
       },
     ]);
   };
@@ -323,28 +406,202 @@ export default function EditTourPage() {
     );
   };
 
-  // Start Dates Functions
-  const addStartDate = () => {
-    setStartDates((prev) => [
+  // Handle day image upload
+  const handleDayImageSelect = (
+    dayIndex: number,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setItinerary((prev) =>
+          prev.map((item, i) =>
+            i === dayIndex
+              ? {
+                ...item,
+                imageFile: file,
+                imagePreview: reader.result as string,
+              }
+              : item,
+          ),
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeDayImage = (dayIndex: number) => {
+    setItinerary((prev) =>
+      prev.map((item, i) =>
+        i === dayIndex
+          ? { ...item, imageFile: null, imagePreview: "", imageUrl: "" }
+          : item,
+      ),
+    );
+  };
+
+  // Activity management functions
+  const addActivity = (dayIndex: number) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].activities = [
+        ...newItinerary[dayIndex].activities,
+        {
+          name: "",
+          description: "",
+          placeName: "",
+          duration: "",
+          icon: "MapPin",
+        },
+      ];
+      return newItinerary;
+    });
+  };
+
+  const removeActivity = (dayIndex: number, activityIndex: number) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].activities.splice(activityIndex, 1);
+      return newItinerary;
+    });
+  };
+
+  const updateActivity = (
+    dayIndex: number,
+    activityIndex: number,
+    field: keyof Activity,
+    value: string,
+  ) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].activities[activityIndex] = {
+        ...newItinerary[dayIndex].activities[activityIndex],
+        [field]: value,
+      };
+      return newItinerary;
+    });
+  };
+
+  // Optional activity management functions
+  const addOptionalActivity = (dayIndex: number) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].optionalActivities = [
+        ...newItinerary[dayIndex].optionalActivities,
+        {
+          name: "",
+          price: { amount: 0, currency: "USD" },
+          place: "",
+          description: "",
+          duration: "",
+          icon: "MapPin",
+        },
+      ];
+      return newItinerary;
+    });
+  };
+
+  const removeOptionalActivity = (dayIndex: number, activityIndex: number) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].optionalActivities.splice(activityIndex, 1);
+      return newItinerary;
+    });
+  };
+
+  const updateOptionalActivity = (
+    dayIndex: number,
+    activityIndex: number,
+    field: string,
+    value: any,
+  ) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      if (field === "price.amount") {
+        newItinerary[dayIndex].optionalActivities[activityIndex].price.amount =
+          value;
+      } else if (field === "price.currency") {
+        newItinerary[dayIndex].optionalActivities[
+          activityIndex
+        ].price.currency = value;
+      } else {
+        newItinerary[dayIndex].optionalActivities[activityIndex] = {
+          ...newItinerary[dayIndex].optionalActivities[activityIndex],
+          [field]: value,
+        };
+      }
+      return newItinerary;
+    });
+  };
+
+  // Accommodation management functions
+  const addAccommodation = (dayIndex: number) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].accommodations = [
+        ...newItinerary[dayIndex].accommodations,
+        {
+          name: "",
+          type: "Hotel",
+          rating: 3,
+          description: "",
+        },
+      ];
+      return newItinerary;
+    });
+  };
+
+  const removeAccommodation = (
+    dayIndex: number,
+    accommodationIndex: number,
+  ) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].accommodations.splice(accommodationIndex, 1);
+      return newItinerary;
+    });
+  };
+
+  const updateAccommodation = (
+    dayIndex: number,
+    accommodationIndex: number,
+    field: keyof Accommodation,
+    value: string | number,
+  ) => {
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      newItinerary[dayIndex].accommodations[accommodationIndex] = {
+        ...newItinerary[dayIndex].accommodations[accommodationIndex],
+        [field]: value,
+      };
+      return newItinerary;
+    });
+  };
+
+  // Available Dates Functions
+  const addAvailableDate = () => {
+    setAvailableDates((prev) => [
       ...prev,
       {
-        date: "",
+        startDate: "",
+        endDate: "",
         availableSpots: parseInt(formData.maxGroupSize) || 10,
         priceAmount: parseFloat(formData.priceAmount) || 0,
       },
     ]);
   };
 
-  const removeStartDate = (index: number) => {
-    setStartDates((prev) => prev.filter((_, i) => i !== index));
+  const removeAvailableDate = (index: number) => {
+    setAvailableDates((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateStartDate = (
+  const updateAvailableDate = (
     index: number,
-    field: keyof StartDate,
+    field: keyof AvailableDate,
     value: string | number,
   ) => {
-    setStartDates((prev) =>
+    setAvailableDates((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
     );
   };
@@ -365,7 +622,7 @@ export default function EditTourPage() {
     try {
       setSubmitting(true);
 
-      // Upload new images to Supabase
+      // Upload all images to Supabase
       const uploadedImages = await Promise.all(
         images.map(async (img) => {
           if (img.file) {
@@ -375,13 +632,39 @@ export default function EditTourPage() {
               caption: img.caption,
               isPrimary: img.isPrimary,
             };
-          } else {
-            return {
-              url: img.url,
-              caption: img.caption,
-              isPrimary: img.isPrimary,
-            };
           }
+          return {
+            url: img.url,
+            caption: img.caption,
+            isPrimary: img.isPrimary,
+          };
+        }),
+      );
+
+      const validImages = uploadedImages.filter((img) => img !== null);
+
+      // Upload description image if exists
+      let descriptionImageUrl = descriptionImage.url;
+      if (descriptionImage.file) {
+        descriptionImageUrl = await uploadImageToSupabase(descriptionImage.file);
+      }
+
+      // Upload day images
+      const itineraryWithImages = await Promise.all(
+        itinerary.map(async (day) => {
+          let imageUrl = day.imageUrl || "";
+          if (day.imageFile) {
+            imageUrl = await uploadImageToSupabase(day.imageFile);
+          }
+          return {
+            day: day.day,
+            title: day.title,
+            description: day.description,
+            imageUrl,
+            activities: day.activities,
+            optionalActivities: day.optionalActivities,
+            accommodations: day.accommodations,
+          };
         }),
       );
 
@@ -397,45 +680,19 @@ export default function EditTourPage() {
         .map((h) => h.trim())
         .filter((h) => h !== "");
 
-      const inclusionsMealsArray = formData.inclusionsMeals
-        .split("\n")
-        .map((m) => m.trim())
-        .filter((m) => m !== "");
-
-      const inclusionsTransportArray = formData.inclusionsTransport
-        .split("\n")
-        .map((t) => t.trim())
-        .filter((t) => t !== "");
-
-      const inclusionsActivitiesArray = formData.inclusionsActivities
-        .split("\n")
-        .map((a) => a.trim())
-        .filter((a) => a !== "");
-
-      const inclusionsOtherArray = formData.inclusionsOther
-        .split("\n")
-        .map((o) => o.trim())
-        .filter((o) => o !== "");
-
-      const exclusionsArray = formData.exclusions
-        .split("\n")
-        .map((e) => e.trim())
-        .filter((e) => e !== "");
-
       const tourData = {
         name: formData.name,
         summary: formData.summary,
         description: formData.description,
+        descriptionImage: descriptionImageUrl,
         country: formData.country,
         duration: {
           days: parseInt(formData.durationDays),
           nights: parseInt(formData.durationNights),
         },
         maxGroupSize: parseInt(formData.maxGroupSize),
-        difficulty: formData.difficulty,
         physicalRating: {
           level: parseInt(formData.physicalRatingLevel),
-          description: formData.physicalRatingDescription,
         },
         price: {
           amount: parseFloat(formData.priceAmount),
@@ -443,46 +700,31 @@ export default function EditTourPage() {
           discountPercent: parseFloat(formData.discountPercent),
         },
         travelStyle: formData.travelStyle,
-        serviceLevel: formData.serviceLevel,
-        tripType: formData.tripType,
+        serviceLevel: "Standard",
         location: {
           startCity: formData.startCity,
           endCity: formData.endCity,
           visitedCities: visitedCitiesArray,
         },
         highlights: highlightsArray,
-        images: uploadedImages,
-        itinerary: itinerary.map((day) => ({
-          day: day.day,
-          title: day.title,
-          description: day.description,
-          activities: day.activities
-            .split(",")
-            .map((a) => a.trim())
-            .filter((a) => a !== ""),
-        })),
-        startDates: startDates.map((sd) => ({
-          date: new Date(sd.date),
-          availableSpots: sd.availableSpots,
+        whatsIncluded: formData.whatsIncluded,
+        transportation: formData.transportation,
+        staffExperts: formData.staffExperts,
+        images: validImages,
+        itinerary: itineraryWithImages,
+        startDates: availableDates.map((ad) => ({
+          startDate: new Date(ad.startDate),
+          endDate: new Date(ad.endDate),
+          availableSpots: ad.availableSpots,
           price: {
-            amount: sd.priceAmount,
+            amount: ad.priceAmount,
             currency: formData.priceCurrency,
           },
           isActive: true,
         })),
-        inclusions: {
-          accommodation: formData.inclusionsAccommodation,
-          meals: inclusionsMealsArray,
-          transport: inclusionsTransportArray,
-          activities: inclusionsActivitiesArray,
-          guides: formData.inclusionsGuides,
-          other: inclusionsOtherArray,
-        },
-        exclusions: exclusionsArray,
         ageRequirement: {
           min: parseInt(formData.ageMin),
           max: parseInt(formData.ageMax),
-          description: formData.ageDescription,
         },
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
@@ -526,9 +768,14 @@ export default function EditTourPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">Edit Tour</h1>
-          <p className="text-sm text-gray-600 mt-1">Update tour information</p>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Edit Tour
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Update tour details below
+          </p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -537,10 +784,10 @@ export default function EditTourPage() {
               Basic Information
             </h2>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Tour Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -549,7 +796,8 @@ export default function EditTourPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    placeholder="e.g., Himalayan Adventure Trek - Everest Base Camp"
                   />
                 </div>
 
@@ -564,6 +812,7 @@ export default function EditTourPage() {
                     required
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Brief summary"
                   />
                 </div>
 
@@ -578,7 +827,73 @@ export default function EditTourPage() {
                     required
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Detailed description"
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description Image
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Upload an image that will be displayed in the tour detail page
+                  </p>
+
+                  {!descriptionImage.preview ? (
+                    <label className="block w-full">
+                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition">
+                        <svg
+                          className="mx-auto h-8 w-8 text-gray-400"
+                          stroke="currentColor"
+                          fill="none"
+                          viewBox="0 0 48 48"
+                        >
+                          <path
+                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Click to upload description image
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDescriptionImageSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={descriptionImage.preview}
+                        alt="Description preview"
+                        className="w-full h-48 object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeDescriptionImage}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -612,7 +927,9 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     required
                     min="1"
+                    max="50"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="12"
                   />
                 </div>
 
@@ -628,6 +945,7 @@ export default function EditTourPage() {
                     required
                     min="1"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="7"
                   />
                 </div>
 
@@ -643,24 +961,8 @@ export default function EditTourPage() {
                     required
                     min="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="6"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Difficulty <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="difficulty"
-                    value={formData.difficulty}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  >
-                    <option value="easy">Easy</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="difficult">Difficult</option>
-                  </select>
                 </div>
 
                 <div>
@@ -681,19 +983,6 @@ export default function EditTourPage() {
                     <option value="4">4 - Challenging</option>
                     <option value="5">5 - Very Challenging</option>
                   </select>
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Physical Rating Description
-                  </label>
-                  <input
-                    type="text"
-                    name="physicalRatingDescription"
-                    value={formData.physicalRatingDescription}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  />
                 </div>
 
                 <div>
@@ -721,42 +1010,6 @@ export default function EditTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service Level <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="serviceLevel"
-                    value={formData.serviceLevel}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  >
-                    <option value="Standard">Standard</option>
-                    <option value="Comfort">Comfort</option>
-                    <option value="Premium">Premium</option>
-                    <option value="Luxury">Luxury</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Trip Type <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="tripType"
-                    value={formData.tripType}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  >
-                    <option value="Small Group">Small Group</option>
-                    <option value="Private">Private</option>
-                    <option value="Independent">Independent</option>
-                    <option value="Family">Family</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Start City <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -766,6 +1019,7 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Kathmandu"
                   />
                 </div>
 
@@ -780,6 +1034,7 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Kathmandu"
                   />
                 </div>
 
@@ -793,6 +1048,7 @@ export default function EditTourPage() {
                     value={formData.visitedCities}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Kathmandu, Lukla, Namche Bazaar"
                   />
                 </div>
 
@@ -806,6 +1062,56 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Reach Everest Base Camp&#10;Sunrise from Kala Patthar"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    What&apos;s Included (skip a line between points)
+                  </label>
+                  <textarea
+                    name="whatsIncluded"
+                    value={formData.whatsIncluded}
+                    onChange={handleChange}
+                    rows={8}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Your G for Good Moment: Women With Wheels Transfer, Indira Gandhi International Airport
+
+Your G for Good Moment: City Walk, Delhi
+
+Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Skip one line between different points. Each separated block will be displayed as a bullet point.
+                  </p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Transportation
+                  </label>
+                  <textarea
+                    name="transportation"
+                    value={formData.transportation}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Train, local bus, private vehicle, auto-rickshaw, small riverboat, plane."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Staff &amp; Experts
+                  </label>
+                  <textarea
+                    name="staffExperts"
+                    value={formData.staffExperts}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="CEO (Chief Experience Officer) throughout, local guides."
                   />
                 </div>
 
@@ -820,6 +1126,7 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     min="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="0"
                   />
                 </div>
 
@@ -834,19 +1141,7 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     min="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Age Requirement Description
-                  </label>
-                  <input
-                    type="text"
-                    name="ageDescription"
-                    value={formData.ageDescription}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="99"
                   />
                 </div>
 
@@ -904,6 +1199,9 @@ export default function EditTourPage() {
                   <p className="mt-2 text-sm text-gray-600">
                     Click to upload images
                   </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    PNG, JPG up to 10MB
+                  </p>
                 </div>
                 <input
                   type="file"
@@ -947,7 +1245,7 @@ export default function EditTourPage() {
                       </svg>
                     </button>
                     {img.isPrimary && (
-                      <div className="absolute top-1 left-1 bg-gray-900 text-white px-2 py-0.5 rounded text-xs">
+                      <div className="absolute top-1 left-1 bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
                         Primary
                       </div>
                     )}
@@ -965,11 +1263,10 @@ export default function EditTourPage() {
                     <button
                       type="button"
                       onClick={() => setImageAsPrimary(index)}
-                      className={`w-full py-1 rounded text-xs transition ${
-                        img.isPrimary
-                          ? "bg-gray-900 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                      className={`w-full py-1 rounded text-xs transition ${img.isPrimary
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
                     >
                       {img.isPrimary ? "Primary" : "Set Primary"}
                     </button>
@@ -977,6 +1274,12 @@ export default function EditTourPage() {
                 </div>
               ))}
             </div>
+
+            {images.length === 0 && (
+              <div className="text-center py-6 text-gray-500 text-sm">
+                No images uploaded yet
+              </div>
+            )}
           </div>
 
           {/* Pricing Section */}
@@ -998,6 +1301,7 @@ export default function EditTourPage() {
                   min="0"
                   step="0.01"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  placeholder="1299.00"
                 />
               </div>
 
@@ -1031,6 +1335,7 @@ export default function EditTourPage() {
                   min="0"
                   max="90"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  placeholder="0"
                 />
               </div>
             </div>
@@ -1051,68 +1356,518 @@ export default function EditTourPage() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              {itinerary.map((day, index) => (
+            <div className="space-y-6">
+              {itinerary.map((day, dayIndex) => (
                 <div
-                  key={index}
-                  className="border border-gray-200 rounded-md p-4"
+                  key={dayIndex}
+                  className="border border-gray-200 rounded-lg p-6 bg-gray-50"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-sm font-semibold text-gray-900">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       Day {day.day}
                     </h3>
                     <button
                       type="button"
-                      onClick={() => removeItineraryDay(index)}
-                      className="text-red-500 hover:text-red-700 text-sm"
+                      onClick={() => removeItineraryDay(dayIndex)}
+                      className="text-red-500 hover:text-red-700 text-sm bg-white px-2 py-1 rounded border"
                     >
-                      Remove
+                      Remove Day
                     </button>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Basic day info */}
+                  <div className="space-y-3 mb-6">
                     <input
                       type="text"
                       value={day.title}
                       onChange={(e) =>
-                        updateItinerary(index, "title", e.target.value)
+                        updateItinerary(dayIndex, "title", e.target.value)
                       }
-                      placeholder="Day title"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                      placeholder="Day title (e.g., Arrival in Paris)"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
                     <textarea
                       value={day.description}
                       onChange={(e) =>
-                        updateItinerary(index, "description", e.target.value)
+                        updateItinerary(dayIndex, "description", e.target.value)
                       }
-                      placeholder="Description"
+                      placeholder="Day description"
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
-                    <input
-                      type="text"
-                      value={day.activities}
-                      onChange={(e) =>
-                        updateItinerary(index, "activities", e.target.value)
-                      }
-                      placeholder="Activities (comma-separated)"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    />
+
+                    {/* Day Image Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Day Photo (Optional)
+                      </label>
+                      {day.imagePreview ? (
+                        <div className="relative inline-block">
+                          <img
+                            src={day.imagePreview}
+                            alt="Day preview"
+                            className="w-32 h-32 object-cover rounded border border-gray-300"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeDayImage(dayIndex)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="inline-block cursor-pointer">
+                          <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center hover:border-gray-400 transition">
+                            <svg
+                              className="mx-auto h-8 w-8 text-gray-400"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 48 48"
+                            >
+                              <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <p className="mt-1 text-xs text-gray-600">
+                              Upload photo
+                            </p>
+                          </div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleDayImageSelect(dayIndex, e)}
+                            className="hidden"
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Activities Section */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-md font-semibold text-gray-800">
+                        Activities
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => addActivity(dayIndex)}
+                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {day.activities.map((activity, actIndex) => (
+                        <div
+                          key={actIndex}
+                          className="bg-white p-4 rounded border border-gray-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <h5 className="text-sm font-medium text-gray-700">
+                              Activity #{actIndex + 1}
+                            </h5>
+                            <button
+                              type="button"
+                              onClick={() => removeActivity(dayIndex, actIndex)}
+                              className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              value={activity.name}
+                              onChange={(e) =>
+                                updateActivity(
+                                  dayIndex,
+                                  actIndex,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Activity name"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <input
+                              type="text"
+                              value={activity.placeName}
+                              onChange={(e) =>
+                                updateActivity(
+                                  dayIndex,
+                                  actIndex,
+                                  "placeName",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Place name"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <input
+                              type="text"
+                              value={activity.duration}
+                              onChange={(e) =>
+                                updateActivity(
+                                  dayIndex,
+                                  actIndex,
+                                  "duration",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Duration (e.g., 2 hours)"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <select
+                              value={activity.icon}
+                              onChange={(e) =>
+                                updateActivity(
+                                  dayIndex,
+                                  actIndex,
+                                  "icon",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            >
+                              <option value="MapPin">📍 Place</option>
+                              <option value="Bus">🚌 Bus</option>
+                              <option value="Car">🚗 Car</option>
+                              <option value="Airplane">✈️ Airplane</option>
+                              <option value="Train">🚂 Train</option>
+                              <option value="Boat">🚢 Boat</option>
+                              <option value="Coffee">☕ Free Time</option>
+                              <option value="Camera">📷 Sightseeing</option>
+                              <option value="Mountain">🏔️ Adventure</option>
+                              <option value="Trees">🌳 Nature</option>
+                              <option value="Utensils">🍽️ Dining</option>
+                              <option value="Clock">🕐 Schedule</option>
+                              <option value="Heart">❤️ Special</option>
+                            </select>
+                            <textarea
+                              value={activity.description}
+                              onChange={(e) =>
+                                updateActivity(
+                                  dayIndex,
+                                  actIndex,
+                                  "description",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Activity description"
+                              rows={2}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 md:col-span-2"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Optional Activities Section */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-md font-semibold text-gray-800">
+                        Optional Activities
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => addOptionalActivity(dayIndex)}
+                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {day.optionalActivities.map((optActivity, optIndex) => (
+                        <div
+                          key={optIndex}
+                          className="bg-white p-4 rounded border border-gray-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <h5 className="text-sm font-medium text-gray-700">
+                              Optional Activity #{optIndex + 1}
+                            </h5>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeOptionalActivity(dayIndex, optIndex)
+                              }
+                              className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <input
+                              type="text"
+                              value={optActivity.name}
+                              onChange={(e) =>
+                                updateOptionalActivity(
+                                  dayIndex,
+                                  optIndex,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Optional activity name"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <input
+                              type="text"
+                              value={optActivity.place}
+                              onChange={(e) =>
+                                updateOptionalActivity(
+                                  dayIndex,
+                                  optIndex,
+                                  "place",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Place"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <input
+                              type="text"
+                              value={optActivity.duration}
+                              onChange={(e) =>
+                                updateOptionalActivity(
+                                  dayIndex,
+                                  optIndex,
+                                  "duration",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Duration"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <div className="flex gap-2">
+                              <input
+                                type="number"
+                                value={optActivity.price.amount}
+                                onChange={(e) =>
+                                  updateOptionalActivity(
+                                    dayIndex,
+                                    optIndex,
+                                    "price.amount",
+                                    parseFloat(e.target.value),
+                                  )
+                                }
+                                placeholder="Price"
+                                step="0.01"
+                                min="0"
+                                className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                              />
+                              <select
+                                value={optActivity.price.currency}
+                                onChange={(e) =>
+                                  updateOptionalActivity(
+                                    dayIndex,
+                                    optIndex,
+                                    "price.currency",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-16 px-1 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                              >
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="INR">INR</option>
+                              </select>
+                            </div>
+                            <select
+                              value={optActivity.icon}
+                              onChange={(e) =>
+                                updateOptionalActivity(
+                                  dayIndex,
+                                  optIndex,
+                                  "icon",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            >
+                              <option value="MapPin">📍 Place</option>
+                              <option value="Bus">🚌 Bus</option>
+                              <option value="Car">🚗 Car</option>
+                              <option value="Airplane">✈️ Airplane</option>
+                              <option value="Train">🚂 Train</option>
+                              <option value="Boat">🚢 Boat</option>
+                              <option value="Coffee">☕ Free Time</option>
+                              <option value="Camera">📷 Sightseeing</option>
+                              <option value="Mountain">🏔️ Adventure</option>
+                              <option value="Trees">🌳 Nature</option>
+                              <option value="Utensils">🍽️ Dining</option>
+                              <option value="Clock">🕐 Schedule</option>
+                              <option value="Heart">❤️ Special</option>
+                            </select>
+                            <textarea
+                              value={optActivity.description}
+                              onChange={(e) =>
+                                updateOptionalActivity(
+                                  dayIndex,
+                                  optIndex,
+                                  "description",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Optional activity description"
+                              rows={2}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 lg:col-span-3"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Accommodation Section */}
+                  <div className="mb-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-md font-semibold text-gray-800">
+                        Accommodation
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => addAccommodation(dayIndex)}
+                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
+                      >
+                        + Add
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      {day.accommodations.map((accommodation, accIndex) => (
+                        <div
+                          key={accIndex}
+                          className="bg-white p-4 rounded border border-gray-200"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <h5 className="text-sm font-medium text-gray-700">
+                              Accommodation #{accIndex + 1}
+                            </h5>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeAccommodation(dayIndex, accIndex)
+                              }
+                              className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                              Remove
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <input
+                              type="text"
+                              value={accommodation.name}
+                              onChange={(e) =>
+                                updateAccommodation(
+                                  dayIndex,
+                                  accIndex,
+                                  "name",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Accommodation name"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            />
+                            <select
+                              value={accommodation.type}
+                              onChange={(e) =>
+                                updateAccommodation(
+                                  dayIndex,
+                                  accIndex,
+                                  "type",
+                                  e.target.value,
+                                )
+                              }
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            >
+                              <option value="Hotel">Hotel</option>
+                              <option value="Lounge">Lounge</option>
+                              <option value="Cottage">Cottage</option>
+                              <option value="Guestroom">Guestroom</option>
+                              <option value="Camp">Camp</option>
+                            </select>
+                            <select
+                              value={accommodation.rating || 3}
+                              onChange={(e) =>
+                                updateAccommodation(
+                                  dayIndex,
+                                  accIndex,
+                                  "rating",
+                                  parseInt(e.target.value),
+                                )
+                              }
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                            >
+                              <option value={1}>⭐ 1 Star</option>
+                              <option value={2}>⭐⭐ 2 Stars</option>
+                              <option value={3}>⭐⭐⭐ 3 Stars</option>
+                              <option value={4}>⭐⭐⭐⭐ 4 Stars</option>
+                              <option value={5}>⭐⭐⭐⭐⭐ 5 Stars</option>
+                            </select>
+                            <textarea
+                              value={accommodation.description || ""}
+                              onChange={(e) =>
+                                updateAccommodation(
+                                  dayIndex,
+                                  accIndex,
+                                  "description",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="Accommodation description (optional)"
+                              rows={2}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 md:col-span-3"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
+
+            {itinerary.length === 0 && (
+              <div className="text-center py-6 text-gray-500 text-sm">
+                No itinerary days added yet
+              </div>
+            )}
           </div>
 
-          {/* Start Dates Section */}
+          {/* Available Dates Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
-                Start Dates
+                Available Dates
               </h2>
               <button
                 type="button"
-                onClick={addStartDate}
+                onClick={addAvailableDate}
                 className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition"
               >
                 + Add Date
@@ -1120,38 +1875,48 @@ export default function EditTourPage() {
             </div>
 
             <div className="space-y-3">
-              {startDates.map((sd, index) => (
+              {availableDates.map((ad, index) => (
                 <div
                   key={index}
                   className="border border-gray-200 rounded-md p-4"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-sm font-semibold text-gray-900">
-                      Departure #{index + 1}
+                      Date Range #{index + 1}
                     </h3>
                     <button
                       type="button"
-                      onClick={() => removeStartDate(index)}
+                      onClick={() => removeAvailableDate(index)}
                       className="text-red-500 hover:text-red-700 text-sm"
                     >
                       Remove
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                     <input
                       type="date"
-                      value={sd.date}
+                      value={ad.startDate}
                       onChange={(e) =>
-                        updateStartDate(index, "date", e.target.value)
+                        updateAvailableDate(index, "startDate", e.target.value)
                       }
+                      placeholder="Start Date"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    />
+                    <input
+                      type="date"
+                      value={ad.endDate}
+                      onChange={(e) =>
+                        updateAvailableDate(index, "endDate", e.target.value)
+                      }
+                      placeholder="End Date"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     />
                     <input
                       type="number"
-                      value={sd.availableSpots}
+                      value={ad.availableSpots}
                       onChange={(e) =>
-                        updateStartDate(
+                        updateAvailableDate(
                           index,
                           "availableSpots",
                           parseInt(e.target.value),
@@ -1163,9 +1928,9 @@ export default function EditTourPage() {
                     />
                     <input
                       type="number"
-                      value={sd.priceAmount}
+                      value={ad.priceAmount}
                       onChange={(e) =>
-                        updateStartDate(
+                        updateAvailableDate(
                           index,
                           "priceAmount",
                           parseFloat(e.target.value),
@@ -1180,106 +1945,12 @@ export default function EditTourPage() {
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Inclusions Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Inclusions & Exclusions
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Accommodation
-                </label>
-                <input
-                  type="text"
-                  name="inclusionsAccommodation"
-                  value={formData.inclusionsAccommodation}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
+            {availableDates.length === 0 && (
+              <div className="text-center py-6 text-gray-500 text-sm">
+                No available dates added yet
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Meals (one per line)
-                </label>
-                <textarea
-                  name="inclusionsMeals"
-                  value={formData.inclusionsMeals}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Transport (one per line)
-                </label>
-                <textarea
-                  name="inclusionsTransport"
-                  value={formData.inclusionsTransport}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Activities (one per line)
-                </label>
-                <textarea
-                  name="inclusionsActivities"
-                  value={formData.inclusionsActivities}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Guides
-                </label>
-                <input
-                  type="text"
-                  name="inclusionsGuides"
-                  value={formData.inclusionsGuides}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Other Inclusions (one per line)
-                </label>
-                <textarea
-                  name="inclusionsOther"
-                  value={formData.inclusionsOther}
-                  onChange={handleChange}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                />
-              </div>
-
-              <div className="border-t border-gray-200 pt-4">
-                <label className="block text-sm font-medium text-red-600 mb-1">
-                  Exclusions (one per line)
-                </label>
-                <textarea
-                  name="exclusions"
-                  value={formData.exclusions}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-red-200 rounded-md focus:ring-1 focus:ring-red-500 focus:border-red-500 text-gray-900"
-                />
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Submit Buttons */}

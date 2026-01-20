@@ -28,6 +28,10 @@ const tourSchema = new mongoose.Schema(
       required: [true, "A tour must have a description"],
       trim: true,
     },
+    descriptionImage: {
+      type: String,
+      trim: true,
+    },
     duration: {
       days: {
         type: Number,
@@ -415,6 +419,18 @@ const tourSchema = new mongoose.Schema(
       insurance: String,
     },
     tags: [String],
+    whatsIncluded: {
+      type: String,
+      trim: true,
+    },
+    transportation: {
+      type: String,
+      trim: true,
+    },
+    staffExperts: {
+      type: String,
+      trim: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

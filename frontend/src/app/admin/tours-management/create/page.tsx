@@ -78,6 +78,19 @@ export default function CreateTourPage() {
   // Image uploads
   const [images, setImages] = useState<ImageUpload[]>([]);
 
+  // Description Image
+  const [descriptionImage, setDescriptionImage] = useState<{
+    file: File | null;
+    preview: string;
+    uploading: boolean;
+    url: string;
+  }>({
+    file: null,
+    preview: "",
+    uploading: false,
+    url: "",
+  });
+
   // Itinerary
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
 
@@ -101,6 +114,9 @@ export default function CreateTourPage() {
     endCity: "",
     visitedCities: "",
     highlights: "",
+    whatsIncluded: "",
+    transportation: "",
+    staffExperts: "",
     ageMin: "0",
     ageMax: "99",
     isFeatured: false,
@@ -230,6 +246,34 @@ export default function CreateTourPage() {
     );
   };
 
+  // Description Image Functions
+  const handleDescriptionImageSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDescriptionImage({
+          file,
+          preview: reader.result as string,
+          uploading: false,
+          url: "",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeDescriptionImage = () => {
+    setDescriptionImage({
+      file: null,
+      preview: "",
+      uploading: false,
+      url: "",
+    });
+  };
+
   // Itinerary Functions
   const addItineraryDay = () => {
     setItinerary((prev) => [
@@ -279,10 +323,10 @@ export default function CreateTourPage() {
           prev.map((item, i) =>
             i === dayIndex
               ? {
-                  ...item,
-                  imageFile: file,
-                  imagePreview: reader.result as string,
-                }
+                ...item,
+                imageFile: file,
+                imagePreview: reader.result as string,
+              }
               : item,
           ),
         );
@@ -504,6 +548,12 @@ export default function CreateTourPage() {
 
       const validImages = uploadedImages.filter((img) => img !== null);
 
+      // Upload description image if exists
+      let descriptionImageUrl = "";
+      if (descriptionImage.file) {
+        descriptionImageUrl = await uploadImageToSupabase(descriptionImage.file);
+      }
+
       // Upload day images
       const itineraryWithImages = await Promise.all(
         itinerary.map(async (day) => {
@@ -539,6 +589,7 @@ export default function CreateTourPage() {
         name: formData.name,
         summary: formData.summary,
         description: formData.description,
+        descriptionImage: descriptionImageUrl,
         country: formData.country,
         duration: {
           days: parseInt(formData.durationDays),
@@ -561,6 +612,9 @@ export default function CreateTourPage() {
           visitedCities: visitedCitiesArray,
         },
         highlights: highlightsArray,
+        whatsIncluded: formData.whatsIncluded,
+        transportation: formData.transportation,
+        staffExperts: formData.staffExperts,
         images: validImages,
         itinerary: itineraryWithImages,
         startDates: availableDates.map((ad) => ({
@@ -680,6 +734,71 @@ export default function CreateTourPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="Detailed description"
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description Image
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Upload an image that will be displayed in the tour detail page
+                  </p>
+
+                  {!descriptionImage.preview ? (
+                    <label className="block w-full">
+                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition">
+                        <svg
+                          className="mx-auto h-8 w-8 text-gray-400"
+                          stroke="currentColor"
+                          fill="none"
+                          viewBox="0 0 48 48"
+                        >
+                          <path
+                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Click to upload description image
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDescriptionImageSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={descriptionImage.preview}
+                        alt="Description preview"
+                        className="w-full h-48 object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeDescriptionImage}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -852,6 +971,51 @@ export default function CreateTourPage() {
                   />
                 </div>
 
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    What&apos;s Included (skip a line between points)
+                  </label>
+                  <textarea
+                    name="whatsIncluded"
+                    value={formData.whatsIncluded}
+                    onChange={handleChange}
+                    rows={8}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Your G for Good Moment: Women With Wheels Transfer, Indira Gandhi International Airport&#10;&#10;Your G for Good Moment: City Walk, Delhi&#10;&#10;Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Skip one line between different points. Each separated block will be displayed as a bullet point.
+                  </p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Transportation
+                  </label>
+                  <textarea
+                    name="transportation"
+                    value={formData.transportation}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="Train, local bus, private vehicle, auto-rickshaw, small riverboat, plane."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Staff &amp; Experts
+                  </label>
+                  <textarea
+                    name="staffExperts"
+                    value={formData.staffExperts}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="CEO (Chief Experience Officer) throughout, local guides."
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Min Age
@@ -1000,11 +1164,10 @@ export default function CreateTourPage() {
                     <button
                       type="button"
                       onClick={() => setImageAsPrimary(index)}
-                      className={`w-full py-1 rounded text-xs transition ${
-                        img.isPrimary
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                      className={`w-full py-1 rounded text-xs transition ${img.isPrimary
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
                     >
                       {img.isPrimary ? "Primary" : "Set Primary"}
                     </button>
