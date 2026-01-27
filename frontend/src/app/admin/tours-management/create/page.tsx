@@ -54,9 +54,6 @@ interface ItineraryDay {
   day: number;
   title: string;
   description: string;
-  imageUrl?: string;
-  imageFile?: File | null;
-  imagePreview?: string;
   activities: Activity[];
   optionalActivities: OptionalActivity[];
   accommodations: Accommodation[];
@@ -91,6 +88,19 @@ export default function CreateTourPage() {
     url: "",
   });
 
+  // Itinerary Map Image
+  const [itineraryMapImage, setItineraryMapImage] = useState<{
+    file: File | null;
+    preview: string;
+    uploading: boolean;
+    url: string;
+  }>({
+    file: null,
+    preview: "",
+    uploading: false,
+    url: "",
+  });
+
   // Itinerary
   const [itinerary, setItinerary] = useState<ItineraryDay[]>([]);
 
@@ -109,6 +119,7 @@ export default function CreateTourPage() {
     priceAmount: "",
     priceCurrency: "USD",
     discountPercent: "0",
+    bookingPercentage: "20",
     travelStyle: "Classic",
     startCity: "",
     endCity: "",
@@ -282,9 +293,6 @@ export default function CreateTourPage() {
         day: prev.length + 1,
         title: "",
         description: "",
-        imageUrl: "",
-        imageFile: null,
-        imagePreview: "",
         activities: [],
         optionalActivities: [],
         accommodations: [],
@@ -310,39 +318,32 @@ export default function CreateTourPage() {
     );
   };
 
-  // Handle day image upload
-  const handleDayImageSelect = (
-    dayIndex: number,
+  // Itinerary Map Image Functions
+  const handleItineraryMapImageSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setItinerary((prev) =>
-          prev.map((item, i) =>
-            i === dayIndex
-              ? {
-                ...item,
-                imageFile: file,
-                imagePreview: reader.result as string,
-              }
-              : item,
-          ),
-        );
+        setItineraryMapImage({
+          file,
+          preview: reader.result as string,
+          uploading: false,
+          url: "",
+        });
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const removeDayImage = (dayIndex: number) => {
-    setItinerary((prev) =>
-      prev.map((item, i) =>
-        i === dayIndex
-          ? { ...item, imageFile: null, imagePreview: "", imageUrl: "" }
-          : item,
-      ),
-    );
+  const removeItineraryMapImage = () => {
+    setItineraryMapImage({
+      file: null,
+      preview: "",
+      uploading: false,
+      url: "",
+    });
   };
 
   // Activity management functions
@@ -554,18 +555,19 @@ export default function CreateTourPage() {
         descriptionImageUrl = await uploadImageToSupabase(descriptionImage.file);
       }
 
+      // Upload itinerary map image if exists
+      let itineraryMapImageUrl = "";
+      if (itineraryMapImage.file) {
+        itineraryMapImageUrl = await uploadImageToSupabase(itineraryMapImage.file);
+      }
+
       // Upload day images
       const itineraryWithImages = await Promise.all(
         itinerary.map(async (day) => {
-          let imageUrl = day.imageUrl || "";
-          if (day.imageFile) {
-            imageUrl = await uploadImageToSupabase(day.imageFile);
-          }
           return {
             day: day.day,
             title: day.title,
             description: day.description,
-            imageUrl,
             activities: day.activities,
             optionalActivities: day.optionalActivities,
             accommodations: day.accommodations,
@@ -590,6 +592,7 @@ export default function CreateTourPage() {
         summary: formData.summary,
         description: formData.description,
         descriptionImage: descriptionImageUrl,
+        itineraryMapImage: itineraryMapImageUrl,
         country: formData.country,
         duration: {
           days: parseInt(formData.durationDays),
@@ -603,6 +606,7 @@ export default function CreateTourPage() {
           amount: parseFloat(formData.priceAmount),
           currency: formData.priceCurrency,
           discountPercent: parseFloat(formData.discountPercent),
+          bookingPercentage: parseFloat(formData.bookingPercentage),
         },
         travelStyle: formData.travelStyle,
         serviceLevel: "Standard",
@@ -781,6 +785,72 @@ export default function CreateTourPage() {
                       <button
                         type="button"
                         onClick={removeDescriptionImage}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Itinerary Map Image
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Upload a map image for the full itinerary view
+                  </p>
+
+                  {!itineraryMapImage.preview ? (
+                    <label className="block w-full">
+                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition">
+                        <svg
+                          className="mx-auto h-8 w-8 text-gray-400"
+                          stroke="currentColor"
+                          fill="none"
+                          viewBox="0 0 48 48"
+                        >
+                          <path
+                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Click to upload map image
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleItineraryMapImageSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  ) : (
+                    <div className="relative">
+                      <img
+                        src={itineraryMapImage.preview}
+                        alt="Map preview"
+                        className="w-full h-48 object-cover rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeItineraryMapImage}
                         className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                       >
                         <svg
@@ -1239,6 +1309,22 @@ export default function CreateTourPage() {
                   placeholder="0"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Booking Percentage %
+                </label>
+                <input
+                  type="number"
+                  name="bookingPercentage"
+                  value={formData.bookingPercentage}
+                  onChange={handleChange}
+                  min="0"
+                  max="100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  placeholder="20"
+                />
+              </div>
             </div>
           </div>
 
@@ -1297,67 +1383,6 @@ export default function CreateTourPage() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
 
-                    {/* Day Image Upload */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Day Photo (Optional)
-                      </label>
-                      {day.imagePreview ? (
-                        <div className="relative inline-block">
-                          <img
-                            src={day.imagePreview}
-                            alt="Day preview"
-                            className="w-32 h-32 object-cover rounded border border-gray-300"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeDayImage(dayIndex)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                          >
-                            <svg
-                              className="w-3 h-3"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      ) : (
-                        <label className="inline-block cursor-pointer">
-                          <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center hover:border-gray-400 transition">
-                            <svg
-                              className="mx-auto h-8 w-8 text-gray-400"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 48 48"
-                            >
-                              <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <p className="mt-1 text-xs text-gray-600">
-                              Upload photo
-                            </p>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleDayImageSelect(dayIndex, e)}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
-                    </div>
                   </div>
 
                   {/* Activities Section */}
@@ -1879,7 +1904,7 @@ export default function CreateTourPage() {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

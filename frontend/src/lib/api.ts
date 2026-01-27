@@ -37,10 +37,12 @@ export const api = {
       delete: "/countries/:id",
     },
     bookings: {
+      getAll: "/bookings",
       create: "/bookings",
       getById: (id: string) => `/bookings/${id}`,
       update: (id: string) => `/bookings/${id}`,
       cancel: (id: string) => `/bookings/${id}/cancel`,
+      getByTour: (tourId: string) => `/bookings?tour=${tourId}`,
     },
     reviews: {
       getAll: "/reviews",

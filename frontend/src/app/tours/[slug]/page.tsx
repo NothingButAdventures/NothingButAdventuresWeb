@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
@@ -13,6 +13,7 @@ interface Tour {
   summary: string;
   description: string;
   descriptionImage?: string;
+  itineraryMapImage?: string;
   whatsIncluded?: string;
   transportation?: string;
   staffExperts?: string;
@@ -41,7 +42,6 @@ interface Tour {
     day: number;
     title: string;
     description: string;
-    imageUrl?: string;
     activities: Array<{
       name: string;
       description: string;
@@ -125,6 +125,7 @@ const iconMap: { [key: string]: string } = {
 
 export default function TourDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
 
   const [tour, setTour] = useState<Tour | null>(null);
@@ -136,6 +137,10 @@ export default function TourDetailPage() {
   const [relatedTours, setRelatedTours] = useState<Tour[]>([]);
   const dayRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
+  const [showStickyFooter, setShowStickyFooter] = useState(false);
+  const bookingPanelRef = useRef<HTMLDivElement>(null);
+  const recommendedToursRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (slug) {
       fetchTour();
@@ -145,6 +150,23 @@ export default function TourDetailPage() {
   // Track scroll position and update current visible day
   useEffect(() => {
     const handleScroll = () => {
+      // Sticky Footer Logic
+      if (bookingPanelRef.current && recommendedToursRef.current) {
+        const bookingPanelRect = bookingPanelRef.current.getBoundingClientRect();
+        const recommendedRect =
+          recommendedToursRef.current.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        // Show when booking panel is scrolled up out of view (bottom < 0 or top < some negative value)
+        // We'll use bottom < 0 to mean it has completely scrolled off the top
+        const isBookingPanelHidden = bookingPanelRect.bottom < 0;
+
+        // Hide when recommended tours section comes into view
+        const isRecommendedVisible = recommendedRect.top < windowHeight;
+
+        setShowStickyFooter(isBookingPanelHidden && !isRecommendedVisible);
+      }
+
       if (activeTab !== "itinerary" || !tour) return;
 
       let closestDay = 1;
@@ -348,7 +370,10 @@ export default function TourDetailPage() {
                   </div>
 
                   {/* Booking Panel (right) */}
-                  <aside className="bg-gradient-to-br from-white to-gray-50 rounded-xl border shadow-lg overflow-hidden">
+                  <aside
+                    ref={bookingPanelRef}
+                    className="bg-gradient-to-br from-white to-gray-50 rounded-xl border shadow-lg overflow-hidden"
+                  >
                     {/* Top Seller Badge */}
                     {tour.ratingsQuantity > 100 && (
                       <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-3 text-white text-center">
@@ -431,7 +456,10 @@ export default function TourDetailPage() {
 
                       {/* CTA Buttons */}
                       <div className="space-y-3">
-                        <button className="w-full bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:from-purple-700 hover:to-purple-800 transition shadow-md flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => router.push(`/tours/${tour.slug}/checkout`)}
+                          className="w-full bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2"
+                        >
                           <span></span>
                           Book Now
                         </button>
@@ -504,41 +532,77 @@ export default function TourDetailPage() {
                     </p>
                   </div>
 
-                  <div className="mb-8">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      Highlights
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {tour.highlights.map((highlight, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <span className="text-green-500 mt-1">✓</span>
-                          <span className="text-gray-700">{highlight}</span>
+                  {/* Is This Tour For Me Section */}
+                  <div className="mb-12 border-t pt-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Is this tour for me?
+                    </h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-bold text-indigo-900">
+                            Travel Style: {tour.travelStyle}
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            Immersive experiences that capture the essence of a
+                            destination including its highlights, culture, and
+                            history. All at a great price.
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-indigo-900">
+                            Service Level: {tour.serviceLevel}
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            Comfortable tourist-class accommodations with character;
+                            mix of public and private transport.
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-indigo-900">
+                            Physical Rating: {tour.physicalRating.level}
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            {tour.physicalRating.description ||
+                              "Light walking and hiking suitable for most fitness levels."}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-indigo-900">
+                            Trip Type: Small Group
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            Small group experience; Max {tour.maxGroupSize}.
+                            Great for meeting like-minded travellers.
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-indigo-900">
+                            Age requirement: {tour.ageRequirement.min}+
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            {tour.ageRequirement.description ||
+                              "All travellers under age 18 must be accompanied by an adult."}
+                          </p>
+                        </div>
+                      </div>
 
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                      Route
-                    </h3>
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <span className="font-medium">
-                        {tour.location.startCity}
-                      </span>
-                      <span className="text-gray-400">→</span>
-                      {tour.location.visitedCities.map((city, index) => (
-                        <span key={index} className="flex items-center gap-2">
-                          <span>{city}</span>
-                          {index < tour.location.visitedCities.length - 1 && (
-                            <span className="text-gray-400">→</span>
-                          )}
-                        </span>
-                      ))}
-                      <span className="text-gray-400">→</span>
-                      <span className="font-medium">
-                        {tour.location.endCity}
-                      </span>
+                      <div className="lg:border-l lg:pl-12 border-gray-200">
+                        <h3 className="text-lg font-bold text-indigo-900 mb-3">
+                          Check Your Visa Requirements
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          Before booking, use our handy entry requirements tool
+                          so you know which documents you need to enter and
+                          travel through the countries on your trip.
+                        </p>
+                        <a
+                          href="#"
+                          className="text-cyan-500 hover:text-cyan-600 font-medium hover:underline block"
+                        >
+                          View our Entry Requirements tool
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -571,17 +635,7 @@ export default function TourDetailPage() {
                       </h3>
                       <p className="text-gray-700 mb-4">{day.description}</p>
 
-                      {day.imageUrl && (
-                        <div className="mb-4">
-                          <Image
-                            src={day.imageUrl}
-                            alt={day.title}
-                            width={800}
-                            height={400}
-                            className="w-full h-64 object-cover rounded-lg"
-                          />
-                        </div>
-                      )}
+
 
                       {day.activities.length > 0 && (
                         <div className="mb-4">
@@ -794,134 +848,25 @@ export default function TourDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {activeTab === "overview" && (
-              <>
-                {/* Available Dates */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Available Dates
-                  </h3>
-                  <div className="space-y-3">
-                    {tour.startDates
-                      .filter(
-                        (date) => date.isActive && date.availableSpots > 0,
-                      )
-                      .slice(0, 5)
-                      .map((date, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-center p-3 rounded"
-                        >
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {new Date(date.startDate).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                },
-                              )}{" "}
-                              -{" "}
-                              {new Date(date.endDate).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                },
-                              )}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {date.availableSpots} spots left
-                            </div>
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            {formatPrice(
-                              date.price.amount,
-                              date.price.currency,
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
 
-                {/* Quick Info */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Quick Info
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">🌟</span>
-                      <div>
-                        <div className="font-medium text-gray-900">Rating</div>
-                        <div className="text-sm text-gray-600">
-                          {tour.ratingsAverage}
-                          {"/"}5 ({tour.ratingsQuantity} reviews)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">📍</span>
-                      <div>
-                        <div className="font-medium text-gray-900">Country</div>
-                        <div className="text-sm text-gray-600">
-                          {tour.country.name}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">💪</span>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          Physical Level
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Level {tour.physicalRating.level}
-                          {"/"}5
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact */}
-                <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    Need Help?
-                  </h3>
-                  <p className="text-gray-700 text-sm mb-4">
-                    Have questions about this tour? Our travel experts are here
-                    to help!
-                  </p>
-                  <button className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition text-sm">
-                    Contact Us
-                  </button>
-                </div>
-              </>
-            )}
 
             {activeTab === "itinerary" && (
               <div className="sticky top-24 space-y-4">
-                {/* Itinerary Preview Image */}
+                {/* Itinerary Map Image */}
                 <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
                   <div className="relative w-full aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                    {tour.itinerary[currentDay - 1]?.imageUrl ? (
+                    {tour.itineraryMapImage ? (
                       <Image
-                        src={tour.itinerary[currentDay - 1].imageUrl || "/placeholder-image.jpg"}
-                        alt={`Day ${currentDay}`}
+                        src={tour.itineraryMapImage}
+                        alt="Itinerary Map"
                         fill
                         className="object-cover"
                       />
                     ) : (
                       <div className="text-center">
-                        <div className="text-5xl mb-2">📍</div>
+                        <div className="text-5xl mb-2">🗺️</div>
                         <div className="text-gray-600 font-medium">
-                          Day {currentDay}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {tour.itinerary[currentDay - 1]?.title || ""}
+                          Tour Map
                         </div>
                       </div>
                     )}
@@ -1707,7 +1652,13 @@ export default function TourDetailPage() {
                                       Unavailable
                                     </span>
                                   ) : (
-                                    <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors">
+                                    <button
+                                      onClick={() => {
+                                        const dateStr = new Date(date.startDate).toISOString().split('T')[0];
+                                        router.push(`/tours/${tour.slug}/checkout?date=${dateStr}`);
+                                      }}
+                                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors"
+                                    >
                                       Book now
                                     </button>
                                   )}
@@ -1736,7 +1687,10 @@ export default function TourDetailPage() {
       )}
 
       {/* Recommended Tours Section */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-16 ">
+      <div
+        ref={recommendedToursRef}
+        className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-16 "
+      >
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Recommended Tours
@@ -1836,6 +1790,89 @@ export default function TourDetailPage() {
           </div>
         )}
       </div>
-    </div >
+
+      {/* Sticky Footer */}
+      {showStickyFooter && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom duration-300">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+
+              {/* Route & Price Info */}
+              <div className="flex items-center gap-8 flex-1">
+                {/* Route */}
+                <div className="hidden md:block">
+                  <div className="text-sm font-bold text-gray-900">
+                    {tour.location.startCity} to {tour.location.endCity}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {tour.duration.days} days
+                  </div>
+                </div>
+
+                {/* Price */}
+                <div className="flex items-center gap-4">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs text-gray-500">From</span>
+                      <span className="text-xl font-bold text-gray-900">
+                        ${discountedPrice.toFixed(0)}
+                      </span>
+                      <span className="text-xs font-medium text-gray-900">USD</span>
+                    </div>
+                    {tour.price.discountPercent > 0 && (
+                      <div className="text-xs text-gray-500">
+                        was <span className="line-through">${tour.price.amount.toFixed(0)}</span> per person
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Valid Date */}
+                  {tour.startDates && tour.startDates.length > 0 && (
+                    <div className="hidden lg:block pl-4 border-l border-gray-300">
+                      <div className="text-xs text-gray-500">Valid on</div>
+                      <div className="text-sm font-semibold text-gray-900">
+                        {new Date(tour.startDates[0].startDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rating */}
+                  <div className="hidden xl:block pl-4 border-l border-gray-300">
+                    <div className="flex text-yellow-400">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className="text-lg leading-none">
+                          {i < Math.floor(tour.ratingsAverage) ? "★" : "☆"}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {tour.ratingsQuantity} reviews
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={() => router.push(`/tours/${tour.slug}/checkout`)}
+                  className="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-colors whitespace-nowrap"
+                >
+                  Book Now
+                </button>
+                <button className="flex-1 md:flex-none border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded transition-colors whitespace-nowrap flex items-center justify-center gap-2">
+                  <span className="text-xl">♡</span>
+                  <span className="hidden sm:inline">Save to wish list</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

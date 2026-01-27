@@ -79,15 +79,49 @@ export default function Header() {
             </Link>
           </div>
 
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 max-w-md mx-8">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const query = formData.get("search");
+                if (query) {
+                  router.push(`/search?s=${query}`);
+                }
+              }}
+              className="w-full relative"
+            >
+              <input
+                type="text"
+                name="search"
+                placeholder="Where to?"
+                className="w-full px-4 py-2 pl-10 bg-gray-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200"
+              />
+              <svg
+                className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 transform -translate-y-1/2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </form>
+          </div>
+
           {/* Desktop Navigation */}
-          <nav className="hidden text-base md:flex items-center space-x-8">
+          <nav className="hidden text-base md:flex items-center space-x-6">
             <Link
               href="/tours"
-              className={`font-medium transition-colors duration-200 ${
-                isActivePage("/tours")
-                  ? "underline underline-offset-2"
-                  : "hover:underline underline-offset-2"
-              }`}
+              className={`font-medium transition-colors duration-200 ${isActivePage("/tours")
+                  ? "text-blue-600"
+                  : "text-gray-700 hover:text-blue-600"
+                }`}
             >
               Tours
             </Link>
@@ -95,11 +129,10 @@ export default function Header() {
             {!isLoading && user && (
               <Link
                 href="/dashboard"
-                className={`font-medium transition-colors duration-200 ${
-                  isActivePage("/dashboard")
-                    ? "underline underline-offset-2"
-                    : "hover:underline underline-offset-2"
-                }`}
+                className={`font-medium transition-colors duration-200 ${isActivePage("/dashboard")
+                    ? "text-blue-600"
+                    : "text-gray-700 hover:text-blue-600"
+                  }`}
               >
                 Dashboard
               </Link>
@@ -119,7 +152,7 @@ export default function Header() {
                           {user.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <span className="font-medium">{user.name}</span>
+                      <span className="font-medium hidden lg:inline">{user.name}</span>
                       <svg
                         className={`w-4 h-4 transition-transform duration-200 ${isUserMenuOpen ? "rotate-180" : ""}`}
                         fill="none"
