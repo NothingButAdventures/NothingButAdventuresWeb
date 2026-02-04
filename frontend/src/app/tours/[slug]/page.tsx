@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
+import TourDetailLoading from "./loading";
 
 interface Tour {
   _id: string;
@@ -241,14 +242,7 @@ export default function TourDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-          <p className="mt-3 text-gray-600">Loading tour details...</p>
-        </div>
-      </div>
-    );
+    return <TourDetailLoading />;
   }
 
   if (!tour) {

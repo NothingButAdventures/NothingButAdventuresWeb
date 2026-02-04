@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Removed 'output: export' to enable SSR with Firebase Cloud Functions
   env: {
     NEXT_PUBLIC_API_URL:
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1",
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://api-gi52ugpsnq-uc.a.run.app/api/v1",
   },
   images: {
     remotePatterns: [

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -70,7 +70,7 @@ const DISCOUNTS = ["Any Discount", "20% off or more", "30% off or more", "40% of
 const PHYSICAL_RATINGS = ["1 - Easy", "2 - Light", "3 - Average", "4 - Demanding", "5 - Challenging"];
 const SERVICE_LEVELS = ["Standard", "Comfort", "Premium", "Luxury"];
 
-export default function SearchPage() {
+function SearchContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -608,5 +608,17 @@ export default function SearchPage() {
                 />
             )}
         </div>
+    );
+}
+
+export default function SearchPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        }>
+            <SearchContent />
+        </Suspense>
     );
 }

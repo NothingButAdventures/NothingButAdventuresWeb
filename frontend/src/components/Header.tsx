@@ -59,8 +59,8 @@ export default function Header() {
     router.push("/");
   };
 
-  // Don't show header on auth pages
-  if (pathname?.startsWith("/auth")) {
+  // Don't show header on auth pages or admin pages (admin has its own layout)
+  if (pathname?.startsWith("/auth") || pathname?.startsWith("/admin")) {
     return null;
   }
 
@@ -119,27 +119,45 @@ export default function Header() {
             <Link
               href="/tours"
               className={`font-medium transition-colors duration-200 ${isActivePage("/tours")
-                  ? "text-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
+                ? "text-blue-600"
+                : "text-gray-700 hover:text-blue-600"
                 }`}
             >
               Tours
             </Link>
+            <Link
+              href="/blogs"
+              className={`font-medium transition-colors duration-200 ${pathname?.startsWith("/blogs")
+                ? "text-blue-600"
+                : "text-gray-700 hover:text-blue-600"
+                }`}
+            >
+              Blog
+            </Link>
 
-            {!isLoading && user && (
+            {isLoading ? (
+              <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+            ) : user ? (
               <Link
                 href="/dashboard"
                 className={`font-medium transition-colors duration-200 ${isActivePage("/dashboard")
-                    ? "text-blue-600"
-                    : "text-gray-700 hover:text-blue-600"
+                  ? "text-blue-600"
+                  : "text-gray-700 hover:text-blue-600"
                   }`}
               >
                 Dashboard
               </Link>
-            )}
+            ) : null}
 
             {/* User Authentication */}
-            {!isLoading && (
+            {isLoading ? (
+              /* Skeleton Loading State */
+              <div className="flex items-center space-x-2 animate-pulse">
+                <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                <div className="hidden lg:block w-20 h-4 bg-gray-200 rounded"></div>
+                <div className="w-4 h-4 bg-gray-200 rounded"></div>
+              </div>
+            ) : (
               <>
                 {user ? (
                   <div className="relative">
@@ -181,27 +199,6 @@ export default function Header() {
                           </span>
                         </div>
 
-                        <Link
-                          href="/dashboard"
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          <svg
-                            className="w-4 h-4 mr-3"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                            />
-                          </svg>
-                          Dashboard
-                        </Link>
-
                         {user.role === "admin" && (
                           <Link
                             href="/admin"
@@ -228,6 +225,29 @@ export default function Header() {
                               />
                             </svg>
                             Admin Panel
+                          </Link>
+                        )}
+
+                        {(user.role === "copywriter" || user.role === "admin") && (
+                          <Link
+                            href="/blogs/my-blogs"
+                            className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <svg
+                              className="w-4 h-4 mr-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                              />
+                            </svg>
+                            My Blogs
                           </Link>
                         )}
 
@@ -348,8 +368,17 @@ export default function Header() {
               >
                 Tours
               </Link>
+              <Link
+                href="/blogs"
+                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Blog
+              </Link>
 
-              {!isLoading && user && (
+              {isLoading ? (
+                <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+              ) : user ? (
                 <Link
                   href="/dashboard"
                   className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
@@ -357,9 +386,20 @@ export default function Header() {
                 >
                   Dashboard
                 </Link>
-              )}
+              ) : null}
 
-              {!isLoading && (
+              {isLoading ? (
+                /* Mobile Skeleton Loading State */
+                <div className="pt-4 border-t border-gray-200 animate-pulse">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    <div>
+                      <div className="w-24 h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="w-16 h-3 bg-gray-200 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <>
                   {user ? (
                     <div className="pt-4 border-t border-gray-200">
@@ -384,6 +424,16 @@ export default function Header() {
                           onClick={() => setIsMenuOpen(false)}
                         >
                           Admin Panel
+                        </Link>
+                      )}
+
+                      {(user.role === "copywriter" || user.role === "admin") && (
+                        <Link
+                          href="/blogs/my-blogs"
+                          className="block text-gray-700 hover:text-blue-600 font-medium mb-3 transition-colors"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          My Blogs
                         </Link>
                       )}
 

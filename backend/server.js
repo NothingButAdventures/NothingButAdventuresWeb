@@ -20,6 +20,7 @@ const countryRoutes = require("./routes/countryRoutes");
 const tourRoutes = require("./routes/tourRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
+const blogRoutes = require("./routes/blogRoutes");
 
 // Load environment variables
 require("dotenv").config();
@@ -49,9 +50,13 @@ app.use("/api", limiter);
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: [
+      "https://nothingbutadventures.com",
+      "https://www.nothingbutadventures.com",
+      "http://localhost:3000",
+    ],
     credentials: true,
-  })
+  }),
 );
 
 // Logging
@@ -80,8 +85,13 @@ app.use(
       "difficulty",
       "price",
     ],
-  })
+  }),
 );
+
+// Root route for testing
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 
 // Health check route
 app.get("/health", (req, res) => {
@@ -99,6 +109,7 @@ app.use("/api/v1/countries", countryRoutes);
 app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
+app.use("/api/v1/blogs", blogRoutes);
 
 // Handle undefined routes
 app.all("*", (req, res, next) => {
@@ -110,25 +121,30 @@ app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 3001;
 
-const server = app.listen(PORT, () => {
-  logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+const { onRequest } = require("firebase-functions/v2/https");
 
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (err, promise) => {
-  logger.error("Unhandled Rejection at:", promise, "reason:", err);
-  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
-  server.close(() => {
-    process.exit(1);
+if (require.main === module) {
+  const server = app.listen(PORT, () => {
+    logger.info(
+      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+    );
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
   });
-});
 
-// Handle uncaught exceptions
-process.on("uncaughtException", (err) => {
-  logger.error("Uncaught Exception:", err);
-  console.log("UNCAUGHT EXCEPTION! 💥 Shutting down...");
-  process.exit(1);
-});
+  process.on("unhandledRejection", (err, promise) => {
+    logger.error("Unhandled Rejection at:", promise, "reason:", err);
+    console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+    server.close(() => {
+      process.exit(1);
+    });
+  });
+} else {
+  // Firebase Cloud Functions export
+  module.exports.api = onRequest(app);
+}
 
-module.exports = app;
+if (typeof module.exports.api === "undefined") {
+  // Fallback for older Firebase versions
+  exports.api = onRequest(app);
+}
+exports.app = app;

@@ -1,6 +1,6 @@
 // API configuration and utilities
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
+// const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -55,6 +55,19 @@ export const api = {
       updateMe: "/users/update-me",
       getMyBookings: "/users/my-bookings",
       getMyReviews: "/users/my-reviews",
+    },
+    blogs: {
+      getAll: "/blogs",
+      getBySlug: (slug: string) => `/blogs/${slug}`,
+      getFeatured: "/blogs/featured",
+      getCategories: "/blogs/categories",
+      getByCategory: (category: string) => `/blogs/category/${category}`,
+      search: "/blogs/search",
+      getMyBlogs: "/blogs/me/blogs",
+      getMyBlog: (id: string) => `/blogs/me/blogs/${id}`,
+      create: "/blogs",
+      update: (id: string) => `/blogs/${id}`,
+      delete: (id: string) => `/blogs/${id}`,
     },
   },
 };

@@ -103,11 +103,10 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
-// Indexes
-userSchema.index({ email: 1 });
+// Indexes (email already indexed via unique constraint)
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 
@@ -145,7 +144,7 @@ userSchema.pre("save", function (next) {
 // Instance method to check password
 userSchema.methods.correctPassword = async function (
   candidatePassword,
-  userPassword
+  userPassword,
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
 };
@@ -155,7 +154,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(
       this.passwordChangedAt.getTime() / 1000,
-      10
+      10,
     );
     return JWTTimestamp < changedTimestamp;
   }

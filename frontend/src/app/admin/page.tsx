@@ -2,262 +2,223 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 
-interface User {
-  name: string;
-  email: string;
-  role: string;
+interface Stats {
+  totalTours: number;
+  totalUsers: number;
+  totalBookings: number;
+  totalRevenue: number;
 }
 
-export default function AdminPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats>({
+    totalTours: 0,
+    totalUsers: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
+  });
 
   useEffect(() => {
-    checkAuth();
+    fetchStats();
   }, []);
 
-  const checkAuth = async () => {
+  const fetchStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/auth/login");
-        return;
+      // Fetch tours count
+      const toursResponse = await fetch(`${api.baseURL}/tours`);
+      if (toursResponse.ok) {
+        const toursData = await toursResponse.json();
+        setStats((prev) => ({
+          ...prev,
+          totalTours: toursData.data.tours?.length || 0,
+        }));
       }
-
-      const response = await fetch(`${api.baseURL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.data.user.role !== "admin") {
-        router.push("/dashboard");
-        return;
-      }
-
-      setUser(data.data.user);
     } catch (error) {
-      router.push("/auth/login");
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch stats:", error);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back, {user?.name}</p>
+      {/* Page Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="px-8 py-6">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">Welcome to the admin panel</p>
+        </div>
+      </div>
+
+      {/* Dashboard Content */}
+      <div className="p-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Tours */}
+          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalTours}</h3>
+            <p className="text-gray-500 text-sm">Total Tours</p>
+          </div>
+
+          {/* Total Users */}
+          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Users</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalUsers || "—"}</h3>
+            <p className="text-gray-500 text-sm">Total Users</p>
+          </div>
+
+          {/* Total Bookings */}
+          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Pending</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalBookings || "—"}</h3>
+            <p className="text-gray-500 text-sm">Total Bookings</p>
+          </div>
+
+          {/* Revenue */}
+          <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Revenue</span>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">${stats.totalRevenue || "—"}</h3>
+            <p className="text-gray-500 text-sm">Total Revenue</p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Tours Management Card */}
-          <Link
-            href="/admin/tours-management"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
-                  />
-                </svg>
+        {/* Quick Actions */}
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Link
+              href="/admin/tours-management/create"
+              className="group bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <svg className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Create New Tour</h3>
+                  <p className="text-gray-500 text-sm">Add a new tour package</p>
+                </div>
               </div>
-              <span className="text-sm text-gray-500">Manage</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Tours Management
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Create, edit, and manage all tours in the system
-            </p>
-          </Link>
+            </Link>
 
-          {/* Countries Management Card */}
-          <Link
-            href="/admin/countries"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+            <Link
+              href="/admin/tours-management"
+              className="group bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <svg className="w-6 h-6 text-gray-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">Manage Tours</h3>
+                  <p className="text-gray-500 text-sm">View and edit tours</p>
+                </div>
               </div>
-              <span className="text-sm text-gray-500">Configure</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Countries
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Manage countries and destinations
-            </p>
-          </Link>
+            </Link>
 
-          {/* Users Management Card */}
-          <Link
-            href="/admin/users"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+            <Link
+              href="/admin/bookings"
+              className="group bg-white border border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <svg className="w-6 h-6 text-amber-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">View Bookings</h3>
+                  <p className="text-gray-500 text-sm">Track reservations</p>
+                </div>
               </div>
-              <span className="text-sm text-gray-500">View</span>
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Users</h3>
-            <p className="text-gray-600 text-sm">
-              View and manage user accounts
-            </p>
-          </Link>
+            </Link>
+          </div>
+        </div>
 
-          {/* Bookings Card */}
-          <Link
-            href="/admin/bookings"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
+        {/* Recent Activity Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Bookings */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm text-gray-500">Track</span>
+              <h2 className="font-semibold text-gray-900">Recent Bookings</h2>
+              <Link href="/admin/bookings" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                View All →
+              </Link>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Bookings
-            </h3>
-            <p className="text-gray-600 text-sm">
-              View and manage all bookings
-            </p>
-          </Link>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-blue-600 font-medium text-sm">JD</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Sample Booking {i}</p>
+                      <p className="text-gray-500 text-xs">Everest Base Camp Trek</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">Confirmed</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          {/* Reviews Card */}
-          <Link
-            href="/admin/reviews"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
+          {/* Recent Tours */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm text-gray-500">Moderate</span>
+              <h2 className="font-semibold text-gray-900">Popular Tours</h2>
+              <Link href="/admin/tours-management" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                View All →
+              </Link>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Reviews
-            </h3>
-            <p className="text-gray-600 text-sm">
-              Moderate and respond to reviews
-            </p>
-          </Link>
-
-          {/* Settings Card */}
-          <Link
-            href="/admin/settings"
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-6 border border-gray-200"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-              <span className="text-sm text-gray-500">Configure</span>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-gray-200 rounded-lg"></div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">Tour Package {i}</p>
+                      <p className="text-gray-500 text-xs">12 bookings this month</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-gray-900">$1,299</span>
+                </div>
+              ))}
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Settings
-            </h3>
-            <p className="text-gray-600 text-sm">
-              System settings and configuration
-            </p>
-          </Link>
+          </div>
         </div>
       </div>
     </div>

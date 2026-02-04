@@ -459,8 +459,7 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
-// Indexes
-tourSchema.index({ slug: 1 });
+// Indexes (slug already indexed via unique constraint)
 tourSchema.index({ country: 1 });
 tourSchema.index({ price: 1 });
 tourSchema.index({ ratingsAverage: -1 });

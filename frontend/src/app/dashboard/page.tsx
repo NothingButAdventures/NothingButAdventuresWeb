@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import DashboardLoading from "./loading";
 
 interface User {
   name: string;
@@ -77,19 +78,15 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    return <DashboardLoading />;
   }
 
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4">
         {/* Greeting Section */}
-        <div className="grid grid-cols-3 gap-8 py-12">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-12">
+          <div className="md:col-span-2">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
               {greeting}, {user?.name || "Traveler"}
             </h1>
@@ -104,22 +101,63 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {/* Tour Status Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">
-              Tour Status
-            </h3>
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <span className="text-2xl">🎈</span>
+          {/* Status Cards Column */}
+          <div className="space-y-4">
+            {/* Write Blog Card - Only for copywriters and admins */}
+            {(user?.role === "copywriter" || user?.role === "admin") && (
+              <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold mb-1 text-purple-100">
+                      Content Creator
+                    </h3>
+                    <p className="text-lg font-bold">Write a Blog</p>
+                    <p className="text-sm text-purple-200 mt-1">
+                      Share your travel stories
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <Link
+                  href="/blogs/write"
+                  className="mt-4 inline-block bg-white text-purple-600 hover:bg-purple-50 font-medium py-2 px-4 rounded-lg transition w-full text-center"
+                >
+                  Start Writing
+                </Link>
               </div>
-              <p className="text-gray-700 font-medium mb-2">
-                Nothing to co here - yet
-              </p>
-              <p className="text-sm text-gray-500">
-                Tour and events updates will show up here with things you need
-                to know
-              </p>
+            )}
+
+            {/* Tour Status Card */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                Tour Status
+              </h3>
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">🎈</span>
+                </div>
+                <p className="text-gray-700 font-medium mb-2">
+                  Nothing to do here - yet
+                </p>
+                <p className="text-sm text-gray-500">
+                  Tour and events updates will show up here with things you need
+                  to know
+                </p>
+              </div>
             </div>
           </div>
         </div>
