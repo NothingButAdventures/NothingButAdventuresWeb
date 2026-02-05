@@ -13,6 +13,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
+import { api } from "@/lib/api";
 
 // --- Configuration ---
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -108,7 +109,7 @@ export default function EditContinentPage() {
 
     const fetchContinent = async () => {
         try {
-            const res = await fetch(`http://localhost:3001/api/v1/continents/${id}`, {
+            const res = await fetch(`${api.baseURL}/continents/${id}`, {
                 credentials: "include",
             });
             const data = await res.json();
@@ -184,7 +185,7 @@ export default function EditContinentPage() {
 
         setSaving(true);
         try {
-            const res = await fetch(`http://localhost:3001/api/v1/continents/${id}`, {
+            const res = await fetch(`${api.baseURL}/continents/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

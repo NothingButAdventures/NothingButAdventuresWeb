@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { api } from "@/lib/api";
 
 // --- Types ---
 interface Continent {
@@ -79,7 +80,7 @@ export default function LocationPage() {
 
     const fetchContinents = async () => {
         try {
-            const res = await fetch("http://localhost:3001/api/v1/continents");
+            const res = await fetch(`${api.baseURL}/continents`);
             const data = await res.json();
             if (data.status === "success") {
                 setContinents(data.data.continents);
@@ -94,7 +95,7 @@ export default function LocationPage() {
     const handleCreateContinent = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch("http://localhost:3001/api/v1/continents", {
+            const res = await fetch(`${api.baseURL}/continents`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name: newContinentName }),
@@ -143,7 +144,7 @@ export default function LocationPage() {
         console.log("Submitting Country Payload:", payload);
 
         try {
-            const res = await fetch("http://localhost:3001/api/v1/countries", {
+            const res = await fetch(`${api.baseURL}/countries`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

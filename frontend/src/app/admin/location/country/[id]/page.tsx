@@ -13,6 +13,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
+import { api } from "@/lib/api";
 
 // --- Configuration ---
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -126,7 +127,7 @@ export default function EditCountryPage() {
 
     const fetchCountry = async () => {
         try {
-            const res = await fetch(`http://localhost:3001/api/v1/countries/${id}`, {
+            const res = await fetch(`${api.baseURL}/countries/${id}`, {
                 credentials: "include",
             });
             const data = await res.json();
@@ -216,7 +217,7 @@ export default function EditCountryPage() {
                 image,
             };
 
-            const res = await fetch(`http://localhost:3001/api/v1/countries/${id}`, {
+            const res = await fetch(`${api.baseURL}/countries/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
