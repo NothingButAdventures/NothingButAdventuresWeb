@@ -75,7 +75,8 @@ interface Tour {
         startDate: string;
         endDate: string;
         availableSpots: number;
-        price: {
+        discount?: number;
+        price?: {
             amount: number;
             currency: string;
         };
@@ -215,24 +216,41 @@ export default function CheckoutPage() {
     const calculateTotalPrice = useMemo(() => {
         if (!tour) return 0;
 
-        let basePrice = selectedDate?.price?.amount || tour.price.amount;
-        if (tour.price.discountPercent > 0 && !selectedDate?.price?.amount) {
+        let basePrice = tour.price.amount;
+
+        // Apply date-specific discount if available
+        if (selectedDate?.discount) {
+            basePrice = basePrice * (1 - selectedDate.discount / 100);
+        } else if (selectedDate?.price?.amount) {
+            // Use date's specific price if set
+            basePrice = selectedDate.price.amount;
+        } else if (tour.price.discountPercent > 0) {
+            // Fall back to tour's general discount
             basePrice = basePrice * (1 - tour.price.discountPercent / 100);
         }
 
         const activitiesTotal = selectedActivities.reduce((sum, act) => sum + act.price * act.count, 0);
         const accommodationTotal = accommodationUpgrade ? accommodationUpgrade.price * accommodationUpgrade.count : 0;
 
-        return (basePrice * adultCount) + activitiesTotal + accommodationTotal;
+        return Math.round((basePrice * adultCount) + activitiesTotal + accommodationTotal);
     }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade]);
 
     const pricePerPerson = useMemo(() => {
         if (!tour) return 0;
-        let basePrice = selectedDate?.price?.amount || tour.price.amount;
-        if (tour.price.discountPercent > 0 && !selectedDate?.price?.amount) {
+        let basePrice = tour.price.amount;
+
+        // Apply date-specific discount if available
+        if (selectedDate?.discount) {
+            basePrice = basePrice * (1 - selectedDate.discount / 100);
+        } else if (selectedDate?.price?.amount) {
+            // Use date's specific price if set
+            basePrice = selectedDate.price.amount;
+        } else if (tour.price.discountPercent > 0) {
+            // Fall back to tour's general discount
             basePrice = basePrice * (1 - tour.price.discountPercent / 100);
         }
-        return basePrice;
+
+        return Math.round(basePrice);
     }, [tour, selectedDate]);
 
     const formatPrice = (amount: number, currency: string = "USD") => {
@@ -636,7 +654,7 @@ export default function CheckoutPage() {
                                                                             }`}
                                                                     >
                                                                         {day}
-                                                                        {dateStatus && !isPast && (
+                                                                        {dateStatus && !isPast && dateStatus.price && (
                                                                             <span className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 text-[8px] text-purple-600">
                                                                                 ${Math.round(dateStatus.price.amount)}
                                                                             </span>
@@ -686,7 +704,7 @@ export default function CheckoutPage() {
                                                             <div className="flex items-center gap-4">
                                                                 <div className="text-right">
                                                                     <div className="font-bold text-gray-900">
-                                                                        ${Math.round(date.price.amount)}
+                                                                        ${Math.round(tour.price.amount * (1 - (date.discount || 0) / 100))}
                                                                         <span className="text-xs font-normal text-gray-500"> USD</span>
                                                                     </div>
                                                                     <div className="text-xs text-gray-500">per person</div>

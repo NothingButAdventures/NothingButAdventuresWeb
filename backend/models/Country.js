@@ -16,64 +16,38 @@ const countrySchema = new mongoose.Schema(
     },
     code: {
       type: String,
-      required: [true, "A country must have a country code"],
       unique: true,
       uppercase: true,
       length: [2, "Country code must be exactly 2 characters"],
+      sparse: true,
     },
     continent: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Continent",
       required: [true, "A country must belong to a continent"],
-      enum: [
-        "Asia",
-        "Africa",
-        "North America",
-        "South America",
-        "Antarctica",
-        "Europe",
-        "Australia/Oceania",
-      ],
     },
     description: {
       type: String,
-      required: [true, "A country must have a description"],
       trim: true,
     },
     shortDescription: {
       type: String,
-      required: [true, "A country must have a short description"],
       maxlength: [200, "Short description cannot exceed 200 characters"],
     },
-    images: [
-      {
-        url: {
-          type: String,
-          required: true,
-        },
-        caption: {
-          type: String,
-          trim: true,
-        },
-        isPrimary: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    ],
+    image: {
+      type: String,
+    },
     currency: {
       code: {
         type: String,
-        required: true,
         uppercase: true,
         length: [3, "Currency code must be exactly 3 characters"],
       },
       name: {
         type: String,
-        required: true,
       },
       symbol: {
         type: String,
-        required: true,
       },
     },
     language: [

@@ -23,10 +23,10 @@ router.get('/continent/:continent', getCountriesByContinent);
 router.get('/:id', getCountry);
 
 // Protected routes
-router.use(protect);
+// router.use(protect);
 
 // Admin only routes
-router.use(restrictTo('admin'));
+// router.use(restrictTo('admin'));
 router.post('/', createCountry);
 router.patch('/:id', updateCountry);
 router.delete('/:id', deleteCountry);

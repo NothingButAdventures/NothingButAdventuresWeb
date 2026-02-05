@@ -63,7 +63,7 @@ interface AvailableDate {
   startDate: string;
   endDate: string;
   availableSpots: number;
-  priceAmount: number;
+  discount: number;
 }
 
 export default function EditTourPage() {
@@ -115,12 +115,10 @@ export default function EditTourPage() {
     description: "",
     country: "",
     durationDays: "",
-    durationNights: "",
     maxGroupSize: "",
     physicalRatingLevel: "3",
     priceAmount: "",
     priceCurrency: "USD",
-    discountPercent: "0",
     bookingPercentage: "20",
     travelStyle: "Classic",
     startCity: "",
@@ -130,8 +128,9 @@ export default function EditTourPage() {
     whatsIncluded: "",
     transportation: "",
     staffExperts: "",
+    meals: "",
+    accommodation: "",
     ageMin: "0",
-    ageMax: "99",
     isFeatured: false,
     isActive: true,
   });
@@ -189,12 +188,10 @@ export default function EditTourPage() {
           description: tour.description || "",
           country: tour.country?._id || tour.country || "",
           durationDays: tour.duration?.days?.toString() || "",
-          durationNights: tour.duration?.nights?.toString() || "",
           maxGroupSize: tour.maxGroupSize?.toString() || "",
           physicalRatingLevel: tour.physicalRating?.level?.toString() || "3",
           priceAmount: tour.price?.amount?.toString() || "",
           priceCurrency: tour.price?.currency || "USD",
-          discountPercent: tour.price?.discountPercent?.toString() || "0",
           bookingPercentage: tour.price?.bookingPercentage?.toString() || "20",
           travelStyle: tour.travelStyle || "Classic",
           startCity: tour.location?.startCity || "",
@@ -204,8 +201,9 @@ export default function EditTourPage() {
           whatsIncluded: tour.whatsIncluded || "",
           transportation: tour.transportation || "",
           staffExperts: tour.staffExperts || "",
+          meals: tour.meals || "",
+          accommodation: tour.accommodation || "",
           ageMin: tour.ageRequirement?.min?.toString() || "0",
-          ageMax: tour.ageRequirement?.max?.toString() || "99",
           isFeatured: tour.isFeatured || false,
           isActive: tour.isActive !== undefined ? tour.isActive : true,
         });
@@ -270,7 +268,7 @@ export default function EditTourPage() {
                 ? new Date(sd.endDate).toISOString().split("T")[0]
                 : "",
               availableSpots: sd.availableSpots || 0,
-              priceAmount: sd.price?.amount || 0,
+              discount: sd.discount || 0,
             })),
           );
         }
@@ -597,7 +595,7 @@ export default function EditTourPage() {
         startDate: "",
         endDate: "",
         availableSpots: parseInt(formData.maxGroupSize) || 10,
-        priceAmount: parseFloat(formData.priceAmount) || 0,
+        discount: 0,
       },
     ]);
   };
@@ -701,7 +699,6 @@ export default function EditTourPage() {
         country: formData.country,
         duration: {
           days: parseInt(formData.durationDays),
-          nights: parseInt(formData.durationNights),
         },
         maxGroupSize: parseInt(formData.maxGroupSize),
         physicalRating: {
@@ -710,7 +707,6 @@ export default function EditTourPage() {
         price: {
           amount: parseFloat(formData.priceAmount),
           currency: formData.priceCurrency,
-          discountPercent: parseFloat(formData.discountPercent),
           bookingPercentage: parseFloat(formData.bookingPercentage),
         },
         travelStyle: formData.travelStyle,
@@ -724,21 +720,19 @@ export default function EditTourPage() {
         whatsIncluded: formData.whatsIncluded,
         transportation: formData.transportation,
         staffExperts: formData.staffExperts,
+        meals: formData.meals,
+        accommodation: formData.accommodation,
         images: validImages,
         itinerary: itineraryWithImages,
         startDates: availableDates.map((ad) => ({
           startDate: new Date(ad.startDate),
           endDate: new Date(ad.endDate),
           availableSpots: ad.availableSpots,
-          price: {
-            amount: ad.priceAmount,
-            currency: formData.priceCurrency,
-          },
+          discount: ad.discount,
           isActive: true,
         })),
         ageRequirement: {
           min: parseInt(formData.ageMin),
-          max: parseInt(formData.ageMax),
         },
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
@@ -1028,21 +1022,7 @@ export default function EditTourPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (Nights) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="durationNights"
-                    value={formData.durationNights}
-                    onChange={handleChange}
-                    required
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="6"
-                  />
-                </div>
+
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1194,6 +1174,34 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                   />
                 </div>
 
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Meals
+                  </label>
+                  <textarea
+                    name="meals"
+                    value={formData.meals}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="e.g. 11 breakfasts, 10 lunches, 12 dinners."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Accommodation
+                  </label>
+                  <textarea
+                    name="accommodation"
+                    value={formData.accommodation}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    placeholder="e.g. Hotels (12 nts), Camping (3 nts)."
+                  />
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Min Age
@@ -1209,20 +1217,7 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Max Age
-                  </label>
-                  <input
-                    type="number"
-                    name="ageMax"
-                    value={formData.ageMax}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="99"
-                  />
-                </div>
+
 
                 <div className="md:col-span-2 flex gap-6">
                   <div className="flex items-center">
@@ -1402,21 +1397,7 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Discount %
-                </label>
-                <input
-                  type="number"
-                  name="discountPercent"
-                  value={formData.discountPercent}
-                  onChange={handleChange}
-                  min="0"
-                  max="90"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  placeholder="0"
-                />
-              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1892,6 +1873,14 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                 No itinerary days added yet
               </div>
             )}
+
+            <button
+              type="button"
+              onClick={addItineraryDay}
+              className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+            >
+              + Add Day
+            </button>
           </div>
 
           {/* Available Dates Section */}
@@ -1961,21 +1950,24 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     />
-                    <input
-                      type="number"
-                      value={ad.priceAmount}
-                      onChange={(e) =>
-                        updateAvailableDate(
-                          index,
-                          "priceAmount",
-                          parseFloat(e.target.value),
-                        )
-                      }
-                      placeholder="Price"
-                      step="0.01"
-                      min="0"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={ad.discount}
+                        onChange={(e) =>
+                          updateAvailableDate(
+                            index,
+                            "discount",
+                            parseFloat(e.target.value),
+                          )
+                        }
+                        placeholder="Discount"
+                        step="0.01"
+                        min="0"
+                        className="w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-1 focus:ring-blue-900 focus:border-blue-900 text-gray-900"
+                      />
+                      <span className="absolute right-3 top-2 text-xs text-gray-500">% Off</span>
+                    </div>
                   </div>
                 </div>
               ))}

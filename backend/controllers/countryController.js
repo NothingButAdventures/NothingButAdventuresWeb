@@ -1,4 +1,6 @@
+const mongoose = require('mongoose');
 const Country = require('../models/Country');
+const Continent = require('../models/Continent');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
@@ -62,11 +64,31 @@ const getPopularCountries = catchAsync(async (req, res, next) => {
 
 const getCountriesByContinent = catchAsync(async (req, res, next) => {
   const { continent } = req.params;
+  let filter = { isActive: true };
 
-  const countries = await Country.find({ 
-    continent: { $regex: new RegExp(continent, 'i') },
-    isActive: true 
-  })
+  if (mongoose.Types.ObjectId.isValid(continent)) {
+    filter.continent = continent;
+  } else {
+    const continentDoc = await Continent.findOne({
+      $or: [
+        { name: { $regex: new RegExp(continent, 'i') } },
+        { slug: continent }
+      ]
+    });
+
+    if (continentDoc) {
+      filter.continent = continentDoc._id;
+    } else {
+      return res.status(200).json({
+        status: 'success',
+        results: 0,
+        continent,
+        data: { countries: [] }
+      });
+    }
+  }
+
+  const countries = await Country.find(filter)
     .sort('name')
     .select('name slug shortDescription images statistics');
 

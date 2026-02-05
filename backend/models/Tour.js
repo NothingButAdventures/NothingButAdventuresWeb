@@ -44,7 +44,7 @@ const tourSchema = new mongoose.Schema(
       },
       nights: {
         type: Number,
-        required: [true, "A tour must have nights count"],
+        default: 0,
       },
     },
     maxGroupSize: {
@@ -73,12 +73,7 @@ const tourSchema = new mongoose.Schema(
         required: true,
         default: "USD",
       },
-      discountPercent: {
-        type: Number,
-        default: 0,
-        min: [0, "Discount cannot be negative"],
-        max: [90, "Discount cannot exceed 90%"],
-      },
+
       bookingPercentage: {
         type: Number,
         default: 20,
@@ -127,12 +122,11 @@ const tourSchema = new mongoose.Schema(
           type: Number,
           required: true,
         },
-        price: {
-          amount: Number,
-          currency: {
-            type: String,
-            default: "USD",
-          },
+        discount: {
+          type: Number,
+          default: 0,
+          min: [0, "Discount cannot be negative"],
+          max: [90, "Discount cannot exceed 90%"],
         },
         isActive: {
           type: Boolean,
@@ -438,6 +432,14 @@ const tourSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    meals: {
+      type: String,
+      trim: true,
+    },
+    accommodation: {
+      type: String,
+      trim: true,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -484,9 +486,9 @@ tourSchema.virtual("reviews", {
 
 // Virtual for discounted price
 tourSchema.virtual("discountedPrice").get(function () {
-  if (this.price.discountPercent > 0) {
-    return this.price.amount * (1 - this.price.discountPercent / 100);
-  }
+  // Calculate based on the current date, finding the best discount available?
+  // For now, let's return the base price as the discounted price logic is moved to specific dates.
+  return this.price.amount;
   return this.price.amount;
 });
 

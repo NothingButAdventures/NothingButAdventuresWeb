@@ -18,10 +18,11 @@ interface Tour {
   whatsIncluded?: string;
   transportation?: string;
   staffExperts?: string;
+  meals?: string;
+  accommodation?: string;
   price: {
     amount: number;
     currency: string;
-    discountPercent: number;
   };
   duration: {
     days: number;
@@ -90,10 +91,7 @@ interface Tour {
     startDate: string;
     endDate: string;
     availableSpots: number;
-    price: {
-      amount: number;
-      currency: string;
-    };
+    discount: number;
     isActive: boolean;
   }>;
   ageRequirement: {
@@ -219,12 +217,6 @@ export default function TourDetailPage() {
     }
   };
 
-  const calculateDiscountedPrice = (price: Tour["price"]) => {
-    if (price.discountPercent > 0) {
-      return price.amount * (1 - price.discountPercent / 100);
-    }
-    return price.amount;
-  };
 
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-US", {
@@ -262,7 +254,23 @@ export default function TourDetailPage() {
 
   const primaryImage =
     tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
-  const discountedPrice = calculateDiscountedPrice(tour.price);
+
+  // Pricing and Dates Logic
+  const sortedDates = tour.startDates ? [...tour.startDates].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
+
+  // Find highest discount date
+  const bestDealDate = sortedDates.reduce((best, current) => {
+    return (current.discount || 0) > (best?.discount || 0) ? current : best;
+  }, sortedDates[0]);
+
+  const basePrice = tour.price.amount;
+  const bestDiscount = bestDealDate?.discount || 0;
+  const discountedPrice = bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
+
+  // Top 3 discounted dates for list
+  const topDiscountedDates = sortedDates
+    .filter(d => (d.discount || 0) > 0)
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen">
@@ -401,12 +409,15 @@ export default function TourDetailPage() {
                             USD
                           </span>
                         </div>
-                        {tour.price.discountPercent > 0 && (
+                        {tour.price.amount > discountedPrice && (
                           <div className="text-sm text-gray-600">
                             was{" "}
                             <span className="line-through">
                               ${tour.price.amount.toFixed(0)}
                             </span>
+                            <div className="text-sm text-red-600 font-medium mt-1">
+                              Best Price for {new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </div>
                           </div>
                         )}
                         <div className="text-xs text-gray-500 mt-2">
@@ -414,25 +425,7 @@ export default function TourDetailPage() {
                         </div>
                       </div>
 
-                      {/* Valid Date and Trip Code */}
-                      <div className="mb-6 pb-6 border-b space-y-4">
-                        {tour.startDates && tour.startDates.length > 0 && (
-                          <div>
-                            <div className="text-xs text-gray-600 font-medium">
-                              Valid on
-                            </div>
-                            <div className="text-sm font-medium text-blue-600">
-                              {new Date(
-                                tour.startDates[0].startDate,
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+
 
                       {/* Rating */}
                       <div className="mb-6 pb-6 border-b flex items-center gap-3">
@@ -452,15 +445,30 @@ export default function TourDetailPage() {
                       <div className="space-y-3">
                         <button
                           onClick={() => router.push(`/tours/${tour.slug}/checkout`)}
-                          className="w-full bg-red-500 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2"
+                          className="w-full bg-red-500 text-white font-semibold py-2 px-4 text-sm rounded-lg hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2"
                         >
                           <span></span>
                           Book Now
                         </button>
-                        <button className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition flex items-center justify-center gap-2">
+                        <button className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-2 px-4 text-sm rounded-lg hover:border-purple-300 hover:bg-purple-50 transition flex items-center justify-center gap-2">
                           <span></span>
                           Save to wish list
                         </button>
+
+                        {/* Top Discounts List */}
+                        {topDiscountedDates.length > 0 && (
+                          <div className="mt-3 pt-3 text-center border-t space-y-1">
+                            {topDiscountedDates.map((date, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${new Date(date.startDate).toISOString().split('T')[0]}`)}
+                                className="block w-full text-left text-sm text-sky-500 hover:text-sky-700 hover:bg-sky-50 py-1 px-2 rounded transition-colors cursor-pointer"
+                              >
+                                Save {date.discount}% - Departure {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </aside>
@@ -770,8 +778,7 @@ export default function TourDetailPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Duration:</span>
                         <span className="font-medium">
-                          {tour.duration.days} days, {tour.duration.nights}{" "}
-                          nights
+                          {tour.duration.days} days
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -806,12 +813,6 @@ export default function TourDetailPage() {
                         <span className="text-gray-600">Minimum Age:</span>
                         <span className="font-medium">
                           {tour.ageRequirement.min} years
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Maximum Age:</span>
-                        <span className="font-medium">
-                          {tour.ageRequirement.max} years
                         </span>
                       </div>
                       {tour.ageRequirement.description && (
@@ -1219,21 +1220,23 @@ export default function TourDetailPage() {
                       Accommodations
                     </h4>
                     <p className="text-gray-700">
-                      {tour.itinerary &&
-                        tour.itinerary.some(
-                          (day) =>
-                            day.accommodations && day.accommodations.length > 0,
-                        )
-                        ? Array.from(
-                          new Set(
-                            tour.itinerary.flatMap(
-                              (day) =>
-                                day.accommodations?.map((acc) => acc.type) ||
-                                [],
+                      {tour.accommodation ||
+                        (tour.itinerary &&
+                          tour.itinerary.some(
+                            (day) =>
+                              day.accommodations && day.accommodations.length > 0,
+                          )
+                          ? Array.from(
+                            new Set(
+                              tour.itinerary.flatMap(
+                                (day) =>
+                                  day.accommodations?.map(
+                                    (acc) => acc.type,
+                                  ) || [],
+                              ),
                             ),
-                          ),
-                        ).join(", ")
-                        : "Standard accommodation"}
+                          ).join(", ")
+                          : "Standard accommodation")}
                     </p>
                   </div>
 
@@ -1242,25 +1245,27 @@ export default function TourDetailPage() {
                       Meals
                     </h4>
                     <p className="text-gray-700 mb-1">
-                      {tour.itinerary?.reduce(
-                        (acc, day) => acc + (day.meals?.breakfast ? 1 : 0),
-                        0,
-                      )}{" "}
-                      breakfasts,{" "}
-                      {tour.itinerary?.reduce(
-                        (acc, day) => acc + (day.meals?.lunch ? 1 : 0),
-                        0,
-                      )}{" "}
-                      lunches,{" "}
-                      {tour.itinerary?.reduce(
-                        (acc, day) => acc + (day.meals?.dinner ? 1 : 0),
-                        0,
-                      )}{" "}
-                      dinners
+                      {tour.meals || (
+                        <>
+                          {tour.itinerary?.reduce(
+                            (acc, day) => acc + (day.meals?.breakfast ? 1 : 0),
+                            0,
+                          )}{" "}
+                          breakfasts,{" "}
+                          {tour.itinerary?.reduce(
+                            (acc, day) => acc + (day.meals?.lunch ? 1 : 0),
+                            0,
+                          )}{" "}
+                          lunches,{" "}
+                          {tour.itinerary?.reduce(
+                            (acc, day) => acc + (day.meals?.dinner ? 1 : 0),
+                            0,
+                          )}{" "}
+                          dinners
+                        </>
+                      )}
                     </p>
-                    <p className="text-gray-500 text-sm">
-                      Allow USD345-450 for meals not included.
-                    </p>
+
                   </div>
                 </div>
               )}
@@ -1479,202 +1484,201 @@ export default function TourDetailPage() {
       {/* Check Availability Section - Only visible in Overview tab */}
       {activeTab === "overview" && (
         <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-12">
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-            {/* Section Header */}
-            <div className="px-6 py-6 border-b bg-gradient-to-r from-gray-50 to-white">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Check Availability
-              </h2>
-              <p className="text-gray-600">
-                Select your preferred dates and secure your spot on this tour
-              </p>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                {/* Section Header */}
+                <div className="px-6 py-6 border-b bg-gradient-to-r from-gray-50 to-white">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Check Availability
+                  </h2>
+                  <p className="text-gray-600">
+                    Select your preferred dates and secure your spot on this tour
+                  </p>
+                </div>
 
-            {/* Availability Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                {/* Table Header */}
-                <thead>
-                  <tr className="bg-gray-100 border-b">
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                      Dates
-                      <div className="text-xs font-normal text-gray-500">
-                        Start-End
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                      Availability
-                      <div className="text-xs font-normal text-gray-500">
-                        Remaining Spaces
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                      Price
-                      <div className="text-xs font-normal text-gray-500">
-                        Per Person
-                      </div>
-                    </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
+                {/* Availability Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    {/* Table Header */}
+                    <thead>
+                      <tr className="bg-gray-100 border-b">
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                          Dates
+                          <div className="text-xs font-normal text-gray-500">
+                            Start-End
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                          Availability
+                          <div className="text-xs font-normal text-gray-500">
+                            Remaining Spaces
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                          Price
+                          <div className="text-xs font-normal text-gray-500">
+                            Per Person
+                          </div>
+                        </th>
+                        <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
 
-                {/* Table Body - Grouped by Month */}
-                <tbody>
-                  {tour.startDates && tour.startDates.length > 0 ? (
-                    (() => {
-                      // Group dates by month
-                      const groupedByMonth: {
-                        [key: string]: typeof tour.startDates;
-                      } = {};
-                      tour.startDates.forEach((date) => {
-                        const monthYear = new Date(
-                          date.startDate,
-                        ).toLocaleDateString("en-US", {
-                          month: "long",
-                          year: "numeric",
-                        });
-                        if (!groupedByMonth[monthYear]) {
-                          groupedByMonth[monthYear] = [];
-                        }
-                        groupedByMonth[monthYear].push(date);
-                      });
+                    {/* Table Body - Grouped by Month */}
+                    <tbody>
+                      {tour.startDates && tour.startDates.length > 0 ? (
+                        (() => {
+                          // Group dates by month
+                          const groupedByMonth: {
+                            [key: string]: typeof tour.startDates;
+                          } = {};
+                          tour.startDates.forEach((date) => {
+                            const monthYear = new Date(
+                              date.startDate,
+                            ).toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            });
+                            if (!groupedByMonth[monthYear]) {
+                              groupedByMonth[monthYear] = [];
+                            }
+                            groupedByMonth[monthYear].push(date);
+                          });
 
-                      // Sort months chronologically
-                      const sortedMonths = Object.keys(groupedByMonth).sort(
-                        (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-                      );
+                          // Sort months chronologically
+                          const sortedMonths = Object.keys(groupedByMonth).sort(
+                            (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                          );
 
-                      return sortedMonths
-                        .map((month, monthIndex) => [
-                          // Month Header Row
-                          <tr key={`month-${month}`} className="bg-gray-200">
-                            <td
-                              colSpan={4}
-                              className="px-6 py-3 text-sm font-bold text-gray-800 uppercase tracking-wide"
-                            >
-                              {month}
-                            </td>
-                          </tr>,
-                          // Dates in this month
-                          ...groupedByMonth[month].map((date, dateIndex) => {
-                            const isSoldOut =
-                              date.availableSpots === 0 || !date.isActive;
-                            const originalPrice = tour.price.amount;
-                            const discountedPrice =
-                              tour.price.discountPercent > 0
-                                ? originalPrice *
-                                (1 - tour.price.discountPercent / 100)
-                                : originalPrice;
+                          return sortedMonths
+                            .map((month, monthIndex) => [
+                              // Month Header Row
+                              <tr key={`month-${month}`} className="bg-gray-200">
+                                <td
+                                  colSpan={4}
+                                  className="px-6 py-3 text-sm font-bold text-gray-800 uppercase tracking-wide"
+                                >
+                                  {month}
+                                </td>
+                              </tr>,
+                              // Dates in this month
+                              ...groupedByMonth[month].map((date, dateIndex) => {
+                                const isSoldOut =
+                                  date.availableSpots === 0 || !date.isActive;
+                                const originalPrice = tour.price.amount;
+                                const discount = date.discount || 0;
+                                const datePrice = originalPrice * (1 - discount / 100);
 
-                            return (
-                              <tr
-                                key={`${month}-${dateIndex}`}
-                                className={`border-b ${isSoldOut
-                                  ? "bg-gray-50 opacity-50"
-                                  : "bg-white hover:bg-blue-50"
-                                  } transition-colors`}
-                              >
-                                <td className="px-6 py-4">
-                                  <div
-                                    className={`text-sm font-medium ${isSoldOut
-                                      ? "text-gray-400"
-                                      : "text-gray-900"
-                                      }`}
+                                return (
+                                  <tr
+                                    key={`${month}-${dateIndex}`}
+                                    className={`border-b ${isSoldOut
+                                      ? "bg-gray-50 opacity-50"
+                                      : "bg-white hover:bg-blue-50"
+                                      } transition-colors`}
                                   >
-                                    {new Date(date.startDate).toLocaleDateString(
-                                      "en-US",
-                                      {
-                                        weekday: "short",
-                                        month: "short",
-                                        day: "numeric",
-                                      },
-                                    )}{" "}
-                                    -{" "}
-                                    {new Date(date.endDate).toLocaleDateString(
-                                      "en-US",
-                                      {
-                                        weekday: "short",
-                                        month: "short",
-                                        day: "numeric",
-                                      },
-                                    )}
-                                  </div>
-                                </td>
-
-                                <td className="px-6 py-4">
-                                  {isSoldOut ? (
-                                    <span className="text-sm text-gray-400 font-medium">
-                                      Sold Out
-                                    </span>
-                                  ) : (
-                                    <span className="text-sm text-gray-700 font-medium">
-                                      {date.availableSpots}{" "}
-                                      <span className="text-gray-500">
-                                        Available
-                                      </span>
-                                    </span>
-                                  )}
-                                </td>
-
-                                <td className="px-6 py-4">
-                                  {isSoldOut ? (
-                                    <div className="text-sm text-gray-400">
-                                      ${originalPrice}
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-sm font-bold text-gray-900">
-                                        $
-                                        {Math.round(
-                                          date.price.amount || discountedPrice,
+                                    <td className="px-6 py-4">
+                                      <div
+                                        className={`text-sm font-medium ${isSoldOut
+                                          ? "text-gray-400"
+                                          : "text-gray-900"
+                                          }`}
+                                      >
+                                        {new Date(date.startDate).toLocaleDateString(
+                                          "en-US",
+                                          {
+                                            weekday: "short",
+                                            month: "short",
+                                            day: "numeric",
+                                          },
+                                        )}{" "}
+                                        -{" "}
+                                        {new Date(date.endDate).toLocaleDateString(
+                                          "en-US",
+                                          {
+                                            weekday: "short",
+                                            month: "short",
+                                            day: "numeric",
+                                          },
                                         )}
-                                      </span>
-                                      {tour.price.discountPercent > 0 && (
-                                        <span className="text-xs text-gray-500 line-through">
-                                          ${originalPrice}
+                                      </div>
+                                    </td>
+
+                                    <td className="px-6 py-4">
+                                      {isSoldOut ? (
+                                        <span className="text-sm text-gray-400 font-medium">
+                                          Sold Out
+                                        </span>
+                                      ) : (
+                                        <span className="text-sm text-gray-700 font-medium">
+                                          {date.availableSpots}{" "}
+                                          <span className="text-gray-500">
+                                            Available
+                                          </span>
                                         </span>
                                       )}
-                                    </div>
-                                  )}
-                                </td>
+                                    </td>
 
-                                <td className="px-6 py-4 text-center">
-                                  {isSoldOut ? (
-                                    <span className="text-xs text-gray-400 font-medium">
-                                      Unavailable
-                                    </span>
-                                  ) : (
-                                    <button
-                                      onClick={() => {
-                                        const dateStr = new Date(date.startDate).toISOString().split('T')[0];
-                                        router.push(`/tours/${tour.slug}/checkout?date=${dateStr}`);
-                                      }}
-                                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors"
-                                    >
-                                      Book now
-                                    </button>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          }),
-                        ])
-                        .flat();
-                    })()
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="px-6 py-8 text-center text-gray-500"
-                      >
-                        No dates available at the moment
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                                    <td className="px-6 py-4">
+                                      {isSoldOut ? (
+                                        <div className="text-sm text-gray-400">
+                                          ${originalPrice}
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm font-bold text-gray-900">
+                                            $
+                                            {Math.round(datePrice)}
+                                          </span>
+                                          {discount > 0 && (
+                                            <span className="text-xs text-gray-500 line-through">
+                                              ${originalPrice}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                    </td>
+
+                                    <td className="px-6 py-4 text-center">
+                                      {isSoldOut ? (
+                                        <span className="text-xs text-gray-400 font-medium">
+                                          Unavailable
+                                        </span>
+                                      ) : (
+                                        <button
+                                          onClick={() => {
+                                            const dateStr = new Date(date.startDate).toISOString().split('T')[0];
+                                            router.push(`/tours/${tour.slug}/checkout?date=${dateStr}`);
+                                          }}
+                                          className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded transition-colors"
+                                        >
+                                          Book now
+                                        </button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              }),
+                            ])
+                            .flat();
+                        })()
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="px-6 py-8 text-center text-gray-500"
+                          >
+                            No dates available at the moment
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1700,11 +1704,7 @@ export default function TourDetailPage() {
               const primaryImage =
                 recommendedTour.images?.find((img) => img.isPrimary) ||
                 recommendedTour.images?.[0];
-              const discountedPrice =
-                recommendedTour.price.discountPercent > 0
-                  ? recommendedTour.price.amount *
-                  (1 - recommendedTour.price.discountPercent / 100)
-                  : recommendedTour.price.amount;
+              const discountedPrice = recommendedTour.price.amount;
 
               return (
                 <Link
@@ -1813,7 +1813,7 @@ export default function TourDetailPage() {
                       </span>
                       <span className="text-xs font-medium text-gray-900">USD</span>
                     </div>
-                    {tour.price.discountPercent > 0 && (
+                    {tour.price.amount > discountedPrice && (
                       <div className="text-xs text-gray-500">
                         was <span className="line-through">${tour.price.amount.toFixed(0)}</span> per person
                       </div>
@@ -1821,11 +1821,11 @@ export default function TourDetailPage() {
                   </div>
 
                   {/* Valid Date */}
-                  {tour.startDates && tour.startDates.length > 0 && (
+                  {sortedDates.length > 0 && (
                     <div className="hidden lg:block pl-4 border-l border-gray-300">
                       <div className="text-xs text-gray-500">Valid on</div>
                       <div className="text-sm font-semibold text-gray-900">
-                        {new Date(tour.startDates[0].startDate).toLocaleDateString("en-US", {
+                        {new Date(sortedDates[0].startDate).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
                           year: "numeric",

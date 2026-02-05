@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
+const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/database");
 const globalErrorHandler = require("./middleware/errorHandler");
@@ -21,6 +22,7 @@ const tourRoutes = require("./routes/tourRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const blogRoutes = require("./routes/blogRoutes");
+const continentRoutes = require("./routes/continentRoutes");
 
 // Load environment variables
 require("dotenv").config();
@@ -67,6 +69,7 @@ if (process.env.NODE_ENV === "development") {
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cookieParser());
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -110,6 +113,7 @@ app.use("/api/v1/tours", tourRoutes);
 app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/blogs", blogRoutes);
+app.use("/api/v1/continents", continentRoutes);
 
 // Handle undefined routes
 app.all("*", (req, res, next) => {
@@ -120,8 +124,6 @@ app.all("*", (req, res, next) => {
 app.use(globalErrorHandler);
 
 const PORT = process.env.PORT || 3001;
-
-const { onRequest } = require("firebase-functions/v2/https");
 
 if (require.main === module) {
   const server = app.listen(PORT, () => {
@@ -139,12 +141,45 @@ if (require.main === module) {
     });
   });
 } else {
-  // Firebase Cloud Functions export
-  module.exports.api = onRequest(app);
+  // Firebase Cloud Functions export with performance optimizations
+  const { onRequest } = require("firebase-functions/v2/https");
+  const { setGlobalOptions } = require("firebase-functions/v2");
+
+  // Set global options for better performance
+  setGlobalOptions({
+    maxInstances: 10,
+    timeoutSeconds: 60,
+    memory: "512MiB",
+  });
+
+  module.exports.api = onRequest(
+    {
+      // Keep at least 1 instance warm to avoid cold starts
+      minInstances: 1,
+      // Allow concurrent requests on same instance
+      concurrency: 80,
+      // Increase memory for better performance
+      memory: "512MiB",
+      // Set timeout
+      timeoutSeconds: 60,
+      // Set region (change to your preferred region)
+      region: "us-central1",
+    },
+    app
+  );
+
+  // Fallback for older Firebase versions
+  if (typeof module.exports.api === "undefined") {
+    exports.api = onRequest(
+      {
+        minInstances: 1,
+        concurrency: 80,
+        memory: "512MiB",
+        timeoutSeconds: 60,
+      },
+      app
+    );
+  }
 }
 
-if (typeof module.exports.api === "undefined") {
-  // Fallback for older Firebase versions
-  exports.api = onRequest(app);
-}
 exports.app = app;
