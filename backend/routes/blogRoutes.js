@@ -4,6 +4,7 @@ const {
     getBlog,
     getFeaturedBlogs,
     getBlogsByCategory,
+    getBlogsByContinent,
     getCategories,
     searchBlogs,
     getMyBlogs,
@@ -24,6 +25,7 @@ router.get("/featured", getFeaturedBlogs);
 router.get("/categories", getCategories);
 router.get("/search", searchBlogs);
 router.get("/category/:category", getBlogsByCategory);
+router.get("/continent/:continentId", getBlogsByContinent);
 router.get("/:slug", getBlog);
 
 // Protected routes - copywriter and admin

@@ -34,6 +34,17 @@ interface Category {
     count: number;
 }
 
+interface Continent {
+    _id: string;
+    name: string;
+    slug: string;
+}
+
+interface ContinentWithBlogs {
+    continent: Continent;
+    blogs: Blog[];
+}
+
 const CATEGORIES = [
     { name: "Active Travel", image: "https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=300&fit=crop" },
     { name: "Food & Drink", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop" },
@@ -45,6 +56,8 @@ export default function BlogsPage() {
     const [featuredBlogs, setFeaturedBlogs] = useState<Blog[]>([]);
     const [blogs, setBlogs] = useState<Blog[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+    const [continents, setContinents] = useState<Continent[]>([]);
+    const [continentBlogs, setContinentBlogs] = useState<ContinentWithBlogs[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -54,6 +67,7 @@ export default function BlogsPage() {
         fetchBlogs();
         fetchFeaturedBlogs();
         fetchCategories();
+        fetchContinentsWithBlogs();
     }, [selectedCategory]);
 
     const fetchBlogs = async () => {
@@ -97,6 +111,37 @@ export default function BlogsPage() {
             }
         } catch (error) {
             console.error("Failed to fetch categories:", error);
+        }
+    };
+
+    const fetchContinentsWithBlogs = async () => {
+        try {
+            // First fetch all continents
+            const continentsResponse = await fetch(`${api.baseURL}/continents`);
+            if (!continentsResponse.ok) return;
+
+            const continentsData = await continentsResponse.json();
+            const allContinents: Continent[] = continentsData.data.continents || continentsData.data || [];
+            setContinents(allContinents);
+
+            // Then fetch blogs for each continent
+            const blogsPromises = allContinents.map(async (continent) => {
+                const blogsResponse = await fetch(`${api.baseURL}/blogs/continent/${continent._id}?limit=5`);
+                if (blogsResponse.ok) {
+                    const blogsData = await blogsResponse.json();
+                    return {
+                        continent,
+                        blogs: blogsData.data.blogs || [],
+                    };
+                }
+                return { continent, blogs: [] };
+            });
+
+            const results = await Promise.all(blogsPromises);
+            // Filter to only show continents that have blogs
+            setContinentBlogs(results.filter(item => item.blogs.length > 0));
+        } catch (error) {
+            console.error("Failed to fetch continents with blogs:", error);
         }
     };
 
@@ -152,27 +197,10 @@ export default function BlogsPage() {
                     <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
                         Travel Stories & Guides
                     </h1>
-                    <p className="text-xl text-gray-200 max-w-2xl mb-8">
+                    <p className="text-xl text-gray-200 max-w-2xl">
                         Discover inspiring travel stories, expert guides, and tips from our
                         adventure writers around the world.
                     </p>
-                    <form onSubmit={handleSearch} className="w-full max-w-xl">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search articles..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full px-6 py-4 rounded-full bg-white/95 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xl"
-                            />
-                            <button
-                                type="submit"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-colors font-medium"
-                            >
-                                Search
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
 
@@ -187,7 +215,7 @@ export default function BlogsPage() {
                                     selectedCategory === category.name ? null : category.name
                                 )
                             }
-                            className={`relative group overflow-hidden rounded-xl h-40 transition-all ${selectedCategory === category.name
+                            className={`relative group overflow-hidden rounded-xs h-40 transition-all ${selectedCategory === category.name
                                 ? "ring-4 ring-blue-500"
                                 : ""
                                 }`}
@@ -255,7 +283,7 @@ export default function BlogsPage() {
                         {mainFeatured && (
                             <div className="lg:col-span-2">
                                 <Link href={`/blogs/${mainFeatured.slug}`}>
-                                    <article className="group relative h-[500px] rounded-2xl overflow-hidden">
+                                    <article className="group relative h-[500px] rounded-xs overflow-hidden">
                                         <img
                                             src={mainFeatured.featuredImage.url}
                                             alt={mainFeatured.featuredImage.alt || mainFeatured.title}
@@ -297,7 +325,7 @@ export default function BlogsPage() {
                             {sideFeatured.map((blog) => (
                                 <Link key={blog._id} href={`/blogs/${blog.slug}`}>
                                     <article className="group flex gap-4">
-                                        <div className="relative w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden">
+                                        <div className="relative w-32 h-32 flex-shrink-0 rounded-xs overflow-hidden">
                                             <img
                                                 src={blog.featuredImage.url}
                                                 alt={blog.featuredImage.alt || blog.title}
@@ -342,48 +370,118 @@ export default function BlogsPage() {
                 </h2>
 
                 {blogs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {blogs.map((blog) => (
-                            <Link key={blog._id} href={`/blogs/${blog.slug}`}>
-                                <article className="group h-full">
-                                    <div className="relative h-56 rounded-xl overflow-hidden mb-4">
-                                        <img
-                                            src={blog.featuredImage.url}
-                                            alt={blog.featuredImage.alt || blog.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute top-4 left-4">
-                                            <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
-                                                {blog.category}
-                                            </span>
+                    <div className="space-y-8">
+                        {/* First Row: 2-column + 1-column */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* First Blog - Takes 2 columns */}
+                            {blogs[0] && (
+                                <Link href={`/blogs/${blogs[0].slug}`} className="lg:col-span-2">
+                                    <article className="group h-full">
+                                        <div className="relative h-72 lg:h-80 rounded-xs overflow-hidden mb-4">
+                                            <img
+                                                src={blogs[0].featuredImage.url}
+                                                alt={blogs[0].featuredImage.alt || blogs[0].title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    {blogs[0].category}
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-6">
+                                                <h3 className="font-bold text-2xl text-white group-hover:text-blue-300 transition-colors mb-2 line-clamp-2">
+                                                    {blogs[0].title}
+                                                </h3>
+                                                <p className="text-sm text-gray-200 mb-2">
+                                                    Written by{" "}
+                                                    <span className="font-medium text-white">
+                                                        {blogs[0].author.name}
+                                                    </span>{" "}
+                                                    on {formatDate(blogs[0].publishedAt)}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
-                                        {blog.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mb-2">
-                                        Written by{" "}
-                                        <span className="font-medium text-gray-700">
-                                            {blog.author.name}
-                                        </span>{" "}
-                                        on {formatDate(blog.publishedAt)}
-                                    </p>
-                                    <p className="text-gray-600 line-clamp-2 mb-3">
-                                        {blog.excerpt}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {blog.tags.slice(0, 5).map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="text-xs text-blue-500 hover:text-blue-600"
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </article>
-                            </Link>
-                        ))}
+                                    </article>
+                                </Link>
+                            )}
+
+                            {/* Second Blog - Takes 1 column */}
+                            {blogs[1] && (
+                                <Link href={`/blogs/${blogs[1].slug}`}>
+                                    <article className="group h-full">
+                                        <div className="relative h-72 lg:h-80 rounded-xs overflow-hidden mb-4">
+                                            <img
+                                                src={blogs[1].featuredImage.url}
+                                                alt={blogs[1].featuredImage.alt || blogs[1].title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    {blogs[1].category}
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-6">
+                                                <h3 className="font-bold text-xl text-white group-hover:text-blue-300 transition-colors mb-2 line-clamp-2">
+                                                    {blogs[1].title}
+                                                </h3>
+                                                <p className="text-sm text-gray-200">
+                                                    {formatDate(blogs[1].publishedAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            )}
+                        </div>
+
+                        {/* Second Row: 3 equal columns */}
+                        {blogs.length > 2 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {blogs.slice(2, 5).map((blog) => (
+                                    <Link key={blog._id} href={`/blogs/${blog.slug}`}>
+                                        <article className="group h-full">
+                                            <div className="relative h-56 rounded-xs overflow-hidden mb-4">
+                                                <img
+                                                    src={blog.featuredImage.url}
+                                                    alt={blog.featuredImage.alt || blog.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                        {blog.category}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                                                {blog.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 mb-2">
+                                                Written by{" "}
+                                                <span className="font-medium text-gray-700">
+                                                    {blog.author.name}
+                                                </span>{" "}
+                                                on {formatDate(blog.publishedAt)}
+                                            </p>
+                                            <p className="text-gray-600 line-clamp-2 mb-3">
+                                                {blog.excerpt}
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {blog.tags.slice(0, 5).map((tag) => (
+                                                    <span
+                                                        key={tag}
+                                                        className="text-xs text-blue-500 hover:text-blue-600"
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </article>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="text-center py-20">
@@ -413,6 +511,129 @@ export default function BlogsPage() {
                     </div>
                 )}
             </div>
+
+            {/* Blogs by Continent Sections */}
+            {continentBlogs.map((item) => (
+                <div key={item.continent._id} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                        {item.continent.name}
+                    </h2>
+
+                    <div className="space-y-8">
+                        {/* First Row: 2-column + 1-column */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            {/* First Blog - Takes 2 columns */}
+                            {item.blogs[0] && (
+                                <Link href={`/blogs/${item.blogs[0].slug}`} className="lg:col-span-2">
+                                    <article className="group h-full">
+                                        <div className="relative h-72 lg:h-80 rounded-xs overflow-hidden mb-4">
+                                            <img
+                                                src={item.blogs[0].featuredImage.url}
+                                                alt={item.blogs[0].featuredImage.alt || item.blogs[0].title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    {item.blogs[0].category}
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-6">
+                                                <h3 className="font-bold text-2xl text-white group-hover:text-blue-300 transition-colors mb-2 line-clamp-2">
+                                                    {item.blogs[0].title}
+                                                </h3>
+                                                <p className="text-sm text-gray-200 mb-2">
+                                                    Written by{" "}
+                                                    <span className="font-medium text-white">
+                                                        {item.blogs[0].author.name}
+                                                    </span>{" "}
+                                                    on {formatDate(item.blogs[0].publishedAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            )}
+
+                            {/* Second Blog - Takes 1 column */}
+                            {item.blogs[1] && (
+                                <Link href={`/blogs/${item.blogs[1].slug}`}>
+                                    <article className="group h-full">
+                                        <div className="relative h-72 lg:h-80 rounded-xs overflow-hidden mb-4">
+                                            <img
+                                                src={item.blogs[1].featuredImage.url}
+                                                alt={item.blogs[1].featuredImage.alt || item.blogs[1].title}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    {item.blogs[1].category}
+                                                </span>
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 right-0 p-6">
+                                                <h3 className="font-bold text-xl text-white group-hover:text-blue-300 transition-colors mb-2 line-clamp-2">
+                                                    {item.blogs[1].title}
+                                                </h3>
+                                                <p className="text-sm text-gray-200">
+                                                    {formatDate(item.blogs[1].publishedAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            )}
+                        </div>
+
+                        {/* Second Row: 3 equal columns */}
+                        {item.blogs.length > 2 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {item.blogs.slice(2, 5).map((blog) => (
+                                    <Link key={blog._id} href={`/blogs/${blog.slug}`}>
+                                        <article className="group h-full">
+                                            <div className="relative h-56 rounded-xs overflow-hidden mb-4">
+                                                <img
+                                                    src={blog.featuredImage.url}
+                                                    alt={blog.featuredImage.alt || blog.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                        {blog.category}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                                                {blog.title}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 mb-2">
+                                                Written by{" "}
+                                                <span className="font-medium text-gray-700">
+                                                    {blog.author.name}
+                                                </span>{" "}
+                                                on {formatDate(blog.publishedAt)}
+                                            </p>
+                                            <p className="text-gray-600 line-clamp-2 mb-3">
+                                                {blog.excerpt}
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {blog.tags.slice(0, 5).map((tag) => (
+                                                    <span
+                                                        key={tag}
+                                                        className="text-xs text-blue-500 hover:text-blue-600"
+                                                    >
+                                                        {tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </article>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ))}
         </div>
     );
 }

@@ -1,6 +1,6 @@
 // API configuration and utilities
-const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
-// const API_BASE_URL = "http://localhost:3001/api/v1";
+// const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
+const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -56,6 +56,12 @@ export const api = {
       getMyBookings: "/users/my-bookings",
       getMyReviews: "/users/my-reviews",
     },
+    holdSpaces: {
+      create: "/hold-spaces",
+      getMyHolds: "/hold-spaces/my-holds",
+      getById: (id: string) => `/hold-spaces/${id}`,
+      release: (id: string) => `/hold-spaces/${id}/release`,
+    },
     blogs: {
       getAll: "/blogs",
       getBySlug: (slug: string) => `/blogs/${slug}`,
@@ -68,6 +74,21 @@ export const api = {
       create: "/blogs",
       update: (id: string) => `/blogs/${id}`,
       delete: (id: string) => `/blogs/${id}`,
+    },
+    travelStyles: {
+      getAll: "/travel-styles",
+      getById: (id: string) => `/travel-styles/${id}`,
+      getBySlug: (slug: string) => `/travel-styles/slug/${slug}`,
+      create: "/travel-styles",
+      update: (id: string) => `/travel-styles/${id}`,
+      delete: (id: string) => `/travel-styles/${id}`,
+    },
+    continents: {
+      getAll: "/continents",
+      getById: (id: string) => `/continents/${id}`,
+      create: "/continents",
+      update: (id: string) => `/continents/${id}`,
+      delete: (id: string) => `/continents/${id}`,
     },
   },
 };

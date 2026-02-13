@@ -44,6 +44,12 @@ interface Country {
     slug: string;
 }
 
+interface Continent {
+    _id: string;
+    name: string;
+    slug: string;
+}
+
 interface Tour {
     _id: string;
     name: string;
@@ -67,6 +73,7 @@ interface Blog {
     metaTitle: string;
     metaDescription: string;
     relatedCountries: Array<{ _id: string }>;
+    relatedContinents: Array<{ _id: string }>;
     relatedTours: Array<{ _id: string }>;
 }
 
@@ -98,8 +105,10 @@ export default function EditBlogPage({
     const [metaTitle, setMetaTitle] = useState("");
     const [metaDescription, setMetaDescription] = useState("");
     const [countries, setCountries] = useState<Country[]>([]);
+    const [continents, setContinents] = useState<Continent[]>([]);
     const [tours, setTours] = useState<Tour[]>([]);
     const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+    const [selectedContinents, setSelectedContinents] = useState<string[]>([]);
     const [selectedTours, setSelectedTours] = useState<string[]>([]);
 
     // Image upload state
@@ -149,6 +158,7 @@ export default function EditBlogPage({
     useEffect(() => {
         checkAuth();
         fetchCountries();
+        fetchContinents();
         fetchTours();
     }, []);
 
@@ -227,6 +237,9 @@ export default function EditBlogPage({
             setSelectedCountries(
                 blog.relatedCountries?.map((c) => c._id) || []
             );
+            setSelectedContinents(
+                blog.relatedContinents?.map((c) => c._id) || []
+            );
             setSelectedTours(blog.relatedTours?.map((t) => t._id) || []);
 
             // Set editor content
@@ -265,6 +278,18 @@ export default function EditBlogPage({
             }
         } catch (error) {
             console.error("Failed to fetch tours:", error);
+        }
+    };
+
+    const fetchContinents = async () => {
+        try {
+            const response = await fetch(`${api.baseURL}/continents`);
+            if (response.ok) {
+                const data = await response.json();
+                setContinents(data.data.continents || data.data || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch continents:", error);
         }
     };
 
@@ -392,6 +417,7 @@ export default function EditBlogPage({
                 metaTitle: metaTitle || title,
                 metaDescription: metaDescription || excerpt || title.substring(0, 160),
                 relatedCountries: selectedCountries,
+                relatedContinents: selectedContinents,
                 relatedTours: selectedTours,
             };
 
@@ -917,6 +943,32 @@ export default function EditBlogPage({
                                 {countries.map((country) => (
                                     <option key={country._id} value={country._id}>
                                         {country.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Hold Ctrl/Cmd to select multiple
+                            </p>
+                        </div>
+
+                        {/* Related Continents */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                                Related Continents
+                            </h3>
+                            <select
+                                multiple
+                                value={selectedContinents}
+                                onChange={(e) =>
+                                    setSelectedContinents(
+                                        Array.from(e.target.selectedOptions, (opt) => opt.value)
+                                    )
+                                }
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
+                            >
+                                {continents.map((continent) => (
+                                    <option key={continent._id} value={continent._id}>
+                                        {continent.name}
                                     </option>
                                 ))}
                             </select>

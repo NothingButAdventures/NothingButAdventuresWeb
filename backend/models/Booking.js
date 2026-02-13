@@ -30,42 +30,42 @@ const bookingSchema = new mongoose.Schema(
         },
         email: {
           type: String,
-          required: true,
+          required: false,
           lowercase: true,
         },
         phone: {
           type: String,
-          required: true,
+          required: false,
         },
         dateOfBirth: {
           type: Date,
-          required: true,
+          required: false,
         },
         nationality: {
           type: String,
-          required: true,
+          required: false,
         },
         passportNumber: {
           type: String,
-          required: true,
+          required: false,
         },
         passportExpiry: {
           type: Date,
-          required: true,
+          required: false,
         },
         specialRequests: String,
         emergencyContact: {
           name: {
             type: String,
-            required: true,
+            required: false,
           },
           phone: {
             type: String,
-            required: true,
+            required: false,
           },
           relationship: {
             type: String,
-            required: true,
+            required: false,
           },
         },
       },
@@ -142,6 +142,29 @@ const bookingSchema = new mongoose.Schema(
           gatewayResponse: mongoose.Schema.Types.Mixed,
         },
       ],
+    },
+    extras: {
+      activities: [
+        {
+          name: {
+            type: String,
+            required: true,
+          },
+          price: {
+            type: Number,
+            required: true,
+          },
+          count: {
+            type: Number,
+            default: 1,
+          },
+        },
+      ],
+      accommodationUpgrade: {
+        name: String,
+        price: Number,
+        count: Number,
+      },
     },
     status: {
       type: String,
@@ -268,18 +291,20 @@ bookingSchema.pre("save", function (next) {
 });
 
 // Pre-save middleware to calculate total price
-bookingSchema.pre("save", function (next) {
-  if (
-    this.isModified("price.basePrice") ||
-    this.isModified("price.discountAmount") ||
-    this.isModified("price.taxes")
-  ) {
-    this.price.totalPrice =
-      (this.price.basePrice - this.price.discountAmount + this.price.taxes) *
-      this.numberOfTravelers;
-  }
-  next();
-});
+// NOTE: Total price is now calculated in the controller to include extras
+// bookingSchema.pre("save", function (next) {
+//   if (
+//     this.isModified("price.basePrice") ||
+//     this.isModified("price.discountAmount") ||
+//     this.isModified("price.taxes")
+//   ) {
+//     this.price.totalPrice =
+//       (this.price.basePrice - this.price.discountAmount + this.price.taxes) *
+//       this.numberOfTravelers;
+//   }
+//   next();
+// });
+
 
 // Static method to get booking statistics
 bookingSchema.statics.getBookingStats = async function (filters = {}) {

@@ -9,6 +9,7 @@ interface User {
   name: string;
   email: string;
   role: string;
+  avatar?: string;
 }
 
 export default function Header() {
@@ -75,7 +76,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-2xl font-bold">Logo</span>
+              <span className="text-2xl font-bold">NBA</span>
             </Link>
           </div>
 
@@ -90,16 +91,16 @@ export default function Header() {
                   router.push(`/search?s=${query}`);
                 }
               }}
-              className="w-full relative"
+              className="w-full relative group"
             >
               <input
                 type="text"
                 name="search"
-                placeholder="Where to?"
-                className="w-full px-4 py-2 pl-10 bg-gray-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all duration-200"
+                placeholder="Search destinations, tours..."
+                className="w-full px-4 py-2.5 pl-10 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 focus:bg-white hover:border-gray-300 hover:bg-white transition-all duration-200"
               />
               <svg
-                className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 transform -translate-y-1/2"
+                className="w-[18px] h-[18px] text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 group-focus-within:text-blue-500 transition-colors duration-200"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -165,10 +166,14 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                       className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
                     >
-                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
-                        </span>
+                      <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center overflow-hidden">
+                        {user.avatar ? (
+                          <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-white text-sm font-semibold">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
                       </div>
                       <span className="font-medium hidden lg:inline">{user.name}</span>
                       <svg
@@ -198,6 +203,27 @@ export default function Header() {
                             {user.role}
                           </span>
                         </div>
+
+                        <Link
+                          href="/profile"
+                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <svg
+                            className="w-4 h-4 mr-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                          My Profile
+                        </Link>
 
                         {user.role === "admin" && (
                           <Link
@@ -404,10 +430,14 @@ export default function Header() {
                   {user ? (
                     <div className="pt-4 border-t border-gray-200">
                       <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                          <span className="text-white text-sm font-semibold">
-                            {user.name.charAt(0).toUpperCase()}
-                          </span>
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center overflow-hidden">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-white text-sm font-semibold">
+                              {user.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900">
@@ -416,6 +446,14 @@ export default function Header() {
                           <p className="text-sm text-gray-500">{user.role}</p>
                         </div>
                       </div>
+
+                      <Link
+                        href="/profile"
+                        className="block text-gray-700 hover:text-blue-600 font-medium mb-3 transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        My Profile
+                      </Link>
 
                       {user.role === "admin" && (
                         <Link

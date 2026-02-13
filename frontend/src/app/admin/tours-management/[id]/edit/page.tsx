@@ -63,7 +63,36 @@ interface AvailableDate {
   startDate: string;
   endDate: string;
   availableSpots: number;
-  discount: number;
+  discount: string;
+}
+
+interface TravelStyle {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
+interface PhysicalRatingOption {
+  _id: string;
+  name: string;
+  level: number;
+  isActive: boolean;
+}
+
+interface TripTypeOption {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
+interface DiscountOption {
+  _id: string;
+  name: string;
+  percentage: number;
+  color?: string;
+  isActive: boolean;
 }
 
 export default function EditTourPage() {
@@ -71,6 +100,10 @@ export default function EditTourPage() {
   const params = useParams();
   const tourId = params?.id as string;
   const [countries, setCountries] = useState<Country[]>([]);
+  const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
+  const [physicalRatings, setPhysicalRatings] = useState<PhysicalRatingOption[]>([]);
+  const [tripTypes, setTripTypes] = useState<TripTypeOption[]>([]);
+  const [discounts, setDiscounts] = useState<DiscountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -116,11 +149,12 @@ export default function EditTourPage() {
     country: "",
     durationDays: "",
     maxGroupSize: "",
-    physicalRatingLevel: "3",
+    physicalRatingLevel: "",
     priceAmount: "",
     priceCurrency: "USD",
     bookingPercentage: "20",
-    travelStyle: "Classic",
+    travelStyle: "",
+    tripType: "",
     startCity: "",
     endCity: "",
     visitedCities: "",
@@ -172,6 +206,34 @@ export default function EditTourPage() {
         setCountries(countriesData.data.countries);
       }
 
+      // Fetch travel styles
+      const travelStylesResponse = await fetch(`${api.baseURL}/travel-styles`);
+      if (travelStylesResponse.ok) {
+        const travelStylesData = await travelStylesResponse.json();
+        setTravelStyles(travelStylesData.data.travelStyles || []);
+      }
+
+      // Fetch physical ratings
+      const physicalRatingsResponse = await fetch(`${api.baseURL}/physical-ratings`);
+      if (physicalRatingsResponse.ok) {
+        const physicalRatingsData = await physicalRatingsResponse.json();
+        setPhysicalRatings(physicalRatingsData.data.physicalRatings || []);
+      }
+
+      // Fetch trip types
+      const tripTypesResponse = await fetch(`${api.baseURL}/trip-types`);
+      if (tripTypesResponse.ok) {
+        const tripTypesData = await tripTypesResponse.json();
+        setTripTypes(tripTypesData.data.tripTypes || []);
+      }
+
+      // Fetch discounts
+      const discountsResponse = await fetch(`${api.baseURL}/discounts`);
+      if (discountsResponse.ok) {
+        const discountsData = await discountsResponse.json();
+        setDiscounts(discountsData.data.discounts || []);
+      }
+
       // Fetch tour data
       const tourResponse = await fetch(`${api.baseURL}/tours/${tourId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -193,7 +255,8 @@ export default function EditTourPage() {
           priceAmount: tour.price?.amount?.toString() || "",
           priceCurrency: tour.price?.currency || "USD",
           bookingPercentage: tour.price?.bookingPercentage?.toString() || "20",
-          travelStyle: tour.travelStyle || "Classic",
+          travelStyle: tour.travelStyle || "",
+          tripType: tour.tripType || "",
           startCity: tour.location?.startCity || "",
           endCity: tour.location?.endCity || "",
           visitedCities: tour.location?.visitedCities?.join(", ") || "",
@@ -268,7 +331,7 @@ export default function EditTourPage() {
                 ? new Date(sd.endDate).toISOString().split("T")[0]
                 : "",
               availableSpots: sd.availableSpots || 0,
-              discount: sd.discount || 0,
+              discount: sd.discount || "",
             })),
           );
         }
@@ -595,7 +658,7 @@ export default function EditTourPage() {
         startDate: "",
         endDate: "",
         availableSpots: parseInt(formData.maxGroupSize) || 10,
-        discount: 0,
+        discount: "",
       },
     ]);
   };
@@ -710,6 +773,7 @@ export default function EditTourPage() {
           bookingPercentage: parseFloat(formData.bookingPercentage),
         },
         travelStyle: formData.travelStyle,
+        tripType: formData.tripType,
         serviceLevel: "Standard",
         location: {
           startCity: formData.startCity,
@@ -1026,7 +1090,7 @@ export default function EditTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Physical Rating (1-5){" "}
+                    Physical Rating{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1036,11 +1100,12 @@ export default function EditTourPage() {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
-                    <option value="1">1 - Very Easy</option>
-                    <option value="2">2 - Easy</option>
-                    <option value="3">3 - Moderate</option>
-                    <option value="4">4 - Challenging</option>
-                    <option value="5">5 - Very Challenging</option>
+                    <option value="">Select physical rating...</option>
+                    {physicalRatings.map((rating) => (
+                      <option key={rating._id} value={rating.level}>
+                        {rating.level} - {rating.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1055,15 +1120,32 @@ export default function EditTourPage() {
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
-                    <option value="Classic">Classic</option>
-                    <option value="Solo-ish Adventures">
-                      Solo-ish Adventures
-                    </option>
-                    <option value="NexTrip Journeys">NexTrip Journeys</option>
-                    <option value="Family">Family</option>
-                    <option value="Adventure">Adventure</option>
-                    <option value="Luxury">Luxury</option>
-                    <option value="Budget">Budget</option>
+                    <option value="">Select travel style...</option>
+                    {travelStyles.map((style) => (
+                      <option key={style._id} value={style.name}>
+                        {style.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Trip Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="tripType"
+                    value={formData.tripType}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  >
+                    <option value="">Select trip type...</option>
+                    {tripTypes.map((type) => (
+                      <option key={type._id} value={type.name}>
+                        {type.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1950,24 +2032,20 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                       min="1"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     />
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={ad.discount}
-                        onChange={(e) =>
-                          updateAvailableDate(
-                            index,
-                            "discount",
-                            parseFloat(e.target.value),
-                          )
-                        }
-                        placeholder="Discount"
-                        step="0.01"
-                        min="0"
-                        className="w-full px-3 py-2 border border-blue-300 rounded-md text-sm focus:ring-1 focus:ring-blue-900 focus:border-blue-900 text-gray-900"
-                      />
-                      <span className="absolute right-3 top-2 text-xs text-gray-500">% Off</span>
-                    </div>
+                    <select
+                      value={ad.discount}
+                      onChange={(e) =>
+                        updateAvailableDate(index, "discount", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-1 focus:ring-green-600 focus:border-green-600 text-gray-900 bg-white"
+                    >
+                      <option value="">No Discount</option>
+                      {discounts.filter(d => d.isActive).map((d) => (
+                        <option key={d._id} value={d.name}>
+                          {d.name} ({d.percentage}% off)
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               ))}

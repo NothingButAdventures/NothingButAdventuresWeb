@@ -220,7 +220,7 @@ export default function LocationPage() {
 
             {/* Content Area */}
             <div className="p-8">
-                <div className="space-y-4 max-w-6xl mx-auto">
+                <div className="space-y-4">
                     {continents.length === 0 ? (
                         <div className="bg-white rounded-xl border border-gray-200 p-16 text-center shadow-sm">
                             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -246,19 +246,22 @@ export default function LocationPage() {
                                     className="px-6 py-5 flex items-center justify-between cursor-pointer select-none bg-white hover:bg-gray-50 transition-colors"
                                     onClick={() => toggleContinent(continent.id || continent._id)}
                                 >
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                             {continent.image ? (
-                                                <img src={continent.image} alt={continent.name} className="w-full h-full object-cover rounded-xl" />
+                                                <img src={continent.image} alt={continent.name} className="w-full h-full object-cover rounded-lg" />
                                             ) : (
-                                                <Icons.Globe className="w-6 h-6" />
+                                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                                                    <path strokeWidth="2" d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                                </svg>
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                            <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
                                                 {continent.name}
-                                                <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-                                                    {continent.countries?.length || 0} Countries
+                                                <span className="text-xs font-normal text-gray-500">
+                                                    ({continent.countries?.length || 0} countries)
                                                 </span>
                                             </h3>
                                             <p className="text-sm text-gray-400 mt-0.5 truncate max-w-md">
@@ -270,15 +273,19 @@ export default function LocationPage() {
                                     <div className="flex items-center gap-3">
                                         <Link
                                             href={`/admin/location/continent/${continent.id || continent._id}`}
-                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                                             onClick={(e) => e.stopPropagation()}
-                                            title="Edit Continent Details"
+                                            title="Edit"
                                         >
-                                            <Icons.Edit2 className="w-5 h-5" />
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
                                         </Link>
                                         <div className="w-px h-8 bg-gray-200 mx-1"></div>
                                         <div className={`text-gray-400 transition-transform duration-200 ${expandedContinent === (continent.id || continent._id) ? "rotate-180" : ""}`}>
-                                            <Icons.ChevronDown className="w-6 h-6" />
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         </div>
                                     </div>
                                 </div>

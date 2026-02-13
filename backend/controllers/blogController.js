@@ -110,6 +110,29 @@ const getCategories = catchAsync(async (req, res, next) => {
     });
 });
 
+// Get blogs by continent (public)
+const getBlogsByContinent = catchAsync(async (req, res, next) => {
+    const { continentId } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    const blogs = await Blog.find({
+        status: "published",
+        relatedContinents: continentId
+    })
+        .sort("-publishedAt")
+        .limit(limit)
+        .populate("author", "name avatar")
+        .select("title slug excerpt featuredImage category readTime publishedAt tags author");
+
+    res.status(200).json({
+        status: "success",
+        results: blogs.length,
+        data: {
+            blogs,
+        },
+    });
+});
+
 // Search blogs (public)
 const searchBlogs = catchAsync(async (req, res, next) => {
     const { q, category, tag } = req.query;
@@ -309,6 +332,7 @@ module.exports = {
     getBlog,
     getFeaturedBlogs,
     getBlogsByCategory,
+    getBlogsByContinent,
     getCategories,
     searchBlogs,
     getMyBlogs,

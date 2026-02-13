@@ -123,10 +123,8 @@ const tourSchema = new mongoose.Schema(
           required: true,
         },
         discount: {
-          type: Number,
-          default: 0,
-          min: [0, "Discount cannot be negative"],
-          max: [90, "Discount cannot exceed 90%"],
+          type: String,
+          trim: true,
         },
         isActive: {
           type: Boolean,
@@ -320,15 +318,11 @@ const tourSchema = new mongoose.Schema(
     travelStyle: {
       type: String,
       required: [true, "A tour must have a travel style"],
-      enum: [
-        "Classic",
-        "Solo-ish Adventures",
-        "NexTrip Journeys",
-        "Family",
-        "Adventure",
-        "Luxury",
-        "Budget",
-      ],
+      trim: true,
+    },
+    tripType: {
+      type: String,
+      trim: true,
     },
     serviceLevel: {
       type: String,
@@ -550,7 +544,7 @@ tourSchema.statics.getPopularTours = async function (limit = 10) {
 tourSchema.methods.checkAvailability = function (date) {
   const startDate = this.startDates.find(
     (sd) =>
-      sd.date.toDateString() === new Date(date).toDateString() &&
+      sd.startDate.toDateString() === new Date(date).toDateString() &&
       sd.isActive &&
       sd.availableSpots > 0,
   );

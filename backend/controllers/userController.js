@@ -30,7 +30,8 @@ const updateMe = catchAsync(async (req, res, next) => {
     'phone',
     'dateOfBirth',
     'nationality',
-    'preferences'
+    'preferences',
+    'avatar'
   );
 
   // Update user document
@@ -58,7 +59,7 @@ const deleteMe = catchAsync(async (req, res, next) => {
 
 const getMyBookings = catchAsync(async (req, res, next) => {
   const Booking = require('../models/Booking');
-  
+
   const features = new APIFeatures(
     Booking.find({ user: req.user.id }),
     req.query
@@ -69,7 +70,7 @@ const getMyBookings = catchAsync(async (req, res, next) => {
     .paginate();
 
   const bookings = await features.query
-    .populate('tour', 'name slug images price duration')
+    .populate('tour', 'name slug images price duration location')
     .populate('user', 'name email');
 
   const total = await Booking.countDocuments({ user: req.user.id });
@@ -86,7 +87,7 @@ const getMyBookings = catchAsync(async (req, res, next) => {
 
 const getMyReviews = catchAsync(async (req, res, next) => {
   const Review = require('../models/Review');
-  
+
   const features = new APIFeatures(
     Review.find({ user: req.user.id }),
     req.query

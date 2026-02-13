@@ -23,6 +23,11 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const continentRoutes = require("./routes/continentRoutes");
+const travelStyleRoutes = require("./routes/travelStyleRoutes");
+const physicalRatingRoutes = require("./routes/physicalRatingRoutes");
+const tripTypeRoutes = require("./routes/tripTypeRoutes");
+const discountRoutes = require("./routes/discountRoutes");
+const holdSpaceRoutes = require("./routes/holdSpaceRoutes");
 
 // Load environment variables
 require("dotenv").config();
@@ -114,6 +119,11 @@ app.use("/api/v1/bookings", bookingRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/blogs", blogRoutes);
 app.use("/api/v1/continents", continentRoutes);
+app.use("/api/v1/travel-styles", travelStyleRoutes);
+app.use("/api/v1/physical-ratings", physicalRatingRoutes);
+app.use("/api/v1/trip-types", tripTypeRoutes);
+app.use("/api/v1/discounts", discountRoutes);
+app.use("/api/v1/hold-spaces", holdSpaceRoutes);
 
 // Handle undefined routes
 app.all("*", (req, res, next) => {

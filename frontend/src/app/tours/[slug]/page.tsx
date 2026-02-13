@@ -91,7 +91,7 @@ interface Tour {
     startDate: string;
     endDate: string;
     availableSpots: number;
-    discount: number;
+    discount: string;
     isActive: boolean;
   }>;
   ageRequirement: {
@@ -134,11 +134,24 @@ export default function TourDetailPage() {
   >("overview");
   const [currentDay, setCurrentDay] = useState(1);
   const [relatedTours, setRelatedTours] = useState<Tour[]>([]);
+  const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
   const dayRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   const [showStickyFooter, setShowStickyFooter] = useState(false);
   const bookingPanelRef = useRef<HTMLDivElement>(null);
   const recommendedToursRef = useRef<HTMLDivElement>(null);
+
+  // Hold Space state
+  const [showHoldModal, setShowHoldModal] = useState(false);
+  const [holdSelectedDate, setHoldSelectedDate] = useState<string>("");
+  const [holdLoading, setHoldLoading] = useState(false);
+  const [holdMessage, setHoldMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Helper function to get discount percentage by name
+  const getDiscountPercentage = (discountName: string | undefined): number => {
+    if (!discountName) return 0;
+    return discountsMap[discountName] || 0;
+  };
 
   useEffect(() => {
     if (slug) {
@@ -191,6 +204,23 @@ export default function TourDetailPage() {
   const fetchTour = async () => {
     try {
       setLoading(true);
+
+      // Fetch discounts first to build the lookup map
+      try {
+        const discountsResponse = await fetch(`${api.baseURL}/discounts`);
+        if (discountsResponse.ok) {
+          const discountsData = await discountsResponse.json();
+          const discounts = discountsData.data.discounts || [];
+          const map: { [name: string]: number } = {};
+          discounts.forEach((d: { name: string; percentage: number }) => {
+            map[d.name] = d.percentage;
+          });
+          setDiscountsMap(map);
+        }
+      } catch (error) {
+        console.error("Failed to fetch discounts:", error);
+      }
+
       const response = await fetch(`${api.baseURL}${"/tours/"}${slug}`);
       const data = await response.json();
 
@@ -233,6 +263,60 @@ export default function TourDetailPage() {
     }
   };
 
+  const handleHoldSpace = async () => {
+    if (!holdSelectedDate || !tour) return;
+
+    setHoldLoading(true);
+    setHoldMessage(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const response = await fetch(`${api.baseURL}/hold-spaces`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          tour: tour._id,
+          startDate: holdSelectedDate,
+          numberOfSpots: 1,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setHoldMessage({
+          type: "success",
+          text: `Space held for 48 hours! Reference: ${data.data.holdSpace.holdReference}`,
+        });
+        setTimeout(() => {
+          setShowHoldModal(false);
+          setHoldMessage(null);
+          setHoldSelectedDate("");
+        }, 3000);
+      } else {
+        setHoldMessage({
+          type: "error",
+          text: data.message || "Failed to hold space. Please try again.",
+        });
+      }
+    } catch (error) {
+      setHoldMessage({
+        type: "error",
+        text: "Network error. Please try again.",
+      });
+    } finally {
+      setHoldLoading(false);
+    }
+  };
+
   if (loading) {
     return <TourDetailLoading />;
   }
@@ -260,16 +344,16 @@ export default function TourDetailPage() {
 
   // Find highest discount date
   const bestDealDate = sortedDates.reduce((best, current) => {
-    return (current.discount || 0) > (best?.discount || 0) ? current : best;
+    return getDiscountPercentage(current.discount) > getDiscountPercentage(best?.discount) ? current : best;
   }, sortedDates[0]);
 
   const basePrice = tour.price.amount;
-  const bestDiscount = bestDealDate?.discount || 0;
+  const bestDiscount = getDiscountPercentage(bestDealDate?.discount);
   const discountedPrice = bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
 
   // Top 3 discounted dates for list
   const topDiscountedDates = sortedDates
-    .filter(d => (d.discount || 0) > 0)
+    .filter(d => getDiscountPercentage(d.discount) > 0)
     .slice(0, 3);
 
   return (
@@ -450,6 +534,17 @@ export default function TourDetailPage() {
                           <span></span>
                           Book Now
                         </button>
+                        <button
+                          onClick={() => {
+                            setShowHoldModal(true);
+                            setHoldMessage(null);
+                            setHoldSelectedDate("");
+                          }}
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-2 px-4 text-sm rounded-lg hover:from-amber-600 hover:to-orange-600 transition shadow-md flex items-center justify-center gap-2"
+                        >
+                          <span>🔒</span>
+                          Hold Space
+                        </button>
                         <button className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-2 px-4 text-sm rounded-lg hover:border-purple-300 hover:bg-purple-50 transition flex items-center justify-center gap-2">
                           <span></span>
                           Save to wish list
@@ -464,7 +559,7 @@ export default function TourDetailPage() {
                                 onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${new Date(date.startDate).toISOString().split('T')[0]}`)}
                                 className="block w-full text-left text-sm text-sky-500 hover:text-sky-700 hover:bg-sky-50 py-1 px-2 rounded transition-colors cursor-pointer"
                               >
-                                Save {date.discount}% - Departure {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                Save {getDiscountPercentage(date.discount)}% - Departure {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                               </button>
                             ))}
                           </div>
@@ -1569,7 +1664,7 @@ export default function TourDetailPage() {
                                 const isSoldOut =
                                   date.availableSpots === 0 || !date.isActive;
                                 const originalPrice = tour.price.amount;
-                                const discount = date.discount || 0;
+                                const discount = getDiscountPercentage(date.discount);
                                 const datePrice = originalPrice * (1 - discount / 100);
 
                                 return (
@@ -1861,6 +1956,143 @@ export default function TourDetailPage() {
                 <button className="flex-1 md:flex-none border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 px-4 rounded transition-colors whitespace-nowrap flex items-center justify-center gap-2">
                   <span className="text-xl">♡</span>
                   <span className="hidden sm:inline">Save to wish list</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hold Space Modal */}
+      {showHoldModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowHoldModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <span>🔒</span> Hold Your Space
+                  </h3>
+                  <p className="text-sm text-white/80 mt-1">Reserve your spot for 48 hours — no payment required</p>
+                </div>
+                <button
+                  onClick={() => setShowHoldModal(false)}
+                  className="text-white/80 hover:text-white text-2xl leading-none p-1"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              {/* Tour Info */}
+              <div className="flex items-start gap-3 mb-6 pb-4 border-b border-gray-100">
+                {tour?.images?.[0] && (
+                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 relative">
+                    <Image
+                      src={tour.images[0].url || "/placeholder-image.jpg"}
+                      alt={tour.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-semibold text-gray-900 text-sm">{tour?.name}</h4>
+                  <p className="text-xs text-gray-500 mt-1">{tour?.duration.days} days • {tour?.location.startCity} to {tour?.location.endCity}</p>
+                </div>
+              </div>
+
+              {/* Date Selection */}
+              <div className="mb-5">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Select a departure date</label>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {sortedDates
+                    .filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date())
+                    .map((date, idx) => {
+                      const discount = getDiscountPercentage(date.discount);
+                      const dateStr = new Date(date.startDate).toISOString().split("T")[0];
+                      const isSelected = holdSelectedDate === dateStr;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => setHoldSelectedDate(dateStr)}
+                          className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm ${isSelected
+                            ? "border-amber-500 bg-amber-50 shadow-sm"
+                            : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/30"
+                            }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                {" — "}
+                                {new Date(date.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-0.5">
+                                {date.availableSpots} spots left
+                                {discount > 0 && (
+                                  <span className="ml-2 text-green-600 font-semibold">{discount}% off</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-amber-500 bg-amber-500" : "border-gray-300"
+                              }`}>
+                              {isSelected && <span className="text-white text-xs">✓</span>}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+                {sortedDates.filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date()).length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">No available dates for this tour</p>
+                )}
+              </div>
+
+              {/* Hold Info */}
+              <div className="bg-gray-50 rounded-xl p-4 mb-5 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-500 mt-0.5">⏱️</span>
+                  <div>
+                    <p className="text-gray-700">Your space will be held for <strong>48 hours</strong> from confirmation.</p>
+                    <p className="text-gray-500 text-xs mt-1">No payment required. You can convert to a booking or release anytime.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message */}
+              {holdMessage && (
+                <div className={`mb-4 px-4 py-3 rounded-xl text-sm font-medium ${holdMessage.type === "success"
+                  ? "bg-green-50 text-green-700 border border-green-200"
+                  : "bg-red-50 text-red-700 border border-red-200"
+                  }`}>
+                  {holdMessage.text}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowHoldModal(false)}
+                  className="flex-1 py-3 px-4 border border-gray-300 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleHoldSpace}
+                  disabled={!holdSelectedDate || holdLoading}
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold text-sm hover:from-amber-600 hover:to-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                >
+                  {holdLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="animate-spin">⏳</span> Holding...
+                    </span>
+                  ) : (
+                    "Confirm Hold"
+                  )}
                 </button>
               </div>
             </div>

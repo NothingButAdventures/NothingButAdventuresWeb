@@ -91,6 +91,12 @@ const blogSchema = new mongoose.Schema(
                 ref: "Country",
             },
         ],
+        relatedContinents: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: "Continent",
+            },
+        ],
         relatedTours: [
             {
                 type: mongoose.Schema.ObjectId,

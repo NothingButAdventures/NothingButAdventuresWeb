@@ -73,9 +73,10 @@ const createBooking = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Calculate pricing
-  const basePrice = availability.price?.amount || tour.price.amount;
+  // Use the price calculated on checkout (includes date-specific discounts, taxes included)
   const numberOfTravelers = travelers.length;
+  const pricePerPerson = req.body.pricePerPerson || availability.price?.amount || tour.price.amount;
+  const totalPrice = req.body.totalPrice || pricePerPerson * numberOfTravelers;
 
   // Create booking
   const bookingData = {
@@ -85,14 +86,15 @@ const createBooking = catchAsync(async (req, res, next) => {
     travelers,
     numberOfTravelers,
     price: {
-      basePrice,
+      basePrice: pricePerPerson,
       discountAmount: 0,
-      taxes: basePrice * 0.1, // 10% tax
-      totalPrice: 0, // Will be calculated in pre-save middleware
+      taxes: 0,
+      totalPrice: totalPrice,
       currency: tour.price.currency,
     },
+    extras: req.body.extras || { activities: [], accommodationUpgrade: null },
     specialRequests,
-    payment: {
+    payment: req.body.payment || {
       method: 'pending',
       status: 'pending',
       transactions: [],
@@ -185,7 +187,7 @@ const cancelBooking = catchAsync(async (req, res, next) => {
   // Restore tour availability
   const tour = await Tour.findById(booking.tour);
   const startDate = tour.startDates.find(
-    (sd) => sd.date.toDateString() === booking.startDate.toDateString()
+    (sd) => sd.startDate.toDateString() === booking.startDate.toDateString()
   );
   if (startDate) {
     startDate.availableSpots += booking.numberOfTravelers;

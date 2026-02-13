@@ -75,7 +75,7 @@ interface Tour {
         startDate: string;
         endDate: string;
         availableSpots: number;
-        discount?: number;
+        discount?: string;
         price?: {
             amount: number;
             currency: string;
@@ -121,6 +121,13 @@ export default function CheckoutPage() {
     const [tour, setTour] = useState<Tour | null>(null);
     const [loading, setLoading] = useState(true);
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+    const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
+
+    // Helper function to get discount percentage by name
+    const getDiscountPercentage = (discountName: string | undefined): number => {
+        if (!discountName) return 0;
+        return discountsMap[discountName] || 0;
+    };
 
     // Step 1: Travellers
     const [adultCount, setAdultCount] = useState(1);
@@ -152,6 +159,11 @@ export default function CheckoutPage() {
         country: "",
         postalCode: "",
     });
+
+    // Payment Simulation State
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [isBooking, setIsBooking] = useState(false);
+    const [bookingError, setBookingError] = useState("");
 
     useEffect(() => {
         if (slug) {
@@ -193,6 +205,23 @@ export default function CheckoutPage() {
     const fetchTour = async () => {
         try {
             setLoading(true);
+
+            // Fetch discounts first to build the lookup map
+            try {
+                const discountsResponse = await fetch(`${api.baseURL}/discounts`);
+                if (discountsResponse.ok) {
+                    const discountsData = await discountsResponse.json();
+                    const discounts = discountsData.data.discounts || [];
+                    const map: { [name: string]: number } = {};
+                    discounts.forEach((d: { name: string; percentage: number }) => {
+                        map[d.name] = d.percentage;
+                    });
+                    setDiscountsMap(map);
+                }
+            } catch (error) {
+                console.error("Failed to fetch discounts:", error);
+            }
+
             const response = await fetch(`${api.baseURL}/tours/${slug}`);
             const data = await response.json();
 
@@ -219,8 +248,9 @@ export default function CheckoutPage() {
         let basePrice = tour.price.amount;
 
         // Apply date-specific discount if available
-        if (selectedDate?.discount) {
-            basePrice = basePrice * (1 - selectedDate.discount / 100);
+        const dateDiscount = getDiscountPercentage(selectedDate?.discount);
+        if (dateDiscount > 0) {
+            basePrice = basePrice * (1 - dateDiscount / 100);
         } else if (selectedDate?.price?.amount) {
             // Use date's specific price if set
             basePrice = selectedDate.price.amount;
@@ -240,8 +270,9 @@ export default function CheckoutPage() {
         let basePrice = tour.price.amount;
 
         // Apply date-specific discount if available
-        if (selectedDate?.discount) {
-            basePrice = basePrice * (1 - selectedDate.discount / 100);
+        const dateDiscount = getDiscountPercentage(selectedDate?.discount);
+        if (dateDiscount > 0) {
+            basePrice = basePrice * (1 - dateDiscount / 100);
         } else if (selectedDate?.price?.amount) {
             // Use date's specific price if set
             basePrice = selectedDate.price.amount;
@@ -415,8 +446,109 @@ export default function CheckoutPage() {
     };
 
     const handleSubmitBooking = async () => {
-        // For now, just show an alert since payment is not implemented
-        alert("Booking submitted! Payment integration coming soon.");
+        // Open the payment simulation modal
+        setShowPaymentModal(true);
+        setBookingError("");
+    };
+
+    const handlePaymentSimulation = async (success: boolean) => {
+        if (!success) {
+            setBookingError("Payment declined. Please try again.");
+            return;
+        }
+
+        setIsBooking(true);
+        setBookingError("");
+
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setBookingError("Please log in to complete your booking");
+                setIsBooking(false);
+                // Optionally redirect to login
+                // router.push("/auth/login?redirect=...");
+                return;
+            }
+
+            if (!tour || !selectedDate) {
+                setBookingError("Missing tour details");
+                setIsBooking(false);
+                return;
+            }
+
+            const travelersList = [];
+            // Add primary traveller
+            travelersList.push({
+                firstName: primaryTraveller.firstName,
+                lastName: primaryTraveller.lastName,
+                email: contactInfo.email,
+                phone: contactInfo.phone,
+            });
+
+            // Add other travelers as placeholders
+            for (let i = 1; i < adultCount; i++) {
+                travelersList.push({
+                    firstName: `Guest ${i + 1}`,
+                    lastName: "Traveller",
+                });
+            }
+
+            const bookingData = {
+                tour: tour._id,
+                startDate: selectedDate.startDate,
+                travelers: travelersList,
+                pricePerPerson,
+                totalPrice: calculateTotalPrice,
+                extras: {
+                    activities: selectedActivities.map(activity => ({
+                        name: activity.name,
+                        price: activity.price,
+                        count: activity.count
+                    })),
+                    accommodationUpgrade: accommodationUpgrade ? {
+                        name: accommodationUpgrade.name,
+                        price: accommodationUpgrade.price,
+                        count: accommodationUpgrade.count
+                    } : undefined
+                },
+                payment: {
+                    method: 'credit_card',
+                    status: 'paid',
+                    transactions: [{
+                        transactionId: `sim_${Date.now()}`,
+                        amount: calculateTotalPrice,
+                        currency: 'USD',
+                        status: 'completed',
+                        paymentDate: new Date()
+                    }]
+                }
+            };
+
+            const response = await fetch(`${api.baseURL}/bookings`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(bookingData),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Booking failed");
+            }
+
+            // Success
+            alert("Booking Successful! Redirecting to dashboard...");
+            router.push("/dashboard");
+
+        } catch (err: any) {
+            console.error("Booking error:", err);
+            setBookingError(err.message || "Something went wrong processing your booking");
+        } finally {
+            setIsBooking(false);
+        }
     };
 
     if (loading) {
@@ -704,7 +836,7 @@ export default function CheckoutPage() {
                                                             <div className="flex items-center gap-4">
                                                                 <div className="text-right">
                                                                     <div className="font-bold text-gray-900">
-                                                                        ${Math.round(tour.price.amount * (1 - (date.discount || 0) / 100))}
+                                                                        ${Math.round(tour.price.amount * (1 - getDiscountPercentage(date.discount) / 100))}
                                                                         <span className="text-xs font-normal text-gray-500"> USD</span>
                                                                     </div>
                                                                     <div className="text-xs text-gray-500">per person</div>
@@ -1344,6 +1476,81 @@ export default function CheckoutPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Payment Simulation Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {/* Background overlay */}
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => !isBooking && setShowPaymentModal(false)}></div>
+
+                        {/* Modal panel */}
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl relative z-50 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <span className="text-green-600 text-lg">💳</span>
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                            Payment Simulation
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500 mb-4">
+                                                Since this is a demo, please choose an outcome for the payment process.
+                                            </p>
+
+                                            {bookingError && (
+                                                <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4 text-sm">
+                                                    {bookingError}
+                                                </div>
+                                            )}
+
+                                            <div className="bg-gray-50 p-4 rounded-md mb-4">
+                                                <div className="flex justify-between text-sm mb-2">
+                                                    <span className="text-gray-600">Total Amount:</span>
+                                                    <span className="font-bold">{formatPrice(calculateTotalPrice)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-gray-600">Card:</span>
+                                                    <span className="font-mono">**** **** **** 4242</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => handlePaymentSimulation(true)}
+                                    disabled={isBooking}
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isBooking ? "Processing..." : "Simulate Success"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handlePaymentSimulation(false)}
+                                    disabled={isBooking}
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Simulate Failure
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPaymentModal(false)}
+                                    disabled={isBooking}
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
