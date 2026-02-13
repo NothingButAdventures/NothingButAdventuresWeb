@@ -84,6 +84,12 @@ const userSchema = new mongoose.Schema(
         },
       ],
     },
+    wishlist: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Tour",
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,

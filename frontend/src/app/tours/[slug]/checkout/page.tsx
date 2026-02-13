@@ -164,6 +164,7 @@ export default function CheckoutPage() {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
     const [bookingError, setBookingError] = useState("");
+    const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
 
     useEffect(() => {
         if (slug) {
@@ -264,6 +265,25 @@ export default function CheckoutPage() {
 
         return Math.round((basePrice * adultCount) + activitiesTotal + accommodationTotal);
     }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade]);
+
+    const isDepositAvailable = useMemo(() => {
+        if (!selectedDate) return false;
+        const now = new Date();
+        const start = new Date(selectedDate.startDate);
+        const differenceInTime = start.getTime() - now.getTime();
+        const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+        return differenceInDays >= 90;
+    }, [selectedDate]);
+
+    const depositAmount = useMemo(() => {
+        if (!tour) return 0;
+        const percentage = tour.price.bookingPercentage || 20;
+        return Math.round(calculateTotalPrice * (percentage / 100));
+    }, [calculateTotalPrice, tour]);
+
+    const payNowAmount = useMemo(() => {
+        return paymentOption === "deposit" && isDepositAvailable ? depositAmount : calculateTotalPrice;
+    }, [paymentOption, isDepositAvailable, depositAmount, calculateTotalPrice]);
 
     const pricePerPerson = useMemo(() => {
         if (!tour) return 0;
@@ -513,10 +533,10 @@ export default function CheckoutPage() {
                 },
                 payment: {
                     method: 'credit_card',
-                    status: 'paid',
+                    status: paymentOption === 'deposit' && isDepositAvailable ? 'partially_paid' : 'paid',
                     transactions: [{
                         transactionId: `sim_${Date.now()}`,
-                        amount: calculateTotalPrice,
+                        amount: payNowAmount,
                         currency: 'USD',
                         status: 'completed',
                         paymentDate: new Date()
@@ -1232,7 +1252,7 @@ export default function CheckoutPage() {
                                             </h3>
                                         </div>
 
-                                        <div className="border-t pt-6">
+                                        <div className="border-t pt-6 mb-8">
                                             <h3 className="font-semibold text-gray-900 mb-4">Contact Information</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
@@ -1294,6 +1314,74 @@ export default function CheckoutPage() {
                                                         className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                                         placeholder="Country"
                                                     />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Payment Options */}
+                                        <div className="border-t pt-6">
+                                            <h3 className="font-semibold text-gray-900 mb-4">Payment Options</h3>
+
+                                            <div className="grid grid-cols-1 gap-4">
+                                                {/* Full Payment Option */}
+                                                <div
+                                                    className={`border rounded-xl p-4 cursor-pointer transition-all ${paymentOption === 'full'
+                                                            ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600'
+                                                            : 'border-gray-300 hover:border-gray-400'
+                                                        }`}
+                                                    onClick={() => setPaymentOption('full')}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${paymentOption === 'full' ? 'border-purple-600' : 'border-gray-400'
+                                                            }`}>
+                                                            {paymentOption === 'full' && <div className="w-2.5 h-2.5 rounded-full bg-purple-600" />}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="font-semibold text-gray-900">Pay Full Amount</span>
+                                                                <span className="font-bold text-gray-900">{formatPrice(calculateTotalPrice)}</span>
+                                                            </div>
+                                                            <p className="text-sm text-gray-500 mt-1">Pay the total amount now and you&apos;re all set!</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Partial Payment Option */}
+                                                <div
+                                                    className={`border rounded-xl p-4 transition-all ${!isDepositAvailable
+                                                            ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-75'
+                                                            : paymentOption === 'deposit'
+                                                                ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600 cursor-pointer'
+                                                                : 'border-gray-300 hover:border-gray-400 cursor-pointer'
+                                                        }`}
+                                                    onClick={() => isDepositAvailable && setPaymentOption('deposit')}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${!isDepositAvailable ? 'border-gray-300 bg-gray-100' :
+                                                                paymentOption === 'deposit' ? 'border-purple-600' : 'border-gray-400'
+                                                            }`}>
+                                                            {paymentOption === 'deposit' && isDepositAvailable && <div className="w-2.5 h-2.5 rounded-full bg-purple-600" />}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className={`font-semibold ${!isDepositAvailable ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                    Pay Deposit ({tour.price.bookingPercentage || 20}%)
+                                                                </span>
+                                                                <span className={`font-bold ${!isDepositAvailable ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                    {formatPrice(depositAmount)}
+                                                                </span>
+                                                            </div>
+                                                            {isDepositAvailable ? (
+                                                                <p className="text-sm text-gray-500 mt-1">
+                                                                    Pay {formatPrice(depositAmount)} now. The remaining {formatPrice(calculateTotalPrice - depositAmount)} is due later.
+                                                                </p>
+                                                            ) : (
+                                                                <p className="text-sm text-red-500 mt-1">
+                                                                    Partial payment is only available for tours booked at least 3 months in advance.
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1509,10 +1597,20 @@ export default function CheckoutPage() {
 
                                             <div className="bg-gray-50 p-4 rounded-md mb-4">
                                                 <div className="flex justify-between text-sm mb-2">
-                                                    <span className="text-gray-600">Total Amount:</span>
-                                                    <span className="font-bold">{formatPrice(calculateTotalPrice)}</span>
+                                                    <span className="text-gray-600">Total Booking Value:</span>
+                                                    <span className="font-semibold">{formatPrice(calculateTotalPrice)}</span>
                                                 </div>
-                                                <div className="flex justify-between text-sm">
+                                                <div className="flex justify-between text-lg mb-2 font-bold text-gray-900 border-t border-gray-200 pt-2">
+                                                    <span>Pay Now:</span>
+                                                    <span>{formatPrice(payNowAmount)}</span>
+                                                </div>
+                                                {paymentOption === 'deposit' && isDepositAvailable && (
+                                                    <div className="flex justify-between text-sm text-gray-500">
+                                                        <span>Due Later:</span>
+                                                        <span>{formatPrice(calculateTotalPrice - payNowAmount)}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex justify-between text-sm mt-3 pt-2 border-t border-gray-200">
                                                     <span className="text-gray-600">Card:</span>
                                                     <span className="font-mono">**** **** **** 4242</span>
                                                 </div>

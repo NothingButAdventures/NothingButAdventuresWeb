@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 interface BookingDetails {
     _id: string;
@@ -70,6 +72,10 @@ interface BookingDetailsModalProps {
 }
 
 export default function BookingDetailsModal({ booking, onClose }: BookingDetailsModalProps) {
+    const router = useRouter();
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
     // Lock body scroll when modal is open
     useEffect(() => {
         document.body.style.overflow = "hidden";
@@ -111,7 +117,74 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
         }
     };
 
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: booking.price.currency || 'USD',
+            maximumFractionDigits: 0,
+        }).format(price);
+    };
+
     const primaryImage = booking.tour.images?.find((img) => img.isPrimary) || booking.tour.images?.[0];
+
+    const totalPaid = booking.payment.transactions?.reduce((sum, t) => sum + t.amount, 0) || 0;
+    const remainingAmount = booking.price.totalPrice - totalPaid;
+
+    const handlePayRemaining = async () => {
+        setIsProcessingPayment(true);
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in again");
+                return;
+            }
+
+            const newTransaction = {
+                transactionId: `sim_${Date.now()}`,
+                amount: remainingAmount,
+                paymentDate: new Date().toISOString(),
+                status: 'completed',
+                currency: booking.price.currency || 'USD'
+            };
+
+            const updatedTransactions = [
+                ...(booking.payment.transactions || []),
+                newTransaction
+            ];
+
+            const response = await fetch(`${api.baseURL}/bookings/${booking._id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    payment: {
+                        method: booking.payment.method,
+                        status: 'paid', // Update status to paid
+                        transactions: updatedTransactions
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Payment failed");
+            }
+
+            // Success
+            onClose();
+            // Refresh page to show updated data
+            window.location.reload();
+
+        } catch (error: any) {
+            console.error("Payment error:", error);
+            alert(error.message || "Something went wrong processing payment");
+        } finally {
+            setIsProcessingPayment(false);
+            setShowPaymentModal(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
@@ -191,9 +264,19 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Payment Status</h4>
-                            <span className={`inline-block px-2 py-1 text-xs font-bold rounded-full ${booking.payment.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                                {booking.payment.status.toUpperCase()}
-                            </span>
+                            <div className="flex flex-col items-start gap-2">
+                                <span className={`inline-block px-2 py-1 text-xs font-bold rounded-full ${booking.payment.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                    {booking.payment.status.toUpperCase()}
+                                </span>
+                                {booking.payment.status === 'partially_paid' && remainingAmount > 0 && (
+                                    <button
+                                        onClick={() => setShowPaymentModal(true)}
+                                        className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded transition-colors"
+                                    >
+                                        Pay Remaining ({formatPrice(remainingAmount)})
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="col-span-2">
@@ -351,6 +434,78 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                     </div>
                 </div>
             </div>
+
+            {/* Payment Simulation Modal Overlay */}
+            {
+                showPaymentModal && (
+                    <div className="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            {/* Background overlay */}
+                            <div
+                                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                aria-hidden="true"
+                                onClick={() => !isProcessingPayment && setShowPaymentModal(false)}
+                            ></div>
+
+                            {/* Modal panel */}
+                            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl relative z-[70] sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div className="sm:flex sm:items-start">
+                                        <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                            <span className="text-green-600 text-lg">💳</span>
+                                        </div>
+                                        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                            <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                                Payment Simulation
+                                            </h3>
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-500 mb-4">
+                                                    Complete your booking by paying the remaining balance.
+                                                </p>
+
+                                                <div className="bg-gray-50 p-4 rounded-md mb-4">
+                                                    <div className="flex justify-between text-sm mb-2">
+                                                        <span className="text-gray-600">Ref:</span>
+                                                        <span className="font-mono">{booking.bookingReference}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-200">
+                                                        <span>Pay Remaining:</span>
+                                                        <span>{formatPrice(remainingAmount)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm mt-3">
+                                                        <span className="text-gray-600">Card:</span>
+                                                        <span className="font-mono">**** **** **** 4242</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-4 flex flex-col gap-2">
+                                                    <button
+                                                        type="button"
+                                                        disabled={isProcessingPayment}
+                                                        onClick={handlePayRemaining}
+                                                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm disabled:opacity-50"
+                                                    >
+                                                        {isProcessingPayment ? "Processing..." : `Pay ${formatPrice(remainingAmount)}`}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        disabled={isProcessingPayment}
+                                                        onClick={() => setShowPaymentModal(false)}
+                                                        className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     );
 }

@@ -9,6 +9,8 @@ const {
   updateUser,
   deleteUser,
   getUserStats,
+  getMyWishlist,
+  toggleWishlist,
 } = require('../controllers/userController');
 const { protect, restrictTo } = require('../middleware/auth');
 
@@ -22,6 +24,8 @@ router.patch('/update-me', updateMe);
 router.delete('/delete-me', deleteMe);
 router.get('/my-bookings', getMyBookings);
 router.get('/my-reviews', getMyReviews);
+router.get('/wishlist', getMyWishlist);
+router.post('/wishlist/:tourId', toggleWishlist);
 
 // Admin only routes
 router.use(restrictTo('admin'));

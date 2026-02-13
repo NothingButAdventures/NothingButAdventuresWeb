@@ -113,6 +113,58 @@ const getMyReviews = catchAsync(async (req, res, next) => {
   });
 });
 
+const getMyWishlist = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).populate({
+    path: 'wishlist',
+    select: 'name slug images price duration location ratingsAverage ratingsQuantity startDates country',
+  });
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    results: user.wishlist.length,
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
+
+const toggleWishlist = catchAsync(async (req, res, next) => {
+  const { tourId } = req.params;
+  const user = await User.findById(req.user.id);
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  // check if tour is already in wishlist
+  const index = user.wishlist.indexOf(tourId);
+
+  let message = '';
+  if (index === -1) {
+    // add to wishlist
+    user.wishlist.push(tourId);
+    message = 'Tour added to wishlist';
+  } else {
+    // remove from wishlist
+    user.wishlist.splice(index, 1);
+    message = 'Tour removed from wishlist';
+  }
+
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message,
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
+
 // Admin only functions
 const getAllUsers = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(User.find(), req.query)
@@ -219,4 +271,6 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserStats,
+  getMyWishlist,
+  toggleWishlist,
 };

@@ -55,6 +55,8 @@ export const api = {
       updateMe: "/users/update-me",
       getMyBookings: "/users/my-bookings",
       getMyReviews: "/users/my-reviews",
+      getWishlist: "/users/wishlist",
+      toggleWishlist: (tourId: string) => `/users/wishlist/${tourId}`,
     },
     holdSpaces: {
       create: "/hold-spaces",

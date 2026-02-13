@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import TourDetailLoading from "./loading";
+import { CalendarCheck, Clock, Heart } from "@phosphor-icons/react";
 
 interface Tour {
   _id: string;
@@ -151,6 +152,55 @@ export default function TourDetailPage() {
   const getDiscountPercentage = (discountName: string | undefined): number => {
     if (!discountName) return 0;
     return discountsMap[discountName] || 0;
+  };
+
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
+  useEffect(() => {
+    if (tour) {
+      checkWishlistStatus();
+    }
+  }, [tour]);
+
+  const checkWishlistStatus = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+      const response = await fetch(`${api.baseURL}${api.endpoints.auth.me}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.data.user.wishlist && data.data.user.wishlist.includes(tour?._id)) {
+          setIsInWishlist(true);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!tour) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${api.baseURL}${api.endpoints.users.toggleWishlist(tour._id)}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        setIsInWishlist(!isInWishlist);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -528,10 +578,10 @@ export default function TourDetailPage() {
                       {/* CTA Buttons */}
                       <div className="space-y-3">
                         <button
-                          onClick={() => router.push(`/tours/${tour.slug}/checkout`)}
+                          onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${new Date(bestDealDate.startDate).toISOString().split('T')[0]}`)}
                           className="w-full bg-red-500 text-white font-semibold py-2 px-4 text-sm rounded-lg hover:bg-red-600 transition shadow-md flex items-center justify-center gap-2"
                         >
-                          <span></span>
+                          <CalendarCheck size={20} weight="bold" />
                           Book Now
                         </button>
                         <button
@@ -542,12 +592,15 @@ export default function TourDetailPage() {
                           }}
                           className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold py-2 px-4 text-sm rounded-lg hover:from-amber-600 hover:to-orange-600 transition shadow-md flex items-center justify-center gap-2"
                         >
-                          <span>🔒</span>
+                          <Clock size={20} weight="bold" />
                           Hold Space
                         </button>
-                        <button className="w-full border-2 border-gray-300 text-gray-700 font-semibold py-2 px-4 text-sm rounded-lg hover:border-purple-300 hover:bg-purple-50 transition flex items-center justify-center gap-2">
-                          <span></span>
-                          Save to wish list
+                        <button
+                          onClick={handleWishlistToggle}
+                          className={`w-full border-2 ${isInWishlist ? 'border-red-500 bg-red-50 text-red-600' : 'border-gray-300 text-gray-700'} font-semibold py-2 px-4 text-sm rounded-lg hover:border-red-300 hover:bg-red-50 transition flex items-center justify-center gap-2`}
+                        >
+                          <Heart size={20} weight={isInWishlist ? "fill" : "bold"} />
+                          {isInWishlist ? 'Saved to wish list' : 'Save to wish list'}
                         </button>
 
                         {/* Top Discounts List */}
