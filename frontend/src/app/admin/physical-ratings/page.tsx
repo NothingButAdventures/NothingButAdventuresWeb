@@ -363,11 +363,11 @@ export default function PhysicalRatingsPage() {
                                     onChange={(e) => setNewRatingLevel(Number(e.target.value))}
                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                                 >
-                                    <option value={1}>1 - Easy</option>
-                                    <option value={2}>2 - Moderate</option>
-                                    <option value={3}>3 - Challenging</option>
-                                    <option value={4}>4 - Difficult</option>
-                                    <option value={5}>5 - Expert</option>
+                                    <option value={1}>1</option>
+                                    <option value={2}>2</option>
+                                    <option value={3}>3</option>
+                                    <option value={4}>4</option>
+                                    <option value={5}>5</option>
                                 </select>
                             </div>
                             <div>

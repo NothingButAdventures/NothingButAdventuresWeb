@@ -1,6 +1,6 @@
 // API configuration and utilities
 // const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
-const API_BASE_URL = "http://localhost:3001/api/v1";
+const API_BASE_URL = "http://localhost:3001/api/v1"
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -91,6 +91,21 @@ export const api = {
       create: "/continents",
       update: (id: string) => `/continents/${id}`,
       delete: (id: string) => `/continents/${id}`,
+    },
+    queries: {
+      getAll: "/queries",
+      create: "/queries",
+      update: (id: string) => `/queries/${id}`,
+      delete: (id: string) => `/queries/${id}`,
+    },
+    promoCodes: {
+      getAll: "/promo-codes",
+      getById: (id: string) => `/promo-codes/${id}`,
+      create: "/promo-codes",
+      update: (id: string) => `/promo-codes/${id}`,
+      delete: (id: string) => `/promo-codes/${id}`,
+      apply: "/promo-codes/apply",
+      checkStatus: (tourId: string) => `/promo-codes/check/${tourId}`,
     },
   },
 };

@@ -11,13 +11,9 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
+import { uploadCountryImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
 
-// --- Configuration ---
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const BUCKET_NAME = "location-image";
 
 // --- Types ---
 interface Country {
@@ -150,21 +146,7 @@ export default function EditCountryPage() {
 
     const uploadImageToSupabase = async (file: File): Promise<string | null> => {
         try {
-            const fileExt = file.name.split(".").pop();
-            const fileName = `country-${id}-${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage
-                .from(BUCKET_NAME)
-                .getPublicUrl(filePath);
-
-            return data.publicUrl;
+            return await uploadCountryImage(file);
         } catch (error) {
             console.error("Upload error:", error);
             alert("Failed to upload image.");

@@ -123,10 +123,31 @@ export default function CheckoutPage() {
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
     const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
 
+    // Promo code state
+    const [promoData, setPromoData] = useState<{
+        code: string;
+        discountType: string;
+        discountValue: number;
+        discountAmount: number;
+    } | null>(null);
+
     // Helper function to get discount percentage by name
     const getDiscountPercentage = (discountName: string | undefined): number => {
         if (!discountName) return 0;
         return discountsMap[discountName] || 0;
+    };
+
+    // Helper: get best discount considering promo
+    const getBestDiscountPct = (dateDiscountPct: number, basePrice: number): number => {
+        let promoDiscountPct = 0;
+        if (promoData) {
+            if (promoData.discountType === "percentage") {
+                promoDiscountPct = promoData.discountValue;
+            } else {
+                promoDiscountPct = (promoData.discountAmount / basePrice) * 100;
+            }
+        }
+        return Math.max(dateDiscountPct, promoDiscountPct);
     };
 
     // Step 1: Travellers
@@ -227,7 +248,30 @@ export default function CheckoutPage() {
             const data = await response.json();
 
             if (response.ok) {
-                setTour(data.data.tour);
+                const fetchedTour = data.data.tour;
+                setTour(fetchedTour);
+
+                // Check for active promo code on this tour
+                try {
+                    const token = localStorage.getItem("token");
+                    if (token && fetchedTour._id) {
+                        const promoRes = await fetch(
+                            `${api.baseURL}${api.endpoints.promoCodes.checkStatus(fetchedTour._id)}`,
+                            { headers: { Authorization: `Bearer ${token}` } }
+                        );
+                        const promoResData = await promoRes.json();
+                        if (promoResData.status === "success" && promoResData.data.hasActivePromo) {
+                            setPromoData({
+                                code: promoResData.data.promoCode.code,
+                                discountType: promoResData.data.promoCode.discountType,
+                                discountValue: promoResData.data.promoCode.discountValue,
+                                discountAmount: promoResData.data.promoCode.discountAmount,
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // silent fail
+                }
             } else {
                 console.error("Failed to fetch tour:", data.message);
             }
@@ -250,13 +294,13 @@ export default function CheckoutPage() {
 
         // Apply date-specific discount if available
         const dateDiscount = getDiscountPercentage(selectedDate?.discount);
-        if (dateDiscount > 0) {
-            basePrice = basePrice * (1 - dateDiscount / 100);
+        const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
+
+        if (bestDiscount > 0) {
+            basePrice = tour.price.amount * (1 - bestDiscount / 100);
         } else if (selectedDate?.price?.amount) {
-            // Use date's specific price if set
             basePrice = selectedDate.price.amount;
         } else if (tour.price.discountPercent > 0) {
-            // Fall back to tour's general discount
             basePrice = basePrice * (1 - tour.price.discountPercent / 100);
         }
 
@@ -264,7 +308,7 @@ export default function CheckoutPage() {
         const accommodationTotal = accommodationUpgrade ? accommodationUpgrade.price * accommodationUpgrade.count : 0;
 
         return Math.round((basePrice * adultCount) + activitiesTotal + accommodationTotal);
-    }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade]);
+    }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade, promoData]);
 
     const isDepositAvailable = useMemo(() => {
         if (!selectedDate) return false;
@@ -291,18 +335,18 @@ export default function CheckoutPage() {
 
         // Apply date-specific discount if available
         const dateDiscount = getDiscountPercentage(selectedDate?.discount);
-        if (dateDiscount > 0) {
-            basePrice = basePrice * (1 - dateDiscount / 100);
+        const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
+
+        if (bestDiscount > 0) {
+            basePrice = tour.price.amount * (1 - bestDiscount / 100);
         } else if (selectedDate?.price?.amount) {
-            // Use date's specific price if set
             basePrice = selectedDate.price.amount;
         } else if (tour.price.discountPercent > 0) {
-            // Fall back to tour's general discount
             basePrice = basePrice * (1 - tour.price.discountPercent / 100);
         }
 
         return Math.round(basePrice);
-    }, [tour, selectedDate]);
+    }, [tour, selectedDate, promoData]);
 
     const formatPrice = (amount: number, currency: string = "USD") => {
         return new Intl.NumberFormat("en-US", {
@@ -349,9 +393,9 @@ export default function CheckoutPage() {
         return days;
     };
 
-    const getDateStatus = (day: number) => {
+    const getDateStatus = (day: number, currentMonthDate: Date) => {
         if (!tour) return null;
-        const dateStr = `${calendarMonth.getFullYear()}-${String(calendarMonth.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const dateStr = `${currentMonthDate.getFullYear()}-${String(currentMonthDate.getMonth() + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
         const matchingDate = tour.startDates.find((d) => {
             const startDateStr = new Date(d.startDate).toISOString().split("T")[0];
@@ -787,7 +831,7 @@ export default function CheckoutPage() {
                                                                 }
 
                                                                 const checkDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
-                                                                const dateStatus = getDateStatus(day);
+                                                                const dateStatus = getDateStatus(day, monthDate);
                                                                 const isSelected = dateStatus && selectedDateId === dateStatus._id;
                                                                 const isPast = checkDate < new Date(new Date().setHours(0, 0, 0, 0));
 
@@ -856,7 +900,7 @@ export default function CheckoutPage() {
                                                             <div className="flex items-center gap-4">
                                                                 <div className="text-right">
                                                                     <div className="font-bold text-gray-900">
-                                                                        ${Math.round(tour.price.amount * (1 - getDiscountPercentage(date.discount) / 100))}
+                                                                        ${Math.round(tour.price.amount * (1 - getBestDiscountPct(getDiscountPercentage(date.discount), tour.price.amount) / 100))}
                                                                         <span className="text-xs font-normal text-gray-500"> USD</span>
                                                                     </div>
                                                                     <div className="text-xs text-gray-500">per person</div>
@@ -1326,8 +1370,8 @@ export default function CheckoutPage() {
                                                 {/* Full Payment Option */}
                                                 <div
                                                     className={`border rounded-xl p-4 cursor-pointer transition-all ${paymentOption === 'full'
-                                                            ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600'
-                                                            : 'border-gray-300 hover:border-gray-400'
+                                                        ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600'
+                                                        : 'border-gray-300 hover:border-gray-400'
                                                         }`}
                                                     onClick={() => setPaymentOption('full')}
                                                 >
@@ -1349,16 +1393,16 @@ export default function CheckoutPage() {
                                                 {/* Partial Payment Option */}
                                                 <div
                                                     className={`border rounded-xl p-4 transition-all ${!isDepositAvailable
-                                                            ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-75'
-                                                            : paymentOption === 'deposit'
-                                                                ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600 cursor-pointer'
-                                                                : 'border-gray-300 hover:border-gray-400 cursor-pointer'
+                                                        ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-75'
+                                                        : paymentOption === 'deposit'
+                                                            ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600 cursor-pointer'
+                                                            : 'border-gray-300 hover:border-gray-400 cursor-pointer'
                                                         }`}
                                                     onClick={() => isDepositAvailable && setPaymentOption('deposit')}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${!isDepositAvailable ? 'border-gray-300 bg-gray-100' :
-                                                                paymentOption === 'deposit' ? 'border-purple-600' : 'border-gray-400'
+                                                            paymentOption === 'deposit' ? 'border-purple-600' : 'border-gray-400'
                                                             }`}>
                                                             {paymentOption === 'deposit' && isDepositAvailable && <div className="w-2.5 h-2.5 rounded-full bg-purple-600" />}
                                                         </div>
@@ -1545,6 +1589,24 @@ export default function CheckoutPage() {
                                             </div>
                                         )}
 
+                                        {/* Promo Code Applied */}
+                                        {promoData && (
+                                            <div className="py-3 border-t border-gray-100">
+                                                <div className="flex items-center gap-2 bg-emerald-50 rounded-lg p-3">
+                                                    <span className="text-emerald-600 text-lg">🏷️</span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-bold text-emerald-700 font-mono">{promoData.code}</div>
+                                                        <div className="text-xs text-emerald-600">
+                                                            {promoData.discountType === "percentage"
+                                                                ? `${promoData.discountValue}% off`
+                                                                : `$${promoData.discountAmount} off`}
+                                                        </div>
+                                                    </div>
+                                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">APPLIED</span>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Total Price */}
                                         <div className="pt-4 mt-2 border-t border-gray-100">
                                             <div className="flex items-center justify-between">
@@ -1554,6 +1616,11 @@ export default function CheckoutPage() {
                                                 </div>
                                                 <div className="text-right">
                                                     <span className="text-2xl font-extrabold text-blue-900">{formatPrice(calculateTotalPrice)}</span>
+                                                    {promoData && tour && (
+                                                        <div className="text-xs text-gray-400 line-through">
+                                                            {formatPrice(tour.price.amount * adultCount)}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

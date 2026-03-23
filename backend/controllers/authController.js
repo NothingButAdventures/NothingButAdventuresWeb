@@ -5,6 +5,7 @@ const User = require("../models/User");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const { createSendToken } = require("../middleware/auth");
+const { checkWalletExpiration } = require("../utils/walletUtils");
 
 const register = catchAsync(async (req, res, next) => {
   const {
@@ -217,10 +218,20 @@ const resendVerificationEmail = catchAsync(async (req, res, next) => {
 });
 
 const getMe = catchAsync(async (req, res, next) => {
+  // Check for wallet expiration
+  await checkWalletExpiration(req.user.id);
+
+  // Re-fetch user to get updated data if needed (though checkWalletExpiration updates the DB, 
+  // req.user might be stale if it was attached by protect middleware before this check)
+  // However, for simplicity, we can just return the user embedded in req.user if we assume protect attached it freshly.
+  // BUT, to be safe, if we just modified it, we might want to return the modified version.
+  // Let's just re-fetch to be 100% sure we send the latest state.
+  const user = await User.findById(req.user.id);
+
   res.status(200).json({
     status: "success",
     data: {
-      user: req.user,
+      user,
     },
   });
 });

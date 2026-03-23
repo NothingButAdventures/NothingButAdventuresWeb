@@ -104,6 +104,11 @@ const userSchema = new mongoose.Schema(
     passwordResetExpires: Date,
     emailVerificationToken: String,
     emailVerificationExpires: Date,
+    walletBalance: {
+      type: Number,
+      default: 0,
+    },
+    walletExpiresAt: Date,
   },
   {
     timestamps: true,

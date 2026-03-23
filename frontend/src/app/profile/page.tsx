@@ -3,14 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
+import { uploadUserAvatar } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import BookingDetailsModal from "@/components/BookingDetailsModal";
-
-// Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const BUCKET_NAME = "user-images";
 
 // Types
 interface User {
@@ -28,6 +23,8 @@ interface User {
         interests?: string[];
     };
     createdAt: string;
+    walletBalance?: number;
+    walletExpiresAt?: string;
 }
 
 interface Booking {
@@ -103,6 +100,35 @@ interface Review {
     };
 }
 
+interface Tour {
+    _id: string;
+    name: string;
+    slug: string;
+    price: {
+        amount: number;
+        currency: string;
+        discountPercent: number;
+    };
+    duration: {
+        days: number;
+        nights: number;
+    };
+    ratingsAverage: number;
+    ratingsQuantity: number;
+    summary: string;
+    images: Array<{
+        url: string;
+        caption: string;
+        isPrimary: boolean;
+    }>;
+    country: {
+        _id: string;
+        name: string;
+    };
+    startDates: any[];
+    travelStyle: string;
+}
+
 
 
 // Helper function
@@ -120,8 +146,9 @@ export default function ProfilePage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [holdSpaces, setHoldSpaces] = useState<any[]>([]);
+    const [wishlist, setWishlist] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "reviews" | "hold spaces" | "settings">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "reviews" | "hold spaces" | "settings" | "wishlist" | "nba club">("overview");
     const [releasingHold, setReleasingHold] = useState<string | null>(null);
 
     // Edit mode
@@ -228,6 +255,15 @@ export default function ProfilePage() {
                 const holdsData = await holdsRes.json();
                 setHoldSpaces(holdsData.data.holdSpaces || []);
             }
+
+            // Fetch wishlist
+            const wishlistRes = await fetch(`${api.baseURL}${api.endpoints.users.getWishlist}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (wishlistRes.ok) {
+                const wishlistData = await wishlistRes.json();
+                setWishlist(wishlistData.data.wishlist || []);
+            }
         } catch (error) {
             console.error("Error fetching user data:", error);
         } finally {
@@ -241,19 +277,10 @@ export default function ProfilePage() {
 
         try {
             setUploadingAvatar(true);
-            const fileExt = file.name.split(".").pop();
-            const fileName = `${user._id}-${Date.now()}.${fileExt}`;
 
-            const { error: uploadError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(fileName, file);
+            const avatarUrl = await uploadUserAvatar(file);
 
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(fileName);
-            const avatarUrl = data.publicUrl;
-
-            // Update user avatar
+            // Update user avatar in the backend
             const token = localStorage.getItem("token");
             const res = await fetch(`${api.baseURL}/users/update-me`, {
                 method: "PATCH",
@@ -451,17 +478,17 @@ export default function ProfilePage() {
             {/* Tabs */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex gap-8">
-                        {(["overview", "bookings", "hold spaces", "reviews", "settings"] as const).map((tab) => (
+                    <div className="flex gap-8 overflow-x-auto pb-2 scrollbar-hide">
+                        {(["overview", "bookings", "hold spaces", "wishlist", "reviews", "nba club", "settings"] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab
+                                className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors capitalize whitespace-nowrap ${activeTab === tab
                                     ? "border-blue-600 text-blue-600"
                                     : "border-transparent text-gray-500 hover:text-gray-700"
                                     }`}
                             >
-                                {tab}
+                                {tab === "nba club" ? "NBA Club" : tab}
                             </button>
                         ))}
                     </div>
@@ -798,7 +825,7 @@ export default function ProfilePage() {
                                                                     }
                                                                 }}
                                                                 disabled={releasingHold === hold._id}
-                                                                className="px-4 py-1.5 border border-gray-300 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                                                                className="px-4 py-1.5 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
                                                             >
                                                                 {releasingHold === hold._id ? 'Releasing...' : 'Release Hold'}
                                                             </button>
@@ -814,119 +841,417 @@ export default function ProfilePage() {
                     </div>
                 )}
 
-                {/* Reviews Tab */}
-                {activeTab === "reviews" && (
+                {/* Wishlist Tab */}
+                {activeTab === "wishlist" && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-semibold text-gray-900">My Reviews</h2>
-                            <p className="text-sm text-gray-500 mt-1">{reviews.length} reviews written</p>
+                            <h2 className="text-lg font-semibold text-gray-900">My Wishlist</h2>
+                            <p className="text-sm text-gray-500 mt-1">{wishlist.length} saved tours</p>
                         </div>
-                        {reviews.length === 0 ? (
+                        {wishlist.length === 0 ? (
                             <div className="p-12 text-center">
-                                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                <svg
+                                    className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={1}
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
                                 </svg>
-                                <h3 className="font-medium text-gray-900 mb-1">No reviews yet</h3>
-                                <p className="text-gray-500">Complete a tour to leave a review!</p>
+                                <h3 className="font-medium text-gray-900 mb-1">Your wishlist is empty</h3>
+                                <p className="text-gray-500 mb-4">Start exploring our tours to find your dream adventure!</p>
+                                <Link
+                                    href="/tours"
+                                    className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
+                                >
+                                    Explore Tours
+                                </Link>
                             </div>
                         ) : (
-                            <div className="divide-y divide-gray-100">
-                                {reviews.map((review) => (
-                                    <div key={review._id} className="p-6">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <Link href={`/tours/${review.tour.slug}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                                                {review.tour.name}
-                                            </Link>
-                                            <div className="flex items-center gap-1">
-                                                {[...Array(5)].map((_, i) => (
-                                                    <svg
-                                                        key={i}
-                                                        className={`w-4 h-4 ${i < review.rating ? "text-yellow-400" : "text-gray-200"}`}
-                                                        fill="currentColor"
-                                                        viewBox="0 0 20 20"
-                                                    >
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                    </svg>
-                                                ))}
+                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {wishlist.map((tour) => {
+                                    const primaryImage =
+                                        tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
+                                    const discountedPrice =
+                                        tour.price.discountPercent > 0
+                                            ? tour.price.amount * (1 - tour.price.discountPercent / 100)
+                                            : tour.price.amount;
+
+                                    return (
+                                        <Link href={`/tours/${tour.slug}`} key={tour._id}>
+                                            <div className="group bg-white border rounded-xl overflow-hidden transition-all duration-300 transform cursor-pointer h-full flex flex-col hover:shadow-lg">
+                                                {/* Image Container */}
+                                                <div className="relative w-full h-48 overflow-hidden bg-gray-100">
+                                                    {primaryImage?.url ? (
+                                                        <div className="relative w-full h-full">
+                                                            <img
+                                                                src={primaryImage.url}
+                                                                alt={primaryImage.caption || tour.name}
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                                            <svg
+                                                                className="w-12 h-12 text-gray-400"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={1}
+                                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                />
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="p-4 flex-1 flex flex-col">
+                                                    {/* Duration Badge */}
+                                                    <div className="mb-2">
+                                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                                            {tour.duration.days} DAYS
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Tour Name */}
+                                                    <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                                                        {tour.name}
+                                                    </h3>
+
+                                                    {/* Spacing for push to bottom */}
+                                                    <div className="flex-1"></div>
+
+                                                    {/* Price Section */}
+                                                    <div className="flex items-baseline gap-1.5 mb-3">
+                                                        <span className="text-lg font-bold text-gray-900">
+                                                            ${Math.round(discountedPrice)}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">per person</span>
+                                                    </div>
+
+                                                    {/* CTA Button */}
+                                                    <button className="w-full bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 text-sm font-medium py-1.5 px-3 rounded-lg transition-all duration-200">
+                                                        View Details
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <p className="text-gray-600 text-sm">{review.review}</p>
-                                        <p className="text-xs text-gray-400 mt-2">{formatDate(review.createdAt)}</p>
-                                    </div>
-                                ))}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
                 )}
 
-                {/* Settings Tab */}
-                {activeTab === "settings" && (
-                    <div className="max-w-2xl">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Settings</h2>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                                    <div>
-                                        <h3 className="font-medium text-gray-900">Email Address</h3>
-                                        <p className="text-sm text-gray-500">{user.email}</p>
-                                    </div>
-                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Verified</span>
+
+                {/* Reviews Tab */}
+                {
+                    activeTab === "reviews" && (
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                            <div className="p-6 border-b border-gray-100">
+                                <h2 className="text-lg font-semibold text-gray-900">My Reviews</h2>
+                                <p className="text-sm text-gray-500 mt-1">{reviews.length} reviews written</p>
+                            </div>
+                            {reviews.length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                    </svg>
+                                    <h3 className="font-medium text-gray-900 mb-1">No reviews yet</h3>
+                                    <p className="text-gray-500">Complete a tour to leave a review!</p>
                                 </div>
-                                <div className="py-3">
-                                    <h3 className="font-medium text-gray-900 mb-4">Change Password</h3>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {reviews.map((review) => (
+                                        <div key={review._id} className="p-6">
+                                            <div className="flex items-start justify-between mb-3">
+                                                <Link href={`/tours/${review.tour.slug}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                                    {review.tour.name}
+                                                </Link>
+                                                <div className="flex items-center gap-1">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <svg
+                                                            key={i}
+                                                            className={`w-4 h-4 ${i < review.rating ? "text-yellow-400" : "text-gray-200"}`}
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-600 text-sm">{review.review}</p>
+                                            <p className="text-xs text-gray-400 mt-2">{formatDate(review.createdAt)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )
+                }
+
+
+
+                {/* NBA Club Tab */}
+                {
+                    activeTab === "nba club" && (
+                        <div className="max-w-4xl mx-auto space-y-8">
+                            {/* Wallet & Status Card */}
+                            <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                                <div className="relative z-10">
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                                        <div>
+                                            <h2 className="text-3xl font-bold mb-2">NBA Club Membership</h2>
+                                            <p className="text-gray-400">Unlock exclusive rewards as you travel</p>
+                                        </div>
+                                        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 min-w-[200px] border border-white/20">
+                                            <p className="text-sm text-gray-300 font-medium mb-1">Wallet Balance</p>
+                                            <div className="text-3xl font-bold text-amber-400 flex items-center">
+                                                <span className="text-xl mr-1">$</span>
+                                                {(user.walletBalance || 0).toLocaleString()}
+                                            </div>
+                                            {user.walletExpiresAt && (
+                                                <p className="text-xs text-red-500 font-semibold mt-1">
+                                                    Expires {new Date(user.walletExpiresAt).toLocaleDateString()}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-gray-400 mt-2">Available for your next adventure</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar logic */}
+                                    {(() => {
+                                        const completedTours = bookings.filter(b => b.status === "completed" || b.status === "confirmed").length; // Include confirmed for now to show progress
+                                        const levels = [
+                                            { name: "Explorer", min: 0, max: 3, next: 4, credit: 0 },
+                                            { name: "Silver Traveler", min: 4, max: 9, next: 10, credit: 100 },
+                                            { name: "Gold Explorer", min: 10, max: 14, next: 15, credit: 150 },
+                                            { name: "Platinum Adventurer", min: 15, max: Infinity, next: null, credit: 250 }
+                                        ];
+
+                                        const currentLevel = levels.find(l => completedTours >= l.min && completedTours <= l.max) || levels[levels.length - 1];
+                                        const nextLevel = levels[levels.indexOf(currentLevel) + 1];
+                                        const progress = nextLevel
+                                            ? ((completedTours - currentLevel.min) / (nextLevel.min - currentLevel.min)) * 100
+                                            : 100;
+
+                                        return (
+                                            <div>
+                                                <div className="flex justify-between items-end mb-3">
+                                                    <div>
+                                                        <p className="text-sm text-gray-300 mb-1">Current Status</p>
+                                                        <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500">
+                                                            {currentLevel.name}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-2xl font-bold">{completedTours}</p>
+                                                        <p className="text-xs text-gray-400">Total Tours Completed</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Progress Bar */}
+                                                <div className="h-4 bg-gray-700/50 rounded-full overflow-hidden mb-2 border border-white/10">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out relative"
+                                                        style={{ width: `${Math.min(100, Math.max(0, nextLevel ? ((completedTours / nextLevel.min) * 100) : 100))}%` }}
+                                                    >
+                                                        <div className="absolute inset-0 bg-white/20 w-full h-full animate-[shimmer_2s_infinite]"></div>
+                                                    </div>
+                                                </div>
+
+                                                {nextLevel && (
+                                                    <p className="text-sm text-gray-400 text-center">
+                                                        {nextLevel.min - completedTours} more tours to reach <span className="text-white font-semibold">{nextLevel.name}</span>
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* Benefits Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <span className="text-6xl">🥈</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Silver Traveler</h3>
+                                    <p className="text-sm text-blue-600 font-semibold mb-4">4-9 Tours</p>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-center text-sm text-gray-600">
+                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Balance Topped Up to <span className="font-bold ml-1">$100 USD</span>
+                                        </li>
+                                        <li className="flex items-center text-sm text-gray-600">
+                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Early Access to Deals
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-6 border border-amber-100 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform bg-gradient-to-b from-amber-50/50 to-white">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <span className="text-6xl">🥇</span>
+                                    </div>
+                                    <div className="absolute -top-3 -right-3 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rotate-12 shadow-sm">POPULAR</div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Gold Explorer</h3>
+                                    <p className="text-sm text-amber-600 font-semibold mb-4">10-14 Tours</p>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-center text-sm text-gray-600">
+                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Balance Topped Up to <span className="font-bold ml-1">$150 USD</span>
+                                        </li>
+                                        <li className="flex items-center text-sm text-gray-600">
+                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Priority Support
+                                        </li>
+                                        <li className="flex items-center text-sm text-gray-600">
+                                            <span className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Free Cancellation Flex
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <div className="bg-gray-900 text-white rounded-2xl p-6 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                        <span className="text-6xl">💎</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white mb-1">Platinum Adventurer</h3>
+                                    <p className="text-sm text-blue-400 font-semibold mb-4">15+ Tours</p>
+                                    <ul className="space-y-3">
+                                        <li className="flex items-center text-sm text-gray-300">
+                                            <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Balance Topped Up to <span className="font-bold text-white ml-1">$250 USD</span>
+                                        </li>
+                                        <li className="flex items-center text-sm text-gray-300">
+                                            <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Private Concierge
+                                        </li>
+                                        <li className="flex items-center text-sm text-gray-300">
+                                            <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs mr-3">✓</span>
+                                            Exclusive Events Invite
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Fine Print */}
+                            <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                                <div className="flex gap-4 items-start">
+                                    <div className="flex-shrink-0 text-blue-500 mt-1">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
                                     <div className="space-y-3">
-                                        <input
-                                            type="password"
-                                            placeholder="Current Password"
-                                            value={passwordForm.currentPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="New Password"
-                                            value={passwordForm.newPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
-                                        />
-                                        <input
-                                            type="password"
-                                            placeholder="Confirm New Password"
-                                            value={passwordForm.confirmPassword}
-                                            onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                            className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
-                                        />
-                                        <button
-                                            onClick={handlePasswordChange}
-                                            disabled={changingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
-                                            className="w-full bg-gray-900 hover:bg-black text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                                        >
-                                            {changingPassword ? "Updating..." : "Update Password"}
-                                        </button>
+                                        <h4 className="text-base font-semibold text-blue-900">Credit Usage & Validity</h4>
+                                        <ul className="list-disc list-outside ml-4 space-y-2 text-sm text-blue-800">
+                                            <li>
+                                                <span className="font-semibold">Booking Window:</span> Credit must be used to book a tour within <span className="font-semibold">12 months</span> from the issue date.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold">Departure Window:</span> The selected tour must depart within <span className="font-semibold">24 months</span> from the credit issue date.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold">Single Use Only:</span> Credits cannot be stacked. Only one credit can be applied per tour booking.
+                                            </li>
+                                            <li>
+                                                <span className="font-semibold">Top-Up Logic:</span> Members earn credits upon returning home from a milestone tour. If your current balance is lower than the new milestone credit, your account will be <span className="font-semibold">topped up</span> to reach the new total (e.g., $50 current + $100 top-up = $150 total). Any unused balance gets refreshed with the new credit's validity period.
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    )
+                }
 
-                        <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
-                            <h2 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h2>
-                            <p className="text-sm text-red-700 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
-                            <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm">
-                                Delete Account
-                            </button>
+                {/* Settings Tab */}
+                {
+                    activeTab === "settings" && (
+                        <div className="max-w-2xl">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                                <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Settings</h2>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <div>
+                                            <h3 className="font-medium text-gray-900">Email Address</h3>
+                                            <p className="text-sm text-gray-500">{user.email}</p>
+                                        </div>
+                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Verified</span>
+                                    </div>
+                                    <div className="py-3">
+                                        <h3 className="font-medium text-gray-900 mb-4">Change Password</h3>
+                                        <div className="space-y-3">
+                                            <input
+                                                type="password"
+                                                placeholder="Current Password"
+                                                value={passwordForm.currentPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                                                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                                            />
+                                            <input
+                                                type="password"
+                                                placeholder="New Password"
+                                                value={passwordForm.newPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                                            />
+                                            <input
+                                                type="password"
+                                                placeholder="Confirm New Password"
+                                                value={passwordForm.confirmPassword}
+                                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                                className="w-full px-4 py-2.5 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                                            />
+                                            <button
+                                                onClick={handlePasswordChange}
+                                                disabled={changingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
+                                                className="w-full bg-gray-900 hover:bg-black text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                            >
+                                                {changingPassword ? "Updating..." : "Update Password"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-red-50 rounded-2xl border border-red-100 p-6">
+                                <h2 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h2>
+                                <p className="text-sm text-red-700 mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+                                <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition text-sm">
+                                    Delete Account
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )
+                }
+            </div >
 
             {/* Booking Details Modal */}
-            {selectedBooking && (
-                <BookingDetailsModal
-                    booking={selectedBooking}
-                    onClose={() => setSelectedBooking(null)}
-                />
-            )}
-        </div>
+            {
+                selectedBooking && (
+                    <BookingDetailsModal
+                        booking={selectedBooking}
+                        onClose={() => setSelectedBooking(null)}
+                    />
+                )
+            }
+        </div >
     );
 }
 

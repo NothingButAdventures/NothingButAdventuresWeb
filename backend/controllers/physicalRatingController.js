@@ -89,11 +89,7 @@ const deletePhysicalRating = catchAsync(async (req, res, next) => {
         return next(new AppError(`Cannot delete this physical rating. ${toursUsingRating} tour(s) are using it. Please reassign or delete those tours first.`, 400));
     }
 
-    const physicalRating = await PhysicalRating.findByIdAndUpdate(
-        req.params.id,
-        { isActive: false },
-        { new: true }
-    );
+    const physicalRating = await PhysicalRating.findByIdAndDelete(req.params.id);
 
     if (!physicalRating) {
         return next(new AppError('No physical rating found with that ID', 404));

@@ -51,7 +51,7 @@ const getPopularCountries = catchAsync(async (req, res, next) => {
   const countries = await Country.find({ isActive: true })
     .sort('-statistics.popularityScore -statistics.totalTours')
     .limit(10)
-    .select('name slug shortDescription images statistics');
+    .select('name slug shortDescription image statistics');
 
   res.status(200).json({
     status: 'success',
@@ -90,7 +90,7 @@ const getCountriesByContinent = catchAsync(async (req, res, next) => {
 
   const countries = await Country.find(filter)
     .sort('name')
-    .select('name slug shortDescription images statistics');
+    .select('name slug shortDescription image statistics');
 
   res.status(200).json({
     status: 'success',
@@ -117,7 +117,7 @@ const searchCountries = catchAsync(async (req, res, next) => {
 
   const countries = await Country.find(query)
     .sort('name')
-    .select('name slug shortDescription images statistics');
+    .select('name slug shortDescription image statistics');
 
   res.status(200).json({
     status: 'success',

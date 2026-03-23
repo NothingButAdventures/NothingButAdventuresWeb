@@ -28,6 +28,8 @@ const physicalRatingRoutes = require("./routes/physicalRatingRoutes");
 const tripTypeRoutes = require("./routes/tripTypeRoutes");
 const discountRoutes = require("./routes/discountRoutes");
 const holdSpaceRoutes = require("./routes/holdSpaceRoutes");
+const queryRoutes = require("./routes/queryRoutes");
+const promoCodeRoutes = require("./routes/promoCodeRoutes");
 
 // Load environment variables
 require("dotenv").config();
@@ -124,6 +126,8 @@ app.use("/api/v1/physical-ratings", physicalRatingRoutes);
 app.use("/api/v1/trip-types", tripTypeRoutes);
 app.use("/api/v1/discounts", discountRoutes);
 app.use("/api/v1/hold-spaces", holdSpaceRoutes);
+app.use("/api/v1/queries", queryRoutes);
+app.use("/api/v1/promo-codes", promoCodeRoutes);
 
 // Handle undefined routes
 app.all("*", (req, res, next) => {

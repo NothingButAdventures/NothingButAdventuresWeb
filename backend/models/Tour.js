@@ -6,6 +6,7 @@ const tourSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "A tour must have a name"],
+
       trim: true,
       maxlength: [200, "Tour name cannot exceed 200 characters"],
     },
@@ -16,16 +17,13 @@ const tourSchema = new mongoose.Schema(
     country: {
       type: mongoose.Schema.ObjectId,
       ref: "Country",
-      required: [true, "Tour must belong to a country"],
     },
     summary: {
       type: String,
-      required: [true, "A tour must have a summary"],
       trim: true,
     },
     description: {
       type: String,
-      required: [true, "A tour must have a description"],
       trim: true,
     },
     descriptionImage: {
@@ -39,7 +37,6 @@ const tourSchema = new mongoose.Schema(
     duration: {
       days: {
         type: Number,
-        required: [true, "A tour must have duration in days"],
         min: [1, "Duration must be at least 1 day"],
       },
       nights: {
@@ -49,7 +46,6 @@ const tourSchema = new mongoose.Schema(
     },
     maxGroupSize: {
       type: Number,
-      required: [true, "A tour must have a group size"],
       min: [1, "Group size must be at least 1"],
       max: [50, "Group size cannot exceed 50"],
     },
@@ -57,7 +53,6 @@ const tourSchema = new mongoose.Schema(
     physicalRating: {
       level: {
         type: Number,
-        required: true,
         min: 1,
         max: 5,
       },
@@ -66,11 +61,9 @@ const tourSchema = new mongoose.Schema(
     price: {
       amount: {
         type: Number,
-        required: [true, "A tour must have a price"],
       },
       currency: {
         type: String,
-        required: true,
         default: "USD",
       },
 
@@ -96,7 +89,6 @@ const tourSchema = new mongoose.Schema(
       {
         url: {
           type: String,
-          required: true,
         },
         caption: {
           type: String,
@@ -112,15 +104,12 @@ const tourSchema = new mongoose.Schema(
       {
         startDate: {
           type: Date,
-          required: true,
         },
         endDate: {
           type: Date,
-          required: true,
         },
         availableSpots: {
           type: Number,
-          required: true,
         },
         discount: {
           type: String,
@@ -136,16 +125,13 @@ const tourSchema = new mongoose.Schema(
       {
         day: {
           type: Number,
-          required: true,
         },
         title: {
           type: String,
-          required: true,
           trim: true,
         },
         description: {
           type: String,
-          required: true,
           trim: true,
         },
 
@@ -153,27 +139,22 @@ const tourSchema = new mongoose.Schema(
           {
             name: {
               type: String,
-              required: true,
               trim: true,
             },
             description: {
               type: String,
-              required: true,
               trim: true,
             },
             placeName: {
               type: String,
-              required: true,
               trim: true,
             },
             duration: {
               type: String,
-              required: true,
               trim: true,
             },
             icon: {
               type: String,
-              required: true,
               enum: [
                 "MapPin",
                 "Bus",
@@ -196,13 +177,11 @@ const tourSchema = new mongoose.Schema(
           {
             name: {
               type: String,
-              required: true,
               trim: true,
             },
             price: {
               amount: {
                 type: Number,
-                required: true,
               },
               currency: {
                 type: String,
@@ -211,22 +190,18 @@ const tourSchema = new mongoose.Schema(
             },
             place: {
               type: String,
-              required: true,
               trim: true,
             },
             description: {
               type: String,
-              required: true,
               trim: true,
             },
             duration: {
               type: String,
-              required: true,
               trim: true,
             },
             icon: {
               type: String,
-              required: true,
               enum: [
                 "MapPin",
                 "Bus",
@@ -249,12 +224,10 @@ const tourSchema = new mongoose.Schema(
           {
             name: {
               type: String,
-              required: true,
               trim: true,
             },
             type: {
               type: String,
-              required: true,
               enum: ["Hotel", "Lounge", "Cottage", "Guestroom", "Camp"],
             },
             rating: {
@@ -317,7 +290,6 @@ const tourSchema = new mongoose.Schema(
     exclusions: [String],
     travelStyle: {
       type: String,
-      required: [true, "A tour must have a travel style"],
       trim: true,
     },
     tripType: {
@@ -326,7 +298,6 @@ const tourSchema = new mongoose.Schema(
     },
     serviceLevel: {
       type: String,
-      required: [true, "A tour must have a service level"],
       enum: ["Standard", "Comfort", "Premium", "Luxury"],
     },
 
@@ -363,12 +334,10 @@ const tourSchema = new mongoose.Schema(
     location: {
       startCity: {
         type: String,
-        required: true,
         trim: true,
       },
       endCity: {
         type: String,
-        required: true,
         trim: true,
       },
       visitedCities: [String],
@@ -394,12 +363,10 @@ const tourSchema = new mongoose.Schema(
       {
         question: {
           type: String,
-          required: true,
           trim: true,
         },
         answer: {
           type: String,
-          required: true,
           trim: true,
         },
       },

@@ -89,11 +89,7 @@ const deleteTravelStyle = catchAsync(async (req, res, next) => {
         return next(new AppError(`Cannot delete this travel style. ${toursUsingStyle} tour(s) are using it. Please reassign or delete those tours first.`, 400));
     }
 
-    const travelStyle = await TravelStyle.findByIdAndUpdate(
-        req.params.id,
-        { isActive: false },
-        { new: true }
-    );
+    const travelStyle = await TravelStyle.findByIdAndDelete(req.params.id);
 
     if (!travelStyle) {
         return next(new AppError('No travel style found with that ID', 404));

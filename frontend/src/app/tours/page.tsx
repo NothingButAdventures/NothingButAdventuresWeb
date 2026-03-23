@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import ToursLoading from "./loading";
+import TourCard from "@/components/TourCard";
 
 interface Tour {
   _id: string;
@@ -87,80 +88,10 @@ export default function ToursPage() {
           </p>
         </div>
 
-        {/* Tours Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredTours.map((tour) => {
-            const primaryImage =
-              tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
-            const discountedPrice =
-              tour.price.discountPercent > 0
-                ? tour.price.amount * (1 - tour.price.discountPercent / 100)
-                : tour.price.amount;
-
-            return (
-              <Link href={`/tours/${tour.slug}`} key={tour._id}>
-                <div className="group bg-white border rounded-xl  overflow-hidden  transition-all duration-300 transform  cursor-pointer h-full flex flex-col">
-                  {/* Image Container */}
-                  <div className="relative w-full h-64 overflow-hidden bg-gray-100">
-                    {primaryImage?.url ? (
-                      <img
-                        src={primaryImage.url}
-                        alt={primaryImage.caption || tour.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                        <svg
-                          className="w-16 h-16 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    {/* Duration Badge */}
-                    <div className="mb-3">
-                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                        {tour.duration.days} Day Tour
-                      </span>
-                    </div>
-
-                    {/* Tour Name */}
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-                      {tour.name}
-                    </h3>
-
-                    {/* Spacing for push to bottom */}
-                    <div className="flex-1"></div>
-
-                    {/* Price Section */}
-                    <div className="flex items-baseline gap-2 mb-4">
-                      <span className="text-3xl font-bold text-gray-900">
-                        ${Math.round(discountedPrice)}
-                      </span>
-                      <span className="text-sm text-gray-600">per person</span>
-                    </div>
-
-                    {/* CTA Button */}
-                    <button className="w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition-all duration-200">
-                      View itinerary
-                    </button>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredTours.map((tour) => (
+            <TourCard key={tour._id} tour={tour} />
+          ))}
         </div>
 
         {filteredTours.length === 0 && !loading && (

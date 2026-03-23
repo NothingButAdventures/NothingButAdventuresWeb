@@ -276,8 +276,8 @@ export default function ToursManagementPage() {
                       <div className="flex items-center gap-2">
                         <span
                           className={`px-2.5 py-1 text-xs font-medium rounded-full ${tour.isActive
-                              ? "bg-green-50 text-green-700"
-                              : "bg-gray-100 text-gray-600"
+                            ? "bg-green-50 text-green-700"
+                            : "bg-gray-100 text-gray-600"
                             }`}
                         >
                           {tour.isActive ? "Active" : "Inactive"}

@@ -12,5 +12,8 @@
       ],
       "runtime": "nodejs22"
     }
-  ]
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  }
 }

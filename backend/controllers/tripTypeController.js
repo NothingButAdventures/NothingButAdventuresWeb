@@ -89,11 +89,7 @@ const deleteTripType = catchAsync(async (req, res, next) => {
         return next(new AppError(`Cannot delete this trip type. ${toursUsingType} tour(s) are using it. Please reassign or delete those tours first.`, 400));
     }
 
-    const tripType = await TripType.findByIdAndUpdate(
-        req.params.id,
-        { isActive: false },
-        { new: true }
-    );
+    const tripType = await TripType.findByIdAndDelete(req.params.id);
 
     if (!tripType) {
         return next(new AppError('No trip type found with that ID', 404));

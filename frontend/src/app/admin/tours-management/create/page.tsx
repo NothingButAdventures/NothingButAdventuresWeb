@@ -3,11 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import {
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  SUPABASE_BUCKET,
-} from "@/lib/supabase";
+import { uploadTourImage } from "@/lib/firebase";
+import { Toaster, toast } from "react-hot-toast";
 
 interface Country {
   _id: string;
@@ -278,29 +275,7 @@ export default function CreateTourPage() {
   };
 
   const uploadImageToSupabase = async (file: File): Promise<string> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-    const filePath = `tours/${fileName}`;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch(
-      `${SUPABASE_URL}/storage/v1/object/${SUPABASE_BUCKET}/${filePath}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: formData,
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to upload image");
-    }
-
-    return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/${filePath}`;
+    return await uploadTourImage(file);
   };
 
   const removeImage = (index: number) => {
@@ -578,16 +553,13 @@ export default function CreateTourPage() {
 
     if (
       !formData.name ||
-      !formData.summary ||
-      !formData.description ||
-      !formData.country
+      !formData.country ||
+      !formData.physicalRatingLevel ||
+      !formData.travelStyle ||
+      !formData.tripType ||
+      !formData.priceAmount
     ) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    if (images.length === 0) {
-      alert("Please add at least one image");
+      toast.error("Please fill in all required fields: Tour Name, Country, Physical Rating, Travel Style, Trip Type, and Base Price");
       return;
     }
 
@@ -655,25 +627,25 @@ export default function CreateTourPage() {
         description: formData.description,
         descriptionImage: descriptionImageUrl,
         itineraryMapImage: itineraryMapImageUrl,
-        country: formData.country,
+        country: formData.country || undefined,
         duration: {
-          days: parseInt(formData.durationDays),
+          days: parseInt(formData.durationDays) || undefined,
         },
-        maxGroupSize: parseInt(formData.maxGroupSize),
+        maxGroupSize: parseInt(formData.maxGroupSize) || undefined,
         physicalRating: {
-          level: parseInt(formData.physicalRatingLevel),
+          level: parseInt(formData.physicalRatingLevel) || undefined,
         },
         price: {
-          amount: parseFloat(formData.priceAmount),
-          currency: formData.priceCurrency,
-          bookingPercentage: parseFloat(formData.bookingPercentage),
+          amount: parseFloat(formData.priceAmount) || undefined,
+          currency: formData.priceCurrency || "USD",
+          bookingPercentage: parseFloat(formData.bookingPercentage) || 20,
         },
-        travelStyle: formData.travelStyle,
-        tripType: formData.tripType,
+        travelStyle: formData.travelStyle || undefined,
+        tripType: formData.tripType || undefined,
         serviceLevel: "Standard",
         location: {
-          startCity: formData.startCity,
-          endCity: formData.endCity,
+          startCity: formData.startCity || undefined,
+          endCity: formData.endCity || undefined,
           visitedCities: visitedCitiesArray,
         },
         highlights: highlightsArray,
@@ -685,14 +657,14 @@ export default function CreateTourPage() {
         images: validImages,
         itinerary: itineraryWithImages,
         startDates: availableDates.map((ad) => ({
-          startDate: new Date(ad.startDate),
-          endDate: new Date(ad.endDate),
-          availableSpots: ad.availableSpots,
-          discount: ad.discount,
+          startDate: ad.startDate ? new Date(ad.startDate) : undefined,
+          endDate: ad.endDate ? new Date(ad.endDate) : undefined,
+          availableSpots: ad.availableSpots || undefined,
+          discount: ad.discount || undefined,
           isActive: true,
-        })),
+        })).filter((ad) => ad.startDate && ad.endDate),
         ageRequirement: {
-          min: parseInt(formData.ageMin),
+          min: parseInt(formData.ageMin) || 0,
         },
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
@@ -708,15 +680,15 @@ export default function CreateTourPage() {
       });
 
       if (response.ok) {
-        alert("Tour created successfully!");
+        toast.success("Tour created successfully!");
         router.push("/admin/tours-management");
       } else {
         const data = await response.json();
-        alert(`Failed to create tour: ${data.message}`);
+        toast.error(`Failed to create tour: ${data.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error creating tour:", error);
-      alert("Failed to create tour. Please try again.");
+      toast.error("Failed to create tour. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -735,6 +707,7 @@ export default function CreateTourPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <Toaster position="top-right" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
@@ -771,13 +744,12 @@ export default function CreateTourPage() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Summary <span className="text-red-500">*</span>
+                    Summary 
                   </label>
                   <textarea
                     name="summary"
                     value={formData.summary}
                     onChange={handleChange}
-                    required
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="Brief summary"
@@ -786,13 +758,12 @@ export default function CreateTourPage() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description <span className="text-red-500">*</span>
+                    Description 
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    required
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="Detailed description"
@@ -935,10 +906,10 @@ export default function CreateTourPage() {
                     Country <span className="text-red-500">*</span>
                   </label>
                   <select
+                    required
                     name="country"
                     value={formData.country}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
                     <option value="">Select country</option>
@@ -952,14 +923,13 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Max Group Size <span className="text-red-500">*</span>
+                    Max Group Size 
                   </label>
                   <input
                     type="number"
                     name="maxGroupSize"
                     value={formData.maxGroupSize}
                     onChange={handleChange}
-                    required
                     min="1"
                     max="50"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
@@ -969,14 +939,13 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (Days) <span className="text-red-500">*</span>
+                    Duration (Days) 
                   </label>
                   <input
                     type="number"
                     name="durationDays"
                     value={formData.durationDays}
                     onChange={handleChange}
-                    required
                     min="1"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="7"
@@ -987,14 +956,14 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Physical Rating{" "}
-                    <span className="text-red-500">*</span>
+                    Physical Rating{" "} <span className="text-red-500">*</span>
+                    
                   </label>
                   <select
+                    required
                     name="physicalRatingLevel"
                     value={formData.physicalRatingLevel}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
                     <option value="">Select physical rating...</option>
@@ -1011,10 +980,10 @@ export default function CreateTourPage() {
                     Travel Style <span className="text-red-500">*</span>
                   </label>
                   <select
+                    required
                     name="travelStyle"
                     value={formData.travelStyle}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
                     <option value="">Select travel style...</option>
@@ -1031,10 +1000,10 @@ export default function CreateTourPage() {
                     Trip Type <span className="text-red-500">*</span>
                   </label>
                   <select
+                    required
                     name="tripType"
                     value={formData.tripType}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                   >
                     <option value="">Select trip type...</option>
@@ -1048,14 +1017,13 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start City <span className="text-red-500">*</span>
+                    Start City 
                   </label>
                   <input
                     type="text"
                     name="startCity"
                     value={formData.startCity}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="Kathmandu"
                   />
@@ -1063,14 +1031,13 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End City <span className="text-red-500">*</span>
+                    End City 
                   </label>
                   <input
                     type="text"
                     name="endCity"
                     value={formData.endCity}
                     onChange={handleChange}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     placeholder="Kathmandu"
                   />
@@ -1342,11 +1309,11 @@ export default function CreateTourPage() {
                   Base Price <span className="text-red-500">*</span>
                 </label>
                 <input
+                  required
                   type="number"
                   name="priceAmount"
                   value={formData.priceAmount}
                   onChange={handleChange}
-                  required
                   min="0"
                   step="0.01"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
@@ -1356,13 +1323,12 @@ export default function CreateTourPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Currency <span className="text-red-500">*</span>
+                  Currency 
                 </label>
                 <select
                   name="priceCurrency"
                   value={formData.priceCurrency}
                   onChange={handleChange}
-                  required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                 >
                   <option value="USD">USD</option>
@@ -1434,7 +1400,7 @@ export default function CreateTourPage() {
                       onChange={(e) =>
                         updateItinerary(dayIndex, "title", e.target.value)
                       }
-                      placeholder="Day title (e.g., Arrival in Paris)"
+                      placeholder="Day title (e.g., Arrival in Paris) *"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
                     <textarea
@@ -1442,7 +1408,7 @@ export default function CreateTourPage() {
                       onChange={(e) =>
                         updateItinerary(dayIndex, "description", e.target.value)
                       }
-                      placeholder="Day description"
+                      placeholder="Day description *"
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
@@ -1495,7 +1461,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Activity name"
+                              placeholder="Activity name *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <input
@@ -1509,7 +1475,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Place name"
+                              placeholder="Place name *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <input
@@ -1523,7 +1489,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Duration (e.g., 2 hours)"
+                              placeholder="Duration (e.g., 2 hours) *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <select
@@ -1562,7 +1528,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Activity description"
+                              placeholder="Activity description *"
                               rows={2}
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 md:col-span-2"
                             />
@@ -1620,7 +1586,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Optional activity name"
+                              placeholder="Optional activity name *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <input
@@ -1634,7 +1600,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Place"
+                              placeholder="Place *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <input
@@ -1648,7 +1614,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Duration"
+                              placeholder="Duration *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <div className="flex gap-2">
@@ -1663,7 +1629,7 @@ export default function CreateTourPage() {
                                     parseFloat(e.target.value),
                                   )
                                 }
-                                placeholder="Price"
+                                placeholder="Price *"
                                 step="0.01"
                                 min="0"
                                 className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
@@ -1722,7 +1688,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Optional activity description"
+                              placeholder="Optional activity description *"
                               rows={2}
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 lg:col-span-3"
                             />
@@ -1780,7 +1746,7 @@ export default function CreateTourPage() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="Accommodation name"
+                              placeholder="Accommodation name *"
                               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
                             />
                             <select

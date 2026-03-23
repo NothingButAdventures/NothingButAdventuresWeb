@@ -11,13 +11,9 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
+import { uploadPhysicalRatingImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
 
-// --- Configuration ---
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const BUCKET_NAME = "location-image";
 
 // --- Types ---
 interface PhysicalRating {
@@ -135,21 +131,7 @@ export default function EditPhysicalRatingPage() {
 
     const uploadImageToSupabase = async (file: File): Promise<string | null> => {
         try {
-            const fileExt = file.name.split(".").pop();
-            const fileName = `physical-rating-${id}-${Date.now()}.${fileExt}`;
-            const filePath = `${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from(BUCKET_NAME)
-                .upload(filePath, file);
-
-            if (uploadError) throw uploadError;
-
-            const { data } = supabase.storage
-                .from(BUCKET_NAME)
-                .getPublicUrl(filePath);
-
-            return data.publicUrl;
+            return await uploadPhysicalRatingImage(file);
         } catch (error) {
             console.error("Upload error:", error);
             alert("Failed to upload image.");
@@ -281,11 +263,11 @@ export default function EditPhysicalRatingPage() {
                                     onChange={(e) => setLevel(Number(e.target.value))}
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                                 >
-                                    <option value={1}>1 - Easy</option>
-                                    <option value={2}>2 - Moderate</option>
-                                    <option value={3}>3 - Challenging</option>
-                                    <option value={4}>4 - Difficult</option>
-                                    <option value={5}>5 - Expert</option>
+                                    <option value={1}>1</option>
+                                    <option value={2}>2</option>
+                                    <option value={3}>3</option>
+                                    <option value={4}>4</option>
+                                    <option value={5}>5</option>
                                 </select>
                                 <div className="flex gap-1 mt-2">
                                     {[1, 2, 3, 4, 5].map((lvl) => (

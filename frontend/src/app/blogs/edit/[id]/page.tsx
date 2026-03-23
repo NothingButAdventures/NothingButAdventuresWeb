@@ -11,11 +11,8 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
-import { createClient } from "@supabase/supabase-js";
 import { api } from "@/lib/api";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { uploadBlogImage } from "@/lib/firebase";
 
 const CATEGORIES = [
     "Active Travel",
@@ -295,24 +292,7 @@ export default function EditBlogPage({
 
     const uploadImage = async (file: File): Promise<string | null> => {
         try {
-            const fileExt = file.name.split(".").pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-            const filePath = `blogs/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from("blog-images")
-                .upload(filePath, file);
-
-            if (uploadError) {
-                console.error("Upload error:", uploadError);
-                throw uploadError;
-            }
-
-            const { data } = supabase.storage
-                .from("blog-images")
-                .getPublicUrl(filePath);
-
-            return data.publicUrl;
+            return await uploadBlogImage(file);
         } catch (error) {
             console.error("Failed to upload image:", error);
             alert("Failed to upload image. Please try again.");

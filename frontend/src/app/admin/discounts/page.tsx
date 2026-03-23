@@ -237,8 +237,8 @@ export default function DiscountsPage() {
                                     <td className="px-6 py-4">
                                         <span
                                             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${discount.isActive
-                                                    ? "bg-green-100 text-green-700"
-                                                    : "bg-gray-100 text-gray-600"
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-gray-100 text-gray-600"
                                                 }`}
                                         >
                                             <span

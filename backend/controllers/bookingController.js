@@ -1,8 +1,10 @@
+const User = require('../models/User');
 const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const { checkAndApplyWalletRewards } = require('../utils/walletUtils');
 
 const getAllBookings = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Booking.find(), req.query)
@@ -143,6 +145,10 @@ const updateBooking = catchAsync(async (req, res, next) => {
       runValidators: true,
     }
   ).populate('tour user');
+
+  if (req.body.status === 'completed') {
+    await checkAndApplyWalletRewards(updatedBooking.user._id);
+  }
 
   res.status(200).json({
     status: 'success',
