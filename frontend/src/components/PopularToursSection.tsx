@@ -41,7 +41,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                 </div>
                 <div className="hidden md:flex flex-col items-end gap-3 mt-6">
                     <Link
-                        href="/tours"
+                        href="/trip"
                         className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
                     >
                         View All Trips
@@ -115,7 +115,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     </button>
                 </div>
                 <Link
-                    href="/tours"
+                    href="/trip"
                     className="inline-block font-medium text-lg text-black underline underline-offset-4 decoration-1"
                 >
                     View All Trips

@@ -9,6 +9,7 @@ interface Tour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     price: {
         amount: number;
         currency: string;
@@ -92,7 +93,7 @@ export default function WishlistPage() {
                     <>
                         <div className="mb-6">
                             <p className="text-gray-600">
-                                {filteredTours.length} tour{filteredTours.length !== 1 ? "s" : ""} found
+                                {filteredTours.length} trip{filteredTours.length !== 1 ? "s" : ""} found
                             </p>
                         </div>
 
@@ -106,7 +107,7 @@ export default function WishlistPage() {
                                         : tour.price.amount;
 
                                 return (
-                                    <Link href={`/tours/${tour.slug}`} key={tour._id}>
+                                    <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                         <div className="group bg-white border rounded-xl overflow-hidden transition-all duration-300 transform cursor-pointer h-full flex flex-col hover:shadow-lg">
                                             {/* Image Container */}
                                             <div className="relative w-full h-64 overflow-hidden bg-gray-100">
@@ -142,7 +143,7 @@ export default function WishlistPage() {
                                                 {/* Duration Badge */}
                                                 <div className="mb-3">
                                                     <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                        {tour.duration.days} Day Tour
+                                                        {tour.duration.days} Day Trip
                                                     </span>
                                                 </div>
 
@@ -192,13 +193,13 @@ export default function WishlistPage() {
                             Your wishlist is empty
                         </h3>
                         <p className="text-gray-500 mb-6">
-                            Start exploring our tours to find your dream adventure.
+                            Start exploring our trips to find your dream adventure.
                         </p>
                         <Link
-                            href="/tours"
+                            href="/trip"
                             className="inline-block bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition"
                         >
-                            Explore Tours
+                            Explore Trips
                         </Link>
                     </div>
                 )}

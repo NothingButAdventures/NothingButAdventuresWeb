@@ -90,13 +90,13 @@ export default function WalletPage() {
                             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 max-w-sm">
                                 <h3 className="text-lg font-semibold mb-2">Use your credits</h3>
                                 <p className="text-sm text-gray-300 mb-4">
-                                    Your credits can be applied to any tour booking at checkout. Start planning your next adventure today!
+                                    Your credits can be applied to any trip booking at checkout. Start planning your next adventure today!
                                 </p>
                                 <Link
-                                    href="/tours"
+                                    href="/trip"
                                     className="inline-block bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold py-2 px-6 rounded-lg transition-colors text-sm"
                                 >
-                                    Explore Tours
+                                    Explore Trips
                                 </Link>
                             </div>
                         </div>
@@ -120,14 +120,14 @@ export default function WalletPage() {
                                 <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-900">12-Month Booking Window</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">Credits must be used to book a tour within 12 months from the issue date.</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">Credits must be used to book a trip within 12 months from the issue date.</p>
                                 </div>
                             </li>
                             <li className="flex gap-3">
                                 <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></span>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-900">24-Month Departure Window</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">The tour you book must depart within 24 months of receiving your credit.</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">The trip you book must depart within 24 months of receiving your credit.</p>
                                 </div>
                             </li>
                             <li className="flex gap-3">
@@ -154,21 +154,21 @@ export default function WalletPage() {
                             <div className="p-3 bg-gray-50 rounded-xl flex justify-between items-center">
                                 <div>
                                     <p className="text-sm font-bold text-gray-900">Silver Traveler</p>
-                                    <p className="text-xs text-gray-500">4-9 Tours Completed</p>
+                                    <p className="text-xs text-gray-500">4-9 Trips Completed</p>
                                 </div>
                                 <span className="text-sm font-bold text-green-600">$100 Credit</span>
                             </div>
                             <div className="p-3 bg-amber-50 rounded-xl flex justify-between items-center border border-amber-100">
                                 <div>
                                     <p className="text-sm font-bold text-gray-900">Gold Explorer</p>
-                                    <p className="text-xs text-gray-500">10-14 Tours Completed</p>
+                                    <p className="text-xs text-gray-500">10-14 Trips Completed</p>
                                 </div>
                                 <span className="text-sm font-bold text-amber-600">$150 Credit</span>
                             </div>
                             <div className="p-3 bg-gray-900 text-white rounded-xl flex justify-between items-center">
                                 <div>
                                     <p className="text-sm font-bold">Platinum Adventurer</p>
-                                    <p className="text-xs text-gray-400">15+ Tours Completed</p>
+                                    <p className="text-xs text-gray-400">15+ Trips Completed</p>
                                 </div>
                                 <span className="text-sm font-bold text-blue-400">$250 Credit</span>
                             </div>

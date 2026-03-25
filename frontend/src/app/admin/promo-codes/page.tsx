@@ -30,6 +30,14 @@ interface TravelStyle {
 interface Country {
     _id: string;
     name: string;
+    continent?: string;
+}
+
+interface Continent {
+    _id: string;
+    id?: string;
+    name: string;
+    countries: Country[];
 }
 
 export default function PromoCodesPage() {
@@ -44,6 +52,8 @@ export default function PromoCodesPage() {
     // Lookup data
     const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
     const [countries, setCountries] = useState<Country[]>([]);
+    const [continents, setContinents] = useState<Continent[]>([]);
+    const [expandedContinents, setExpandedContinents] = useState<string[]>([]);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -63,7 +73,7 @@ export default function PromoCodesPage() {
     useEffect(() => {
         fetchPromoCodes();
         fetchTravelStyles();
-        fetchCountries();
+        fetchContinents();
     }, []);
 
     const fetchPromoCodes = async () => {
@@ -92,15 +102,18 @@ export default function PromoCodesPage() {
         }
     };
 
-    const fetchCountries = async () => {
+    const fetchContinents = async () => {
         try {
-            const res = await fetch(`${api.baseURL}${api.endpoints.countries.getAll}`);
+            const res = await fetch(`${api.baseURL}${api.endpoints.continents.getAll}`);
             const data = await res.json();
             if (data.status === "success") {
-                setCountries(data.data.countries);
+                setContinents(data.data.continents);
+                // Also flatten and set countries for other parts of the app if needed
+                const allCountries = data.data.continents.flatMap((con: Continent) => con.countries || []);
+                setCountries(allCountries);
             }
         } catch (err) {
-            console.error("Error fetching countries:", err);
+            console.error("Error fetching continents:", err);
         }
     };
 
@@ -245,6 +258,44 @@ export default function PromoCodesPage() {
                 ? prev.countries.filter((c) => c !== countryId)
                 : [...prev.countries, countryId],
         }));
+    };
+
+    const toggleContinentGroup = (continent: Continent) => {
+        const continentCountryIds = continent.countries?.map(c => c._id) || [];
+        const allSelected = continentCountryIds.every(id => formData.countries.includes(id));
+
+        if (allSelected) {
+            // Deselect all
+            setFormData(prev => ({
+                ...prev,
+                countries: prev.countries.filter(id => !continentCountryIds.includes(id))
+            }));
+        } else {
+            // Select all
+            setFormData(prev => ({
+                ...prev,
+                countries: Array.from(new Set([...prev.countries, ...continentCountryIds]))
+            }));
+        }
+    };
+
+    const isContinentFullySelected = (continent: Continent) => {
+        const continentCountryIds = continent.countries?.map(c => c._id) || [];
+        if (continentCountryIds.length === 0) return false;
+        return continentCountryIds.every(id => formData.countries.includes(id));
+    };
+
+    const isContinentPartiallySelected = (continent: Continent) => {
+        const continentCountryIds = continent.countries?.map(c => c._id) || [];
+        if (continentCountryIds.length === 0) return false;
+        const selectedCount = continentCountryIds.filter(id => formData.countries.includes(id)).length;
+        return selectedCount > 0 && selectedCount < continentCountryIds.length;
+    };
+
+    const toggleContinentExpand = (id: string) => {
+        setExpandedContinents(prev =>
+            prev.includes(id) ? prev.filter(cid => cid !== id) : [...prev, id]
+        );
     };
 
     const filteredPromoCodes = promoCodes.filter(
@@ -665,24 +716,85 @@ export default function PromoCodesPage() {
                             {/* Countries (optional) */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Countries <span className="text-gray-400 text-xs font-normal">(leave empty for all)</span>
+                                    Countries <span className="text-gray-400 text-xs font-normal">(leave empty for all tours)</span>
                                 </label>
-                                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-                                    {countries.map((country) => (
-                                        <button
-                                            type="button"
-                                            key={country._id}
-                                            onClick={() => toggleCountry(country._id)}
-                                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${formData.countries.includes(country._id)
-                                                ? "bg-black text-white border-black"
-                                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
-                                                }`}
-                                        >
-                                            {country.name}
-                                        </button>
-                                    ))}
-                                    {countries.length === 0 && (
-                                        <span className="text-sm text-gray-400">No countries available</span>
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                                    {continents.length === 0 ? (
+                                        <span className="text-sm text-gray-400">No country data available</span>
+                                    ) : (
+                                        continents.map((continent) => {
+                                            const isFullySelected = isContinentFullySelected(continent);
+                                            const isPartiallySelected = isContinentPartiallySelected(continent);
+                                            const isExpanded = expandedContinents.includes(continent._id);
+
+                                            return (
+                                                <div key={continent._id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                                                    <div 
+                                                        className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                                                        onClick={() => toggleContinentExpand(continent._id)}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div 
+                                                                className={`w-5 h-5 rounded border flex items-center justify-center transition-colors cursor-pointer ${
+                                                                    isFullySelected ? "bg-black border-black" : "bg-white border-gray-300"
+                                                                }`}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    toggleContinentGroup(continent);
+                                                                }}
+                                                            >
+                                                                {isFullySelected ? (
+                                                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                ) : isPartiallySelected ? (
+                                                                    <div className="w-2.5 h-0.5 bg-gray-400 rounded" />
+                                                                ) : null}
+                                                            </div>
+                                                            <span className="font-semibold text-gray-800 text-sm">{continent.name}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">
+                                                                {continent.countries?.filter(c => formData.countries.includes(c._id)).length || 0} / {continent.countries?.length || 0}
+                                                            </span>
+                                                            <svg className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+
+                                                    {isExpanded && (
+                                                        <div className="p-3 bg-gray-50/50 border-t border-gray-50 grid grid-cols-2 md:grid-cols-3 gap-2 animate-in slide-in-from-top-1">
+                                                            {continent.countries?.map((country) => {
+                                                                const isSelected = formData.countries.includes(country._id);
+                                                                return (
+                                                                    <button
+                                                                        type="button"
+                                                                        key={country._id}
+                                                                        onClick={() => toggleCountry(country._id)}
+                                                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                                                                            isSelected
+                                                                                ? "bg-black text-white border-black shadow-sm"
+                                                                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+                                                                        }`}
+                                                                    >
+                                                                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
+                                                                            isSelected ? "bg-white border-white" : "border-gray-200"
+                                                                        }`}>
+                                                                            {isSelected && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
+                                                                        </div>
+                                                                        <span className="truncate">{country.name}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                            {(!continent.countries || continent.countries.length === 0) && (
+                                                                <span className="text-[10px] text-gray-400 italic col-span-full">No countries in this continent</span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })
                                     )}
                                 </div>
                             </div>

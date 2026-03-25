@@ -15,6 +15,7 @@ interface Tour {
   _id: string;
   name: string;
   slug: string;
+  tourCode: string;
   price: {
     amount: number;
     currency: string;
@@ -94,7 +95,7 @@ export default function DashboardPage() {
               Welcome and get Nothing but Adventures
             </p>
             <Link
-              href="/tours"
+              href="/trip"
               className="inline-block text-blue-600 hover:text-blue-700 font-medium underline"
             >
               View more
@@ -174,10 +175,10 @@ export default function DashboardPage() {
                 and beautiful locations
               </p>
               <Link
-                href="/tours"
+                href="/trip"
                 className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-6 rounded-lg transition"
               >
-                Browse all tours
+                Browse all trips
               </Link>
             </div>
             <div
@@ -205,7 +206,7 @@ export default function DashboardPage() {
                 const primaryImage =
                   tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
                 return (
-                  <Link href={`/tours/${tour.slug}`} key={tour._id}>
+                  <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                     <div className="group bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer h-full flex flex-col">
                       {/* Image Container */}
                       <div className="relative w-full h-56 overflow-hidden bg-gray-100">
@@ -293,10 +294,10 @@ export default function DashboardPage() {
                 dream a reality
               </p>
               <Link
-                href="/tours"
+                href="/trip"
                 className="inline-block text-blue-600 hover:text-blue-700 font-medium underline"
               >
-                Browse all tours
+                Browse all trips
               </Link>
             </div>
             <div

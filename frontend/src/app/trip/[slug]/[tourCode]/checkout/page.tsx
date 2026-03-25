@@ -5,11 +5,13 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
+import { Tag, WarningCircle, X } from "@phosphor-icons/react";
 
 interface Tour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     summary: string;
     description: string;
     descriptionImage?: string;
@@ -114,6 +116,7 @@ export default function CheckoutPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const slug = params.slug as string;
+    const tourCode = params.tourCode as string;
 
     // Pre-selected date from query params
     const preSelectedDateParam = searchParams.get("date");
@@ -130,6 +133,9 @@ export default function CheckoutPage() {
         discountValue: number;
         discountAmount: number;
     } | null>(null);
+    const [promoCodeInput, setPromoCodeInput] = useState("");
+    const [promoLoading, setPromoLoading] = useState(false);
+    const [promoError, setPromoError] = useState<string | null>(null);
 
     // Helper function to get discount percentage by name
     const getDiscountPercentage = (discountName: string | undefined): number => {
@@ -223,6 +229,56 @@ export default function CheckoutPage() {
             });
         }
     }, [adultCount]);
+
+    const handleApplyPromoCode = async () => {
+        if (!promoCodeInput.trim() || !tour) return;
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/auth/login");
+            return;
+        }
+
+        setPromoLoading(true);
+        setPromoError(null);
+
+        try {
+            const res = await fetch(`${api.baseURL}${api.endpoints.promoCodes.apply}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    code: promoCodeInput.trim(),
+                    tourId: tour._id,
+                }),
+            });
+            const data = await res.json();
+
+            if (res.ok && data.status === "success") {
+                setPromoData({
+                    code: data.data.promoCode.code,
+                    discountType: data.data.promoCode.discountType,
+                    discountValue: data.data.promoCode.discountValue,
+                    discountAmount: data.data.promoCode.discountAmount,
+                });
+                setPromoError(null);
+            } else {
+                setPromoError(data.message || "Invalid promo code");
+            }
+        } catch (e) {
+            setPromoError("Something went wrong. Please try again.");
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    const clearPromoCode = () => {
+        setPromoData(null);
+        setPromoCodeInput("");
+        setPromoError(null);
+    };
 
     const fetchTour = async () => {
         try {
@@ -630,10 +686,10 @@ export default function CheckoutPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Tour not found</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Trip not found</h1>
                     <p className="text-gray-600 mb-4">The tour you&apos;re looking for doesn&apos;t exist.</p>
-                    <Link href="/tours" className="text-purple-600 hover:underline">
-                        Browse all tours
+                    <Link href="/trip" className="text-purple-600 hover:underline">
+                        Browse all trips
                     </Link>
                 </div>
             </div>
@@ -652,11 +708,11 @@ export default function CheckoutPage() {
                             Home
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
-                        <Link href="/tours" className="text-gray-500 hover:text-gray-700">
-                            Tours
+                        <Link href="/trip" className="text-gray-500 hover:text-gray-700">
+                            Trips
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
-                        <Link href={`/tours/${tour.slug}`} className="text-gray-500 hover:text-gray-700">
+                        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} className="text-gray-500 hover:text-gray-700">
                             {tour.name}
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
@@ -1421,7 +1477,7 @@ export default function CheckoutPage() {
                                                                 </p>
                                                             ) : (
                                                                 <p className="text-sm text-red-500 mt-1">
-                                                                    Partial payment is only available for tours booked at least 3 months in advance.
+                                                                    Partial payment is only available for trips booked at least 3 months in advance.
                                                                 </p>
                                                             )}
                                                         </div>
@@ -1468,7 +1524,7 @@ export default function CheckoutPage() {
                         </div>
 
                         <p className="text-center text-sm text-gray-500 mt-4">
-                            To update your tour selections, please return to the tour detail page.
+                            To update your trip selections, please return to the trip detail page.
                         </p>
                     </div>
 
@@ -1498,7 +1554,7 @@ export default function CheckoutPage() {
                             <div className="relative z-10 p-4 h-full overflow-y-auto no-scrollbar">
                                 <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 overflow-hidden">
                                     <div className="p-6">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Tour summary</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Trip summary</h3>
                                         <div className="text-sm text-gray-500 mb-4">
                                             {adultCount} traveller{adultCount > 1 ? "s" : ""}
                                             {selectedDate && (
@@ -1519,7 +1575,7 @@ export default function CheckoutPage() {
                                         {/* Tours Section */}
                                         <div className="py-3 border-t border-gray-100">
                                             <button className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 mb-3 group">
-                                                <span className="font-medium group-hover:text-purple-700 transition-colors">Tours</span>
+                                                <span className="font-medium group-hover:text-purple-700 transition-colors">Trips</span>
                                                 <span className="text-purple-600">▲</span>
                                             </button>
 
@@ -1589,23 +1645,60 @@ export default function CheckoutPage() {
                                             </div>
                                         )}
 
-                                        {/* Promo Code Applied */}
-                                        {promoData && (
-                                            <div className="py-3 border-t border-gray-100">
-                                                <div className="flex items-center gap-2 bg-emerald-50 rounded-lg p-3">
-                                                    <span className="text-emerald-600 text-lg">🏷️</span>
+                                        {/* Promo Code Section */}
+                                        <div className="py-3 border-t border-gray-100">
+                                            <div className="text-sm font-bold text-gray-900 mb-2">Promo Code</div>
+                                            {promoData ? (
+                                                <div className="flex items-center gap-2 bg-emerald-50 rounded-lg p-3 border border-emerald-100">
+                                                    <Tag size={18} className="text-emerald-600" weight="fill" />
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="text-sm font-bold text-emerald-700 font-mono">{promoData.code}</div>
+                                                        <div className="text-sm font-bold text-emerald-700 font-mono tracking-wider">{promoData.code}</div>
                                                         <div className="text-xs text-emerald-600">
                                                             {promoData.discountType === "percentage"
                                                                 ? `${promoData.discountValue}% off`
                                                                 : `$${promoData.discountAmount} off`}
                                                         </div>
                                                     </div>
-                                                    <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">APPLIED</span>
+                                                    <button 
+                                                        onClick={clearPromoCode}
+                                                        className="p-1 hover:bg-emerald-100 rounded-full transition-colors"
+                                                    >
+                                                        <X size={14} className="text-emerald-600" />
+                                                    </button>
                                                 </div>
-                                            </div>
-                                        )}
+                                            ) : (
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={promoCodeInput}
+                                                            onChange={(e) => {
+                                                                setPromoCodeInput(e.target.value.toUpperCase());
+                                                                setPromoError(null);
+                                                            }}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleApplyPromoCode()}
+                                                            placeholder="Enter code"
+                                                            className={`flex-1 text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition uppercase font-mono tracking-wider ${
+                                                                promoError ? "border-red-300 bg-red-50" : "border-gray-300"
+                                                            }`}
+                                                        />
+                                                        <button
+                                                            onClick={handleApplyPromoCode}
+                                                            disabled={promoLoading || !promoCodeInput.trim()}
+                                                            className="px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 disabled:opacity-50 transition shadow-sm"
+                                                        >
+                                                            {promoLoading ? "..." : "Apply"}
+                                                        </button>
+                                                    </div>
+                                                    {promoError && (
+                                                        <div className="flex items-center gap-1.5 text-xs text-red-600 px-1">
+                                                            <WarningCircle size={14} weight="fill" />
+                                                            <span>{promoError}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
 
                                         {/* Total Price */}
                                         <div className="pt-4 mt-2 border-t border-gray-100">

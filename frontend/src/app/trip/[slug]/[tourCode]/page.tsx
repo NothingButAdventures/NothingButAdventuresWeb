@@ -6,12 +6,15 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import TourDetailLoading from "./loading";
-import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Tag, CheckCircle, WarningCircle, X } from "@phosphor-icons/react";
+import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight } from "@phosphor-icons/react";
+import ReviewsSection from "@/components/ReviewsSection";
+import PopularToursSection from "@/components/PopularToursSection";
 
 interface Tour {
   _id: string;
   name: string;
   slug: string;
+  tourCode: string;
   summary: string;
   description: string;
   descriptionImage?: string;
@@ -127,6 +130,7 @@ export default function TourDetailPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+  const tourCode = params.tourCode as string;
 
   const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(true);
@@ -149,29 +153,13 @@ export default function TourDetailPage() {
   const [holdLoading, setHoldLoading] = useState(false);
   const [holdMessage, setHoldMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Promo Code state
-  const [promoCodeInput, setPromoCodeInput] = useState("");
-  const [promoLoading, setPromoLoading] = useState(false);
-  const [promoResult, setPromoResult] = useState<{
-    applied: boolean;
-    code: string;
-    discountType: string;
-    discountValue: number;
-    discountAmount: number;
-    finalPrice: number;
-    originalPrice: number;
-    expiresAt: string;
-    hoursRemaining: number;
-  } | null>(null);
-  const [promoError, setPromoError] = useState<string | null>(null);
-  const [promoChecked, setPromoChecked] = useState(false);
-
   // Helper function to get discount percentage by name
   const getDiscountPercentage = (discountName: string | undefined): number => {
     if (!discountName) return 0;
     return discountsMap[discountName] || 0;
   };
 
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
@@ -226,107 +214,6 @@ export default function TourDetailPage() {
       fetchTour();
     }
   }, [slug]);
-
-  // Check for existing promo on this tour when tour loads
-  useEffect(() => {
-    if (tour && !promoChecked) {
-      checkExistingPromo();
-    }
-  }, [tour]);
-
-  const checkExistingPromo = async () => {
-    const token = localStorage.getItem("token");
-    if (!token || !tour) return;
-    try {
-      const res = await fetch(
-        `${api.baseURL}${api.endpoints.promoCodes.checkStatus(tour._id)}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const data = await res.json();
-      if (data.status === "success" && data.data.hasActivePromo) {
-        setPromoResult({
-          applied: true,
-          code: data.data.promoCode.code,
-          discountType: data.data.promoCode.discountType,
-          discountValue: data.data.promoCode.discountValue,
-          discountAmount: data.data.promoCode.discountAmount,
-          finalPrice: data.data.finalPrice,
-          originalPrice: data.data.originalPrice,
-          expiresAt: data.data.promoCode.expiresAt,
-          hoursRemaining: data.data.promoCode.hoursRemaining,
-        });
-        setPromoCodeInput(data.data.promoCode.code);
-      }
-    } catch (e) {
-      // Silent fail - user just won't see existing promo
-    } finally {
-      setPromoChecked(true);
-    }
-  };
-
-  const handleApplyPromoCode = async () => {
-    if (!promoCodeInput.trim()) {
-      setPromoError("Please enter a promo code");
-      return;
-    }
-    if (!tour) return;
-
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/auth/login");
-      return;
-    }
-
-    setPromoLoading(true);
-    setPromoError(null);
-    setPromoResult(null);
-
-    try {
-      const res = await fetch(`${api.baseURL}${api.endpoints.promoCodes.apply}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          code: promoCodeInput.trim(),
-          tourId: tour._id,
-        }),
-      });
-      const data = await res.json();
-
-      if (res.ok && data.status === "success") {
-        setPromoResult({
-          applied: true,
-          code: data.data.promoCode.code,
-          discountType: data.data.promoCode.discountType,
-          discountValue: data.data.promoCode.discountValue,
-          discountAmount: data.data.promoCode.discountAmount,
-          finalPrice: data.data.finalPrice,
-          originalPrice: data.data.originalPrice,
-          expiresAt: data.data.promoCode.expiresAt,
-          hoursRemaining: data.data.promoCode.hoursRemaining,
-        });
-        setPromoError(null);
-      } else {
-        setPromoError(data.message || "Invalid promo code");
-        setPromoResult(null);
-      }
-    } catch (e) {
-      setPromoError("Something went wrong. Please try again.");
-      setPromoResult(null);
-    } finally {
-      setPromoLoading(false);
-    }
-  };
-
-  const clearPromo = () => {
-    setPromoResult(null);
-    setPromoCodeInput("");
-    setPromoError(null);
-  };
 
   // Track scroll position and update current visible day
   useEffect(() => {
@@ -618,109 +505,49 @@ export default function TourDetailPage() {
                 <div className="flex flex-col gap-4">
                   <aside
                     ref={bookingPanelRef}
-                    className="bg-white rounded-[16px] border border-gray-300 p-5 shadow-sm flex flex-col gap-5 w-full"
+                    className="bg-white rounded-[16px] border border-gray-200 p-5 shadow-sm flex flex-col gap-5 w-full"
                   >
                     {/* Price header */}
                     <div>
-                      <div className="flex items-baseline gap-2">
-                        {promoResult ? (
-                          <>
-                            <span className="text-4xl font-bold text-black">${promoResult.finalPrice.toFixed(0)} USD</span>
-                            <span className="text-base font-medium text-gray-400 line-through">${promoResult.originalPrice.toFixed(0)}</span>
-                            <span className="text-base font-medium text-gray-500">/person</span>
-                          </>
-                        ) : (
-                          <>
-                            <span className="text-4xl font-bold text-black">${discountedPrice.toFixed(0)} USD</span>
-                            <span className="text-base font-medium text-gray-500">/person</span>
-                          </>
+                      <div className="flex items-baseline justify-between">
+                        <span className="flex items-start font-bold text-black leading-none">
+                          <span className="text-base font-bold mt-1">$</span>
+                          <span className="text-[2rem] leading-none">{discountedPrice.toFixed(0)}</span>
+                          <span className="text-base font-bold mt-1 ml-1">USD</span>
+                        </span>
+                        {bestDiscount > 0 && (
+                          <span className="text-base font-semibold text-black">
+                            was{" "}
+                            <span className="line-through">${basePrice.toFixed(0)} USD</span>
+                          </span>
                         )}
                       </div>
-                      {promoResult && (
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Tag size={14} className="text-emerald-600" weight="fill" />
-                          <span className="text-sm font-medium text-emerald-600">
-                            Promo {promoResult.code} applied — saving ${promoResult.discountAmount.toFixed(0)}
-                          </span>
-                        </div>
-                      )}
                       <div className="text-base font-medium text-black mt-2">
                         {tour.location.startCity} to {tour.location.endCity}
                       </div>
                     </div>
 
-                    {/* Dates / Guests Group */}
-                    <div className="border border-gray-400 rounded-xl overflow-hidden">
-                      <div className="flex border-b border-gray-400">
-                        <div className="flex-1 p-3 border-r border-gray-400">
-                          <div className="text-[10px] font-bold tracking-wider text-black">STARTS</div>
+                    {/* Dates / Days Group */}
+                    <div className="border border-gray-300 rounded-xl overflow-hidden">
+                      <div className="flex border-b border-gray-300">
+                        <div className="flex-1 p-3 border-r border-gray-300">
+                          <div className="text-[10px] font-bold tracking-wider text-black uppercase">Starts</div>
                           <div className="text-sm text-gray-800 mt-1">
-                            {bestDealDate ? new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : ""}
+                            {bestDealDate ? new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : "—"}
                           </div>
                         </div>
                         <div className="flex-1 p-3">
-                          <div className="text-[10px] font-bold tracking-wider text-black">ENDS</div>
+                          <div className="text-[10px] font-bold tracking-wider text-black uppercase">Ends</div>
                           <div className="text-sm text-gray-800 mt-1">
-                            {bestDealDate ? new Date(bestDealDate.endDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : ""}
+                            {bestDealDate ? new Date(bestDealDate.endDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : "—"}
                           </div>
                         </div>
                       </div>
-                      <div className="p-3 bg-white">
-                        <div className="text-[10px] font-bold tracking-wider text-black mb-1.5">PROMO CODE</div>
-                        {promoResult ? (
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1.5 flex-1 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
-                              <CheckCircle size={16} className="text-emerald-600" weight="fill" />
-                              <span className="text-sm font-mono font-bold text-emerald-700 tracking-wide">{promoResult.code}</span>
-                              <span className="text-[10px] text-emerald-600 ml-auto">{promoResult.hoursRemaining}h left</span>
-                            </div>
-                            <button
-                              onClick={clearPromo}
-                              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                              title="Remove promo"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="text"
-                              value={promoCodeInput}
-                              onChange={(e) => {
-                                setPromoCodeInput(e.target.value.toUpperCase());
-                                if (promoError) setPromoError(null);
-                              }}
-                              onKeyDown={(e) => e.key === 'Enter' && handleApplyPromoCode()}
-                              placeholder="Enter code"
-                              className={`flex-1 text-sm px-3 py-2 border rounded-lg outline-none transition font-mono uppercase tracking-wider ${
-                                promoError
-                                  ? 'border-red-300 bg-red-50 focus:ring-2 focus:ring-red-200'
-                                  : 'border-gray-300 focus:ring-2 focus:ring-black/10 focus:border-gray-500'
-                              }`}
-                            />
-                            <button
-                              onClick={handleApplyPromoCode}
-                              disabled={promoLoading || !promoCodeInput.trim()}
-                              className="px-3 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition"
-                            >
-                              {promoLoading ? (
-                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                              ) : (
-                                'Apply'
-                              )}
-                            </button>
-                          </div>
-                        )}
-                        {promoError && (
-                          <div className="flex items-start gap-1.5 mt-2">
-                            <WarningCircle size={14} className="text-red-500 mt-0.5 shrink-0" weight="fill" />
-                            <span className="text-xs text-red-600 leading-tight">{promoError}</span>
-                          </div>
-                        )}
+                      <div className="p-3">
+                        <div className="text-[10px] font-bold tracking-wider text-black uppercase">Days</div>
+                        <div className="text-sm text-gray-800 mt-1">
+                          {String(tour.duration.days).padStart(2, "0")} Days
+                        </div>
                       </div>
                     </div>
 
@@ -731,13 +558,13 @@ export default function TourDetailPage() {
                           <Star key={i} size={18} weight={i < Math.round(tour.ratingsAverage) ? "fill" : "regular"} className="text-black" />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">({tour.ratingsQuantity} reviews)</span>
+                      <span className="text-sm text-gray-500">({tour.ratingsQuantity} reviews)</span>
                     </div>
 
                     {/* Primary Buttons */}
                     <div className="flex gap-2">
                       <button
-                        onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                        onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
                         className="flex-1 bg-[#121212] text-white py-3 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-base"
                       >
                         <CalendarCheck size={18} />
@@ -745,7 +572,7 @@ export default function TourDetailPage() {
                       </button>
                       <button
                         className="w-12 h-12 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
-                        onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                        onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
                       >
                         <ArrowUpRight size={18} />
                       </button>
@@ -766,15 +593,12 @@ export default function TourDetailPage() {
                       </button>
                       <button
                         onClick={handleWishlistToggle}
-                        className="flex-1 bg-white text-black border border-gray-400 py-3 px-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-50 transition text-sm"
+                        className="flex-1 bg-white text-black border border-gray-300 py-3 px-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-50 transition text-sm"
                       >
                         <Heart size={18} weight={isInWishlist ? "fill" : "regular"} className={isInWishlist ? "text-[#E63946]" : "text-black"} />
                         {isInWishlist ? 'Saved' : 'Save to Wishlist'}
                       </button>
                     </div>
-
-                    {/* Departure dates with discounts */}
-
                   </aside>
                   {topDiscountedDates.length > 0 && (
                     <div className="flex flex-col gap-2 mt-1">
@@ -784,7 +608,7 @@ export default function TourDetailPage() {
                           <div
                             key={idx}
                             className="bg-[#F3F4F6] py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium text-gray-800 cursor-pointer hover:bg-gray-200 transition"
-                            onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${new Date(dateObj.startDate).toISOString().split('T')[0]}`)}
+                            onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${new Date(dateObj.startDate).toISOString().split('T')[0]}`)}
                           >
                             {discPct > 0 && (
                               <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-md">
@@ -814,7 +638,7 @@ export default function TourDetailPage() {
           {/* Top: Overview content (Full Width) */}
           <div className="mb-8">
             {/* Tour Overview heading + description */}
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Tour Overview</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Trip Overview</h2>
             <p className="text-gray-700 max-w-7xl leading-relaxed mb-1">
               {tour.description.length > 250
                 ? `${tour.description.substring(0, 250)}...`
@@ -830,9 +654,9 @@ export default function TourDetailPage() {
             {/* Quick Info Stats Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 max-w-7xl gap-4 mt-8 rounded-2xl p-5">
               {/* Overall Rating */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">Overall Rating</span>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-start">
                   {[5, 4, 3, 2, 1].map((star) => (
                     <div key={star} className="flex items-center gap-1">
                       <span className="text-[10px] text-gray-500 w-3">{star}</span>
@@ -848,42 +672,42 @@ export default function TourDetailPage() {
               </div>
 
               {/* Duration */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">{tour.duration.days} days</span>
                 <span className="text-xs text-gray-500">Duration</span>
                 <Image src="/1.svg" alt="Duration" width={28} height={28} />
               </div>
 
               {/* Group Size */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">Max {tour.maxGroupSize} people</span>
                 <span className="text-xs text-gray-500">Group Size</span>
                 <Image src="/2.svg" alt="Group Size" width={28} height={28} />
               </div>
 
               {/* Physical Rating */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">{tour.physicalRating.level}/5</span>
                 <span className="text-xs text-gray-500">Physical Rating</span>
                 <Image src="/3.svg" alt="Physical Rating" width={28} height={28} />
               </div>
 
               {/* Travel Style */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">{tour.travelStyle}</span>
                 <span className="text-xs text-gray-500">Travel Style</span>
                 <Image src="/4.svg" alt="Travel Style" width={28} height={28} />
               </div>
 
               {/* Service Level */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">{tour.serviceLevel}</span>
                 <span className="text-xs text-gray-500">Service Level</span>
                 <Image src="/5.svg" alt="Service Level" width={28} height={28} />
               </div>
 
               {/* Minimum Age */}
-              <div className="flex flex-col items-center text-center gap-2">
+              <div className="flex flex-col items-start gap-2">
                 <span className="text-sm font-semibold text-gray-900">{tour.ageRequirement.min} years</span>
                 <span className="text-xs text-gray-500">Minimum Age</span>
                 <Image src="/6.png" alt="Minimum Age" width={28} height={28} />
@@ -945,7 +769,7 @@ export default function TourDetailPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                    onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
                     className="flex-1 bg-white text-black py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-100 transition text-[13px]"
                   >
                     <CalendarCheck size={16} />
@@ -953,7 +777,7 @@ export default function TourDetailPage() {
                   </button>
                   <button
                     className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-100 transition shrink-0"
-                    onClick={() => router.push(`/tours/${tour.slug}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                    onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
                   >
                     <ArrowUpRight size={16} />
                   </button>
@@ -993,7 +817,7 @@ export default function TourDetailPage() {
                 : "bg-white text-gray-900 border border-gray-200 hover:border-gray-300"
                 }`}
             >
-              Tour Details
+              Trip Details
             </button>
           </nav>
         </div>
@@ -1101,7 +925,7 @@ export default function TourDetailPage() {
             {activeTab === "details" && (
               <div className="bg-white  p-2">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  Tour Details
+                  Trip Details
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1196,7 +1020,7 @@ export default function TourDetailPage() {
                       <div className="text-center">
                         <div className="text-5xl mb-2">🗺️</div>
                         <div className="text-gray-600 font-medium">
-                          Tour Map
+                          Trip Map
                         </div>
                       </div>
                     )}
@@ -1284,7 +1108,7 @@ export default function TourDetailPage() {
                     Need Help?
                   </h3>
                   <p className="text-gray-700 text-sm mb-4">
-                    Have questions about this tour? Our travel experts are here
+                    Have questions about this trip? Our travel experts are here
                     to help!
                   </p>
                   <button className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition text-sm">
@@ -1302,7 +1126,7 @@ export default function TourDetailPage() {
         <div className="w-full px-4 sm:px-6 lg:px-10 pb-12 pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
             <div>
-              <h2 className="text-[28px] font-medium text-[#1A1A1A] mb-6 tracking-tight">Is this tour for me?</h2>
+              <h2 className="text-[28px] font-medium text-[#1A1A1A] mb-6 tracking-tight">What&apos;s Included</h2>
               <div className="border border-gray-300 rounded-[20px] bg-white overflow-hidden shadow-sm">
                 {/* Tabs Header */}
                 <div className="grid grid-cols-5 border-b border-gray-200">
@@ -1312,8 +1136,8 @@ export default function TourDetailPage() {
                       svg: <Image src="/7.svg" alt="Activities" width={26} height={26} />
                     },
                     {
-                      id: "tour_leader", label: "TOUR LEADER",
-                      svg: <Image src="/8.svg" alt="Tour Leader" width={26} height={26} />
+                      id: "tour_leader", label: "TRIP LEADER",
+                      svg: <Image src="/8.svg" alt="Trip Leader" width={26} height={26} />
                     },
                     {
                       id: "transport", label: "TRANSPORT",
@@ -1423,7 +1247,46 @@ export default function TourDetailPage() {
                 </div>
               </div>
             </div>
-            <div className="hidden lg:block"></div>
+            {/* Continue Your Journey Card */}
+            <div className="hidden lg:flex flex-col gap-4 pt-[58px]">
+              <div className="border border-gray-200 rounded-[16px] bg-white shadow-sm p-6 flex flex-col gap-4">
+                <div>
+                  <h3 className="text-[18px] font-bold text-[#1A1A1A] mb-2 leading-snug">Continue Your Journey</h3>
+                  <p className="text-[13px] text-gray-500 leading-relaxed">
+                    Your adventure doesn&apos;t have to end here—discover another tour starting right after, from the same destination. Seamlessly extend your travel with handpicked experiences nearby.
+                  </p>
+                </div>
+                {relatedTours.length > 0 && (() => {
+                  const nextTour = relatedTours.find(t => t._id !== tour._id) || relatedTours[0];
+                  return (
+                    <div className="border-t border-gray-100 pt-4">
+                      <div className="font-bold text-[15px] text-[#1A1A1A] mb-1">
+                        Next Tour: {nextTour.location?.startCity} to {nextTour.location?.endCity}
+                      </div>
+                      <p className="text-[12px] text-gray-500 mb-4">
+                        Duration: {nextTour.duration?.days} Days
+                        {nextTour.travelStyle ? ` · ${nextTour.travelStyle}` : ""}
+                        {nextTour.serviceLevel ? ` · ${nextTour.serviceLevel} stay` : ""}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => router.push(`/trip/${nextTour.slug}/${nextTour.tourCode}`)}
+                          className="flex-1 bg-[#121212] text-white py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[13px]"
+                        >
+                          Start Exploring
+                        </button>
+                        <button
+                          onClick={() => router.push(`/trip/${nextTour.slug}/${nextTour.tourCode}`)}
+                          className="w-10 h-10 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
+                        >
+                          <ArrowUpRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1448,8 +1311,58 @@ export default function TourDetailPage() {
                     Check Availability
                   </h2>
                   <p className="text-[#6B7280] text-[15px]">
-                    Select your preferred dates and secure your spot on this tour
+                    Select your preferred dates and secure your spot on this trip
                   </p>
+
+                  {/* Month Selection Slider */}
+                  <div className="mt-8 relative">
+                    <div className="flex overflow-x-auto gap-3 pb-4 no-scrollbar scroll-smooth">
+                      {(() => {
+                        const groupedByMonth: { [key: string]: typeof tour.startDates } = {};
+                        tour.startDates.forEach((date) => {
+                          const monthYear = new Date(date.startDate).toLocaleDateString("en-US", {
+                            month: "short",
+                            year: "numeric",
+                          });
+                          if (!groupedByMonth[monthYear]) {
+                            groupedByMonth[monthYear] = [];
+                          }
+                          groupedByMonth[monthYear].push(date);
+                        });
+
+                        const sortedMonths = Object.keys(groupedByMonth).sort(
+                          (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                        );
+
+                        return sortedMonths.map((month) => {
+                          const dates = groupedByMonth[month];
+                          const minPrice = Math.min(...dates.map(d => {
+                            const discPct = getDiscountPercentage(d.discount);
+                            return tour.price.amount * (1 - discPct / 100);
+                          }));
+                          const isSelected = selectedMonth === month;
+
+                          return (
+                            <button
+                              key={month}
+                              onClick={() => setSelectedMonth(isSelected ? null : month)}
+                              className={`flex flex-col items-center justify-center px-6 py-3.5 rounded-xl border transition-all min-w-[130px] shrink-0 ${isSelected
+                                ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-md"
+                                : "bg-white border-gray-200 text-[#1A1A1A] hover:border-gray-400"
+                                }`}
+                            >
+                              <span className={`text-[15px] font-bold ${isSelected ? "text-white" : "text-[#1A1A1A]"}`}>
+                                {month}
+                              </span>
+                              <span className={`text-[13px] mt-0.5 ${isSelected ? "text-white/70" : "text-gray-500"}`}>
+                                from ${Math.round(minPrice)}
+                              </span>
+                            </button>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Availability Table */}
@@ -1480,7 +1393,6 @@ export default function TourDetailPage() {
                     <tbody>
                       {tour.startDates && tour.startDates.length > 0 ? (
                         (() => {
-                          // Group dates by month
                           const groupedByMonth: {
                             [key: string]: typeof tour.startDates;
                           } = {};
@@ -1489,7 +1401,7 @@ export default function TourDetailPage() {
                             const monthYear = new Date(
                               date.startDate,
                             ).toLocaleDateString("en-US", {
-                              month: "long",
+                              month: "short",
                               year: "numeric",
                             });
                             if (!groupedByMonth[monthYear]) {
@@ -1499,9 +1411,14 @@ export default function TourDetailPage() {
                           });
 
                           // Sort months chronologically
-                          const sortedMonths = Object.keys(groupedByMonth).sort(
+                          let sortedMonths = Object.keys(groupedByMonth).sort(
                             (a, b) => new Date(a).getTime() - new Date(b).getTime(),
                           );
+
+                          // Filter based on selected month
+                          if (selectedMonth) {
+                            sortedMonths = sortedMonths.filter(m => m === selectedMonth);
+                          }
 
                           return sortedMonths.flatMap((month, monthIndex) => {
                             const monthHeader = (
@@ -1517,21 +1434,9 @@ export default function TourDetailPage() {
                               const originalPrice = tour.price.amount;
                               const dateDiscountPct = getDiscountPercentage(date.discount);
 
-                              // Calculate promo discount percentage
-                              let promoDiscountPct = 0;
-                              if (promoResult) {
-                                if (promoResult.discountType === "percentage") {
-                                  promoDiscountPct = promoResult.discountValue;
-                                } else {
-                                  // Fixed amount to percentage
-                                  promoDiscountPct = (promoResult.discountAmount / originalPrice) * 100;
-                                }
-                              }
-
-                              // Use the MAX discount (best deal for user)
-                              const bestDiscountPct = Math.max(dateDiscountPct, promoDiscountPct);
+                              // Use the date discount
+                              const bestDiscountPct = dateDiscountPct;
                               const datePrice = originalPrice * (1 - bestDiscountPct / 100);
-                              const isPromoWinning = promoResult && promoDiscountPct > dateDiscountPct;
 
                               return (
                                 <tr key={`${month}-${dateIndex}`} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
@@ -1561,9 +1466,6 @@ export default function TourDetailPage() {
                                       <div className="flex flex-col">
                                         <div className="flex items-center gap-1.5">
                                           <span className="text-[16px] font-bold text-[#1A1A1A]">${Math.round(datePrice)}</span>
-                                          {isPromoWinning && (
-                                            <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-1.5 py-0.5 rounded">PROMO</span>
-                                          )}
                                         </div>
                                         {bestDiscountPct > 0 && (
                                           <span className="text-[13px] text-gray-500 line-through font-medium">${originalPrice}</span>
@@ -1588,7 +1490,7 @@ export default function TourDetailPage() {
                                       <button
                                         onClick={() => {
                                           const dateStr = new Date(date.startDate).toISOString().split('T')[0];
-                                          router.push(`/tours/${tour.slug}/checkout?date=${dateStr}`);
+                                          router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${dateStr}`);
                                         }}
                                         disabled={isSoldOut}
                                         className={`py-[11px] px-8 rounded-full font-bold text-[14px] transition-colors whitespace-nowrap ${isSoldOut ? "bg-gray-100 text-gray-400 cursor-not-allowed hidden" : "bg-[#222222] hover:bg-black text-white shadow-sm"
@@ -1623,110 +1525,56 @@ export default function TourDetailPage() {
                 </div>
               </div>
             </div>
-            <div className="hidden lg:block"></div>
+            {/* Book Privately Card */}
+            <div className="hidden lg:flex flex-col sticky top-24 self-start">
+              <div className="border border-gray-200 rounded-[16px] bg-white shadow-sm overflow-hidden">
+                {/* Top image */}
+                <div className="relative w-full h-[200px]">
+                  <Image
+                    src={tour.images[tour.images.length - 1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
+                    alt="Book Privately"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                {/* Content */}
+                <div className="p-5 flex flex-col gap-3">
+                  <div>
+                    <h3 className="text-[18px] font-bold text-[#1A1A1A] mb-1.5 leading-snug">Book Privately</h3>
+                    <p className="text-[13px] text-gray-500 leading-relaxed">
+                      Enjoy your journey with added privacy, comfort, and exclusive personal space.
+                    </p>
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
+                      className="flex-1 bg-[#121212] text-white py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[13px]"
+                    >
+                      Start Exploring
+                    </button>
+                    <button
+                      onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
+                      className="w-10 h-10 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
+                    >
+                      <ArrowUpRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Recommended Tours Section */}
-      <div
-        ref={recommendedToursRef}
-        className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-16 "
-      >
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Recommended Tours
-          </h2>
-          <p className="text-gray-600">
-            Explore other amazing adventures you might love
-          </p>
-        </div>
 
-        {relatedTours.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {relatedTours.map((recommendedTour) => {
-              const primaryImage =
-                recommendedTour.images?.find((img) => img.isPrimary) ||
-                recommendedTour.images?.[0];
-              const discountedPrice = recommendedTour.price.amount;
+      {/* Reviews Section */}
+      <div ref={recommendedToursRef} className="w-full px-4 sm:px-6 lg:px-10">
+        <ReviewsSection />
+      </div>
 
-              return (
-                <Link
-                  href={`/tours/${recommendedTour.slug}`}
-                  key={recommendedTour._id}
-                >
-                  <div className="group bg-white rounded-xl border overflow-hidden  transition-all duration-300 transform  cursor-pointer h-full flex flex-col">
-                    {/* Image Container */}
-                    <div className="relative w-full h-64 overflow-hidden bg-gray-100">
-                      {primaryImage?.url ? (
-                        <img
-                          src={primaryImage.url}
-                          alt={primaryImage.caption || recommendedTour.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                          <svg
-                            className="w-16 h-16 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1}
-                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6 flex-1 flex flex-col">
-                      {/* Duration Badge */}
-                      <div className="mb-3">
-                        <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                          {recommendedTour.duration.days} Day Tour
-                        </span>
-                      </div>
-
-                      {/* Tour Name */}
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-                        {recommendedTour.name}
-                      </h3>
-
-                      {/* Spacing for push to bottom */}
-                      <div className="flex-1"></div>
-
-                      {/* Price Section */}
-                      <div className="flex items-baseline gap-2 mb-4">
-                        <span className="text-3xl font-bold text-gray-900">
-                          ${Math.round(discountedPrice)}
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          per person
-                        </span>
-                      </div>
-
-                      {/* CTA Button */}
-                      <button className="w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition-all duration-200">
-                        View itinerary
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500">
-              No other tours available at the moment
-            </p>
-          </div>
-        )}
+      {/* Popular Tours Section */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 pb-16">
+        <PopularToursSection tours={relatedTours} />
       </div>
 
       {/* Sticky Footer */}
@@ -1797,7 +1645,7 @@ export default function TourDetailPage() {
               {/* Actions */}
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <button
-                  onClick={() => router.push(`/tours/${tour.slug}/checkout`)}
+                  onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout`)}
                   className="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-colors whitespace-nowrap"
                 >
                   Book Now
@@ -1897,7 +1745,7 @@ export default function TourDetailPage() {
                     })}
                 </div>
                 {sortedDates.filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date()).length === 0 && (
-                  <p className="text-sm text-gray-500 text-center py-4">No available dates for this tour</p>
+                  <p className="text-sm text-gray-500 text-center py-4">No available dates for this trip</p>
                 )}
               </div>
 

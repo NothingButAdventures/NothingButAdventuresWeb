@@ -100,7 +100,7 @@ export default function PostcardsInMotionSection() {
 
                             {/* Top Right Arrow Pill */}
                             <div className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover/card:scale-110 z-20">
-                                <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-black transition-transform duration-300 group-hover/card:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19L19 5M19 5v10M19 5H9" />
                                 </svg>
                             </div>

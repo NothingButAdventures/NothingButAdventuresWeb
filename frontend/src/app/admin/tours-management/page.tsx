@@ -8,6 +8,7 @@ interface Tour {
   _id: string;
   name: string;
   slug: string;
+  tourCode: string;
   summary: string;
   price: {
     amount: number;
@@ -246,7 +247,7 @@ export default function ToursManagementPage() {
                         </div>
                         <div>
                           <Link
-                            href={`/tours/${tour.slug}`}
+                            href={`/trip/${tour.slug}/${tour.tourCode}`}
                             className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                           >
                             {tour.name}

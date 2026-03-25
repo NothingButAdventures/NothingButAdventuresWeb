@@ -36,11 +36,11 @@ const getTour = catchAsync(async (req, res, next) => {
   const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
 
   if (isValidObjectId) {
-    // If it's a valid ObjectId, check both _id and slug
-    query.$or = [{ _id: id }, { slug: id }];
+    // If it's a valid ObjectId, check _id, slug and tourCode
+    query.$or = [{ _id: id }, { slug: id }, { tourCode: id }];
   } else {
-    // If it's not a valid ObjectId, only check slug
-    query.slug = id;
+    // If it's not a valid ObjectId, check both slug and tourCode
+    query.$or = [{ slug: id }, { tourCode: id }];
   }
 
   const tour = await Tour.findOne(query)

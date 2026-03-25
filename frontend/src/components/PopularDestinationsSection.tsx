@@ -40,7 +40,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 {countries.map((country) => (
                     <Link
                         key={country._id}
-                        href={`/tours?country=${country.slug}`}
+                        href={`/trip?country=${country.slug}`}
                         className="relative w-full aspect-[4/5] md:aspect-[3/4] rounded-[20px] overflow-hidden block group cursor-pointer"
                     >
                         <img
@@ -55,7 +55,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                         {/* Tour count badge */}
                         {country.statistics && country.statistics.totalTours > 0 && (
                             <div className="absolute top-4 right-4 bg-white text-black text-[13px] font-semibold px-4 py-1.5 rounded-full z-20 shadow-md">
-                                {country.statistics.totalTours} {country.statistics.totalTours === 1 ? "Tour" : "Tours"}
+                                {country.statistics.totalTours} {country.statistics.totalTours === 1 ? "Trip" : "Trips"}
                             </div>
                         )}
 

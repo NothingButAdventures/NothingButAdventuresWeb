@@ -71,6 +71,7 @@ interface Booking {
         _id: string;
         name: string;
         slug: string;
+        tourCode: string;
         images?: Array<{ url: string; caption?: string; isPrimary?: boolean }>;
         duration?: {
             days: number;
@@ -97,6 +98,7 @@ interface Review {
         _id: string;
         name: string;
         slug: string;
+        tourCode: string;
     };
 }
 
@@ -104,6 +106,7 @@ interface Tour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     price: {
         amount: number;
         currency: string;
@@ -641,9 +644,9 @@ export default function ProfilePage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <h3 className="font-medium text-gray-900 mb-1">No bookings yet</h3>
-                                <p className="text-gray-500 mb-4">Start exploring our amazing tours!</p>
-                                <Link href="/tours" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
-                                    Explore Tours
+                                <p className="text-gray-500 mb-4">Start exploring our amazing trips!</p>
+                                <Link href="/trip" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                    Explore Trips
                                 </Link>
                             </div>
                         ) : (
@@ -669,7 +672,7 @@ export default function ProfilePage() {
                                             <div className="flex-1">
                                                 <div className="flex items-start justify-between">
                                                     <div>
-                                                        <Link href={`/tours/${booking.tour.slug}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                        <Link href={`/trip/${booking.tour.slug}/${booking.tour.tourCode}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                                                             {booking.tour.name}
                                                         </Link>
                                                         <p className="text-sm text-gray-500 mt-1">
@@ -716,12 +719,12 @@ export default function ProfilePage() {
                             <div className="p-12 text-center">
                                 <div className="text-5xl mb-4">🔒</div>
                                 <h3 className="font-medium text-gray-900 mb-1">No held spaces</h3>
-                                <p className="text-gray-500">Hold a tour date for 48 hours without payment!</p>
+                                <p className="text-gray-500">Hold a trip date for 48 hours without payment!</p>
                                 <button
                                     onClick={() => router.push('/search')}
                                     className="mt-4 px-6 py-2 bg-amber-500 text-white rounded-lg text-sm font-semibold hover:bg-amber-600 transition"
                                 >
-                                    Browse Tours
+                                    Browse Trips
                                 </button>
                             </div>
                         ) : (
@@ -801,7 +804,7 @@ export default function ProfilePage() {
                                                     {isActive && (
                                                         <div className="flex items-center gap-2 mt-3">
                                                             <button
-                                                                onClick={() => router.push(`/tours/${hold.tour?.slug}/checkout`)}
+                                                                onClick={() => router.push(`/trip/${hold.tour?.slug}/${hold.tour?.tourCode}/checkout`)}
                                                                 className="px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-sm"
                                                             >
                                                                 Book Now
@@ -883,7 +886,7 @@ export default function ProfilePage() {
                                             : tour.price.amount;
 
                                     return (
-                                        <Link href={`/tours/${tour.slug}`} key={tour._id}>
+                                        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                             <div className="group bg-white border rounded-xl overflow-hidden transition-all duration-300 transform cursor-pointer h-full flex flex-col hover:shadow-lg">
                                                 {/* Image Container */}
                                                 <div className="relative w-full h-48 overflow-hidden bg-gray-100">
@@ -975,7 +978,7 @@ export default function ProfilePage() {
                                     {reviews.map((review) => (
                                         <div key={review._id} className="p-6">
                                             <div className="flex items-start justify-between mb-3">
-                                                <Link href={`/tours/${review.tour.slug}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                                <Link href={`/trip/${review.tour.slug}/${review.tour.tourCode}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
                                                     {review.tour.name}
                                                 </Link>
                                                 <div className="flex items-center gap-1">

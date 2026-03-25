@@ -14,6 +14,12 @@ const tourSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    tourCode: {
+      type: String,
+      unique: true,
+      uppercase: true,
+      trim: true,
+    },
     country: {
       type: mongoose.Schema.ObjectId,
       ref: "Country",
@@ -460,10 +466,31 @@ tourSchema.virtual("durationText").get(function () {
   return `${days} Day${days > 1 ? "s" : ""}, ${nights} Night${nights > 1 ? "s" : ""}`;
 });
 
-// Pre-save middleware to create slug
-tourSchema.pre("save", function (next) {
+// Pre-save middleware to create slug and tourCode
+tourSchema.pre("save", async function (next) {
   if (this.isModified("name") || this.isNew) {
     this.slug = slugify(this.name, { lower: true, strict: true });
+  }
+
+  if (!this.tourCode) {
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    let unique = false;
+    let code = "";
+
+    while (!unique) {
+      code = "";
+      for (let i = 0; i < 5; i++) {
+        code += letters.charAt(Math.floor(Math.random() * letters.length));
+      }
+
+      // Check if code exists
+      const existingTour = await mongoose.models.Tour.findOne({ tourCode: code });
+      if (!existingTour) {
+        unique = true;
+      }
+    }
+    this.tourCode = code;
   }
   next();
 });

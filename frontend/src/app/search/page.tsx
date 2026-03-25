@@ -10,6 +10,7 @@ interface Tour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     price: {
         amount: number;
         currency: string;
@@ -370,7 +371,7 @@ function SearchContent() {
                         <span className="text-gray-900 font-medium">Search results</span>
                     </div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                        {filteredTours.length} tours <span className="font-normal text-gray-500">found</span>
+                        {filteredTours.length} trips <span className="font-normal text-gray-500">found</span>
                     </h1>
                 </div>
             </div>
@@ -455,7 +456,7 @@ function SearchContent() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <p className="text-gray-600">
-                        Showing <span className="font-bold text-gray-900">1-{filteredTours.length}</span> of <span className="font-bold text-gray-900">{filteredTours.length}</span> tours:
+                        Showing <span className="font-bold text-gray-900">1-{filteredTours.length}</span> of <span className="font-bold text-gray-900">{filteredTours.length}</span> trips:
                     </p>
 
                     <div className="flex items-center space-x-2">
@@ -485,7 +486,7 @@ function SearchContent() {
                                     : tour.price.amount;
 
                             return (
-                                <Link href={`/tours/${tour.slug}`} key={tour._id}>
+                                <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                     <div className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform h-full flex flex-col">
                                         {/* Image Container */}
                                         <div className="relative w-full h-64 overflow-hidden bg-gray-100 group-hover:opacity-95 transition-opacity">
@@ -585,16 +586,16 @@ function SearchContent() {
                                 </svg>
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                No tours found for "{query}"
+                                No trips found for "{query}"
                             </h3>
                             <p className="text-gray-500 mb-6">
-                                We couldn't find any tours matching your search. Try adjusting your search terms or filters.
+                                We couldn't find any trips matching your search. Try adjusting your search terms or filters.
                             </p>
                             <button
-                                onClick={() => window.location.href = '/tours'}
+                                onClick={() => window.location.href = '/trip'}
                                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
                             >
-                                View all tours
+                                View all trips
                             </button>
                         </div>
                     </div>

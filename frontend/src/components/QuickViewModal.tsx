@@ -7,6 +7,7 @@ interface QuickViewTour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     price: {
         amount: number;
         currency: string;
@@ -70,7 +71,7 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
     };
 
     // Generate a pseudo Trip Code from ID if not present
-    const tripCode = tour._id.substring(tour._id.length - 4).toUpperCase();
+    const tripCode = tour.tourCode;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
@@ -204,10 +205,10 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
                         </div>
 
                         <Link
-                            href={`/tours/${tour.slug}`}
+                            href={`/trip/${tour.slug}/${tour.tourCode}`}
                             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-[#432360] hover:bg-[#321a48] transition-colors"
                         >
-                            View tour details
+                            View trip details
                         </Link>
                     </div>
                 </div>

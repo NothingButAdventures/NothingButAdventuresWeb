@@ -6,6 +6,7 @@ export interface TourCardProps {
         _id: string;
         name: string;
         slug: string;
+        tourCode: string;
         price: {
             amount: number;
             discountPercent: number;
@@ -47,7 +48,7 @@ export default function TourCard({ tour }: TourCardProps) {
     }
 
     return (
-        <Link href={`/tours/${tour.slug}`} className="block h-full cursor-pointer group/card w-full">
+        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} className="block h-full cursor-pointer group/card w-full">
             <div className="transition-all duration-500 transform h-[460px] md:h-[480px] flex flex-col rounded-[16px]">
                 {/* Image Container - flex-1 allows it to grow/shrink based on remaining space */}
                 <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-gray-100 transition-all duration-500 rounded-t-[16px] z-10">
@@ -129,7 +130,7 @@ export default function TourCard({ tour }: TourCardProps) {
 
                                 {/* View Tour Button */}
                                 <div className="w-full bg-[#111] text-white text-[16px] font-medium py-3.5 rounded-xl hover:bg-black transition-colors text-center cursor-pointer">
-                                    View Tour
+                                    View Trip
                                 </div>
                             </div>
                         </div>

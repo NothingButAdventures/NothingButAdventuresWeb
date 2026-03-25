@@ -49,6 +49,7 @@ interface BookingDetails {
         _id: string;
         name: string;
         slug: string;
+        tourCode: string;
         images?: Array<{ url: string; caption?: string; isPrimary?: boolean }>;
         duration?: {
             days: number;
@@ -209,7 +210,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
 
                 {/* Left Column: Image & Key Info */}
                 <div className="w-full md:w-5/12 bg-gray-50 flex flex-col border-r border-gray-100 overflow-y-auto">
-                    {/* Tour Image */}
+                    {/* Trip Image */}
                     <div className="aspect-[4/3] w-full bg-gray-100 relative">
                         {primaryImage?.url ? (
                             <img
@@ -291,7 +292,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                     <div className="p-8 flex-1 overflow-y-auto">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">{booking.tour.name}</h2>
                         <p className="text-lg text-gray-600 mb-8">
-                            {booking.tour.location ? `${booking.tour.location.startCity} to ${booking.tour.location.endCity}` : "Adventure Tour"}
+                            {booking.tour.location ? `${booking.tour.location.startCity} to ${booking.tour.location.endCity}` : "Adventure Trip"}
                         </p>
 
                         {/* Travelers List */}
@@ -333,9 +334,9 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                         <div className="mb-8">
                             <h3 className="text-lg font-bold text-gray-900 mb-4">Price Breakdown</h3>
                             <div className="bg-gray-50 rounded-xl overflow-hidden">
-                                {/* Tours Section */}
+                                {/* Trips Section */}
                                 <div className="p-4 border-b border-gray-200">
-                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Tours</p>
+                                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Trips</p>
                                     <div className="flex justify-between items-start">
                                         <div className="flex-1 pr-4">
                                             <p className="text-sm font-semibold text-gray-900">{booking.tour.name}</p>
@@ -419,10 +420,10 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                     <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Link
-                                href={`/tours/${booking.tour.slug}`}
+                                href={`/trip/${booking.tour.slug}/${booking.tour.tourCode}`}
                                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                             >
-                                View Tour
+                                View Trip
                             </Link>
                         </div>
                         <button

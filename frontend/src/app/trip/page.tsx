@@ -10,6 +10,7 @@ interface Tour {
   _id: string;
   name: string;
   slug: string;
+  tourCode: string;
   price: {
     amount: number;
     currency: string;
@@ -38,7 +39,7 @@ interface Tour {
   };
 }
 
-export default function ToursPage() {
+export default function TripsPage() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -80,10 +81,10 @@ export default function ToursPage() {
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="mb-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Available Tours
+            Available Trips
           </h2>
           <p className="text-gray-600">
-            {filteredTours.length} tour{filteredTours.length !== 1 ? "s" : ""}{" "}
+            {filteredTours.length} trip{filteredTours.length !== 1 ? "s" : ""}{" "}
             found
           </p>
         </div>
@@ -111,10 +112,10 @@ export default function ToursPage() {
                 />
               </svg>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No tours found
+                No trips found
               </h3>
               <p className="text-gray-500">
-                Try adjusting your search criteria to find more tours
+                Try adjusting your search criteria to find more trips
               </p>
             </div>
           </div>

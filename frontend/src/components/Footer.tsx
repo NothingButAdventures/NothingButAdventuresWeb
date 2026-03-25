@@ -44,12 +44,12 @@ export default function Footer() {
             <div>
               <h3 className="font-semibold text-[16px] mb-6 text-white tracking-wide">Destinations</h3>
               <ul className="space-y-4 font-medium">
-                <li><Link href="/tours?destination=rajasthan" className="text-[#a3a3a3] hover:text-white transition-colors">Rajasthan</Link></li>
-                <li><Link href="/tours?destination=kerala" className="text-[#a3a3a3] hover:text-white transition-colors">Kerala</Link></li>
-                <li><Link href="/tours?destination=himalayas" className="text-[#a3a3a3] hover:text-white transition-colors">Himalayas</Link></li>
-                <li><Link href="/tours?destination=golden-triangle" className="text-[#a3a3a3] hover:text-white transition-colors">Golden Triangle</Link></li>
-                <li><Link href="/tours?destination=varanasi" className="text-[#a3a3a3] hover:text-white transition-colors">Varanasi</Link></li>
-                <li><Link href="/tours?destination=goa" className="text-[#a3a3a3] hover:text-white transition-colors">Goa</Link></li>
+                <li><Link href="/trip?destination=rajasthan" className="text-[#a3a3a3] hover:text-white transition-colors">Rajasthan</Link></li>
+                <li><Link href="/trip?destination=kerala" className="text-[#a3a3a3] hover:text-white transition-colors">Kerala</Link></li>
+                <li><Link href="/trip?destination=himalayas" className="text-[#a3a3a3] hover:text-white transition-colors">Himalayas</Link></li>
+                <li><Link href="/trip?destination=golden-triangle" className="text-[#a3a3a3] hover:text-white transition-colors">Golden Triangle</Link></li>
+                <li><Link href="/trip?destination=varanasi" className="text-[#a3a3a3] hover:text-white transition-colors">Varanasi</Link></li>
+                <li><Link href="/trip?destination=goa" className="text-[#a3a3a3] hover:text-white transition-colors">Goa</Link></li>
               </ul>
             </div>
 

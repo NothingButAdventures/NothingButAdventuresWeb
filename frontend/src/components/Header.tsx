@@ -174,8 +174,8 @@ export default function Header() {
                         <Link href="/dashboard" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           <span className="font-medium">Dashboard</span>
                         </Link>
-                        <Link href="/tours" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
-                          <span className="font-medium">Tours</span>
+                        <Link href="/trip" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <span className="font-medium">Trips</span>
                         </Link>
                         <Link href="/blogs" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           <span className="font-medium">Blog</span>
@@ -245,7 +245,7 @@ export default function Header() {
           <div className="md:hidden py-4 border-t border-gray-100 font-sans">
             <div className="flex flex-col space-y-4">
               <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
-              <Link href="/tours" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Tours</Link>
+              <Link href="/trip" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Trips</Link>
               <Link href="/blogs" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Blog</Link>
 
               {user ? (

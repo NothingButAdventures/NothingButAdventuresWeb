@@ -20,6 +20,7 @@ interface RelatedTour {
     _id: string;
     name: string;
     slug: string;
+    tourCode: string;
     price: {
         amount: number;
         currency: string;
@@ -467,7 +468,7 @@ export default function BlogPostPage({
                             {blog.relatedCountries.map((country) => (
                                 <Link
                                     key={country._id}
-                                    href={`/tours?country=${country.slug}`}
+                                    href={`/trip?country=${country.slug}`}
                                     className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
                                 >
                                     {country.name}
@@ -481,7 +482,7 @@ export default function BlogPostPage({
                 {blog.relatedTours && blog.relatedTours.length > 0 && (
                     <div className="mt-8 pt-8 border-t border-gray-200">
                         <h3 className="text-lg font-bold text-gray-900 mb-6">
-                            Explore Related Tours
+                            Explore Related Trips
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {blog.relatedTours.map((tour) => {
@@ -490,7 +491,7 @@ export default function BlogPostPage({
                                 return (
                                     <Link
                                         key={tour._id}
-                                        href={`/tours/${tour.slug}`}
+                                        href={`/trip/${tour.slug}/${tour.tourCode}`}
                                         className="group flex gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors"
                                     >
                                         <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">

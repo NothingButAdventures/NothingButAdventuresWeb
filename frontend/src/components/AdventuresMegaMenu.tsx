@@ -26,6 +26,7 @@ interface Tour {
   _id: string;
   name: string;
   slug: string;
+  tourCode: string;
   images: { url: string; isPrimary?: boolean }[];
   country: string | { _id: string; name: string };
   location: {
@@ -390,7 +391,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
             <hr className="mb-5 border-gray-200" />
 
             <div>
-              <h4 className="text-[11px] font-bold text-gray-500 mb-3 tracking-widest uppercase">Tour Categories</h4>
+              <h4 className="text-[11px] font-bold text-gray-500 mb-3 tracking-widest uppercase">Trip Categories</h4>
               <div className="flex flex-col gap-2">
                 {categories.slice(0, 6).map((cat, i) => (
                   <button
@@ -408,10 +409,10 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
           </div>
 
           <Link
-            href={activeCountry ? `/tours?country=${activeCountry._id}` : "/tours"}
+            href={activeCountry ? `/trip?country=${activeCountry._id}` : "/trip"}
             className="mt-4 block w-full bg-black text-white rounded-xl py-3 text-sm font-semibold text-center hover:bg-gray-800 transition-colors"
           >
-            See All Tours
+            See All Trips
           </Link>
         </div>
 
@@ -473,7 +474,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold font-outfit text-gray-900">
-                  {activeCountry ? `Tours in ${activeCountry.name}` : "Popular Tours"}
+                  {activeCountry ? `Trips in ${activeCountry.name}` : "Popular Trips"}
                 </h3>
                 <span className="bg-gray-800 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                   {tours.length}
@@ -488,7 +489,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
                   const countryName = typeof t.country === "object" ? t.country.name : activeCountry?.name || "";
                   return (
                     <Link
-                      href={`/tours/${t.slug}`}
+                      href={`/trip/${t.slug}/${t.tourCode}`}
                       key={t._id}
                       className="block relative h-32 rounded-xl overflow-hidden group border border-white/10"
                     >
@@ -525,7 +526,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
               </div>
             ) : !loading ? (
               <div className="h-32 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 text-sm">
-                No tours available for {activeCountry?.name || "this selection"}
+                No trips available for {activeCountry?.name || "this selection"}
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-3">
@@ -542,9 +543,10 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
           <h3 className="text-lg font-bold font-outfit mb-2 text-gray-900">
             {activeCountry ? `About ${activeCountry.name}` : "About"}
           </h3>
-          <p className="text-xs text-gray-600 font-sans leading-relaxed mb-4 line-clamp-5">
-            {countryDesc}
-          </p>
+          <div 
+            className="text-xs text-gray-600 font-sans leading-relaxed mb-4 line-clamp-5"
+            dangerouslySetInnerHTML={{ __html: countryDesc }}
+          />
 
           {/* Gallery from tour images */}
           <div className="grid grid-cols-2 gap-2 mt-auto flex-1 overflow-hidden">
@@ -562,16 +564,16 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
                 </div>
               ))}
             {Array.from({ length: Math.max(0, 6 - tours.flatMap((t) => t.images || []).filter((img) => img?.url).length) }).map((_, i) => (
-              <div key={`blank-${i}`} className="aspect-square rounded-xl bg-gray-200 animate-pulse" />
+              <div key={`blank-${i}`} className="aspect-square rounded-xl bg-gray-200" />
             ))}
           </div>
 
           {activeCountry && (
             <Link
-              href={`/tours?country=${activeCountry._id}`}
+              href={`/trip?country=${activeCountry._id}`}
               className="mt-4 block w-full border border-black text-black rounded-xl py-2.5 text-xs font-semibold text-center hover:bg-black hover:text-white transition-colors"
             >
-              View {activeCountry.name} Tours →
+              View {activeCountry.name} Trips →
             </Link>
           )}
         </div>
