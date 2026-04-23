@@ -30,6 +30,7 @@ const discountRoutes = require("./routes/discountRoutes");
 const holdSpaceRoutes = require("./routes/holdSpaceRoutes");
 const queryRoutes = require("./routes/queryRoutes");
 const promoCodeRoutes = require("./routes/promoCodeRoutes");
+const activityRoutes = require("./routes/activityRoutes");
 
 // Load environment variables
 require("dotenv").config();
@@ -128,6 +129,7 @@ app.use("/api/v1/discounts", discountRoutes);
 app.use("/api/v1/hold-spaces", holdSpaceRoutes);
 app.use("/api/v1/queries", queryRoutes);
 app.use("/api/v1/promo-codes", promoCodeRoutes);
+app.use("/api/v1/activities", activityRoutes);
 
 // Handle undefined routes
 app.all("*", (req, res, next) => {

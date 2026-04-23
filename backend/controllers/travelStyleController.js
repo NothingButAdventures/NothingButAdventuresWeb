@@ -53,6 +53,23 @@ const getTravelStyleBySlug = catchAsync(async (req, res, next) => {
 });
 
 const createTravelStyle = catchAsync(async (req, res, next) => {
+    const normalizedName = (req.body.name || '').trim();
+    if (!normalizedName) {
+        return next(new AppError('A travel style must have a name', 400));
+    }
+
+    req.body.name = normalizedName;
+
+    // Backward-compatibility: clean up old soft-deleted duplicates from previous logic.
+    const existingStyle = await TravelStyle.findOne({ name: normalizedName });
+    if (existingStyle) {
+        if (existingStyle.isActive === false) {
+            await TravelStyle.findByIdAndDelete(existingStyle._id);
+        } else {
+            return next(new AppError('A travel style with this name already exists', 400));
+        }
+    }
+
     const newTravelStyle = await TravelStyle.create(req.body);
 
     res.status(201).json({

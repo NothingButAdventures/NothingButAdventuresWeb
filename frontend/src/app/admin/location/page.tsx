@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
@@ -28,6 +27,17 @@ interface Country {
         name: string;
         symbol: string;
     };
+    destinations?: Destination[];
+}
+
+interface Destination {
+    id: string;
+    _id: string;
+    name: string;
+    slug?: string;
+    description?: string;
+    image?: string;
+    isActive?: boolean;
 }
 
 // --- Icons ---
@@ -56,11 +66,15 @@ export default function LocationPage() {
     const [continents, setContinents] = useState<Continent[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedContinent, setExpandedContinent] = useState<string | null>(null);
+    const [expandedCountry, setExpandedCountry] = useState<string | null>(null);
 
     // Modals
     const [isContinentModalOpen, setIsContinentModalOpen] = useState(false);
     const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
+    const [isDestinationModalOpen, setIsDestinationModalOpen] = useState(false);
     const [selectedContinentId, setSelectedContinentId] = useState<string | null>(null);
+    const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
+    const [editingDestinationId, setEditingDestinationId] = useState<string | null>(null);
 
     // Form State
     const [newContinentName, setNewContinentName] = useState("");
@@ -72,6 +86,10 @@ export default function LocationPage() {
         currencyCode: "",
         currencyName: "",
         currencySymbol: ""
+    });
+    const [newDestinationData, setNewDestinationData] = useState({
+        name: "",
+        description: "",
     });
 
     useEffect(() => {
@@ -89,6 +107,47 @@ export default function LocationPage() {
             console.error("Error fetching continents:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const getCountryKey = (country: Country) => country.id || country._id;
+
+    const getDestinationKey = (destination: Destination) => destination.id || destination._id;
+
+    const updateCountryInState = (updatedCountry: Country) => {
+        const countryId = getCountryKey(updatedCountry);
+
+        setContinents((prev) =>
+            prev.map((continent) => ({
+                ...continent,
+                countries: (continent.countries || []).map((country) =>
+                    getCountryKey(country) === countryId ? { ...country, ...updatedCountry } : country
+                ),
+            }))
+        );
+    };
+
+    const persistCountryDestinations = async (countryId: string, destinations: Destination[]) => {
+        try {
+            const res = await fetch(`${api.baseURL}/countries/${countryId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ destinations }),
+                credentials: "include",
+            });
+
+            const data = await res.json();
+            if (data.status === "success") {
+                updateCountryInState(data.data.country);
+                return true;
+            }
+
+            alert("Error saving destination: " + (data.message || "Unknown error"));
+            return false;
+        } catch (err) {
+            console.error("Error saving destination:", err);
+            alert("Failed to save destination.");
+            return false;
         }
     };
 
@@ -175,9 +234,129 @@ export default function LocationPage() {
         setExpandedContinent(expandedContinent === id ? null : id);
     };
 
+    const toggleCountry = (id: string) => {
+        setExpandedCountry(expandedCountry === id ? null : id);
+    };
+
     const openAddCountryModal = (continentId: string) => {
         setSelectedContinentId(continentId);
         setIsCountryModalOpen(true);
+    };
+
+    const openAddDestinationModal = (countryId: string) => {
+        setSelectedCountryId(countryId);
+        setEditingDestinationId(null);
+        setNewDestinationData({ name: "", description: "" });
+        setIsDestinationModalOpen(true);
+    };
+
+    const openEditDestinationModal = (countryId: string, destination: Destination) => {
+        setSelectedCountryId(countryId);
+        setEditingDestinationId(getDestinationKey(destination));
+        setNewDestinationData({
+            name: destination.name || "",
+            description: destination.description || "",
+        });
+        setIsDestinationModalOpen(true);
+    };
+
+    const closeDestinationModal = () => {
+        setIsDestinationModalOpen(false);
+        setSelectedCountryId(null);
+        setEditingDestinationId(null);
+        setNewDestinationData({ name: "", description: "" });
+    };
+
+    const handleSaveDestination = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!selectedCountryId) return;
+
+        const targetCountry = continents
+            .flatMap((continent) => continent.countries || [])
+            .find((country) => getCountryKey(country) === selectedCountryId);
+
+        if (!targetCountry) {
+            alert("Could not find the selected country.");
+            return;
+        }
+
+        const destinations = [...(targetCountry.destinations || [])];
+        const destinationPayload = {
+            name: newDestinationData.name.trim(),
+            description: newDestinationData.description.trim(),
+        };
+
+        if (editingDestinationId) {
+            const destinationIndex = destinations.findIndex((destination) => getDestinationKey(destination) === editingDestinationId);
+            if (destinationIndex === -1) {
+                alert("Could not find the selected destination.");
+                return;
+            }
+
+            destinations[destinationIndex] = {
+                ...destinations[destinationIndex],
+                ...destinationPayload,
+            };
+        } else {
+            destinations.push(destinationPayload as Destination);
+        }
+
+        const saved = await persistCountryDestinations(selectedCountryId, destinations as Destination[]);
+        if (saved) {
+            closeDestinationModal();
+        }
+    };
+
+    const handleDeleteDestination = async (countryId: string, destination: Destination) => {
+        const destinationId = getDestinationKey(destination);
+        const confirmed = window.confirm(`Delete destination "${destination.name}"? This cannot be undone.`);
+        if (!confirmed) return;
+
+        const targetCountry = continents
+            .flatMap((continent) => continent.countries || [])
+            .find((country) => getCountryKey(country) === countryId);
+
+        if (!targetCountry) {
+            alert("Could not find the selected country.");
+            return;
+        }
+
+        const nextDestinations = (targetCountry.destinations || []).filter((item) => getDestinationKey(item) !== destinationId);
+        await persistCountryDestinations(countryId, nextDestinations);
+    };
+
+    const handleDeleteContinent = async (continent: Continent) => {
+        const continentId = continent.id || continent._id;
+        const countryCount = continent.countries?.length || 0;
+
+        if (countryCount > 0) {
+            alert(`You can delete ${continent.name} only when it has 0 countries.`);
+            return;
+        }
+
+        const confirmed = window.confirm(`Delete continent "${continent.name}" permanently? This action cannot be undone.`);
+        if (!confirmed) return;
+
+        try {
+            const res = await fetch(`${api.baseURL}/continents/${continentId}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+            const data = await res.json();
+
+            if (res.ok && data.status === "success") {
+                setContinents((prev) => prev.filter((item) => (item.id || item._id) !== continentId));
+                if (expandedContinent === continentId) {
+                    setExpandedContinent(null);
+                }
+            } else {
+                alert(`Error deleting continent: ${data.message || "Unknown error"}`);
+            }
+        } catch (err) {
+            console.error("Error deleting continent:", err);
+            alert("Failed to delete continent.");
+        }
     };
 
     // --- RENDER ---
@@ -205,7 +384,7 @@ export default function LocationPage() {
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Location Management</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">Destination Management</h1>
                         <p className="text-gray-500 text-sm mt-1">Manage continents and countries for your tours ({continents.length} continents)</p>
                     </div>
                     <button
@@ -213,7 +392,7 @@ export default function LocationPage() {
                         className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-5 rounded-lg transition flex items-center justify-center gap-2 shadow-sm active:scale-95"
                     >
                         <Icons.Plus className="w-5 h-5" />
-                        Add Continent
+                        Add Destination
                     </button>
                 </div>
             </div>
@@ -232,7 +411,7 @@ export default function LocationPage() {
                                 onClick={() => setIsContinentModalOpen(true)}
                                 className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
                             >
-                                Add Continent
+                                Add Destination
                             </button>
                         </div>
                     ) : (
@@ -281,6 +460,18 @@ export default function LocationPage() {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </Link>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteContinent(continent);
+                                            }}
+                                            disabled={(continent.countries?.length || 0) > 0}
+                                            className="p-2 rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 text-gray-500 hover:text-red-600 hover:bg-red-50"
+                                            title={(continent.countries?.length || 0) > 0 ? "Delete available only when this continent has 0 countries" : "Delete permanently"}
+                                        >
+                                            <Icons.Trash2 className="w-4 h-4" />
+                                        </button>
                                         <div className="w-px h-8 bg-gray-200 mx-1"></div>
                                         <div className={`text-gray-400 transition-transform duration-200 ${expandedContinent === (continent.id || continent._id) ? "rotate-180" : ""}`}>
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,7 +481,7 @@ export default function LocationPage() {
                                     </div>
                                 </div>
 
-                                {/* Expanded Countries Grid */}
+                                {/* Expanded Countries List */}
                                 {expandedContinent === (continent.id || continent._id) && (
                                     <div className="border-t border-gray-100 bg-gray-50/50 p-6 animate-in slide-in-from-top-1">
                                         <div className="flex items-center justify-between mb-5">
@@ -309,46 +500,136 @@ export default function LocationPage() {
                                             </button>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                        <div className="space-y-3">
                                             {continent.countries && continent.countries.length > 0 ? (
                                                 continent.countries.map((country) => (
                                                     <div
                                                         key={country.id || country._id}
-                                                        className="group bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex items-start gap-4"
+                                                        className="overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-200 hover:border-blue-300 hover:shadow-md"
                                                     >
-                                                        <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-100">
-                                                            {country.image ? (
-                                                                <img src={country.image} alt={country.name} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
-                                                                    {country.code}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0 pt-0.5">
-                                                            <Link
-                                                                href={`/admin/location/country/${country.id || country._id}`}
-                                                                className="block font-semibold text-gray-900 truncate hover:text-blue-600 transition-colors"
-                                                            >
-                                                                {country.name}
-                                                            </Link>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                                                                    {country.code}
-                                                                </span>
-                                                                {country.currency && (
-                                                                    <span className="text-xs text-gray-400 truncate">
-                                                                        {country.currency.code}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <Link
-                                                            href={`/admin/location/country/${country.id || country._id}`}
-                                                            className="p-1.5 text-gray-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors -mr-1 -mt-1"
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => toggleCountry(country.id || country._id)}
+                                                            className="w-full px-4 py-4 flex items-center justify-between gap-4 text-left hover:bg-gray-50 transition-colors"
                                                         >
-                                                            <Icons.Edit2 className="w-4 h-4" />
-                                                        </Link>
+                                                            <div className="flex items-center gap-4 min-w-0">
+                                                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-100">
+                                                                    {country.image ? (
+                                                                        <img src={country.image} alt={country.name} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs font-bold">
+                                                                            {country.code}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="min-w-0">
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <h5 className="font-semibold text-gray-900 truncate">{country.name}</h5>
+                                                                        <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                                                                            {country.code}
+                                                                        </span>
+                                                                        <span className="text-xs text-gray-400">
+                                                                            {(country.destinations?.length || 0)} destinations
+                                                                        </span>
+                                                                    </div>
+                                                                    {country.currency?.code && (
+                                                                        <p className="text-xs text-gray-400 mt-1 truncate">
+                                                                            Currency: {country.currency.code}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                <Link
+                                                                    href={`/admin/location/country/${country.id || country._id}`}
+                                                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    title="Edit country"
+                                                                >
+                                                                    <Icons.Edit2 className="w-4 h-4" />
+                                                                </Link>
+                                                                <div className={`text-gray-400 transition-transform duration-200 ${expandedCountry === (country.id || country._id) ? "rotate-180" : ""}`}>
+                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+
+                                                        {expandedCountry === (country.id || country._id) && (
+                                                            <div className="border-t border-gray-100 bg-gray-50/70 px-4 py-4">
+                                                                <div className="flex items-center justify-between gap-3 mb-4">
+                                                                    <h5 className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                                                                        Destinations in {country.name}
+                                                                    </h5>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            openAddDestinationModal(country.id || country._id);
+                                                                        }}
+                                                                        className="text-sm flex items-center gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-colors font-medium border border-transparent hover:border-blue-100"
+                                                                    >
+                                                                        <Icons.Plus className="w-4 h-4" />
+                                                                        Add Destination
+                                                                    </button>
+                                                                </div>
+
+                                                                <div className="space-y-3">
+                                                                    {country.destinations && country.destinations.length > 0 ? (
+                                                                        country.destinations.map((destination) => (
+                                                                            <div
+                                                                                key={destination.id || destination._id}
+                                                                                className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                                                                            >
+                                                                                <div className="min-w-0">
+                                                                                    <p className="font-semibold text-gray-900 truncate">{destination.name}</p>
+                                                                                    <p className="text-sm text-gray-500 mt-1">
+                                                                                        {destination.description || "No description added yet."}
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2 flex-shrink-0">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            openEditDestinationModal(country.id || country._id, destination);
+                                                                                        }}
+                                                                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                                                    >
+                                                                                        Edit
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            handleDeleteDestination(country.id || country._id, destination);
+                                                                                        }}
+                                                                                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                                    >
+                                                                                        Delete
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white px-4 py-8 text-center">
+                                                                            <p className="text-sm text-gray-400 mb-3">No destinations added yet.</p>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    openAddDestinationModal(country.id || country._id);
+                                                                                }}
+                                                                                className="text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline"
+                                                                            >
+                                                                                Add the first destination to {country.name}
+                                                                            </button>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 ))
                                             ) : (
@@ -373,6 +654,59 @@ export default function LocationPage() {
                     )}
                 </div>
             </div>
+
+            {/* Add / Edit Destination Modal */}
+            {isDestinationModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden transform transition-all scale-100">
+                        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 bg-gray-50/95 backdrop-blur z-10">
+                            <h2 className="text-lg font-bold text-gray-900">
+                                {editingDestinationId ? "Edit Destination" : "Add Destination"}
+                            </h2>
+                            <button onClick={closeDestinationModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+                        <form onSubmit={handleSaveDestination} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Destination / City Name</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newDestinationData.name}
+                                    onChange={(e) => setNewDestinationData({ ...newDestinationData, name: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-gray-300"
+                                    placeholder="e.g. Kyoto"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea
+                                    value={newDestinationData.description}
+                                    onChange={(e) => setNewDestinationData({ ...newDestinationData, description: e.target.value })}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all h-24 resize-none"
+                                    placeholder="Short note about the destination..."
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-50">
+                                <button
+                                    type="button"
+                                    onClick={closeDestinationModal}
+                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm"
+                                >
+                                    {editingDestinationId ? "Save Destination" : "Create Destination"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Add Continent Modal */}
             {isContinentModalOpen && (

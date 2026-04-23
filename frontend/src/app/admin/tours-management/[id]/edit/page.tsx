@@ -163,6 +163,7 @@ export default function EditTourPage() {
     ageMin: "0",
     isFeatured: false,
     isActive: true,
+    ownRoomAvailable: false,
   });
 
   useEffect(() => {
@@ -265,6 +266,7 @@ export default function EditTourPage() {
           ageMin: tour.ageRequirement?.min?.toString() || "0",
           isFeatured: tour.isFeatured || false,
           isActive: tour.isActive !== undefined ? tour.isActive : true,
+          ownRoomAvailable: tour.ownRoomAvailable || false,
         });
 
         // Load existing description image
@@ -644,7 +646,7 @@ export default function EditTourPage() {
   const updateAvailableDate = (
     index: number,
     field: keyof AvailableDate,
-    value: string | number,
+    value: string | number | boolean,
   ) => {
     setAvailableDates((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
@@ -771,6 +773,7 @@ export default function EditTourPage() {
           discount: ad.discount || undefined,
           isActive: true,
         })).filter(ad => ad.startDate && ad.endDate),
+        ownRoomAvailable: formData.ownRoomAvailable,
         ageRequirement: {
           min: parseInt(formData.ageMin) || 0,
         },
@@ -1271,28 +1274,34 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
 
 
 
-                <div className="md:col-span-2 flex gap-6">
-                  <div className="flex items-center">
+                <div className="md:col-span-1">
+                  <div className="flex items-center gap-2 mt-2">
                     <input
                       type="checkbox"
-                      name="isActive"
-                      checked={formData.isActive}
-                      onChange={handleChange}
-                      className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
-                    />
-                    <label className="ml-2 text-sm text-gray-700">Active</label>
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                      id="isFeatured"
                       name="isFeatured"
                       checked={formData.isFeatured}
                       onChange={handleChange}
-                      className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Featured
+                    <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                      Featured Tour
+                    </label>
+                  </div>
+                </div>
+
+                <div className="md:col-span-1">
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      id="ownRoomAvailable"
+                      name="ownRoomAvailable"
+                      checked={formData.ownRoomAvailable}
+                      onChange={(e) => setFormData(prev => ({ ...prev, ownRoomAvailable: e.target.checked }))}
+                      className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    />
+                    <label htmlFor="ownRoomAvailable" className="text-sm font-medium text-gray-700">
+                      Own Room (Solo Supplement) Available
                     </label>
                   </div>
                 </div>

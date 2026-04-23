@@ -468,7 +468,7 @@ export default function BlogPostPage({
                             {blog.relatedCountries.map((country) => (
                                 <Link
                                     key={country._id}
-                                    href={`/trip?country=${country.slug}`}
+                                    href={`/trips?country=${country.slug}`}
                                     className="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
                                 >
                                     {country.name}
@@ -491,7 +491,7 @@ export default function BlogPostPage({
                                 return (
                                     <Link
                                         key={tour._id}
-                                        href={`/trip/${tour.slug}/${tour.tourCode}`}
+                                        href={`/trips/${tour.slug}/${tour.tourCode}`}
                                         className="group flex gap-4 p-4 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors"
                                     >
                                         <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">

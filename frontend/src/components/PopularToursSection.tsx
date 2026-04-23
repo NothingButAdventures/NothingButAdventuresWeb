@@ -34,14 +34,13 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     <div className="inline-block px-4 py-1.5 bg-[#e8e9eb] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
                         Popular
                     </div>
-                    <h2 className="text-[48px] md:text-[64px] font-medium leading-[1.1] text-black">
-                        <span className="block">Find your perfect</span>
-                        <span className="block">trip experience</span>
+                    <h2 className="text-[32px] md:text-[40px] font-medium leading-tight text-gray-900">
+                        Find your perfect trip experience
                     </h2>
                 </div>
                 <div className="hidden md:flex flex-col items-end gap-3 mt-6">
                     <Link
-                        href="/trip"
+                        href="/trips"
                         className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
                     >
                         View All Trips
@@ -115,7 +114,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     </button>
                 </div>
                 <Link
-                    href="/trip"
+                    href="/trips"
                     className="inline-block font-medium text-lg text-black underline underline-offset-4 decoration-1"
                 >
                     View All Trips

@@ -486,7 +486,7 @@ function SearchContent() {
                                     : tour.price.amount;
 
                             return (
-                                <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
+                                <Link href={`/trips/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                     <div className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform h-full flex flex-col">
                                         {/* Image Container */}
                                         <div className="relative w-full h-64 overflow-hidden bg-gray-100 group-hover:opacity-95 transition-opacity">
@@ -592,7 +592,7 @@ function SearchContent() {
                                 We couldn't find any trips matching your search. Try adjusting your search terms or filters.
                             </p>
                             <button
-                                onClick={() => window.location.href = '/trip'}
+                                onClick={() => window.location.href = '/trips'}
                                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
                             >
                                 View all trips

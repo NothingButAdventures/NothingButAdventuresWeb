@@ -259,14 +259,23 @@ const createTour = catchAsync(async (req, res, next) => {
 });
 
 const updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+  const tour = await Tour.findById(req.params.id);
 
   if (!tour) {
     return next(new AppError("No tour found with that ID", 404));
   }
+
+  // Update fields from req.body
+  Object.keys(req.body).forEach((key) => {
+    tour[key] = req.body[key];
+  });
+
+  // Explicitly mark startDates as modified if they are present in the update
+  if (req.body.startDates) {
+    tour.markModified("startDates");
+  }
+
+  await tour.save({ runValidators: true });
 
   res.status(200).json({
     status: "success",

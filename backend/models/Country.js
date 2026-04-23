@@ -1,6 +1,43 @@
 const mongoose = require("mongoose");
 const slugify = require("slugify");
 
+const destinationSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "A destination must have a name"],
+      trim: true,
+      maxlength: [100, "Destination name cannot exceed 100 characters"],
+    },
+    slug: {
+      type: String,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    image: {
+      type: String,
+      default: "",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+);
+
+destinationSchema.pre("save", function (next) {
+  if (this.isModified("name") || this.isNew) {
+    this.slug = slugify(this.name, { lower: true, strict: true });
+  }
+  next();
+});
+
 const countrySchema = new mongoose.Schema(
   {
     name: {
@@ -34,8 +71,131 @@ const countrySchema = new mongoose.Schema(
       type: String,
       maxlength: [200, "Short description cannot exceed 200 characters"],
     },
+    faqSection: {
+      title: {
+        type: String,
+        default: "FAQ",
+      },
+      subtitle: {
+        type: String,
+        default:
+          "Everything you need to know before your desert journey - from booking to what to pack.",
+      },
+      items: [
+        {
+          question: {
+            type: String,
+            trim: true,
+          },
+          answer: {
+            type: String,
+            trim: true,
+          },
+        },
+      ],
+    },
+    bestTime: {
+      badge: {
+        type: String,
+        default: "Best Time",
+        trim: true,
+      },
+      title: {
+        type: String,
+        default: "Best time to travel",
+        trim: true,
+      },
+      heading: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      items: [
+        {
+          title: {
+            type: String,
+            trim: true,
+          },
+          description: {
+            type: String,
+            trim: true,
+          },
+        },
+      ],
+    },
+    bestTimeInsights: {
+      mostPopularTime: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      budgetFriendly: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      favouriteSeason: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      culturallySignificantTimes: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
+    needToKnow: {
+      timeZone: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      climate: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      currency: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      transportation: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      localCuisine: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      languagesSpoken: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+    },
+    localStoryBlogs: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Blog",
+      },
+    ],
+    travelStoryBlogs: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Blog",
+      },
+    ],
     image: {
       type: String,
+    },
+    destinations: [destinationSchema],
+    videoUrl: {
+      type: String,
+      trim: true,
     },
     currency: {
       code: {

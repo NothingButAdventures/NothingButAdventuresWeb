@@ -1,6 +1,5 @@
-// API configuration and utilities
-const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
-// const API_BASE_URL = "http://localhost:3001/api/v1"
+// const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
+const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -57,6 +56,11 @@ export const api = {
       getMyReviews: "/users/my-reviews",
       getWishlist: "/users/wishlist",
       toggleWishlist: (tourId: string) => `/users/wishlist/${tourId}`,
+      getAllAdmin: "/users",
+      getStats: "/users/stats",
+      getById: (id: string) => `/users/${id}`,
+      updateById: (id: string) => `/users/${id}`,
+      deactivateById: (id: string) => `/users/${id}`,
     },
     holdSpaces: {
       create: "/hold-spaces",
@@ -106,6 +110,17 @@ export const api = {
       delete: (id: string) => `/promo-codes/${id}`,
       apply: "/promo-codes/apply",
       checkStatus: (tourId: string) => `/promo-codes/check/${tourId}`,
+    },
+    activities: {
+      getAll: "/activities",
+      getById: (id: string) => `/activities/${id}`,
+      create: "/activities",
+      update: (id: string) => `/activities/${id}`,
+      delete: (id: string) => `/activities/${id}`,
+    },
+    physicalRatings: {
+      getAll: "/physical-ratings",
+      getById: (id: string) => `/physical-ratings/${id}`,
     },
   },
 };

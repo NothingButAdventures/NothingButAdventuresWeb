@@ -4,6 +4,50 @@ const Continent = require('../models/Continent');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const slugify = require('slugify');
+
+const normalizeDestination = (destination) => {
+  if (!destination || typeof destination !== 'object') return destination;
+
+  const normalizedDestination = { ...destination };
+  const destinationName = typeof normalizedDestination.name === 'string'
+    ? normalizedDestination.name.trim()
+    : '';
+
+  if (destinationName) {
+    normalizedDestination.name = destinationName;
+    normalizedDestination.slug = slugify(destinationName, {
+      lower: true,
+      strict: true,
+    });
+  }
+
+  if (typeof normalizedDestination.description === 'string') {
+    normalizedDestination.description = normalizedDestination.description.trim();
+  }
+
+  if (typeof normalizedDestination.image === 'string') {
+    normalizedDestination.image = normalizedDestination.image.trim();
+  }
+
+  if (typeof normalizedDestination.isActive === 'undefined') {
+    normalizedDestination.isActive = true;
+  }
+
+  return normalizedDestination;
+};
+
+const normalizeCountryPayload = (body) => {
+  const payload = { ...body };
+
+  if (Array.isArray(payload.destinations)) {
+    payload.destinations = payload.destinations
+      .filter((destination) => destination && typeof destination === 'object' && `${destination.name || ''}`.trim())
+      .map(normalizeDestination);
+  }
+
+  return payload;
+};
 
 const getAllCountries = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(Country.find({ isActive: true }), req.query)
@@ -33,6 +77,12 @@ const getCountry = catchAsync(async (req, res, next) => {
     path: 'tours',
     match: { isActive: true },
     select: 'name slug summary price ratingsAverage ratingsQuantity duration images',
+  }).populate({
+    path: 'localStoryBlogs',
+    select: 'title slug excerpt content featuredImage publishedAt status',
+  }).populate({
+    path: 'travelStoryBlogs',
+    select: 'title slug excerpt content featuredImage publishedAt status',
   });
 
   if (!country) {
@@ -152,7 +202,7 @@ const getCountryStats = catchAsync(async (req, res, next) => {
 
 // Admin only routes
 const createCountry = catchAsync(async (req, res, next) => {
-  const newCountry = await Country.create(req.body);
+  const newCountry = await Country.create(normalizeCountryPayload(req.body));
 
   res.status(201).json({
     status: 'success',
@@ -163,7 +213,7 @@ const createCountry = catchAsync(async (req, res, next) => {
 });
 
 const updateCountry = catchAsync(async (req, res, next) => {
-  const country = await Country.findByIdAndUpdate(req.params.id, req.body, {
+  const country = await Country.findByIdAndUpdate(req.params.id, normalizeCountryPayload(req.body), {
     new: true,
     runValidators: true,
   });

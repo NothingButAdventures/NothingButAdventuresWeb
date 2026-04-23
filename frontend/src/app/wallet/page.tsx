@@ -93,7 +93,7 @@ export default function WalletPage() {
                                     Your credits can be applied to any trip booking at checkout. Start planning your next adventure today!
                                 </p>
                                 <Link
-                                    href="/trip"
+                                    href="/trips"
                                     className="inline-block bg-amber-400 hover:bg-amber-500 text-gray-900 font-bold py-2 px-6 rounded-lg transition-colors text-sm"
                                 >
                                     Explore Trips

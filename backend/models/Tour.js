@@ -127,6 +127,10 @@ const tourSchema = new mongoose.Schema(
         },
       },
     ],
+    ownRoomAvailable: {
+      type: Boolean,
+      default: false,
+    },
     itinerary: [
       {
         day: {

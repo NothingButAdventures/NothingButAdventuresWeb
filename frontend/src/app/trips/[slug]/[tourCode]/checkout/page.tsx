@@ -21,6 +21,7 @@ interface Tour {
         discountPercent: number;
         bookingPercentage?: number;
     };
+    ownRoomAvailable: boolean;
     duration: {
         days: number;
         nights: number;
@@ -688,7 +689,7 @@ export default function CheckoutPage() {
                 <div className="text-center">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">Trip not found</h1>
                     <p className="text-gray-600 mb-4">The tour you&apos;re looking for doesn&apos;t exist.</p>
-                    <Link href="/trip" className="text-purple-600 hover:underline">
+                    <Link href="/trips" className="text-purple-600 hover:underline">
                         Browse all trips
                     </Link>
                 </div>
@@ -708,11 +709,11 @@ export default function CheckoutPage() {
                             Home
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
-                        <Link href="/trip" className="text-gray-500 hover:text-gray-700">
+                        <Link href="/trips" className="text-gray-500 hover:text-gray-700">
                             Trips
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
-                        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} className="text-gray-500 hover:text-gray-700">
+                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="text-gray-500 hover:text-gray-700">
                             {tour.name}
                         </Link>
                         <span className="mx-2 text-gray-400">/</span>
@@ -1153,57 +1154,59 @@ export default function CheckoutPage() {
                                         </div>
 
                                         {/* Accommodation Customization */}
-                                        <div className="border-t pt-6">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-2">Customize your accommodation</h3>
-                                            <p className="text-gray-600 text-sm mb-4">
-                                                Basic accommodation is included in your tour, but you can customize and upgrade your options below
-                                            </p>
+                                        {tour.ownRoomAvailable && (
+                                            <div className="border-t pt-6">
+                                                <h3 className="text-lg font-bold text-gray-900 mb-2">Customize your accommodation</h3>
+                                                <p className="text-gray-600 text-sm mb-4">
+                                                    Basic accommodation is included in your tour, but you can customize and upgrade your options below
+                                                </p>
 
-                                            <div className="border rounded-lg p-4">
-                                                <div className="flex items-start gap-4">
-                                                    <div className="w-16 h-16 rounded-lg bg-purple-100 flex items-center justify-center">
-                                                        <span className="text-2xl">🏨</span>
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-gray-900">My Own Room</h4>
-                                                        <p className="text-sm text-gray-600 mt-1">
-                                                            During your tour, sometimes it&apos;s more convenient and comfortable to have your own room. We offer this option so you can treat yourself.
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="font-bold text-gray-900">
-                                                            $279<span className="text-xs font-normal text-gray-500"> USD per person</span>
+                                                <div className="border rounded-lg p-4">
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="w-16 h-16 rounded-lg bg-purple-100 flex items-center justify-center">
+                                                            <span className="text-2xl">🏨</span>
                                                         </div>
-                                                        {accommodationUpgrade ? (
-                                                            <div className="mt-2 flex items-center justify-end gap-3">
-                                                                <div className="flex items-center border border-gray-300 rounded-lg">
-                                                                    <button
-                                                                        onClick={() => updateAccommodationCount(accommodationUpgrade.count - 1)}
-                                                                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-l-lg transition"
-                                                                    >
-                                                                        −
-                                                                    </button>
-                                                                    <span className="w-8 text-center text-sm font-semibold">{accommodationUpgrade.count}</span>
-                                                                    <button
-                                                                        onClick={() => updateAccommodationCount(Math.min(adultCount, accommodationUpgrade.count + 1))}
-                                                                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-r-lg transition"
-                                                                    >
-                                                                        +
-                                                                    </button>
-                                                                </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-gray-900">My Own Room</h4>
+                                                            <p className="text-sm text-gray-600 mt-1">
+                                                                During your tour, sometimes it&apos;s more convenient and comfortable to have your own room. We offer this option so you can treat yourself.
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-bold text-gray-900">
+                                                                $279<span className="text-xs font-normal text-gray-500"> USD per person</span>
                                                             </div>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => updateAccommodationCount(1)}
-                                                                className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm border border-purple-300 text-purple-600 hover:bg-purple-50 transition"
-                                                            >
-                                                                + Add to tour
-                                                            </button>
-                                                        )}
+                                                            {accommodationUpgrade ? (
+                                                                <div className="mt-2 flex items-center justify-end gap-3">
+                                                                    <div className="flex items-center border border-gray-300 rounded-lg">
+                                                                        <button
+                                                                            onClick={() => updateAccommodationCount(accommodationUpgrade.count - 1)}
+                                                                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-l-lg transition"
+                                                                        >
+                                                                            −
+                                                                        </button>
+                                                                        <span className="w-8 text-center text-sm font-semibold">{accommodationUpgrade.count}</span>
+                                                                        <button
+                                                                            onClick={() => updateAccommodationCount(Math.min(adultCount, accommodationUpgrade.count + 1))}
+                                                                            className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-r-lg transition"
+                                                                        >
+                                                                            +
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => updateAccommodationCount(1)}
+                                                                    className="mt-2 flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm border border-purple-300 text-purple-600 hover:bg-purple-50 transition"
+                                                                >
+                                                                    + Add to tour
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </>
                                 ) : (
                                     <div className="text-gray-700">

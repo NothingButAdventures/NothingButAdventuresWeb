@@ -205,7 +205,7 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
                         </div>
 
                         <Link
-                            href={`/trip/${tour.slug}/${tour.tourCode}`}
+                            href={`/trips/${tour.slug}/${tour.tourCode}`}
                             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-[#432360] hover:bg-[#321a48] transition-colors"
                         >
                             View trip details

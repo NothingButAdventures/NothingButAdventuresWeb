@@ -247,7 +247,7 @@ export default function ToursManagementPage() {
                         </div>
                         <div>
                           <Link
-                            href={`/trip/${tour.slug}/${tour.tourCode}`}
+                            href={`/trips/${tour.slug}/${tour.tourCode}`}
                             className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                           >
                             {tour.name}
@@ -265,7 +265,7 @@ export default function ToursManagementPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-700">
-                        {tour.duration.days}D / {tour.duration.nights}N
+                        {tour.duration.days}D
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

@@ -409,7 +409,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
           </div>
 
           <Link
-            href={activeCountry ? `/trip?country=${activeCountry._id}` : "/trip"}
+            href={activeCountry ? `/trips?country=${activeCountry._id}` : "/trips"}
             className="mt-4 block w-full bg-black text-white rounded-xl py-3 text-sm font-semibold text-center hover:bg-gray-800 transition-colors"
           >
             See All Trips
@@ -489,7 +489,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
                   const countryName = typeof t.country === "object" ? t.country.name : activeCountry?.name || "";
                   return (
                     <Link
-                      href={`/trip/${t.slug}/${t.tourCode}`}
+                      href={`/trips/${t.slug}/${t.tourCode}`}
                       key={t._id}
                       className="block relative h-32 rounded-xl overflow-hidden group border border-white/10"
                     >
@@ -570,7 +570,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
 
           {activeCountry && (
             <Link
-              href={`/trip?country=${activeCountry._id}`}
+              href={`/trips?country=${activeCountry._id}`}
               className="mt-4 block w-full border border-black text-black rounded-xl py-2.5 text-xs font-semibold text-center hover:bg-black hover:text-white transition-colors"
             >
               View {activeCountry.name} Trips →

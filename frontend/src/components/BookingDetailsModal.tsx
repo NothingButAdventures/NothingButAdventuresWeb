@@ -191,7 +191,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-white/20 backdrop-blur-md transition-opacity"
                 onClick={onClose}
             />
 
@@ -420,7 +420,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                     <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Link
-                                href={`/trip/${booking.tour.slug}/${booking.tour.tourCode}`}
+                                href={`/trips/${booking.tour.slug}/${booking.tour.tourCode}`}
                                 className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                             >
                                 View Trip

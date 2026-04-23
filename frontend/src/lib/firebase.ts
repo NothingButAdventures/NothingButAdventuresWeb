@@ -112,3 +112,6 @@ export const uploadTripTypeImage = (file: File, onProgress?: (pct: number) => vo
 
 export const uploadTravelStyleImage = (file: File, onProgress?: (pct: number) => void) =>
     uploadToFirebase(file, "travel-style-images", onProgress);
+
+export const uploadActivityImage = (file: File, onProgress?: (pct: number) => void) =>
+    uploadToFirebase(file, "activities", onProgress);

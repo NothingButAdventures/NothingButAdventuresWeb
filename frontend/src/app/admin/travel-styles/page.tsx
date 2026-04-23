@@ -14,6 +14,7 @@ interface TravelStyle {
     icon?: string;
     image?: string;
     color?: string;
+    url?: string;
     isActive: boolean;
 }
 
@@ -23,6 +24,9 @@ export default function TravelStylesPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newStyleName, setNewStyleName] = useState("");
+    const [newShortDescription, setNewShortDescription] = useState("");
+    const [newColor, setNewColor] = useState("#3B82F6");
+    const [newUrl, setNewUrl] = useState("");
     const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
     useEffect(() => {
@@ -49,12 +53,20 @@ export default function TravelStylesPage() {
             const res = await fetch(`${api.baseURL}/travel-styles`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: newStyleName }),
+                body: JSON.stringify({
+                    name: newStyleName,
+                    shortDescription: newShortDescription,
+                    color: newColor,
+                    url: newUrl,
+                }),
                 credentials: "include",
             });
             const data = await res.json();
             if (data.status === "success") {
                 setNewStyleName("");
+                setNewShortDescription("");
+                setNewColor("#3B82F6");
+                setNewUrl("");
                 setIsModalOpen(false);
                 fetchTravelStyles();
             } else {
@@ -325,6 +337,44 @@ export default function TravelStylesPage() {
                             </button>
                         </div>
                         <form onSubmit={handleCreateStyle} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                <input
+                                    type="text"
+                                    value={newShortDescription}
+                                    onChange={(e) => setNewShortDescription(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                                    placeholder="Brief summary for cards"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Brand Color</label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="color"
+                                        value={newColor}
+                                        onChange={(e) => setNewColor(e.target.value)}
+                                        className="h-10 w-12 rounded-md border border-gray-200 cursor-pointer"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={newColor}
+                                        onChange={(e) => setNewColor(e.target.value)}
+                                        className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition uppercase"
+                                        placeholder="#3B82F6"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                                <input
+                                    type="text"
+                                    value={newUrl}
+                                    onChange={(e) => setNewUrl(e.target.value)}
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
+                                    placeholder="/travel-styles/classic"
+                                />
+                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Travel Style Name <span className="text-red-500">*</span></label>
                                 <input

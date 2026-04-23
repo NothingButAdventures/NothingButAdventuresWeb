@@ -22,7 +22,7 @@ const nextConfig = {
     return [
       {
         source: "/tours/:path*",
-        destination: "/trip/:path*",
+        destination: "/trips/:path*",
         permanent: true,
       },
     ];

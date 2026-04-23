@@ -23,12 +23,17 @@ export interface TourCardProps {
         country: {
             name: string;
         };
+        summary?: string;
+        startDates?: Array<{
+            startDate?: string;
+        }>;
         travelStyle?: string;
         rating?: number;
     };
+    showDetailsByDefault?: boolean;
 }
 
-export default function TourCard({ tour }: TourCardProps) {
+export default function TourCard({ tour, showDetailsByDefault = false }: TourCardProps) {
     // Use descriptionImage first, then fall back to primary/first gallery image
     const primaryImage =
         tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
@@ -47,9 +52,29 @@ export default function TourCard({ tour }: TourCardProps) {
         pillBg = "bg-[#d88941]"; // orange
     }
 
+    const discountPercent = Math.max(0, Number(tour.price?.discountPercent || 0));
+    const saleLabel = discountPercent > 0 ? `Sale ${discountPercent}%` : "Sale 20%";
+    const firstStartDate = tour.startDates?.find((date) => date.startDate)?.startDate;
+    const formattedStartDate = firstStartDate
+        ? new Intl.DateTimeFormat("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+          }).format(new Date(firstStartDate))
+        : "";
+    const descriptionText =
+        tour.summary ||
+        (tour.country?.name
+            ? `${tour.country.name}, exploring natural beauty and heritage sites.`
+            : "Explore beautiful destinations around the world with our exclusive tour.");
+
     return (
-        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} className="block h-full cursor-pointer group/card w-full">
-            <div className="transition-all duration-500 transform h-[460px] md:h-[480px] flex flex-col rounded-[16px]">
+        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="block h-full cursor-pointer group/card w-full">
+            <div
+                className={`transition-all duration-500 transform flex flex-col rounded-[16px] ${
+                    showDetailsByDefault ? "h-[560px] md:h-[620px]" : "h-[460px] md:h-[480px]"
+                }`}
+            >
                 {/* Image Container - flex-1 allows it to grow/shrink based on remaining space */}
                 <div className="relative w-full flex-1 min-h-0 overflow-hidden bg-gray-100 transition-all duration-500 rounded-t-[16px] z-10">
                     {cardImageUrl ? (
@@ -68,26 +93,47 @@ export default function TourCard({ tour }: TourCardProps) {
                             {tour.travelStyle || "Adventure"}
                         </div>
                     </div>
+
+                    <div className="absolute left-4 bottom-4 flex flex-wrap gap-3 z-10">
+                        <span className="rounded-full bg-white px-4 py-2 text-[17px] font-medium text-[#0f172a] shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
+                            Bestseller
+                        </span>
+                        <span className="rounded-full bg-white px-4 py-2 text-[17px] font-medium text-[#0f172a] shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
+                            {saleLabel}
+                        </span>
+                    </div>
                 </div>
 
                 {/* Content - flex-shrink-0 ensures it occupies exactly what it needs */}
                 <div className="p-4 md:p-5 shrink-0 flex flex-col bg-white z-0 rounded-b-[16px] shadow-[0_8px_20px_rgba(0,0,0,0.06),-4px_4px_15px_rgba(0,0,0,0.03),4px_4px_15px_rgba(0,0,0,0.03)] relative">
                     {/* Title and Price */}
-                    <div className="flex justify-between items-start mb-1 gap-2">
-                        <h3 className="text-[17px] md:text-[19px] font-bold text-gray-900 leading-[1.2] line-clamp-1">
-                            {tour.name}
-                        </h3>
-                        <div className="text-[17px] md:text-[19px] font-bold text-black shrink-0">
-                            ${Math.round(discountedPrice).toLocaleString()}
+                    <div className="flex items-start justify-between gap-4 mb-1">
+                        <div className="min-w-0 flex-1">
+                            <h3 className="text-[17px] md:text-[19px] font-bold text-gray-900 leading-[1.15] line-clamp-1">
+                                {tour.name}
+                            </h3>
+                            <p className="mt-2 text-gray-500 text-[13px] md:text-[14px] line-clamp-1 leading-relaxed min-h-[20px]">
+                                {descriptionText}
+                            </p>
+                            {formattedStartDate && (
+                                <p className="mt-2 text-gray-500 text-[13px] md:text-[14px] leading-relaxed">
+                                    Departs on {formattedStartDate}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="shrink-0 text-right text-[#1f2738]">
+                            <div className="flex items-end justify-end gap-2 leading-none">
+                                <span className="text-[12px] md:text-[13px] font-medium">From $</span>
+                                <span className="text-[24px] md:text-[29px] font-bold tracking-[-0.04em]">
+                                    {Math.round(discountedPrice).toLocaleString()}
+                                </span>
+                            </div>
+                            <div className="mt-2 text-[11px] md:text-[12px] leading-none">
+                                Was ${Math.round(tour.price.amount).toLocaleString()} USD
+                            </div>
                         </div>
                     </div>
-
-                    {/* Subtitle / Description */}
-                    <p className="text-gray-500 text-[13px] md:text-[14px] line-clamp-1 group-hover/card:line-clamp-2 mb-3 leading-relaxed min-h-[20px]">
-                        {tour.country?.name
-                            ? `${tour.country.name}, exploring natural beauty and heritage sites.`
-                            : "Explore beautiful destinations around the world with our exclusive tour."}
-                    </p>
 
                     {/* Divider */}
                     <div className="border-t border-gray-100 mb-3"></div>
@@ -116,9 +162,17 @@ export default function TourCard({ tour }: TourCardProps) {
                     </div>
 
                     {/* Expandable Hover Content */}
-                    <div className="grid grid-rows-[0fr] group-hover/card:grid-rows-[1fr] transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]">
+                    <div
+                        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                            showDetailsByDefault ? "grid-rows-[1fr]" : "grid-rows-[0fr] group-hover/card:grid-rows-[1fr]"
+                        }`}
+                    >
                         <div className="overflow-hidden">
-                            <div className="pt-5 flex flex-col gap-4 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 delay-100">
+                            <div
+                                className={`pt-5 flex flex-col gap-4 transition-opacity duration-300 delay-100 ${
+                                    showDetailsByDefault ? "opacity-100" : "opacity-0 group-hover/card:opacity-100"
+                                }`}
+                            >
                                 {/* Tags */}
                                 <div className="flex flex-wrap gap-2">
                                     <span className="bg-[#111] text-white text-[11px] font-semibold px-3 py-1.5 rounded-full">Bestseller</span>

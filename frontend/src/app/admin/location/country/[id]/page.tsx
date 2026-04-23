@@ -1,16 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import ImageExtension from "@tiptap/extension-image";
-import LinkExtension from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import TextAlign from "@tiptap/extension-text-align";
-import Underline from "@tiptap/extension-underline";
-import Highlight from "@tiptap/extension-highlight";
 import { uploadCountryImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
 
@@ -22,6 +14,7 @@ interface Country {
     name: string;
     code: string;
     description?: string;
+    videoUrl?: string;
     currency: {
         code: string;
         name: string;
@@ -32,7 +25,41 @@ interface Country {
         visaOnArrival: boolean;
         eVisa: boolean;
     };
+    faqSection?: {
+        title?: string;
+        subtitle?: string;
+        items?: Array<{
+            question: string;
+            answer?: string;
+        }>;
+    };
+    bestTimeInsights?: {
+        mostPopularTime?: string;
+        budgetFriendly?: string;
+        favouriteSeason?: string;
+        culturallySignificantTimes?: string;
+    };
+    needToKnow?: {
+        timeZone?: string;
+        climate?: string;
+        currency?: string;
+        transportation?: string;
+        localCuisine?: string;
+        languagesSpoken?: string;
+    };
+    localStoryBlogs?: Array<string | BlogOption>;
+    travelStoryBlogs?: Array<string | BlogOption>;
     image: string;
+}
+
+interface BlogOption {
+    _id: string;
+    title: string;
+    slug: string;
+    excerpt?: string;
+    featuredImage?: {
+        url: string;
+    };
 }
 
 // --- Icons ---
@@ -80,46 +107,35 @@ export default function EditCountryPage() {
     const [visaRequired, setVisaRequired] = useState(true);
     const [image, setImage] = useState("");
     const [uploadingImage, setUploadingImage] = useState(false);
-    const [uploadingEditorImage, setUploadingEditorImage] = useState(false);
-
-    // TipTap Editor
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            ImageExtension.configure({
-                HTMLAttributes: {
-                    class: "rounded-lg max-w-full h-auto mx-auto shadow-md my-4",
-                },
-            }),
-            LinkExtension.configure({
-                openOnClick: false,
-                HTMLAttributes: {
-                    class: "text-blue-600 hover:text-blue-800 underline",
-                },
-            }),
-            Placeholder.configure({
-                placeholder: "Describe this country... (Culture, History, Top Destinations)",
-            }),
-            TextAlign.configure({
-                types: ["heading", "paragraph"],
-            }),
-            Underline,
-            Highlight.configure({
-                multicolor: true,
-            }),
-        ],
-        content: "",
-        immediatelyRender: false,
-        editorProps: {
-            attributes: {
-                class: "prose prose-lg max-w-none focus:outline-none min-h-[300px] px-6 py-4",
-            },
-        },
-    });
+    const [description, setDescription] = useState("");
+    const [videoUrl, setVideoUrl] = useState("");
+    const [faqTitle, setFaqTitle] = useState("FAQ");
+    const [faqSubtitle, setFaqSubtitle] = useState("Everything you need to know before your desert journey - from booking to what to pack.");
+    const [faqItems, setFaqItems] = useState<Array<{ question: string; answer: string }>>([]);
+    const [mostPopularTimeDescription, setMostPopularTimeDescription] = useState("");
+    const [budgetFriendlyDescription, setBudgetFriendlyDescription] = useState("");
+    const [favouriteSeasonDescription, setFavouriteSeasonDescription] = useState("");
+    const [culturallySignificantTimesDescription, setCulturallySignificantTimesDescription] = useState("");
+    const [needToKnowTimeZone, setNeedToKnowTimeZone] = useState("");
+    const [needToKnowClimate, setNeedToKnowClimate] = useState("");
+    const [needToKnowCurrency, setNeedToKnowCurrency] = useState("");
+    const [needToKnowTransportation, setNeedToKnowTransportation] = useState("");
+    const [needToKnowLocalCuisine, setNeedToKnowLocalCuisine] = useState("");
+    const [needToKnowLanguagesSpoken, setNeedToKnowLanguagesSpoken] = useState("");
+    const [allBlogs, setAllBlogs] = useState<BlogOption[]>([]);
+    const [blogSearch, setBlogSearch] = useState("");
+    const [selectedBlogIds, setSelectedBlogIds] = useState<string[]>([]);
+    const [travelStoryBlogSearch, setTravelStoryBlogSearch] = useState("");
+    const [selectedTravelStoryBlogIds, setSelectedTravelStoryBlogIds] = useState<string[]>([]);
+    const [blogsLoading, setBlogsLoading] = useState(true);
 
     useEffect(() => {
         if (id) fetchCountry();
     }, [id]);
+
+    useEffect(() => {
+        fetchBlogs();
+    }, []);
 
     const fetchCountry = async () => {
         try {
@@ -135,13 +151,93 @@ export default function EditCountryPage() {
                 setCurrency(c.currency || { code: "", name: "", symbol: "" });
                 setVisaRequired(c.travelRequirements?.visaRequired ?? true);
                 setImage(c.image || "");
-                editor?.commands.setContent(c.description || "");
+                setDescription(c.description || "");
+                setVideoUrl(c.videoUrl || "");
+                setFaqTitle(c.faqSection?.title || "FAQ");
+                setFaqSubtitle(c.faqSection?.subtitle || "Everything you need to know before your desert journey - from booking to what to pack.");
+                if (Array.isArray(c.faqSection?.items) && c.faqSection?.items.length > 0) {
+                    setFaqItems(
+                        c.faqSection.items.map((item: { question?: string; answer?: string }) => ({
+                            question: item.question || "",
+                            answer: item.answer || "",
+                        }))
+                    );
+                } else {
+                    setFaqItems([]);
+                }
+                setMostPopularTimeDescription(c.bestTimeInsights?.mostPopularTime || "");
+                setBudgetFriendlyDescription(c.bestTimeInsights?.budgetFriendly || "");
+                setFavouriteSeasonDescription(c.bestTimeInsights?.favouriteSeason || "");
+                setCulturallySignificantTimesDescription(c.bestTimeInsights?.culturallySignificantTimes || "");
+                setNeedToKnowTimeZone(c.needToKnow?.timeZone || "");
+                setNeedToKnowClimate(c.needToKnow?.climate || "");
+                setNeedToKnowCurrency(c.needToKnow?.currency || "");
+                setNeedToKnowTransportation(c.needToKnow?.transportation || "");
+                setNeedToKnowLocalCuisine(c.needToKnow?.localCuisine || "");
+                setNeedToKnowLanguagesSpoken(c.needToKnow?.languagesSpoken || "");
+                setSelectedBlogIds(
+                    (c.localStoryBlogs || []).map((blog: string | BlogOption) =>
+                        typeof blog === "string" ? String(blog) : String(blog._id)
+                    )
+                );
+                setSelectedTravelStoryBlogIds(
+                    (c.travelStoryBlogs || []).map((blog: string | BlogOption) =>
+                        typeof blog === "string" ? String(blog) : String(blog._id)
+                    )
+                );
             }
         } catch (err) {
             console.error("Error fetching country:", err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchBlogs = async () => {
+        try {
+            setBlogsLoading(true);
+            const res = await fetch(`${api.baseURL}/blogs?limit=200`, {
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                setAllBlogs(data.data.blogs || []);
+            }
+        } catch (err) {
+            console.error("Error fetching blogs:", err);
+        } finally {
+            setBlogsLoading(false);
+        }
+    };
+
+    const toggleBlogSelection = (blogId: string) => {
+        const normalizedId = String(blogId);
+        setSelectedBlogIds((prev) =>
+            prev.includes(normalizedId)
+                ? prev.filter((id) => id !== normalizedId)
+                : [...prev, normalizedId]
+        );
+    };
+
+    const toggleTravelStoryBlogSelection = (blogId: string) => {
+        const normalizedId = String(blogId);
+        setSelectedTravelStoryBlogIds((prev) =>
+            prev.includes(normalizedId)
+                ? prev.filter((id) => id !== normalizedId)
+                : [...prev, normalizedId]
+        );
+    };
+
+    const updateFaqItem = (index: number, field: "question" | "answer", value: string) => {
+        setFaqItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
+    };
+
+    const addFaqItem = () => {
+        setFaqItems((prev) => [...prev, { question: "", answer: "" }]);
+    };
+
+    const removeFaqItem = (index: number) => {
+        setFaqItems((prev) => prev.filter((_, i) => i !== index));
     };
 
     const uploadImageToSupabase = async (file: File): Promise<string | null> => {
@@ -164,26 +260,6 @@ export default function EditCountryPage() {
         setUploadingImage(false);
     };
 
-
-
-    const handleEditorImageUpload = useCallback(async () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "image/*";
-        input.onchange = async (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (!file || !editor) return;
-
-            setUploadingEditorImage(true);
-            const url = await uploadImageToSupabase(file);
-            if (url) {
-                editor.chain().focus().setImage({ src: url }).run();
-            }
-            setUploadingEditorImage(false);
-        };
-        input.click();
-    }, [editor, id]);
-
     const handleSave = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!name) return alert("Name is required");
@@ -195,8 +271,30 @@ export default function EditCountryPage() {
                 code,
                 currency,
                 travelRequirements: { visaRequired },
-                description: editor?.getHTML() || "",
+                description,
+                videoUrl,
+                faqSection: {
+                    title: faqTitle,
+                    subtitle: faqSubtitle,
+                    items: faqItems.filter((item) => item.question.trim() !== ""),
+                },
+                bestTimeInsights: {
+                    mostPopularTime: mostPopularTimeDescription.trim(),
+                    budgetFriendly: budgetFriendlyDescription.trim(),
+                    favouriteSeason: favouriteSeasonDescription.trim(),
+                    culturallySignificantTimes: culturallySignificantTimesDescription.trim(),
+                },
+                needToKnow: {
+                    timeZone: needToKnowTimeZone.trim(),
+                    climate: needToKnowClimate.trim(),
+                    currency: needToKnowCurrency.trim(),
+                    transportation: needToKnowTransportation.trim(),
+                    localCuisine: needToKnowLocalCuisine.trim(),
+                    languagesSpoken: needToKnowLanguagesSpoken.trim(),
+                },
                 image,
+                localStoryBlogs: selectedBlogIds,
+                travelStoryBlogs: selectedTravelStoryBlogIds,
             };
 
             const res = await fetch(`${api.baseURL}/countries/${id}`, {
@@ -222,6 +320,32 @@ export default function EditCountryPage() {
 
     if (loading) return <div className="p-10 flex justify-center text-gray-500 animate-pulse">Loading country...</div>;
     if (!country) return <div className="p-10 text-center">Country not found</div>;
+
+    const filteredBlogs = allBlogs.filter((blog) => {
+        const q = blogSearch.trim().toLowerCase();
+        if (!q) return true;
+        return (
+            blog.title.toLowerCase().includes(q) ||
+            blog.slug.toLowerCase().includes(q)
+        );
+    });
+
+    const selectedBlogs = allBlogs.filter((blog) =>
+        selectedBlogIds.includes(String(blog._id))
+    );
+
+    const filteredTravelStoryBlogs = allBlogs.filter((blog) => {
+        const q = travelStoryBlogSearch.trim().toLowerCase();
+        if (!q) return true;
+        return (
+            blog.title.toLowerCase().includes(q) ||
+            blog.slug.toLowerCase().includes(q)
+        );
+    });
+
+    const selectedTravelStoryBlogs = allBlogs.filter((blog) =>
+        selectedTravelStoryBlogIds.includes(String(blog._id))
+    );
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -259,74 +383,34 @@ export default function EditCountryPage() {
                 {/* Basic Info Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">General Information</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Country Name</label>
-                                <input
-                                    type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">ISO Code (2 chars)</label>
-                                <input
-                                    type="text"
-                                    value={code}
-                                    maxLength={2}
-                                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition uppercase"
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-2 pt-2">
-                                <input
-                                    type="checkbox"
-                                    id="visaRequired"
-                                    checked={visaRequired}
-                                    onChange={(e) => setVisaRequired(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
-                                />
-                                <label htmlFor="visaRequired" className="text-sm text-gray-700">Visa Required for Entry</label>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Currency Code</label>
-                                <input
-                                    type="text"
-                                    value={currency.code}
-                                    onChange={(e) => setCurrency({ ...currency, code: e.target.value.toUpperCase() })}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition uppercase"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Currency Name</label>
-                                <input
-                                    type="text"
-                                    value={currency.name}
-                                    onChange={(e) => setCurrency({ ...currency, name: e.target.value })}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Currency Symbol</label>
-                                <input
-                                    type="text"
-                                    value={currency.symbol}
-                                    onChange={(e) => setCurrency({ ...currency, symbol: e.target.value })}
-                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-                                />
-                            </div>
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Country Name</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                        />
                     </div>
                 </div>
 
-                {/* Gallery Card */}
+                {/* Description Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                        <h2 className="text-lg font-semibold text-gray-900">Description</h2>
+                    </div>
+
+                    <div className="p-6">
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Describe this country... (Culture, History, Top Destinations)"
+                            rows={5}
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-gray-800 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
+                        />
+                    </div>
+                </div>
+
                 {/* Cover Image Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">Cover Image</h2>
@@ -359,73 +443,380 @@ export default function EditCountryPage() {
                     </div>
                 </div>
 
-                {/* Editor Card */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Detailed Description</h2>
-                        {/* Simple Toolbar */}
-                        <div className="flex bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
-                            <ToolbarButton
-                                onClick={() => editor?.chain().focus().toggleBold().run()}
-                                isActive={editor?.isActive("bold")}
-                                label="B"
-                                bold
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-4">Get to Know Story Blogs</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Select one or more existing blogs for the "Get to know {name || country.name}" section.
+                    </p>
+
+                    <input
+                        type="text"
+                        value={blogSearch}
+                        onChange={(e) => setBlogSearch(e.target.value)}
+                        placeholder="Search blogs by title or slug"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                    />
+
+                    <div className="mt-4 border border-gray-200 rounded-xl max-h-80 overflow-y-auto">
+                        {blogsLoading ? (
+                            <div className="p-4 text-sm text-gray-500">Loading blogs...</div>
+                        ) : filteredBlogs.length === 0 ? (
+                            <div className="p-4 text-sm text-gray-500">No blogs found.</div>
+                        ) : (
+                            filteredBlogs.map((blog) => (
+                                <label
+                                    key={blog._id}
+                                    className="flex items-start gap-3 p-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedBlogIds.includes(String(blog._id))}
+                                        onChange={() => toggleBlogSelection(blog._id)}
+                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                    />
+                                    {blog.featuredImage?.url ? (
+                                        <img
+                                            src={blog.featuredImage.url}
+                                            alt={blog.title}
+                                            className="w-16 h-12 object-cover rounded-md border border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-12 rounded-md border border-gray-200 bg-gray-100" />
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                        <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                    </div>
+                                </label>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="mt-6">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Blogs ({selectedBlogs.length})</h3>
+                        <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto">
+                            {selectedBlogs.length === 0 ? (
+                                <div className="p-4 text-sm text-gray-500">No blog selected yet.</div>
+                            ) : (
+                                selectedBlogs.map((blog) => (
+                                    <div key={blog._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                            <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleBlogSelection(blog._id)}
+                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-4">Best Time</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Fill only these 4 descriptions. Labels are fixed on frontend.
+                    </p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Most Popular Time</label>
+                            <input
+                                type="text"
+                                value={mostPopularTimeDescription}
+                                onChange={(e) => setMostPopularTimeDescription(e.target.value)}
+                                placeholder="Peak season for the best weather and experiences"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
-                            <ToolbarButton
-                                onClick={() => editor?.chain().focus().toggleItalic().run()}
-                                isActive={editor?.isActive("italic")}
-                                label="I"
-                                italic
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Budget Friendly</label>
+                            <input
+                                type="text"
+                                value={budgetFriendlyDescription}
+                                onChange={(e) => setBudgetFriendlyDescription(e.target.value)}
+                                placeholder="Travel in shoulder months for better value"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
-                            <div className="w-px bg-gray-200 mx-1 my-1" />
-                            <ToolbarButton
-                                onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                                isActive={editor?.isActive("heading", { level: 2 })}
-                                label="H2"
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Favourite Season</label>
+                            <input
+                                type="text"
+                                value={favouriteSeasonDescription}
+                                onChange={(e) => setFavouriteSeasonDescription(e.target.value)}
+                                placeholder="A local favorite for festivals and landscapes"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
-                            <ToolbarButton
-                                onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
-                                isActive={editor?.isActive("heading", { level: 3 })}
-                                label="H3"
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Culturally Significant Times</label>
+                            <input
+                                type="text"
+                                value={culturallySignificantTimesDescription}
+                                onChange={(e) => setCulturallySignificantTimesDescription(e.target.value)}
+                                placeholder="Ideal period to witness local traditions"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
-                            <div className="w-px bg-gray-200 mx-1 my-1" />
-                            <ToolbarButton
-                                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                                isActive={editor?.isActive("bulletList")}
-                                icon={<svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z" /></svg>}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-2">Country Video</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Add a video link (YouTube/Vimeo/embed URL). This video will appear in the same video section on the country page.
+                    </p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                    <input
+                        type="url"
+                        value={videoUrl}
+                        onChange={(e) => setVideoUrl(e.target.value)}
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                    />
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-4">Need to know</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Fill these 6 details for the country page section shown below the video preview.
+                    </p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Time Zone</label>
+                            <input
+                                type="text"
+                                value={needToKnowTimeZone}
+                                onChange={(e) => setNeedToKnowTimeZone(e.target.value)}
+                                placeholder="India Standard Time (UTC +5:30)"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Climate</label>
+                            <input
+                                type="text"
+                                value={needToKnowClimate}
+                                onChange={(e) => setNeedToKnowClimate(e.target.value)}
+                                placeholder="Tropical with wet and dry seasons"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                            <input
+                                type="text"
+                                value={needToKnowCurrency}
+                                onChange={(e) => setNeedToKnowCurrency(e.target.value)}
+                                placeholder="Indian Rupee (INR)"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Transportation</label>
+                            <input
+                                type="text"
+                                value={needToKnowTransportation}
+                                onChange={(e) => setNeedToKnowTransportation(e.target.value)}
+                                placeholder="Trains, buses, rickshaws, taxis, scooters"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Local Cuisine</label>
+                            <input
+                                type="text"
+                                value={needToKnowLocalCuisine}
+                                onChange={(e) => setNeedToKnowLocalCuisine(e.target.value)}
+                                placeholder="Veg-Thali, Masala Dosa, Biryani rice, pani puri"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Languages Spoken</label>
+                            <input
+                                type="text"
+                                value={needToKnowLanguagesSpoken}
+                                onChange={(e) => setNeedToKnowLanguagesSpoken(e.target.value)}
+                                placeholder="Hindi, English"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-4">India Travel Stories Blogs</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Select one or more existing blogs for the "{name || country.name} Travel Stories" section.
+                    </p>
+
+                    <input
+                        type="text"
+                        value={travelStoryBlogSearch}
+                        onChange={(e) => setTravelStoryBlogSearch(e.target.value)}
+                        placeholder="Search blogs by title or slug"
+                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                    />
+
+                    <div className="mt-4 border border-gray-200 rounded-xl max-h-80 overflow-y-auto">
+                        {blogsLoading ? (
+                            <div className="p-4 text-sm text-gray-500">Loading blogs...</div>
+                        ) : filteredTravelStoryBlogs.length === 0 ? (
+                            <div className="p-4 text-sm text-gray-500">No blogs found.</div>
+                        ) : (
+                            filteredTravelStoryBlogs.map((blog) => (
+                                <label
+                                    key={blog._id}
+                                    className="flex items-start gap-3 p-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedTravelStoryBlogIds.includes(String(blog._id))}
+                                        onChange={() => toggleTravelStoryBlogSelection(blog._id)}
+                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                    />
+                                    {blog.featuredImage?.url ? (
+                                        <img
+                                            src={blog.featuredImage.url}
+                                            alt={blog.title}
+                                            className="w-16 h-12 object-cover rounded-md border border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-12 rounded-md border border-gray-200 bg-gray-100" />
+                                    )}
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                        <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                    </div>
+                                </label>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="mt-6">
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Blogs ({selectedTravelStoryBlogs.length})</h3>
+                        <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto">
+                            {selectedTravelStoryBlogs.length === 0 ? (
+                                <div className="p-4 text-sm text-gray-500">No blog selected yet.</div>
+                            ) : (
+                                selectedTravelStoryBlogs.map((blog) => (
+                                    <div key={blog._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                            <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => toggleTravelStoryBlogSelection(blog._id)}
+                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold mb-4">FAQ Section</h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        Manage FAQ heading and questions for the country page.
+                    </p>
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">FAQ Title</label>
+                            <input
+                                type="text"
+                                value={faqTitle}
+                                onChange={(e) => setFaqTitle(e.target.value)}
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">FAQ Subtitle</label>
+                            <textarea
+                                value={faqSubtitle}
+                                onChange={(e) => setFaqSubtitle(e.target.value)}
+                                rows={3}
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
+                            />
+                        </div>
+
+                        <div className="space-y-4">
+                            {faqItems.length === 0 ? (
+                                <div className="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500">
+                                    No FAQs added yet. Click "Add FAQ Item" to create your first FAQ.
+                                </div>
+                            ) : (
+                                faqItems.map((item, index) => (
+                                    <div key={index} className="rounded-lg border border-gray-200 p-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-sm font-medium text-gray-800">FAQ #{index + 1}</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeFaqItem(index)}
+                                                className="text-xs px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">Question</label>
+                                                <input
+                                                    type="text"
+                                                    value={item.question}
+                                                    onChange={(e) => updateFaqItem(index, "question", e.target.value)}
+                                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-600 mb-1">Answer (optional)</label>
+                                                <textarea
+                                                    value={item.answer}
+                                                    onChange={(e) => updateFaqItem(index, "answer", e.target.value)}
+                                                    rows={3}
+                                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+
                             <button
-                                onClick={handleEditorImageUpload}
-                                disabled={uploadingEditorImage}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition disabled:opacity-50"
-                                title="Add Image"
+                                type="button"
+                                onClick={addFaqItem}
+                                className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
-                                {uploadingEditorImage ? (
-                                    <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                    <Icons.Image className="w-4 h-4" />
-                                )}
+                                Add FAQ Item
                             </button>
                         </div>
                     </div>
-
-                    <EditorContent editor={editor} />
                 </div>
             </div>
         </div>
-    );
-}
-
-function ToolbarButton({ onClick, isActive, label, icon, bold, italic }: any) {
-    return (
-        <button
-            onClick={onClick}
-            className={`p-2 min-w-[32px] rounded-md transition text-sm font-medium flex items-center justify-center
-                ${isActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-100'}
-                ${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}
-            `}
-        >
-            {icon || label}
-        </button>
     );
 }

@@ -75,16 +75,28 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
     );
 }
 
-export default function ReviewsSection() {
+export default function ReviewsSection({
+    title = "What travellers say about our tours",
+    pillClasses = "bg-[#e8e9eb] text-gray-500",
+    btnClasses = "bg-[#111] hover:bg-black",
+    btnText = "Plan Your Trip",
+    titleClassName = "text-[32px] md:text-[40px] font-medium leading-tight text-gray-900",
+}: {
+    title?: string;
+    pillClasses?: string;
+    btnClasses?: string;
+    btnText?: string;
+    titleClassName?: string;
+} = {}) {
     return (
         <section className="mx-auto mt-32 mb-16">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-transparent">
                 <div className="max-w-[700px]">
-                    <div className="inline-block px-4 py-1.5 bg-[#e8e9eb] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
+                    <div className={`inline-block px-5 py-2 rounded-full text-[13px] font-semibold tracking-wide mb-6 ${pillClasses}`}>
                         Reviews
                     </div>
-                    <h2 className="text-[48px] md:text-[64px] font-medium leading-[1.1] text-black">
-                        What travellers say about our tours
+                    <h2 className={titleClassName}>
+                        {title}
                     </h2>
                 </div>
                 <div className="max-w-[320px] text-right mt-6 md:mt-0">
@@ -112,10 +124,10 @@ export default function ReviewsSection() {
                             Ready to plan your own journey? Let's get started!
                         </p>
                         <div className="flex items-center gap-3 group">
-                            <button className="bg-[#111] text-white px-6 py-3.5 rounded-full font-medium text-[15px] hover:bg-black transition-all">
-                                Plan Your Trip
+                            <button className={`${btnClasses} text-white px-6 py-3.5 rounded-full font-medium text-[15px] transition-all`}>
+                                {btnText}
                             </button>
-                            <button className="bg-[#111] text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-black transition-all shrink-0">
+                            <button className={`${btnClasses} text-white w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0`}>
                                 <svg className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19L19 5M19 5v10M19 5H9" />
                                 </svg>

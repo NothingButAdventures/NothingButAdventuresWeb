@@ -40,7 +40,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 {countries.map((country) => (
                     <Link
                         key={country._id}
-                        href={`/trip?country=${country.slug}`}
+                        href={`/trips?country=${country.slug}`}
                         className="relative w-full aspect-[4/5] md:aspect-[3/4] rounded-[20px] overflow-hidden block group cursor-pointer"
                     >
                         <img

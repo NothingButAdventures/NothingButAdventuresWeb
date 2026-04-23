@@ -645,7 +645,7 @@ export default function ProfilePage() {
                                 </svg>
                                 <h3 className="font-medium text-gray-900 mb-1">No bookings yet</h3>
                                 <p className="text-gray-500 mb-4">Start exploring our amazing trips!</p>
-                                <Link href="/trip" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                <Link href="/trips" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
                                     Explore Trips
                                 </Link>
                             </div>
@@ -672,7 +672,7 @@ export default function ProfilePage() {
                                             <div className="flex-1">
                                                 <div className="flex items-start justify-between">
                                                     <div>
-                                                        <Link href={`/trip/${booking.tour.slug}/${booking.tour.tourCode}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                        <Link href={`/trips/${booking.tour.slug}/${booking.tour.tourCode}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                                                             {booking.tour.name}
                                                         </Link>
                                                         <p className="text-sm text-gray-500 mt-1">
@@ -804,7 +804,7 @@ export default function ProfilePage() {
                                                     {isActive && (
                                                         <div className="flex items-center gap-2 mt-3">
                                                             <button
-                                                                onClick={() => router.push(`/trip/${hold.tour?.slug}/${hold.tour?.tourCode}/checkout`)}
+                                                                onClick={() => router.push(`/trips/${hold.tour?.slug}/${hold.tour?.tourCode}/checkout`)}
                                                                 className="px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-sm"
                                                             >
                                                                 Book Now
@@ -886,7 +886,7 @@ export default function ProfilePage() {
                                             : tour.price.amount;
 
                                     return (
-                                        <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
+                                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                             <div className="group bg-white border rounded-xl overflow-hidden transition-all duration-300 transform cursor-pointer h-full flex flex-col hover:shadow-lg">
                                                 {/* Image Container */}
                                                 <div className="relative w-full h-48 overflow-hidden bg-gray-100">
@@ -978,7 +978,7 @@ export default function ProfilePage() {
                                     {reviews.map((review) => (
                                         <div key={review._id} className="p-6">
                                             <div className="flex items-start justify-between mb-3">
-                                                <Link href={`/trip/${review.tour.slug}/${review.tour.tourCode}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                                <Link href={`/trips/${review.tour.slug}/${review.tour.tourCode}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
                                                     {review.tour.name}
                                                 </Link>
                                                 <div className="flex items-center gap-1">

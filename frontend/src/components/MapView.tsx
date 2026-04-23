@@ -490,7 +490,7 @@ export default function MapView({
                         <p style="margin:0 0 2px;font-weight:700;font-size:11px;color:#111;line-height:1.3;">${m.tour?.name || m.label}</p>
                         <p style="margin:0 0 4px;font-size:10px;color:#6b7280;">📍 ${m.label}</p>
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">${priceHtml}${durationHtml}</div>
-                        ${m.tour ? `<a href="/trip/${m.tour.slug}/${m.tour.tourCode}" style="display:block;background:#111;color:white;text-align:center;padding:5px 8px;border-radius:5px;font-size:10px;font-weight:600;text-decoration:none;">View Trip →</a>` : ""}
+                        ${m.tour ? `<a href="/trips/${m.tour.slug}/${m.tour.tourCode}" style="display:block;background:#111;color:white;text-align:center;padding:5px 8px;border-radius:5px;font-size:10px;font-weight:600;text-decoration:none;">View Trip →</a>` : ""}
                     </div>
                 </div>
             `);

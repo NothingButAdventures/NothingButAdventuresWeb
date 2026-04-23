@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { api } from "@/lib/api";
-import AdventuresMegaMenu from "./AdventuresMegaMenu";
+import HeaderMegaMenu from "./HeaderMegaMenu";
 
 interface User {
   name: string;
@@ -22,24 +22,27 @@ export default function Header() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isAdventuresHovered, setIsAdventuresHovered] = useState(false);
+  const [activeMenu, setActiveMenu] = useState<"adventures" | "destinations" | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleMouseEnterAdventures = () => {
+  const handleMenuEnter = (menu: "adventures" | "destinations") => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
-    setIsAdventuresHovered(true);
+    setActiveMenu(menu);
   };
 
-  const handleMouseLeaveAdventures = () => {
+  const handleMenuLeave = () => {
     hoverTimeoutRef.current = setTimeout(() => {
-      setIsAdventuresHovered(false);
+      setActiveMenu(null);
     }, 150);
   };
 
   useEffect(() => {
     checkAuth();
+    setIsMenuOpen(false);
+    setIsUserMenuOpen(false);
+    setActiveMenu(null);
   }, [pathname]);
 
   const checkAuth = async () => {
@@ -82,12 +85,8 @@ export default function Header() {
     return null;
   }
 
-  const isActivePage = (path: string) => {
-    return pathname === path;
-  };
-
   return (
-    <header className="bg-white border-b sticky top-0 z-50 font-outfit px-4 md:px-8">
+    <header className="relative bg-white border-b sticky top-0 z-50 font-outfit px-4 md:px-8">
       <div className="mx-auto">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -105,15 +104,29 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 bg-[#f5f5f5] rounded-2xl px-8 py-3">
-            <div
-              onMouseEnter={handleMouseEnterAdventures}
-              onMouseLeave={handleMouseLeaveAdventures}
-              className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors"
+          <nav className="hidden md:flex items-center space-x-5 bg-[#f5f5f5] rounded-2xl px-4 py-2">
+            <button
+              type="button"
+              onMouseEnter={() => handleMenuEnter("adventures")}
+              onMouseLeave={handleMenuLeave}
+              onClick={() => setActiveMenu((currentMenu) => (currentMenu === "adventures" ? null : "adventures"))}
+              aria-expanded={activeMenu === "adventures"}
+              className="flex items-center space-x-1.5 rounded-full px-3.5 py-1.5 text-gray-800 transition-colors hover:text-black"
             >
               <span className="text-[16px] font-medium">Adventures</span>
-              <svg className={`${isAdventuresHovered ? "rotate-180" : ""} transition-transform duration-200 w-4 h-4 text-gray-500`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
+              <svg className={`transition-transform duration-200 w-4 h-4 ${activeMenu === "adventures" ? "rotate-180 text-black" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
+            <button
+              type="button"
+              onMouseEnter={() => handleMenuEnter("destinations")}
+              onMouseLeave={handleMenuLeave}
+              onClick={() => setActiveMenu((currentMenu) => (currentMenu === "destinations" ? null : "destinations"))}
+              aria-expanded={activeMenu === "destinations"}
+              className="flex items-center space-x-1.5 rounded-full px-3.5 py-1.5 text-gray-800 transition-colors hover:text-black"
+            >
+              <span className="text-[16px] font-medium">Destinations</span>
+              <svg className={`transition-transform duration-200 w-4 h-4 ${activeMenu === "destinations" ? "rotate-180 text-black" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </button>
             <div className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors">
               <span className="text-[16px] font-medium">Why Us</span>
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -174,7 +187,7 @@ export default function Header() {
                         <Link href="/dashboard" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           <span className="font-medium">Dashboard</span>
                         </Link>
-                        <Link href="/trip" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                        <Link href="/trips" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
                           <span className="font-medium">Trips</span>
                         </Link>
                         <Link href="/blogs" className="flex items-center px-5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition-colors" onClick={() => setIsUserMenuOpen(false)}>
@@ -245,8 +258,10 @@ export default function Header() {
           <div className="md:hidden py-4 border-t border-gray-100 font-sans">
             <div className="flex flex-col space-y-4">
               <Link href="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
-              <Link href="/trip" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Trips</Link>
+              <Link href="/trips" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Trips</Link>
               <Link href="/blogs" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+              <Link href="/travel-styles" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Adventures</Link>
+              <Link href="/destinations" className="text-gray-700 hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Destinations</Link>
 
               {user ? (
                 <>
@@ -269,10 +284,14 @@ export default function Header() {
 
       {/* Adventures Mega Menu */}
       <div
-        onMouseEnter={handleMouseEnterAdventures}
-        onMouseLeave={handleMouseLeaveAdventures}
+        onMouseEnter={() => {
+          if (hoverTimeoutRef.current) {
+            clearTimeout(hoverTimeoutRef.current);
+          }
+        }}
+        onMouseLeave={handleMenuLeave}
       >
-        <AdventuresMegaMenu isHovered={isAdventuresHovered} />
+        <HeaderMegaMenu activeMenu={activeMenu} />
       </div>
 
     </header>

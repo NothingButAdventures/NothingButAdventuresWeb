@@ -1,4 +1,5 @@
 const Continent = require('../models/Continent');
+const Country = require('../models/Country');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const APIFeatures = require('../utils/apiFeatures');
@@ -66,19 +67,24 @@ const updateContinent = catchAsync(async (req, res, next) => {
 });
 
 const deleteContinent = catchAsync(async (req, res, next) => {
-    const continent = await Continent.findByIdAndUpdate(
-        req.params.id,
-        { isActive: false },
-        { new: true }
-    );
+    const continent = await Continent.findById(req.params.id);
 
     if (!continent) {
         return next(new AppError('No continent found with that ID', 404));
     }
 
-    res.status(204).json({
+    const countryCount = await Country.countDocuments({ continent: req.params.id });
+    if (countryCount > 0) {
+        return next(new AppError('Cannot delete continent with countries. Remove countries first.', 400));
+    }
+
+    await Continent.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
         status: 'success',
-        data: null,
+        data: {
+            deletedId: req.params.id,
+        },
     });
 });
 

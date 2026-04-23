@@ -35,6 +35,11 @@ const travelStyleSchema = new mongoose.Schema(
             type: String,
             default: "#3B82F6", // Default blue color
         },
+        url: {
+            type: String,
+            trim: true,
+            default: "",
+        },
         isActive: {
             type: Boolean,
             default: true,
@@ -42,6 +47,22 @@ const travelStyleSchema = new mongoose.Schema(
         order: {
             type: Number,
             default: 0,
+        },
+        // Dynamic UI Sections configuration
+        sections: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {},
+        },
+        // Rich text description
+        detailed: {
+            content: {
+                type: String,
+                default: "",
+            },
+            show: {
+                type: Boolean,
+                default: true,
+            }
         },
         seo: {
             metaTitle: String,

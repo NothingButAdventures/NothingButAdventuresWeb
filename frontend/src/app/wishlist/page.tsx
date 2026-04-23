@@ -107,7 +107,7 @@ export default function WishlistPage() {
                                         : tour.price.amount;
 
                                 return (
-                                    <Link href={`/trip/${tour.slug}/${tour.tourCode}`} key={tour._id}>
+                                    <Link href={`/trips/${tour.slug}/${tour.tourCode}`} key={tour._id}>
                                         <div className="group bg-white border rounded-xl overflow-hidden transition-all duration-300 transform cursor-pointer h-full flex flex-col hover:shadow-lg">
                                             {/* Image Container */}
                                             <div className="relative w-full h-64 overflow-hidden bg-gray-100">
@@ -196,7 +196,7 @@ export default function WishlistPage() {
                             Start exploring our trips to find your dream adventure.
                         </p>
                         <Link
-                            href="/trip"
+                            href="/trips"
                             className="inline-block bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-blue-700 transition"
                         >
                             Explore Trips

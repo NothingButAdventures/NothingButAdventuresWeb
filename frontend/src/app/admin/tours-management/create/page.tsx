@@ -59,7 +59,7 @@ interface ItineraryDay {
 interface AvailableDate {
   startDate: string;
   endDate: string;
-  availableSpots: number;
+  availableSpots: number | "";
   discount: string;
 }
 
@@ -148,7 +148,7 @@ export default function CreateTourPage() {
     physicalRatingLevel: "",
     priceAmount: "",
     priceCurrency: "USD",
-    bookingPercentage: "20",
+    bookingPercentage: "",
     travelStyle: "",
     tripType: "",
     startCity: "",
@@ -528,7 +528,7 @@ export default function CreateTourPage() {
       {
         startDate: "",
         endDate: "",
-        availableSpots: parseInt(formData.maxGroupSize) || 10,
+        availableSpots: "",
         discount: "",
       },
     ]);
@@ -1883,7 +1883,7 @@ export default function CreateTourPage() {
                         updateAvailableDate(
                           index,
                           "availableSpots",
-                          parseInt(e.target.value),
+                          e.target.value === "" ? "" : parseInt(e.target.value, 10),
                         )
                       }
                       placeholder="Available spots"

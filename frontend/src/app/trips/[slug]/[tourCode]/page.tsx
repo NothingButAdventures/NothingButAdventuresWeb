@@ -6,7 +6,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import TourDetailLoading from "./loading";
-import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight } from "@phosphor-icons/react";
+import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Plus } from "@phosphor-icons/react";
 import ReviewsSection from "@/components/ReviewsSection";
 import PopularToursSection from "@/components/PopularToursSection";
 
@@ -24,6 +24,7 @@ interface Tour {
   staffExperts?: string;
   meals?: string;
   accommodation?: string;
+  ownRoomAvailable: boolean;
   price: {
     amount: number;
     currency: string;
@@ -407,25 +408,34 @@ export default function TourDetailPage() {
   const bestDiscount = getDiscountPercentage(bestDealDate?.discount);
   const discountedPrice = bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
 
-  // Top 3 discounted dates for list
+  // Top 2 discounted dates for list
   const topDiscountedDates = sortedDates
     .filter(d => getDiscountPercentage(d.discount) > 0)
-    .slice(0, 3);
+    .slice(0, 2);
+
+  // Get unique optional activities for "Available Extras"
+  const allOptionalActivities = tour.itinerary.flatMap(day => day.optionalActivities || []);
+  const uniqueOptionalActivities = Array.from(new Map(allOptionalActivities.map(act => [act.name, act])).values());
 
   return (
     <div className="min-h-screen">
       {/* Tour Header - Full Width */}
       <div className="bg-white">
-        <div className="w-full px-4 sm:px-6 lg:px-10 py-14">
+        <div className="w-full px-4 sm:px-6 lg:px-10 pt-10 pb-0">
 
           {/* Title Row */}
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl md:text-4xl font-semibold text-gray-900">
-              {tour.name} - {tour.duration.days} days
-            </h1>
-            <div className="flex items-center gap-3">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h1 className="text-[34px] md:text-[44px] lg:text-[48px] font-semibold text-[#1F2937] leading-[1.2] tracking-tight">
+                {tour.name}
+              </h1>
+              <div className="text-[18px] md:text-[22px] text-[#4B5563] mt-2">
+                {tour.duration.days} Days, {tour.location.startCity} to {tour.location.endCity}
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
               <button className="p-2 hover:bg-gray-100 rounded-full transition" title="Share">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                   <polyline points="16 6 12 2 8 6" />
                   <line x1="12" y1="2" x2="12" y2="15" />
@@ -436,20 +446,20 @@ export default function TourDetailPage() {
                 className="p-2 hover:bg-gray-100 rounded-full transition"
                 title="Save to Wishlist"
               >
-                <Heart size={20} weight={isInWishlist ? "fill" : "regular"} className={isInWishlist ? "text-[#E63946]" : "text-black"} />
+                <Heart size={24} weight={isInWishlist ? "fill" : "regular"} className={isInWishlist ? "text-[#E63946]" : "text-black"} />
               </button>
             </div>
           </div>
 
           {/* Photo Gallery + Booking Panel Grid */}
           {tour.images && tour.images.length > 0 && (
-            <div className="mb-6">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 items-start">
+            <div className="mb-0">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
                 {/* Image Gallery (left) - Airbnb-style grid */}
                 <div>
-                  <div className="grid grid-cols-3 min-h-148 grid-rows-2 gap-2 rounded-xl overflow-hidden" style={{ height: '460px' }}>
+                  <div className="grid grid-cols-3 min-h-148 grid-rows-2 gap-[14px]" style={{ height: '640px' }}>
                     {/* Large image - description image or first tour image */}
-                    <div className="col-span-1 row-span-2 relative">
+                    <div className="col-span-1 row-span-2 relative rounded-[16px] overflow-hidden">
                       <Image
                         src={tour.descriptionImage || tour.images[0]?.url || "/placeholder-image.jpg"}
                         alt={`${tour.name} description`}
@@ -458,7 +468,7 @@ export default function TourDetailPage() {
                       />
                     </div>
                     {/* Top-middle image */}
-                    <div className="relative">
+                    <div className="relative rounded-[16px] overflow-hidden">
                       <Image
                         src={tour.images[0]?.url || "/placeholder-image.jpg"}
                         alt={tour.images[0]?.caption || `${tour.name} photo 1`}
@@ -467,7 +477,7 @@ export default function TourDetailPage() {
                       />
                     </div>
                     {/* Top-right image */}
-                    <div className="relative">
+                    <div className="relative rounded-[16px] overflow-hidden">
                       <Image
                         src={tour.images[1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
                         alt={tour.images[1]?.caption || `${tour.name} photo 2`}
@@ -476,7 +486,7 @@ export default function TourDetailPage() {
                       />
                     </div>
                     {/* Bottom-middle image */}
-                    <div className="relative">
+                    <div className="relative rounded-[16px] overflow-hidden">
                       <Image
                         src={tour.images[2]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
                         alt={tour.images[2]?.caption || `${tour.name} photo 3`}
@@ -485,7 +495,7 @@ export default function TourDetailPage() {
                       />
                     </div>
                     {/* Bottom-right image with +N overlay */}
-                    <div className="relative cursor-pointer group">
+                    <div className="relative rounded-[16px] overflow-hidden cursor-pointer group">
                       <Image
                         src={tour.images[3]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
                         alt={tour.images[3]?.caption || `${tour.name} photo 4`}
@@ -502,121 +512,156 @@ export default function TourDetailPage() {
                 </div>
 
                 {/* Booking Panel (right) */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 relative z-10">
                   <aside
                     ref={bookingPanelRef}
-                    className="bg-white rounded-[16px] border border-gray-200 p-5 shadow-sm flex flex-col gap-5 w-full"
+                    className="bg-white rounded-[16px] border border-gray-200 px-6 py-6 flex flex-col gap-4 w-full shadow-[0px_2px_15px_-3px_rgba(0,0,0,0.07),0px_10px_20px_-2px_rgba(0,0,0,0.04)]"
                   >
-                    {/* Price header */}
-                    <div>
-                      <div className="flex items-baseline justify-between">
-                        <span className="flex items-start font-bold text-black leading-none">
-                          <span className="text-base font-bold mt-1">$</span>
-                          <span className="text-[2rem] leading-none">{discountedPrice.toFixed(0)}</span>
-                          <span className="text-base font-bold mt-1 ml-1">USD</span>
+                    {/* Top Meta Row */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-[#FF1E1E] text-white text-[10px] font-bold px-3 py-1 rounded-full">
+                          Bestseller
                         </span>
                         {bestDiscount > 0 && (
-                          <span className="text-base font-semibold text-black">
-                            was{" "}
-                            <span className="line-through">${basePrice.toFixed(0)} USD</span>
+                          <span className="bg-black text-white text-[10px] font-bold px-3 py-1 rounded-full">
+                            Sale {bestDiscount.toFixed(0)}%
                           </span>
                         )}
                       </div>
-                      <div className="text-base font-medium text-black mt-2">
+                      <p className="text-[14px] text-[#4B5563] font-semibold">
+                        Trip Code: <span className="font-semibold">{tour.tourCode || "T-001"}</span>
+                      </p>
+                    </div>
+
+                    {/* Trip Summary */}
+                    <div className="pt-1 pb-2">
+                      <h3 className="text-[40px] leading-[1.05] font-medium text-black tracking-[-0.02em]">
+                        {tour.duration.days} Days
+                      </h3>
+                      <p className="text-[22px] leading-[1.2] font-medium text-black mt-1">
                         {tour.location.startCity} to {tour.location.endCity}
+                      </p>
+                    </div>
+
+                    {/* Pricing Section (Moved to top for alignment) */}
+                    <div className="relative pb-2">
+                      <p className="text-[14px] text-gray-800 font-medium mb-1">From</p>
+                      <div className="flex items-baseline justify-between mb-1">
+                        <div className="flex items-start">
+                          <span className="text-[20px] font-bold text-black mr-1">$</span>
+                          <span className="text-[44px] font-bold text-black leading-none">{discountedPrice.toFixed(0)}</span>
+                          <span className="text-[14px] font-bold text-black ml-1">USD</span>
+                        </div>
+                        {bestDiscount > 0 && (
+                          <div className="flex items-center gap-1.5 opacity-90">
+                            <span className="text-[14px] text-gray-500">Was</span>
+                            <span className="text-[16px] text-gray-500 line-through">${basePrice.toFixed(0)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[13px] text-[#111827] mt-1.5 opacity-90">
+                        Valid on <span className="font-semibold">{bestDealDate ? new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
+                      </p>
+                    </div>
+
+                    {/* Booking Amount */}
+                    <div className="mt-1 flex items-center justify-between rounded-[12px] bg-[#f2f2f2] px-4 py-4">
+                      <div className="flex items-center gap-3.5">
+                        <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-xl bg-black text-white">
+                          <Star size={20} weight="fill" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[17px] font-medium text-black leading-tight">
+                            Booking Amount
+                          </span>
+                          <span className="mt-1 text-[14px] text-gray-500 leading-tight font-normal">
+                            Book your spot Now
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-[18px] font-semibold text-black tracking-tight">
+                        $200.00
                       </div>
                     </div>
 
-                    {/* Dates / Days Group */}
-                    <div className="border border-gray-300 rounded-xl overflow-hidden">
-                      <div className="flex border-b border-gray-300">
-                        <div className="flex-1 p-3 border-r border-gray-300">
-                          <div className="text-[10px] font-bold tracking-wider text-black uppercase">Starts</div>
-                          <div className="text-sm text-gray-800 mt-1">
-                            {bestDealDate ? new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : "—"}
-                          </div>
-                        </div>
-                        <div className="flex-1 p-3">
-                          <div className="text-[10px] font-bold tracking-wider text-black uppercase">Ends</div>
-                          <div className="text-sm text-gray-800 mt-1">
-                            {bestDealDate ? new Date(bestDealDate.endDate).toLocaleDateString("en-US", { month: "numeric", day: "numeric", year: "numeric" }) : "—"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <div className="text-[10px] font-bold tracking-wider text-black uppercase">Days</div>
-                        <div className="text-sm text-gray-800 mt-1">
-                          {String(tour.duration.days).padStart(2, "0")} Days
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Ratings */}
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={18} weight={i < Math.round(tour.ratingsAverage) ? "fill" : "regular"} className="text-black" />
+                    {/* Reviews Stars */}
+                    <div className="mt-4 mb-2 flex items-center gap-3">
+                      <div className="flex items-center gap-1.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            size={22}
+                            weight={star <= Math.round(tour.ratingsAverage || 5) ? "fill" : "regular"}
+                            className="text-black"
+                          />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-500">({tour.ratingsQuantity} reviews)</span>
+                      <span className="text-[18px] font-medium text-[#64748B]">
+                        ({tour.ratingsQuantity || 0} reviews)
+                      </span>
                     </div>
 
-                    {/* Primary Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                        className="flex-1 bg-[#121212] text-white py-3 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-base"
-                      >
-                        <CalendarCheck size={18} />
-                        Book Now
-                      </button>
-                      <button
-                        className="w-12 h-12 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
-                        onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                      >
-                        <ArrowUpRight size={18} />
-                      </button>
-                    </div>
-
-                    {/* Secondary Buttons */}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setShowHoldModal(true);
-                          setHoldMessage(null);
-                          setHoldSelectedDate("");
-                        }}
-                        className="flex-1 bg-[#4B4B4B] text-white py-3 px-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3D3D3D] transition text-sm"
-                      >
-                        <Clock size={18} />
-                        Hold Space
-                      </button>
-                      <button
-                        onClick={handleWishlistToggle}
-                        className="flex-1 bg-white text-black border border-gray-300 py-3 px-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-50 transition text-sm"
-                      >
-                        <Heart size={18} weight={isInWishlist ? "fill" : "regular"} className={isInWishlist ? "text-[#E63946]" : "text-black"} />
-                        {isInWishlist ? 'Saved' : 'Save to Wishlist'}
-                      </button>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-3 pt-2">
+                      <div className="flex gap-2.5 group">
+                        <button
+                          onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                          className="flex-1 bg-[#111827] text-white py-[14px] px-6 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[15px]"
+                        >
+                          <CalendarCheck size={18} />
+                          Book Now
+                        </button>
+                        <button
+                          className="w-[50px] h-[50px] bg-[#111827] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
+                          onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                        >
+                          <ArrowUpRight size={20} className="transition-transform duration-300 group-hover:rotate-45" />
+                        </button>
+                      </div>
+                      <div className="flex gap-2.5">
+                        <button
+                          onClick={() => {
+                            setShowHoldModal(true);
+                            setHoldMessage(null);
+                            setHoldSelectedDate("");
+                          }}
+                          className="flex-1 bg-[#4B5563] text-white py-[12px] px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#374151] transition text-[14px]"
+                        >
+                          <Clock size={18} />
+                          Hold Space
+                        </button>
+                        <button
+                          onClick={handleWishlistToggle}
+                          className="flex-1 bg-white text-black border border-gray-300 py-[12px] px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-50 transition text-[14px]"
+                        >
+                          <Heart
+                            size={18}
+                            weight={isInWishlist ? "fill" : "regular"}
+                            className={isInWishlist ? "text-[#E63946]" : "text-black"}
+                          />
+                          Save to Wishlist
+                        </button>
+                      </div>
                     </div>
                   </aside>
                   {topDiscountedDates.length > 0 && (
-                    <div className="flex flex-col gap-2 mt-1">
+                    <div className="flex flex-col gap-2.5 mt-2">
                       {topDiscountedDates.map((dateObj, idx) => {
                         const discPct = getDiscountPercentage(dateObj.discount);
                         return (
                           <div
                             key={idx}
-                            className="bg-[#F3F4F6] py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium text-gray-800 cursor-pointer hover:bg-gray-200 transition"
-                            onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${new Date(dateObj.startDate).toISOString().split('T')[0]}`)}
+                            className="bg-[#E5E7EB] py-3 px-5 rounded-lg flex items-center gap-3 text-[13px] font-medium text-gray-800 cursor-pointer hover:bg-gray-300 transition"
+                            onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${new Date(dateObj.startDate).toISOString().split('T')[0]}`)}
                           >
                             {discPct > 0 && (
-                              <span className="bg-gray-900 text-white text-xs font-bold px-2 py-0.5 rounded-md">
+                              <span className="bg-black text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
                                 Save {discPct}%
                               </span>
                             )}
-                            <span>
-                              Departure {new Date(dateObj.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            <span className="opacity-90">
+                              Departure {new Date(dateObj.startDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                             </span>
                           </div>
                         );
@@ -634,114 +679,123 @@ export default function TourDetailPage() {
 
       {/* Tour Overview Section */}
       <div className="bg-white">
-        <div className="w-full px-4 sm:px-6 lg:px-10 py-8">
-          {/* Top: Overview content (Full Width) */}
-          <div className="mb-8">
-            {/* Tour Overview heading + description */}
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Trip Overview</h2>
-            <p className="text-gray-700 max-w-7xl leading-relaxed mb-1">
-              {tour.description.length > 250
-                ? `${tour.description.substring(0, 250)}...`
-                : tour.description}
-              {tour.description.length > 250 && (
-                <span>
-                  {" "}
-                  <button className="text-blue-600 hover:underline font-medium text-sm">Read More</button>
-                </span>
-              )}
-            </p>
+        <div className="w-full px-4 sm:px-6 lg:px-10 pt-4 pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+            {/* Top: Overview content */}
+            <div className="mb-8">
+              {/* Tour Overview heading + description */}
+              <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-6">Tour Overview</h2>
+              <p className="text-gray-700 max-w-7xl leading-relaxed mb-1 text-lg">
+                {tour.description}
+              </p>
 
-            {/* Quick Info Stats Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 max-w-7xl gap-4 mt-8 rounded-2xl p-5">
-              {/* Overall Rating */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">Overall Rating</span>
-                <div className="flex flex-col items-start">
-                  {[5, 4, 3, 2, 1].map((star) => (
-                    <div key={star} className="flex items-center gap-1">
-                      <span className="text-[10px] text-gray-500 w-3">{star}</span>
-                      <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gray-900 rounded-full"
-                          style={{ width: star <= Math.round(tour.ratingsAverage) ? '100%' : '0%' }}
-                        />
+              {/* Quick Info Stats Bar */}
+              <div className="flex flex-wrap items-center max-w-7xl mt-12 py-8">
+                {/* Overall Rating */}
+                <div className="flex-1 min-w-[140px] flex flex-col items-start pr-8 border-r border-gray-200">
+                  <span className="text-base font-bold text-black mb-3">Overall Rating</span>
+                  <div className="flex flex-col items-start gap-1">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <div key={star} className="flex items-center gap-2">
+                        <span className="text-[10px] text-gray-400 w-3 leading-none">{star}</span>
+                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gray-400 rounded-full"
+                            style={{ width: star <= Math.round(tour.ratingsAverage) ? '100%' : '0%' }}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
+                  <div className="mb-5">
+                    <Image src="/1.svg" alt="Duration" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">{tour.duration.days} days</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Duration</span>
+                </div>
+
+                {/* Group Size */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
+                  <div className="mb-5">
+                    <Image src="/2.svg" alt="Group Size" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">Max {tour.maxGroupSize} people</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Group Size</span>
+                </div>
+
+                {/* Physical Rating */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
+                  <div className="mb-5">
+                    <Image src="/3.svg" alt="Physical Rating" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">{tour.physicalRating.level}/5</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Physical Rating</span>
+                </div>
+
+                {/* Travel Style */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
+                  <div className="mb-5">
+                    <Image src="/4.svg" alt="Travel Style" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">{tour.travelStyle}</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Travel Style</span>
+                </div>
+
+                {/* Service Level */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
+                  <div className="mb-5">
+                    <Image src="/5.svg" alt="Service Level" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">{tour.serviceLevel}</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Service Level</span>
+                </div>
+
+                {/* Minimum Age */}
+                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 text-center">
+                  <div className="mb-5">
+                    <Image src="/6.png" alt="Minimum Age" width={36} height={36} />
+                  </div>
+                  <span className="text-base font-bold text-black mb-1">{tour.ageRequirement.min} years</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Minimum Age</span>
                 </div>
               </div>
-
-              {/* Duration */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">{tour.duration.days} days</span>
-                <span className="text-xs text-gray-500">Duration</span>
-                <Image src="/1.svg" alt="Duration" width={28} height={28} />
-              </div>
-
-              {/* Group Size */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">Max {tour.maxGroupSize} people</span>
-                <span className="text-xs text-gray-500">Group Size</span>
-                <Image src="/2.svg" alt="Group Size" width={28} height={28} />
-              </div>
-
-              {/* Physical Rating */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">{tour.physicalRating.level}/5</span>
-                <span className="text-xs text-gray-500">Physical Rating</span>
-                <Image src="/3.svg" alt="Physical Rating" width={28} height={28} />
-              </div>
-
-              {/* Travel Style */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">{tour.travelStyle}</span>
-                <span className="text-xs text-gray-500">Travel Style</span>
-                <Image src="/4.svg" alt="Travel Style" width={28} height={28} />
-              </div>
-
-              {/* Service Level */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">{tour.serviceLevel}</span>
-                <span className="text-xs text-gray-500">Service Level</span>
-                <Image src="/5.svg" alt="Service Level" width={28} height={28} />
-              </div>
-
-              {/* Minimum Age */}
-              <div className="flex flex-col items-start gap-2">
-                <span className="text-sm font-semibold text-gray-900">{tour.ageRequirement.min} years</span>
-                <span className="text-xs text-gray-500">Minimum Age</span>
-                <Image src="/6.png" alt="Minimum Age" width={28} height={28} />
-              </div>
             </div>
+
+            {/* Empty Right Column spacer */}
+            <div className="hidden lg:block w-[400px]"></div>
           </div>
 
           {/* Bottom layout: Highlight cards + 100+ Trees */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-8 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 h-[400px]">
             {/* Left: Itinerary Highlight Cards */}
-            <div className="flex flex-col gap-4">
-              {tour.itinerary.slice(0, 2).map((day, idx) => (
-                <div key={idx} className="flex-1 flex items-center gap-6 bg-[#F8F9FA] rounded-2xl p-4 transition">
-                  {/* Thumbnail from tour images */}
-                  <div className="relative w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] rounded-2xl overflow-hidden shrink-0">
+            <div className="flex flex-col gap-6 h-full">
+              {[0, 1].map((idx) => (
+                <div key={idx} className="flex-1 flex items-center gap-6 bg-[#F6F6F6] rounded-[24px] p-6 lg:px-8 py-5 transition">
+                  {/* Thumbnail */}
+                  <div className="relative w-[130px] h-[130px] sm:w-[145px] sm:h-[145px] rounded-[16px] overflow-hidden shrink-0">
                     <Image
                       src={tour.images[idx]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                      alt={day.title}
+                      alt="Highlight"
                       fill
                       className="object-cover"
                     />
                   </div>
                   <div className="flex-1 py-1">
-                    <h3 className="text-[24px] sm:text-[28px] font-bold text-gray-900 leading-tight mb-2">{day.title}</h3>
-                    <p className="text-[11px] sm:text-[12px] text-gray-600 leading-snug mb-3 max-w-lg">
-                      {day.description.length > 200 ? `${day.description.substring(0, 200)}...` : day.description}
+                    <h3 className="text-[28px] sm:text-[32px] font-semibold text-[#111827] leading-tight mb-1">Heading</h3>
+                    <p className="text-[13px] text-[#4B5563] leading-snug mb-1 max-w-lg">
+                      Help us spread love around the world for days. together with Planterra. we'll plant one tree in our name for every travel day.
                     </p>
-                    <div className="text-[11px] font-bold text-gray-900 mb-2">
-                      Trees Planted this trip : {String(tour.duration.days).padStart(2, '0')}
+                    <div className="text-[13px] font-medium text-[#111827] mb-2">
+                      Trees Planted this trip : 08
                     </div>
                     <div>
                       <button
                         onClick={() => setActiveTab("itinerary")}
-                        className="bg-[#121212] text-white text-[11px] font-medium px-5 py-1.5 rounded-full hover:bg-black transition"
+                        className="bg-[#111827] text-white text-[13px] font-medium px-5 py-2 rounded-full hover:bg-black transition"
                       >
                         Learn More
                       </button>
@@ -752,34 +806,34 @@ export default function TourDetailPage() {
             </div>
 
             {/* Right: 100+ Trees sustainability card */}
-            <div className="relative rounded-2xl overflow-hidden h-full hidden lg:block">
+            <div className="relative rounded-[24px] overflow-hidden w-full h-[400px] hidden lg:block">
               <Image
                 src={tour.images[tour.images.length - 1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
                 alt="Sustainability"
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-              <div className="absolute inset-0 flex flex-col justify-end p-6">
-                <div className="text-center mb-6">
-                  <h3 className="text-[32px] sm:text-[36px] font-medium text-white mb-4">100+ Trees</h3>
-                  <p className="text-white/90 text-[12px] leading-relaxed">
-                    Help us spread Love around the world with trees for the Text Help us spread Love around the world with trees for the Text Help us spread Love around the world with trees for the Text Help us spread Love around.....
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
+              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
+                <div className="mt-auto flex flex-col items-center">
+                  <h3 className="text-[36px] sm:text-[42px] font-semibold text-white mb-4">100+ Trees</h3>
+                  <p className="text-white/95 text-[14px] leading-relaxed mb-8 max-w-[320px]">
+                    Help us spread Love around the world with trees for the Text Help us spread Love around the world with trees for the TextHelp us spread Love around the world with trees for the TextHelp us spread Love around....
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2.5 w-full mt-2 group">
                   <button
-                    onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                    className="flex-1 bg-white text-black py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-100 transition text-[13px]"
+                    onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                    className="flex-1 bg-white text-black py-3.5 px-6 rounded-full flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 transition text-[15px]"
                   >
-                    <CalendarCheck size={16} />
+                    <CalendarCheck size={18} weight="bold" />
                     Book Now
                   </button>
                   <button
-                    className="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-100 transition shrink-0"
-                    onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
+                    className="w-[52px] h-[52px] bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-100 transition shrink-0"
+                    onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
                   >
-                    <ArrowUpRight size={16} />
+                    <ArrowUpRight size={20} weight="bold" className="transition-transform duration-300 group-hover:rotate-45" />
                   </button>
                 </div>
               </div>
@@ -829,10 +883,10 @@ export default function TourDetailPage() {
           {/* Main Content */}
           <div>
             {(activeTab === "overview" || activeTab === "itinerary") && (
-              <div className="bg-white p-2">
+              <div className="bg-white">
                 <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Itinerary Breakdown
+                  <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900">
+                    Itinerary
                   </h2>
                   <button className="bg-[#1C1A1A] text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 hover:bg-black transition">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -924,7 +978,7 @@ export default function TourDetailPage() {
 
             {activeTab === "details" && (
               <div className="bg-white  p-2">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-8">
                   Trip Details
                 </h2>
 
@@ -1126,22 +1180,22 @@ export default function TourDetailPage() {
         <div className="w-full px-4 sm:px-6 lg:px-10 pb-12 pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
             <div>
-              <h2 className="text-[28px] font-medium text-[#1A1A1A] mb-6 tracking-tight">What&apos;s Included</h2>
+              <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-8 tracking-tight">What&apos;s Included</h2>
               <div className="border border-gray-300 rounded-[20px] bg-white overflow-hidden shadow-sm">
                 {/* Tabs Header */}
                 <div className="grid grid-cols-5 border-b border-gray-200">
                   {[
                     {
-                      id: "activities", label: "ACTIVITIES",
+                      id: "activities", label: (
+                        <div className="flex flex-col items-center leading-none mt-1">
+                          <span className="text-[10px] font-bold tracking-widest flex items-center normal-case">
+                            NOTHING
+                            <span className="lowercase font-normal ml-0.5" style={{ fontFamily: '"Brush Script MT", "League Script", "Dancing Script", cursive', fontSize: '15px' }}>but</span>
+                          </span>
+                          <span className="text-[10px] font-bold tracking-widest mt-0.5 normal-case">ADVENTURES</span>
+                        </div>
+                      ),
                       svg: <Image src="/7.svg" alt="Activities" width={26} height={26} />
-                    },
-                    {
-                      id: "tour_leader", label: "TRIP LEADER",
-                      svg: <Image src="/8.svg" alt="Trip Leader" width={26} height={26} />
-                    },
-                    {
-                      id: "transport", label: "TRANSPORT",
-                      svg: <Image src="/9.svg" alt="Transport" width={26} height={26} />
                     },
                     {
                       id: "accommodation", label: "ACCOMMODATION",
@@ -1151,6 +1205,14 @@ export default function TourDetailPage() {
                       id: "meals", label: "MEALS",
                       svg: <Image src="/11.svg" alt="Meals" width={26} height={26} />
                     },
+                    {
+                      id: "transport", label: "TRANSPORT",
+                      svg: <Image src="/9.svg" alt="Transport" width={26} height={26} />
+                    },
+                    {
+                      id: "tour_leader", label: "STAFF & EXPERTS",
+                      svg: <Image src="/8.svg" alt="Trip Leader" width={26} height={26} />
+                    },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1159,12 +1221,13 @@ export default function TourDetailPage() {
                         : "border-transparent"
                         }`}
                       onClick={() => setTourForMeTab(tab.id as any)}
+                      onMouseEnter={() => setTourForMeTab(tab.id as any)}
                     >
                       <div className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors shadow-sm ${tourForMeTab === tab.id ? "bg-black text-white" : "bg-[#AFAFAF] text-white"
                         }`}>
                         {tab.svg}
                       </div>
-                      <span className={`uppercase text-[13px] font-bold mt-4 tracking-wider ${tourForMeTab === tab.id ? "text-[#0B1D3A]" : "text-[#0B1D3A]"
+                      <span className={`text-[13px] font-bold mt-4 tracking-wider flex items-center justify-center text-center ${tourForMeTab === tab.id ? "text-[#0B1D3A]" : "text-[#0B1D3A]"
                         }`}>{tab.label}</span>
                     </button>
                   ))}
@@ -1176,7 +1239,6 @@ export default function TourDetailPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[18px] gap-x-12">
                       {Array.from(new Map(
                         tour.itinerary.flatMap(day => [
-                          ...(day.optionalActivities?.map(a => ({ name: a.name, isAddon: true })) || []),
                           ...(day.activities?.map(a => ({ name: a.name, isAddon: false })) || [])
                         ]).map(item => [item.name, item])
                       ).values()).map((act, i) => (
@@ -1187,7 +1249,7 @@ export default function TourDetailPage() {
                           <span className={act.isAddon ? "" : "ml-0"}>{act.name}</span>
                         </div>
                       ))}
-                      {tour.itinerary.flatMap(d => [...(d.activities || []), ...(d.optionalActivities || [])]).length === 0 && (
+                      {tour.itinerary.flatMap(d => d.activities || []).length === 0 && (
                         <p className="text-gray-500">Activities will be listed soon.</p>
                       )}
                     </div>
@@ -1246,40 +1308,96 @@ export default function TourDetailPage() {
                   )}
                 </div>
               </div>
+
+              {/* Available Extras Section */}
+              <div className="mt-14">
+                <div className="flex flex-wrap items-baseline gap-3 mb-8">
+                  <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 tracking-tight">Available Extras</h2>
+                  <p className="text-gray-500 text-[18px] md:text-[22px] font-medium">(add this to your tour when you book)</p>
+                </div>
+
+                <div className="space-y-4">
+                  {uniqueOptionalActivities.length > 0 ? (
+                    uniqueOptionalActivities.map((act, i) => (
+                      <div key={i} className="border border-gray-300 rounded-[20px] p-8 bg-white shadow-sm hover:shadow-md transition-shadow">
+                        <div className="flex items-start gap-6">
+                          <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0 mt-1">
+                            <Plus size={24} weight="light" className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="text-[22px] font-bold text-gray-900">{act.name}</h3>
+                              <div className="flex flex-col items-end">
+                                <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
+                                <span className="text-[20px] font-bold text-gray-900">{act.price.currency}{act.price.amount.toFixed(0)}</span>
+                              </div>
+                            </div>
+                            <p className="text-gray-600 text-[15px] leading-relaxed max-w-2xl">
+                              {act.description || `Experience ${act.name} during your visit to ${act.place}.`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    /* Fallback to template if no optional activities found */
+                    <div className="border border-gray-300 rounded-[20px] p-8 bg-white shadow-sm">
+                      <div className="flex items-start gap-6">
+                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0 mt-1">
+                          <Plus size={24} weight="light" className="text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="text-[22px] font-bold text-gray-900">Heading</h3>
+                            <div className="flex flex-col items-end">
+                              <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
+                              <span className="text-[20px] font-bold text-gray-900">$49</span>
+                            </div>
+                          </div>
+                          <p className="text-gray-600 text-[15px] leading-relaxed max-w-2xl">
+                            Travel here and there Travel here and there Travel here
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            {/* Continue Your Journey Card */}
-            <div className="hidden lg:flex flex-col gap-4 pt-[58px]">
-              <div className="border border-gray-200 rounded-[16px] bg-white shadow-sm p-6 flex flex-col gap-4">
+
+            {/* Right Column: Continue Your Journey Card */}
+            <div className="hidden lg:flex flex-col gap-4 mt-[80px]">
+              <div className="border border-gray-300 rounded-[20px] bg-white shadow-sm p-8 flex flex-col gap-6">
                 <div>
-                  <h3 className="text-[18px] font-bold text-[#1A1A1A] mb-2 leading-snug">Continue Your Journey</h3>
-                  <p className="text-[13px] text-gray-500 leading-relaxed">
+                  <h3 className="text-[26px] font-medium text-gray-900 mb-3 leading-snug">Continue Your Journey</h3>
+                  <p className="text-[14px] text-gray-700 leading-relaxed max-w-[95%]">
                     Your adventure doesn&apos;t have to end here—discover another tour starting right after, from the same destination. Seamlessly extend your travel with handpicked experiences nearby.
                   </p>
                 </div>
                 {relatedTours.length > 0 && (() => {
                   const nextTour = relatedTours.find(t => t._id !== tour._id) || relatedTours[0];
                   return (
-                    <div className="border-t border-gray-100 pt-4">
-                      <div className="font-bold text-[15px] text-[#1A1A1A] mb-1">
-                        Next Tour: {nextTour.location?.startCity} to {nextTour.location?.endCity}
+                    <div className="border-t border-gray-200 pt-6 mt-1">
+                      <div className="font-medium text-[20px] text-gray-900 mb-2 leading-tight pr-4">
+                        Next Tour: {nextTour.location?.startCity} to {nextTour.location?.endCity} Escape
                       </div>
-                      <p className="text-[12px] text-gray-500 mb-4">
+                      <p className="text-[13px] text-gray-600 mb-6">
                         Duration: {nextTour.duration?.days} Days
                         {nextTour.travelStyle ? ` · ${nextTour.travelStyle}` : ""}
                         {nextTour.serviceLevel ? ` · ${nextTour.serviceLevel} stay` : ""}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 group">
                         <button
-                          onClick={() => router.push(`/trip/${nextTour.slug}/${nextTour.tourCode}`)}
-                          className="flex-1 bg-[#121212] text-white py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[13px]"
+                          onClick={() => router.push(`/trips/${nextTour.slug}/${nextTour.tourCode}`)}
+                          className="px-6 bg-[#121212] text-white py-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[15px]"
                         >
                           Start Exploring
                         </button>
                         <button
-                          onClick={() => router.push(`/trip/${nextTour.slug}/${nextTour.tourCode}`)}
-                          className="w-10 h-10 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
+                          onClick={() => router.push(`/trips/${nextTour.slug}/${nextTour.tourCode}`)}
+                          className="w-[48px] h-[48px] bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
                         >
-                          <ArrowUpRight size={16} />
+                          <ArrowUpRight size={18} className="transition-transform duration-300 group-hover:rotate-45" />
                         </button>
                       </div>
                     </div>
@@ -1307,7 +1425,7 @@ export default function TourDetailPage() {
               <div className="bg-white rounded-[16px] border border-gray-300 shadow-sm overflow-hidden">
                 {/* Section Header */}
                 <div className="px-10 py-8">
-                  <h2 className="text-[28px] text-[#1A1A1A] font-medium mb-1 tracking-tight">
+                  <h2 className="text-[32px] md:text-[40px] text-gray-900 font-medium mb-3 tracking-tight">
                     Check Availability
                   </h2>
                   <p className="text-[#6B7280] text-[15px]">
@@ -1348,7 +1466,7 @@ export default function TourDetailPage() {
                               onClick={() => setSelectedMonth(isSelected ? null : month)}
                               className={`flex flex-col items-center justify-center px-6 py-3.5 rounded-xl border transition-all min-w-[130px] shrink-0 ${isSelected
                                 ? "bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-md"
-                                : "bg-white border-gray-200 text-[#1A1A1A] hover:border-gray-400"
+                                : "bg-white border-gray-200 text-[#1A1A1A] hover:bg-[#F3F4F6] hover:border-gray-300"
                                 }`}
                             >
                               <span className={`text-[15px] font-bold ${isSelected ? "text-white" : "text-[#1A1A1A]"}`}>
@@ -1459,16 +1577,21 @@ export default function TourDetailPage() {
                                     )}
                                   </td>
 
-                                  <td className="px-6 py-6">
+                                  <td className="px-6 py-6 min-w-[200px]">
                                     {isSoldOut ? (
-                                      <span className="text-[16px] font-bold text-gray-400">${originalPrice}</span>
+                                      <span className="text-[20px] font-bold text-gray-300">${originalPrice}</span>
                                     ) : (
-                                      <div className="flex flex-col">
-                                        <div className="flex items-center gap-1.5">
-                                          <span className="text-[16px] font-bold text-[#1A1A1A]">${Math.round(datePrice)}</span>
+                                      <div className="flex items-center gap-4">
+                                        <div className="flex flex-col">
+                                          <span className="text-[24px] font-bold text-[#0B1D3A] leading-tight tracking-tight">${Math.round(datePrice)}</span>
+                                          {bestDiscountPct > 0 && (
+                                            <span className="text-[14px] text-gray-400 line-through mt-0.5">${originalPrice}</span>
+                                          )}
                                         </div>
                                         {bestDiscountPct > 0 && (
-                                          <span className="text-[13px] text-gray-500 line-through font-medium">${originalPrice}</span>
+                                          <div className="bg-black text-white px-3.5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap self-start mt-1 shadow-sm">
+                                            Save {bestDiscountPct}%
+                                          </div>
                                         )}
                                       </div>
                                     )}
@@ -1490,7 +1613,7 @@ export default function TourDetailPage() {
                                       <button
                                         onClick={() => {
                                           const dateStr = new Date(date.startDate).toISOString().split('T')[0];
-                                          router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${dateStr}`);
+                                          router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${dateStr}`);
                                         }}
                                         disabled={isSoldOut}
                                         className={`py-[11px] px-8 rounded-full font-bold text-[14px] transition-colors whitespace-nowrap ${isSoldOut ? "bg-gray-100 text-gray-400 cursor-not-allowed hidden" : "bg-[#222222] hover:bg-black text-white shadow-sm"
@@ -1545,18 +1668,18 @@ export default function TourDetailPage() {
                       Enjoy your journey with added privacy, comfort, and exclusive personal space.
                     </p>
                   </div>
-                  <div className="flex gap-2 mt-1">
+                  <div className="flex gap-2 mt-1 group">
                     <button
-                      onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
+                      onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
                       className="flex-1 bg-[#121212] text-white py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-black transition text-[13px]"
                     >
                       Start Exploring
                     </button>
                     <button
-                      onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
+                      onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
                       className="w-10 h-10 bg-[#121212] text-white rounded-full flex items-center justify-center hover:bg-black transition shrink-0"
                     >
-                      <ArrowUpRight size={16} />
+                      <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:rotate-45" />
                     </button>
                   </div>
                 </div>
@@ -1645,7 +1768,7 @@ export default function TourDetailPage() {
               {/* Actions */}
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <button
-                  onClick={() => router.push(`/trip/${tour.slug}/${tour.tourCode}/checkout`)}
+                  onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout`)}
                   className="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-colors whitespace-nowrap"
                 >
                   Book Now
