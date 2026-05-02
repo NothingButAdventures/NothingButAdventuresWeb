@@ -12,7 +12,7 @@ const getAllActivities = catchAsync(async (req, res, next) => {
 
   const activities = await features.query
     .populate("destination", "name slug")
-    .populate("travelStyle", "name")
+    .populate("travelStyles", "name")
     .populate("physicalRating", "name level");
 
   const total = await Activity.countDocuments();
@@ -30,7 +30,7 @@ const getAllActivities = catchAsync(async (req, res, next) => {
 const getActivity = catchAsync(async (req, res, next) => {
   const activity = await Activity.findById(req.params.id)
     .populate("destination")
-    .populate("travelStyle")
+    .populate("travelStyles")
     .populate("physicalRating");
 
   if (!activity) {

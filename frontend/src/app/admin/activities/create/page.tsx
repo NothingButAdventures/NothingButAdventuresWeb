@@ -20,13 +20,20 @@ export default function CreateActivityPage() {
     title: "",
     description: "",
     destination: "",
-    travelStyle: "",
+    travelStyles: [] as string[],
     isFree: false,
     price: "",
     physicalRating: "",
     ageGroup: "",
     coverImage: "",
+    location: "",
+    duration: "",
   });
+
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [showLocationPopup, setShowLocationPopup] = useState(false);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [addingLocation, setAddingLocation] = useState(false);
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -60,6 +67,63 @@ export default function CreateActivityPage() {
     }
   };
 
+  const fetchDestinations = async (countryId: string) => {
+    try {
+      const response = await fetch(`${api.baseURL}${api.endpoints.countries.getById(countryId)}`);
+      const data = await response.json();
+      if (data.status === "success") {
+        setDestinations(data.data.country.destinations || []);
+      }
+    } catch (error) {
+      console.error("Error fetching destinations:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.destination) {
+      fetchDestinations(formData.destination);
+    } else {
+      setDestinations([]);
+      setFormData(prev => ({ ...prev, location: "" }));
+    }
+  }, [formData.destination]);
+
+  const handleAddLocation = async () => {
+    if (!locationSearch.trim() || !formData.destination) return;
+    setAddingLocation(true);
+    try {
+      const token = localStorage.getItem("token");
+      const updatedDestinations = [
+        ...destinations,
+        { name: locationSearch.trim(), description: "" },
+      ];
+      
+      const response = await fetch(`${api.baseURL}/countries/${formData.destination}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ destinations: updatedDestinations }),
+      });
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setDestinations(data.data.country.destinations || []);
+        setFormData({ ...formData, location: locationSearch.trim() });
+        setShowLocationPopup(false);
+        setLocationSearch("");
+      } else {
+        alert("Failed to add location: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error adding location:", error);
+      alert("Failed to add location");
+    } finally {
+      setAddingLocation(false);
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -87,9 +151,16 @@ export default function CreateActivityPage() {
         return;
       }
 
+      if (formData.travelStyles.length === 0) {
+        alert("Please select at least one travel style");
+        setSubmitting(false);
+        return;
+      }
+
       const payload = {
         ...formData,
         price: formData.isFree ? 0 : parsedPrice,
+        duration: formData.duration,
         coverImage: coverImageUrl,
       };
 
@@ -169,21 +240,120 @@ export default function CreateActivityPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Travel Style</label>
-              <select
-                required
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
-                value={formData.travelStyle}
-                onChange={(e) => setFormData({ ...formData, travelStyle: e.target.value })}
-              >
-                <option value="">Select style</option>
-                {travelStyles.map((s) => (
-                  <option key={s._id} value={s._id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Travel Styles</label>
+            <div className="flex flex-wrap gap-2">
+              {travelStyles.map((s) => (
+                <button
+                  key={s._id}
+                  type="button"
+                  onClick={() => {
+                    const current = formData.travelStyles;
+                    if (current.includes(s._id)) {
+                      setFormData({ ...formData, travelStyles: current.filter(id => id !== s._id) });
+                    } else {
+                      setFormData({ ...formData, travelStyles: [...current, s._id] });
+                    }
+                  }}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                    formData.travelStyles.includes(s._id)
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                  }`}
+                >
+                  {s.name}
+                </button>
+              ))}
+            </div>
+            {formData.travelStyles.length === 0 && (
+              <p className="text-red-500 text-xs mt-1">Please select at least one travel style</p>
+            )}
+          </div>
+
+          {formData.destination && (
+            <div className="relative">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+              <input
+                type="text"
+                readOnly
+                placeholder="Select a location"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition cursor-pointer"
+                value={formData.location}
+                onClick={() => setShowLocationPopup(true)}
+              />
+              
+              {showLocationPopup && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                  <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                      <h3 className="font-bold text-gray-900">Select Location</h3>
+                      <button 
+                        type="button"
+                        onClick={() => setShowLocationPopup(false)}
+                        className="p-1 hover:bg-gray-100 rounded-full"
+                      >
+                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                    <div className="p-4">
+                      <input
+                        type="text"
+                        placeholder="Search locations..."
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4"
+                        value={locationSearch}
+                        onChange={(e) => setLocationSearch(e.target.value)}
+                        autoFocus
+                      />
+                      <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                        {destinations
+                          .filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase()))
+                          .slice(0, 10)
+                          .map((d) => (
+                            <button
+                              key={d._id || d.name}
+                              type="button"
+                              className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                              onClick={() => {
+                                setFormData({ ...formData, location: d.name });
+                                setShowLocationPopup(false);
+                                setLocationSearch("");
+                              }}
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
+                                <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <span className="font-medium text-gray-700">{d.name}</span>
+                            </button>
+                          ))}
+                        {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                          <div className="text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
+                            <p>No locations found</p>
+                            {locationSearch.trim() !== "" && (
+                              <button
+                                type="button"
+                                onClick={handleAddLocation}
+                                disabled={addingLocation}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                              >
+                                {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-6">
             <div>
@@ -245,6 +415,17 @@ export default function CreateActivityPage() {
               />
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (in hrs)</label>
+            <input
+              type="text"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              value={formData.duration}
+              onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+              placeholder="e.g. 2.5"
+            />
+          </div>
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>

@@ -23,11 +23,12 @@ const activitySchema = new mongoose.Schema(
       ref: "Country",
       required: [true, "An activity must belong to a destination (Country)"],
     },
-    travelStyle: {
-      type: mongoose.Schema.ObjectId,
-      ref: "TravelStyle",
-      required: [true, "An activity must have a travel style"],
-    },
+    travelStyles: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "TravelStyle",
+      }
+    ],
     isFree: {
       type: Boolean,
       default: false,
@@ -52,6 +53,15 @@ const activitySchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    location: {
+      type: String,
+      trim: true,
+    },
+    duration: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -66,7 +76,7 @@ const activitySchema = new mongoose.Schema(
 
 // Indexes
 activitySchema.index({ destination: 1 });
-activitySchema.index({ travelStyle: 1 });
+activitySchema.index({ travelStyles: 1 });
 activitySchema.index({ isActive: 1 });
 activitySchema.index({ slug: 1 });
 

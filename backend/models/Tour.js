@@ -147,87 +147,14 @@ const tourSchema = new mongoose.Schema(
 
         activities: [
           {
-            name: {
-              type: String,
-              trim: true,
-            },
-            description: {
-              type: String,
-              trim: true,
-            },
-            placeName: {
-              type: String,
-              trim: true,
-            },
-            duration: {
-              type: String,
-              trim: true,
-            },
-            icon: {
-              type: String,
-              enum: [
-                "MapPin",
-                "Bus",
-                "Car",
-                "Airplane",
-                "Train",
-                "Boat",
-                "Coffee",
-                "Camera",
-                "Mountain",
-                "Trees",
-                "Utensils",
-                "Clock",
-                "Heart",
-              ],
-            },
+            type: mongoose.Schema.ObjectId,
+            ref: "Activity",
           },
         ],
         optionalActivities: [
           {
-            name: {
-              type: String,
-              trim: true,
-            },
-            price: {
-              amount: {
-                type: Number,
-              },
-              currency: {
-                type: String,
-                default: "USD",
-              },
-            },
-            place: {
-              type: String,
-              trim: true,
-            },
-            description: {
-              type: String,
-              trim: true,
-            },
-            duration: {
-              type: String,
-              trim: true,
-            },
-            icon: {
-              type: String,
-              enum: [
-                "MapPin",
-                "Bus",
-                "Car",
-                "Airplane",
-                "Train",
-                "Boat",
-                "Coffee",
-                "Camera",
-                "Mountain",
-                "Trees",
-                "Utensils",
-                "Clock",
-                "Heart",
-              ],
-            },
+            type: mongoose.Schema.ObjectId,
+            ref: "Activity",
           },
         ],
         accommodations: [

@@ -47,9 +47,17 @@ interface Country {
         localCuisine?: string;
         languagesSpoken?: string;
     };
-    localStoryBlogs?: Array<string | BlogOption>;
+    localActivities?: Array<string | ActivityOption>;
     travelStoryBlogs?: Array<string | BlogOption>;
     image: string;
+}
+
+interface ActivityOption {
+    _id: string;
+    title: string;
+    slug?: string;
+    description?: string;
+    coverImage?: string;
 }
 
 interface BlogOption {
@@ -122,9 +130,12 @@ export default function EditCountryPage() {
     const [needToKnowTransportation, setNeedToKnowTransportation] = useState("");
     const [needToKnowLocalCuisine, setNeedToKnowLocalCuisine] = useState("");
     const [needToKnowLanguagesSpoken, setNeedToKnowLanguagesSpoken] = useState("");
+    const [allActivities, setAllActivities] = useState<ActivityOption[]>([]);
+    const [activitySearch, setActivitySearch] = useState("");
+    const [selectedActivityIds, setSelectedActivityIds] = useState<string[]>([]);
+    const [activitiesLoading, setActivitiesLoading] = useState(true);
     const [allBlogs, setAllBlogs] = useState<BlogOption[]>([]);
     const [blogSearch, setBlogSearch] = useState("");
-    const [selectedBlogIds, setSelectedBlogIds] = useState<string[]>([]);
     const [travelStoryBlogSearch, setTravelStoryBlogSearch] = useState("");
     const [selectedTravelStoryBlogIds, setSelectedTravelStoryBlogIds] = useState<string[]>([]);
     const [blogsLoading, setBlogsLoading] = useState(true);
@@ -134,6 +145,7 @@ export default function EditCountryPage() {
     }, [id]);
 
     useEffect(() => {
+        fetchActivities();
         fetchBlogs();
     }, []);
 
@@ -175,9 +187,9 @@ export default function EditCountryPage() {
                 setNeedToKnowTransportation(c.needToKnow?.transportation || "");
                 setNeedToKnowLocalCuisine(c.needToKnow?.localCuisine || "");
                 setNeedToKnowLanguagesSpoken(c.needToKnow?.languagesSpoken || "");
-                setSelectedBlogIds(
-                    (c.localStoryBlogs || []).map((blog: string | BlogOption) =>
-                        typeof blog === "string" ? String(blog) : String(blog._id)
+                setSelectedActivityIds(
+                    (c.localActivities || []).map((activity: string | ActivityOption) =>
+                        typeof activity === "string" ? String(activity) : String(activity._id)
                     )
                 );
                 setSelectedTravelStoryBlogIds(
@@ -190,6 +202,23 @@ export default function EditCountryPage() {
             console.error("Error fetching country:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchActivities = async () => {
+        try {
+            setActivitiesLoading(true);
+            const res = await fetch(`${api.baseURL}/activities?limit=500`, {
+                credentials: "include",
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                setAllActivities(data.data.activities || []);
+            }
+        } catch (err) {
+            console.error("Error fetching activities:", err);
+        } finally {
+            setActivitiesLoading(false);
         }
     };
 
@@ -210,9 +239,9 @@ export default function EditCountryPage() {
         }
     };
 
-    const toggleBlogSelection = (blogId: string) => {
-        const normalizedId = String(blogId);
-        setSelectedBlogIds((prev) =>
+    const toggleActivitySelection = (activityId: string) => {
+        const normalizedId = String(activityId);
+        setSelectedActivityIds((prev) =>
             prev.includes(normalizedId)
                 ? prev.filter((id) => id !== normalizedId)
                 : [...prev, normalizedId]
@@ -293,7 +322,7 @@ export default function EditCountryPage() {
                     languagesSpoken: needToKnowLanguagesSpoken.trim(),
                 },
                 image,
-                localStoryBlogs: selectedBlogIds,
+                localActivities: selectedActivityIds,
                 travelStoryBlogs: selectedTravelStoryBlogIds,
             };
 
@@ -321,17 +350,17 @@ export default function EditCountryPage() {
     if (loading) return <div className="p-10 flex justify-center text-gray-500 animate-pulse">Loading country...</div>;
     if (!country) return <div className="p-10 text-center">Country not found</div>;
 
-    const filteredBlogs = allBlogs.filter((blog) => {
-        const q = blogSearch.trim().toLowerCase();
+    const filteredActivities = allActivities.filter((activity) => {
+        const q = activitySearch.trim().toLowerCase();
         if (!q) return true;
         return (
-            blog.title.toLowerCase().includes(q) ||
-            blog.slug.toLowerCase().includes(q)
+            activity.title.toLowerCase().includes(q) ||
+            (activity.slug || "").toLowerCase().includes(q)
         );
     });
 
-    const selectedBlogs = allBlogs.filter((blog) =>
-        selectedBlogIds.includes(String(blog._id))
+    const selectedActivities = allActivities.filter((activity) =>
+        selectedActivityIds.includes(String(activity._id))
     );
 
     const filteredTravelStoryBlogs = allBlogs.filter((blog) => {
@@ -444,48 +473,48 @@ export default function EditCountryPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                    <h2 className="text-lg font-semibold mb-4">Get to Know Story Blogs</h2>
+                    <h2 className="text-lg font-semibold mb-4">Get to Know Activities</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Select one or more existing blogs for the "Get to know {name || country.name}" section.
+                        Select one or more activities for the "Popular Activities" section on {name || country.name} page.
                     </p>
 
                     <input
                         type="text"
-                        value={blogSearch}
-                        onChange={(e) => setBlogSearch(e.target.value)}
-                        placeholder="Search blogs by title or slug"
+                        value={activitySearch}
+                        onChange={(e) => setActivitySearch(e.target.value)}
+                        placeholder="Search activities by title or slug"
                         className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                     />
 
                     <div className="mt-4 border border-gray-200 rounded-xl max-h-80 overflow-y-auto">
-                        {blogsLoading ? (
-                            <div className="p-4 text-sm text-gray-500">Loading blogs...</div>
-                        ) : filteredBlogs.length === 0 ? (
-                            <div className="p-4 text-sm text-gray-500">No blogs found.</div>
+                        {activitiesLoading ? (
+                            <div className="p-4 text-sm text-gray-500">Loading activities...</div>
+                        ) : filteredActivities.length === 0 ? (
+                            <div className="p-4 text-sm text-gray-500">No activities found.</div>
                         ) : (
-                            filteredBlogs.map((blog) => (
+                            filteredActivities.map((activity) => (
                                 <label
-                                    key={blog._id}
+                                    key={activity._id}
                                     className="flex items-start gap-3 p-4 border-b border-gray-100 last:border-b-0 cursor-pointer hover:bg-gray-50"
                                 >
                                     <input
                                         type="checkbox"
-                                        checked={selectedBlogIds.includes(String(blog._id))}
-                                        onChange={() => toggleBlogSelection(blog._id)}
+                                        checked={selectedActivityIds.includes(String(activity._id))}
+                                        onChange={() => toggleActivitySelection(activity._id)}
                                         className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
                                     />
-                                    {blog.featuredImage?.url ? (
+                                    {activity.coverImage ? (
                                         <img
-                                            src={blog.featuredImage.url}
-                                            alt={blog.title}
+                                            src={activity.coverImage}
+                                            alt={activity.title}
                                             className="w-16 h-12 object-cover rounded-md border border-gray-200"
                                         />
                                     ) : (
                                         <div className="w-16 h-12 rounded-md border border-gray-200 bg-gray-100" />
                                     )}
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
-                                        <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                        <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
+                                        <p className="text-xs text-gray-500 truncate">/{activity.slug || "activity"}</p>
                                     </div>
                                 </label>
                             ))
@@ -493,20 +522,20 @@ export default function EditCountryPage() {
                     </div>
 
                     <div className="mt-6">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Blogs ({selectedBlogs.length})</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Activities ({selectedActivities.length})</h3>
                         <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto">
-                            {selectedBlogs.length === 0 ? (
-                                <div className="p-4 text-sm text-gray-500">No blog selected yet.</div>
+                            {selectedActivities.length === 0 ? (
+                                <div className="p-4 text-sm text-gray-500">No activity selected yet.</div>
                             ) : (
-                                selectedBlogs.map((blog) => (
-                                    <div key={blog._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
+                                selectedActivities.map((activity) => (
+                                    <div key={activity._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
                                         <div className="min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
-                                            <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
+                                            <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
+                                            <p className="text-xs text-gray-500 truncate">/{activity.slug || "activity"}</p>
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => toggleBlogSelection(blog._id)}
+                                            onClick={() => toggleActivitySelection(activity._id)}
                                             className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
                                         >
                                             Remove

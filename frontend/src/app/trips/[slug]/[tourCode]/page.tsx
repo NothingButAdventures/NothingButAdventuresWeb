@@ -50,14 +50,17 @@ interface Tour {
     title: string;
     description: string;
     activities: Array<{
-      name: string;
+      name?: string;
+      title?: string;
       description: string;
-      placeName: string;
+      placeName?: string;
+      location?: string;
       duration: string;
       icon: string;
     }>;
     optionalActivities: Array<{
       name: string;
+      title?: string;
       price: {
         amount: number;
         currency: string;
@@ -914,7 +917,13 @@ export default function TourDetailPage() {
                         {/* Expanded State */}
                         <div className="flex items-center gap-4 mb-2">
                           <span className="border border-gray-400 text-gray-800 rounded-full px-4 py-1.5 text-xs font-semibold">Day {day.day}</span>
-                          <h3 className="font-bold text-xl text-gray-900">{day.title}</h3>
+                          <h3 className="font-bold text-xl text-gray-900">
+                            {day.title ? (
+                              day.title.split(",").filter(t => t.trim()).length > 1 
+                                ? `${day.title.split(",").filter(t => t.trim())[0]} to ${day.title.split(",").filter(t => t.trim())[1]}`
+                                : day.title.split(",").filter(t => t.trim())[0]
+                            ) : "Itinerary"}
+                          </h3>
                         </div>
 
                         <div className="mt-6">
@@ -929,24 +938,21 @@ export default function TourDetailPage() {
                                 <h4 className="font-semibold text-gray-900 mb-5 text-[15px]">Activities</h4>
 
                                 <div className="border-l border-gray-300 ml-2 space-y-7 pt-2 pb-2 relative">
-                                  {!isOverview && day.activities && day.activities.map((act, i) => (
+                                  {(!isOverview || (day.activities && day.activities.length > 0)) && day.activities && day.activities.map((act, i) => (
                                     <div key={`act-${i}`} className="relative pl-6">
                                       <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full"></div>
-                                      <h5 className="font-bold text-gray-900 text-[15px]">{act.name}</h5>
-                                      <p className="text-gray-500 text-[11px] mt-1">{act.placeName} • {act.duration}</p>
-                                      <p className="text-gray-700 text-[13px] mt-1">{act.description}</p>
-                                    </div>
-                                  ))}
-
-                                  {!isOverview && day.optionalActivities && day.optionalActivities.map((act, i) => (
-                                    <div key={`opt-${i}`} className="relative pl-6">
-                                      <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full"></div>
-                                      <div className="mb-2">
-                                        <span className="bg-black text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-full tracking-wide">Add On</span>
+                                      <h5 className="font-bold text-gray-900 text-[15px]">
+                                        {act.name || act.title}
+                                      </h5>
+                                      <div className="flex justify-between items-center mt-0.5">
+                                        <p className="text-gray-500 text-[12px] font-medium">{act.placeName || act.location}</p>
+                                        {act.duration && (
+                                          <span className="text-gray-900 font-bold text-[12px]">
+                                            {act.duration} hrs
+                                          </span>
+                                        )}
                                       </div>
-                                      <h5 className="font-bold text-gray-900 text-[15px]">{act.name} <span className="text-gray-600 font-normal ml-2 text-sm">+{act.price.currency}{act.price.amount.toFixed(2)}</span></h5>
-                                      <p className="text-gray-500 text-[11px] mt-1">{act.place} • {act.duration}</p>
-                                      <p className="text-gray-700 text-[13px] mt-1">{act.description}</p>
+                                      <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
                                     </div>
                                   ))}
 
@@ -955,16 +961,48 @@ export default function TourDetailPage() {
                                       <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full"></div>
                                       <h5 className="font-bold text-gray-900 text-[15px]">Accommodation</h5>
                                       <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-gray-500 text-[11px]">{acc.name}</span>
                                         <span className="text-gray-800 text-[10px]">
-                                          {/* Simple static stars for the mockup feel */}
-                                          ★★★★★
+                                          {Array(acc.rating || 5).fill("★").join("")}
                                         </span>
                                       </div>
                                       <p className="text-gray-700 text-[13px] mt-1">{acc.type}</p>
                                     </div>
                                   ))}
                                 </div>
+
+                                {/* Optional Activities for this day - OUTSIDE activities/accommodations timeline, EXACT SAME UI as activities */}
+                                {day.optionalActivities && day.optionalActivities.length > 0 && (
+                                  <div className="mt-8">
+                                    <h4 className="font-semibold text-gray-900 mb-5 text-[15px]">Optional Activities</h4>
+                                    <div className="border-l border-gray-300 ml-2 space-y-7 pt-2 pb-2 relative">
+                                      {day.optionalActivities.map((act, i) => (
+                                        <div key={`opt-${i}`} className="relative pl-6">
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-blue-400 rounded-full"></div>
+                                          <h5 className="font-bold text-gray-900 text-[15px]">
+                                            {act.name}
+                                          </h5>
+                                          <div className="flex justify-between items-center mt-0.5">
+                                            <p className="text-gray-500 text-[12px] font-medium">{act.place}</p>
+                                            <span className="text-gray-900 font-bold text-[12px]">
+                                              {act.price && typeof act.price.amount === "number"
+                                                ? (Number(act.price.amount) > 0
+                                                  ? `${act.price.currency}${Number(act.price.amount).toLocaleString()}`
+                                                  : "Free")
+                                                : "Free"}
+                                            </span>
+                                          </div>
+                                          {act.duration && (
+                                            <span className="text-gray-900 font-bold text-[12px] block mt-1">{act.duration} hrs</span>
+                                          )}
+                                          {act.title && (
+                                            <div className="text-gray-900 font-semibold text-[13px] mt-2 leading-relaxed">{act.title}</div>
+                                          )}
+                                          <p className="text-gray-700 text-[13px] mt-1 leading-relaxed">{act.description}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </>
                             )}
                           </div>
@@ -1103,7 +1141,11 @@ export default function TourDetailPage() {
                   {tour.itinerary[currentDay - 1] && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                       <div className="font-semibold text-gray-900 text-sm">
-                        {tour.itinerary[currentDay - 1].title}
+                        {tour.itinerary[currentDay - 1].title ? (
+                          tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim()).length > 1 
+                            ? `${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]} to ${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[1]}`
+                            : tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]
+                        ) : "Itinerary"}
                       </div>
                       <div className="text-xs text-gray-600 mt-1 line-clamp-2">
                         {tour.itinerary[currentDay - 1].description}
@@ -1329,7 +1371,13 @@ export default function TourDetailPage() {
                               <h3 className="text-[22px] font-bold text-gray-900">{act.name}</h3>
                               <div className="flex flex-col items-end">
                                 <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
-                                <span className="text-[20px] font-bold text-gray-900">{act.price.currency}{act.price.amount.toFixed(0)}</span>
+                                <span className="text-[20px] font-bold text-gray-900">
+                                  {act.price && typeof act.price.amount === "number"
+                                    ? (act.price.amount === 0
+                                      ? "Free"
+                                      : `${act.price.currency}${act.price.amount.toFixed(0)}`)
+                                    : "Free"}
+                                </span>
                               </div>
                             </div>
                             <p className="text-gray-600 text-[15px] leading-relaxed max-w-2xl">

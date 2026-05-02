@@ -27,6 +27,15 @@ interface Activity {
   icon: string;
 }
 
+interface ActivityOption {
+  _id: string;
+  title: string;
+  description?: string;
+  destination?: { _id?: string; name?: string } | string;
+  travelStyle?: { _id?: string; name?: string } | string;
+  location?: string;
+}
+
 interface OptionalActivity {
   name: string;
   price: {
@@ -50,9 +59,10 @@ interface ItineraryDay {
   day: number;
   title: string;
   description: string;
-  activities: Activity[];
-  optionalActivities: OptionalActivity[];
+  activities: any[];
+  optionalActivities: any[];
   accommodations: Accommodation[];
+  meals: string;
 }
 
 interface AvailableDate {
@@ -97,11 +107,20 @@ export default function EditTourPage() {
   const tourId = params?.id as string;
   const [countries, setCountries] = useState<Country[]>([]);
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
+  const [activityOptions, setActivityOptions] = useState<ActivityOption[]>([]);
+  const [activitySearchTerms, setActivitySearchTerms] = useState<Record<string, string>>({});
   const [physicalRatings, setPhysicalRatings] = useState<PhysicalRatingOption[]>([]);
   const [tripTypes, setTripTypes] = useState<TripTypeOption[]>([]);
   const [discounts, setDiscounts] = useState<DiscountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  // Destinations for the selected country
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [showLocationPopup, setShowLocationPopup] = useState<{ dayIndex: number } | null>(null);
+  const [showActivityPopup, setShowActivityPopup] = useState<{ dayIndex: number; activityIndex: number; isOptional: boolean } | null>(null);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [activitySearch, setActivitySearchInput] = useState("");
 
   // Image uploads
   const [images, setImages] = useState<ImageUpload[]>([]);
@@ -231,6 +250,13 @@ export default function EditTourPage() {
         setDiscounts(discountsData.data.discounts || []);
       }
 
+      // Fetch activities for itinerary selector
+      const activitiesResponse = await fetch(`${api.baseURL}/activities?limit=500`);
+      if (activitiesResponse.ok) {
+        const activitiesData = await activitiesResponse.json();
+        setActivityOptions(activitiesData.data.activities || []);
+      }
+
       // Fetch tour data
       const tourResponse = await fetch(`${api.baseURL}/tours/${tourId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -314,6 +340,7 @@ export default function EditTourPage() {
               activities: day.activities || [],
               optionalActivities: day.optionalActivities || [],
               accommodations: day.accommodations || [],
+              meals: day.meals || "",
             })),
           );
         }
@@ -340,6 +367,26 @@ export default function EditTourPage() {
       setLoading(false);
     }
   };
+
+  const fetchDestinations = async (countryId: string) => {
+    try {
+      const response = await fetch(`${api.baseURL}/countries/${countryId}`);
+      const data = await response.json();
+      if (data.status === "success") {
+        setDestinations(data.data.country.destinations || []);
+      }
+    } catch (error) {
+      console.error("Error fetching destinations:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.country) {
+      fetchDestinations(formData.country);
+    } else {
+      setDestinations([]);
+    }
+  }, [formData.country]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -438,6 +485,7 @@ export default function EditTourPage() {
         activities: [],
         optionalActivities: [],
         accommodations: [],
+        meals: "",
       },
     ]);
   };
@@ -495,6 +543,7 @@ export default function EditTourPage() {
       newItinerary[dayIndex].activities = [
         ...newItinerary[dayIndex].activities,
         {
+          title: "",
           name: "",
           description: "",
           placeName: "",
@@ -526,6 +575,60 @@ export default function EditTourPage() {
         ...newItinerary[dayIndex].activities[activityIndex],
         [field]: value,
       };
+      return newItinerary;
+    });
+  };
+
+  const getActivitySlotKey = (dayIndex: number, activityIndex: number) =>
+    `${dayIndex}-${activityIndex}`;
+
+  const setActivitySearch = (
+    dayIndex: number,
+    activityIndex: number,
+    value: string,
+  ) => {
+    const key = getActivitySlotKey(dayIndex, activityIndex);
+    setActivitySearchTerms((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const getFilteredActivityOptions = (searchValue: string) => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+
+    return activityOptions.filter((option) => {
+      if (!normalizedSearch) return true;
+
+      const destinationName =
+        typeof option.destination === "string"
+          ? ""
+          : option.destination?.name || "";
+      const travelStyleName =
+        typeof option.travelStyle === "string"
+          ? ""
+          : option.travelStyle?.name || "";
+
+      return [option.title, option.description || "", destinationName, travelStyleName]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+    });
+  };
+
+  const applyActivityOption = (
+    dayIndex: number,
+    activityIndex: number,
+    optionId: string,
+    isOptional: boolean = false
+  ) => {
+    const selected = activityOptions.find((option) => option._id === optionId);
+    if (!selected) return;
+
+    setItinerary((prev) => {
+      const newItinerary = [...prev];
+      if (isOptional) {
+        newItinerary[dayIndex].optionalActivities[activityIndex] = selected;
+      } else {
+        newItinerary[dayIndex].activities[activityIndex] = selected;
+      }
       return newItinerary;
     });
   };
@@ -711,8 +814,8 @@ export default function EditTourPage() {
             day: day.day,
             title: day.title,
             description: day.description,
-            activities: day.activities,
-            optionalActivities: day.optionalActivities,
+            activities: day.activities.map(act => act._id || act),
+            optionalActivities: day.optionalActivities.map(act => act._id || act),
             accommodations: day.accommodations,
           };
         }),
@@ -1478,7 +1581,8 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
           </div>
 
           {/* Itinerary Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          {formData.country && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-900">
                 Day-by-Day Itinerary
@@ -1513,15 +1617,39 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
 
                   {/* Basic day info */}
                   <div className="space-y-3 mb-6">
-                    <input
-                      type="text"
-                      value={day.title}
-                      onChange={(e) =>
-                        updateItinerary(dayIndex, "title", e.target.value)
-                      }
-                      placeholder="Day title (e.g., Arrival in Paris)"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
-                    />
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {(day.title ? day.title.split(",").filter(t => t.trim()) : []).map((tag, tagIndex) => (
+                        <span key={tagIndex} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200">
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentTags = day.title.split(",").filter(t => t.trim());
+                              currentTags.splice(tagIndex, 1);
+                              updateItinerary(dayIndex, "title", currentTags.join(","));
+                            }}
+                            className="hover:text-blue-900"
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </span>
+                      ))}
+                      {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) < 2 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowLocationPopup({ dayIndex });
+                            setLocationSearch("");
+                          }}
+                          className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium border border-gray-200 hover:bg-gray-200 transition"
+                        >
+                          + Add Location Tag
+                        </button>
+                      )}
+                    </div>
+
                     <textarea
                       value={day.description}
                       onChange={(e) =>
@@ -1531,11 +1659,10 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                     />
-
-
                   </div>
 
                   {/* Activities Section */}
+                  {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) > 0 && (
                   <div className="mb-6">
                     <div className="flex justify-between items-center mb-3">
                       <h4 className="text-md font-semibold text-gray-800">
@@ -1569,94 +1696,45 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                             </button>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <input
-                              type="text"
-                              value={activity.name}
-                              onChange={(e) =>
-                                updateActivity(
-                                  dayIndex,
-                                  actIndex,
-                                  "name",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Activity name"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <input
-                              type="text"
-                              value={activity.placeName}
-                              onChange={(e) =>
-                                updateActivity(
-                                  dayIndex,
-                                  actIndex,
-                                  "placeName",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Place name"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <input
-                              type="text"
-                              value={activity.duration}
-                              onChange={(e) =>
-                                updateActivity(
-                                  dayIndex,
-                                  actIndex,
-                                  "duration",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Duration (e.g., 2 hours)"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <select
-                              value={activity.icon}
-                              onChange={(e) =>
-                                updateActivity(
-                                  dayIndex,
-                                  actIndex,
-                                  "icon",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                          <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500 mb-2">
+                              Select activity name only. Other details are auto-filled from Admin Activities.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowActivityPopup({ dayIndex, activityIndex: actIndex, isOptional: false });
+                                setActivitySearchInput("");
+                              }}
+                              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
                             >
-                              <option value="MapPin">📍 Place</option>
-                              <option value="Bus">🚌 Bus</option>
-                              <option value="Car">🚗 Car</option>
-                              <option value="Airplane">✈️ Airplane</option>
-                              <option value="Train">🚂 Train</option>
-                              <option value="Boat">🚢 Boat</option>
-                              <option value="Coffee">☕ Free Time</option>
-                              <option value="Camera">📷 Sightseeing</option>
-                              <option value="Mountain">🏔️ Adventure</option>
-                              <option value="Trees">🌳 Nature</option>
-                              <option value="Utensils">🍽️ Dining</option>
-                              <option value="Clock">🕐 Schedule</option>
-                              <option value="Heart">❤️ Special</option>
-                            </select>
-                            <textarea
-                              value={activity.description}
-                              onChange={(e) =>
-                                updateActivity(
-                                  dayIndex,
-                                  actIndex,
-                                  "description",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Activity description"
-                              rows={2}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 md:col-span-2"
-                            />
+                              <span className="text-sm text-gray-700">
+                                {activity.title || activity.name || "Select activity..."}
+                              </span>
+                              <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            
+                            {(activity.title || activity.name) && (
+                              <div className="mt-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
+                                <p className="font-medium text-gray-900">
+                                  {activity.title || activity.name}
+                                </p>
+                                {(activity.location || activity.placeName) && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {activity.location || activity.placeName}
+                                    {activity.duration ? ` • ${activity.duration}` : ""}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
+                  )}
 
                   {/* Optional Activities Section */}
                   <div className="mb-6">
@@ -1692,126 +1770,37 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
                             >
                               Remove
                             </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <input
-                              type="text"
-                              value={optActivity.name}
-                              onChange={(e) =>
-                                updateOptionalActivity(
-                                  dayIndex,
-                                  optIndex,
-                                  "name",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Optional activity name"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <input
-                              type="text"
-                              value={optActivity.place}
-                              onChange={(e) =>
-                                updateOptionalActivity(
-                                  dayIndex,
-                                  optIndex,
-                                  "place",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Place"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <input
-                              type="text"
-                              value={optActivity.duration}
-                              onChange={(e) =>
-                                updateOptionalActivity(
-                                  dayIndex,
-                                  optIndex,
-                                  "duration",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Duration"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <div className="flex gap-2">
-                              <input
-                                type="number"
-                                value={optActivity.price.amount}
-                                onChange={(e) =>
-                                  updateOptionalActivity(
-                                    dayIndex,
-                                    optIndex,
-                                    "price.amount",
-                                    parseFloat(e.target.value),
-                                  )
-                                }
-                                placeholder="Price"
-                                step="0.01"
-                                min="0"
-                                className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                              />
-                              <select
-                                value={optActivity.price.currency}
-                                onChange={(e) =>
-                                  updateOptionalActivity(
-                                    dayIndex,
-                                    optIndex,
-                                    "price.currency",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-16 px-1 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                              >
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="GBP">GBP</option>
-                                <option value="INR">INR</option>
-                              </select>
-                            </div>
-                            <select
-                              value={optActivity.icon}
-                              onChange={(e) =>
-                                updateOptionalActivity(
-                                  dayIndex,
-                                  optIndex,
-                                  "icon",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                          </div>                          <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                            <p className="text-xs text-gray-500 mb-2">
+                              Select activity name only. Other details are auto-filled from Admin Activities.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowActivityPopup({ dayIndex, activityIndex: optIndex, isOptional: true });
+                                setActivitySearchInput("");
+                              }}
+                              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
                             >
-                              <option value="MapPin">📍 Place</option>
-                              <option value="Bus">🚌 Bus</option>
-                              <option value="Car">🚗 Car</option>
-                              <option value="Airplane">✈️ Airplane</option>
-                              <option value="Train">🚂 Train</option>
-                              <option value="Boat">🚢 Boat</option>
-                              <option value="Coffee">☕ Free Time</option>
-                              <option value="Camera">📷 Sightseeing</option>
-                              <option value="Mountain">🏔️ Adventure</option>
-                              <option value="Trees">🌳 Nature</option>
-                              <option value="Utensils">🍽️ Dining</option>
-                              <option value="Clock">🕐 Schedule</option>
-                              <option value="Heart">❤️ Special</option>
-                            </select>
-                            <textarea
-                              value={optActivity.description}
-                              onChange={(e) =>
-                                updateOptionalActivity(
-                                  dayIndex,
-                                  optIndex,
-                                  "description",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Optional activity description"
-                              rows={2}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 lg:col-span-3"
-                            />
+                              <span className="text-sm text-gray-700">
+                                {optActivity.title || optActivity.name || "Select activity..."}
+                              </span>
+                              <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                            
+                            {(optActivity.title || optActivity.name) && (
+                              <div className="mt-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
+                                <p className="font-medium text-gray-900">
+                                  {optActivity.title || optActivity.name}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {optActivity.location || optActivity.place || ""}
+                                  {optActivity.price ? ` • ${optActivity.price} USD` : ""}
+                                </p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -1942,6 +1931,7 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
               + Add Day
             </button>
           </div>
+          )}
 
           {/* Available Dates Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -2060,6 +2050,159 @@ Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
               Cancel
             </button>
           </div>
+
+          {showLocationPopup && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900">Select Location</h3>
+                  <button 
+                    type="button"
+                    onClick={() => setShowLocationPopup(null)}
+                    className="p-1 hover:bg-gray-100 rounded-full"
+                  >
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="p-4">
+                  <input
+                    type="text"
+                    placeholder="Search locations..."
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                    {destinations
+                      .filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase()))
+                      .slice(0, 10)
+                      .map((d) => (
+                        <button
+                          key={d._id || d.name}
+                          type="button"
+                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          onClick={() => {
+                            const dayIndex = showLocationPopup.dayIndex;
+                            const currentTags = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
+                            if (!currentTags.includes(d.name) && currentTags.length < 2) {
+                              const newTitle = [...currentTags, d.name].join(",");
+                              updateItinerary(dayIndex, "title", newTitle);
+                            }
+                            setShowLocationPopup(null);
+                            setLocationSearch("");
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          </div>
+                          <span className="font-medium text-gray-700">{d.name}</span>
+                        </button>
+                      ))}
+                    {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                      <div className="text-center py-8 text-gray-500 text-sm">
+                        No locations found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showActivityPopup && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900">Select Activity</h3>
+                  <button 
+                    type="button"
+                    onClick={() => setShowActivityPopup(null)}
+                    className="p-1 hover:bg-gray-100 rounded-full"
+                  >
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="p-4">
+                  <input
+                    type="text"
+                    placeholder="Search activities..."
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    value={activitySearch}
+                    onChange={(e) => setActivitySearchInput(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                    {activityOptions
+                      .filter(opt => {
+                        const dayIndex = showActivityPopup.dayIndex;
+                        const dayLocations = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
+                        
+                        // Filter by selected country
+                        const destId = typeof opt.destination === "string" ? opt.destination : opt.destination?._id;
+                        if (destId !== formData.country) return false;
+
+                        // Filter by selected location tags for the day
+                        if (!opt.location || !dayLocations.includes(opt.location)) return false;
+
+                        // Filter by search query
+                        if (activitySearch && !opt.title.toLowerCase().includes(activitySearch.toLowerCase())) return false;
+
+                        return true;
+                      })
+                      .slice(0, 10)
+                      .map((opt) => (
+                        <button
+                          key={opt._id}
+                          type="button"
+                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          onClick={() => {
+                            applyActivityOption(
+                              showActivityPopup.dayIndex, 
+                              showActivityPopup.activityIndex, 
+                              opt._id,
+                              showActivityPopup.isOptional
+                            );
+                            setShowActivityPopup(null);
+                            setActivitySearchInput("");
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700 block">{opt.title}</span>
+                            <span className="text-xs text-gray-400">{opt.location}</span>
+                          </div>
+                        </button>
+                      ))}
+                    {activityOptions.filter(opt => {
+                      const dayIndex = showActivityPopup.dayIndex;
+                      const dayLocations = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
+                      const destId = typeof opt.destination === "string" ? opt.destination : opt.destination?._id;
+                      if (destId !== formData.country) return false;
+                      if (!opt.location || !dayLocations.includes(opt.location)) return false;
+                      if (activitySearch && !opt.title.toLowerCase().includes(activitySearch.toLowerCase())) return false;
+                      return true;
+                    }).length === 0 && (
+                      <div className="text-center py-8 text-gray-500 text-sm">
+                        No activities found matching your criteria
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

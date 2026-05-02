@@ -78,6 +78,9 @@ const getCountry = catchAsync(async (req, res, next) => {
     match: { isActive: true },
     select: 'name slug summary price ratingsAverage ratingsQuantity duration images',
   }).populate({
+    path: 'localActivities',
+    select: 'title slug description coverImage destination travelStyle',
+  }).populate({
     path: 'localStoryBlogs',
     select: 'title slug excerpt content featuredImage publishedAt status',
   }).populate({

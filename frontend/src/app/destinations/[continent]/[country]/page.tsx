@@ -39,8 +39,17 @@ interface Country {
     languagesSpoken?: string;
   };
   localStoryBlogs?: Array<LocalStoryBlog | string>;
+  localActivities?: Array<LocalActivity | string>;
   travelStoryBlogs?: Array<LocalStoryBlog | string>;
   continent?: string | { _id?: string; id?: string; name?: string; slug?: string };
+}
+
+interface LocalActivity {
+  _id: string;
+  title: string;
+  slug?: string;
+  description?: string;
+  coverImage?: string;
 }
 
 interface LocalStoryBlog {
@@ -354,6 +363,39 @@ async function resolveCountryLocalStoryBlogs(country: Country): Promise<LocalSto
   }
 }
 
+async function resolveCountryLocalActivities(country: Country): Promise<LocalActivity[]> {
+  const selected = country.localActivities || [];
+  if (selected.length === 0) return [];
+
+  const selectedIds = selected
+    .map((item) => (typeof item === "string" ? item : item?._id))
+    .filter((id): id is string => Boolean(id));
+
+  const hasFullData = selected.every(
+    (item) => typeof item !== "string" && !!item.title
+  );
+
+  if (hasFullData) {
+    return (selected as LocalActivity[]).filter((activity) => activity && activity.title);
+  }
+
+  try {
+    const res = await fetch(`${api.baseURL}/activities?limit=500`, {
+      cache: "no-store",
+    });
+
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const allActivities: LocalActivity[] = data?.data?.activities || [];
+
+    return allActivities.filter((activity) => selectedIds.includes(activity._id));
+  } catch (error) {
+    console.error("Error resolving local activities:", error);
+    return [];
+  }
+}
+
 async function resolveCountryTravelStoryBlogs(country: Country): Promise<LocalStoryBlog[]> {
   const selected = country.travelStoryBlogs || [];
   if (selected.length === 0) return [];
@@ -419,10 +461,10 @@ export default async function CountryDestinationsPage({
   const popularTours = tours.slice(0, 4);
   const heroBullets = tours.slice(0, 5).map((tour) => tour.name);
   const siblingDestinations = await getSiblingDestinations(country);
-  const localStoryBlogs = await resolveCountryLocalStoryBlogs(country);
+  const localActivities = await resolveCountryLocalActivities(country);
   const travelStoryBlogs = await resolveCountryTravelStoryBlogs(country);
   const videoBannerImage =
-    localStoryBlogs[0]?.featuredImage?.url?.trim() ||
+    localActivities[0]?.coverImage?.trim() ||
     travelStoryBlogs[0]?.featuredImage?.url?.trim() ||
     heroImage;
   const countryVideoEmbedUrl = getCountryVideoEmbedUrl(country.videoUrl);
@@ -524,23 +566,22 @@ export default async function CountryDestinationsPage({
           </h2>
 
           <div className="mt-5 space-y-5">
-            {localStoryBlogs.length > 0 ? (
-              localStoryBlogs.map((blog) => {
+            {localActivities.length > 0 ? (
+              localActivities.map((activity) => {
                 const storyImage =
-                  blog.featuredImage?.url && blog.featuredImage.url.trim() !== ""
-                    ? blog.featuredImage.url
+                  activity.coverImage && activity.coverImage.trim() !== ""
+                    ? activity.coverImage
                     : "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=1900&auto=format&fit=crop";
 
                 const storyDescription =
-                  stripHtml(blog.excerpt) ||
-                  stripHtml(blog.content).slice(0, 280) ||
+                  stripHtml(activity.description).slice(0, 280) ||
                   "Immersive travel is about experiencing a destination through the eys of a Local. It's eating at Family restaurants, Learning traditions crafts, and sleeping in authentic accommodations that tells stories.";
 
                 return (
-                  <div key={blog._id} className="overflow-hidden rounded-[14px] border border-[#e0e4eb] bg-white">
+                  <div key={activity._id} className="overflow-hidden rounded-[14px] border border-[#e0e4eb] bg-white">
                     <div className="grid grid-cols-1 md:grid-cols-2 md:items-stretch">
                       <div className="p-6 md:p-8 lg:p-10">
-                        <h3 className="text-[38px] font-semibold leading-tight text-[#121b2f] md:text-[44px]">{blog.title}</h3>
+                        <h3 className="text-[38px] font-semibold leading-tight text-[#121b2f] md:text-[44px]">{activity.title}</h3>
 
                         <p className="mt-4 max-w-[64ch] text-[13px] leading-[1.45] text-[#4f586b] md:text-[14px]">
                           {storyDescription}
@@ -548,13 +589,13 @@ export default async function CountryDestinationsPage({
 
                         <div className="mt-6 flex items-center gap-3">
                           <Link
-                            href={`/blogs/${blog.slug}`}
+                            href="/trips"
                             className="rounded-full bg-[#0f1117] px-6 py-3 text-[16px] font-semibold text-white transition hover:bg-black"
                           >
                             Read Story
                           </Link>
                           <Link
-                            href={`/blogs/${blog.slug}`}
+                            href="/trips"
                             aria-label="Read story"
                             className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f1117] text-white transition hover:bg-black"
                           >
@@ -618,32 +659,63 @@ export default async function CountryDestinationsPage({
           </div>
         </section>
 
-        <section className="mt-14 md:mt-16">
-          <div className="rounded-[14px] bg-[#F2F0E9] px-6 py-6 md:px-10 md:py-8">
-            <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">
-              Best Time
+        <section className="relative left-1/2 right-1/2 mt-14 w-screen -translate-x-1/2 bg-[#F7FAFE] py-14 md:mt-16 md:py-16">
+          <div className="mx-auto w-full px-4 md:px-8 lg:px-12 xl:px-16">
+            <span className="inline-flex rounded-full bg-[#d7d9de] px-5 py-2 text-[12px] font-medium leading-none text-[#8b919c] md:text-[14px]">
+              About
             </span>
 
-            <p className="mt-3 text-[20px] font-medium text-[#121b2f] md:text-[36px]">
-              Best time to travel
-            </p>
-
-            <h3 className="mt-2 max-w-[22ch] text-[42px] font-semibold leading-[0.98] tracking-[-0.02em] text-[#11192d] md:text-[56px]">
-              Best seasons to visit India
+            <h3 className="mt-5 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+              Best Time to Travel
             </h3>
 
-            <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            <p className="mt-4 text-[16px] leading-[1.4] text-[#4e5564] md:text-[22px]">
+              {country.bestTimeInsights?.mostPopularTime?.trim() || `Best seasons to visit ${countryName}`}
+            </p>
+
+            <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 md:grid-cols-2 xl:grid-cols-4">
               {bestTimeItems.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-[#11192d]">
-                    <svg className="h-6 w-6 text-[#11192d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 6v6l4 2" />
-                      <circle cx="12" cy="12" r="9" strokeWidth={2.2} />
-                    </svg>
+                <div key={`${item.title}-${index}`}>
+                  <div className="mb-8 h-20 w-20 text-[#101114]">
+                    {index === 0 && (
+                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M2.5 7.5h9l1.3 7.6H5.4L2.5 7.5Z" />
+                        <circle cx="8.2" cy="18.2" r="1.8" strokeWidth={1.6} />
+                        <circle cx="14.4" cy="18.2" r="1.8" strokeWidth={1.6} />
+                        <circle cx="18" cy="12" r="4.1" strokeWidth={1.6} />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M18 9.7V12l1.5 1.1" />
+                      </svg>
+                    )}
+                    {index === 1 && (
+                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M7.7 13.8c0-2.8 2.3-5.1 5.1-5.1 2.6 0 4.7 1.9 5 4.3 1.2.3 2.1 1.4 2.1 2.7 0 1.6-1.3 2.9-2.9 2.9H7.4c-1.9 0-3.4-1.5-3.4-3.4 0-1.6 1.1-3 2.6-3.3.3-2.1 2.1-3.8 4.3-3.8" />
+                        <circle cx="11.8" cy="6" r="2" strokeWidth={1.6} />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M6.2 14.9v-1.2M9 14.9v-1.2M11.8 14.9v-1.2" />
+                      </svg>
+                    )}
+                    {index === 2 && (
+                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="9" cy="10" r="4.5" strokeWidth={1.6} />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M9 3.5v1.8M9 14.7v1.8M2.6 10h1.8M13.6 10h1.8M4.7 5.7l1.3 1.3M12 13l1.3 1.3M4.7 14.3l1.3-1.3" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M13.8 17.8h-4a2.8 2.8 0 0 1 0-5.7c.4 0 .8.1 1.1.2a3.5 3.5 0 0 1 6.7 1.3 2.2 2.2 0 1 1 0 4.2h-3.8" />
+                      </svg>
+                    )}
+                    {index === 3 && (
+                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 7.6h18" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m3.5 7.6 3.2 2.7V7.6m3.2 0 3.2 2.7V7.6m3.2 0 3.2 2.7V7.6" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 14.5h18" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m3.5 14.5 3.2 2.7v-2.7m3.2 0 3.2 2.7v-2.7m3.2 0 3.2 2.7v-2.7" />
+                      </svg>
+                    )}
                   </div>
-                  <p className="text-[28px] font-semibold leading-[1.1] text-[#11192d] md:text-[32px]">{item.title}</p>
+
+                  <p className="text-[27px] font-semibold leading-[1.08] tracking-[-0.01em] text-[#0f1730] md:text-[32px]">
+                    {item.title}
+                  </p>
+
                   {item.description && (
-                    <p className="text-[13px] leading-[1.5] text-[#8d93a0]">{item.description}</p>
+                    <p className="mt-3 text-[13px] leading-[1.45] text-[#545d6d] md:text-[15px]">{item.description}</p>
                   )}
                 </div>
               ))}

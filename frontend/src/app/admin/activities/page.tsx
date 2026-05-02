@@ -12,10 +12,10 @@ interface Activity {
     _id: string;
     name: string;
   };
-  travelStyle: {
+  travelStyles: {
     _id: string;
     name: string;
-  };
+  }[];
   physicalRating: {
     _id: string;
     name: string;
@@ -25,7 +25,10 @@ interface Activity {
   isFree: boolean;
   coverImage: string;
   isActive: boolean;
-}
+  price?: number;
+  location?: string;
+  duration?: string;
+};
 
 export default function ActivitiesPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -61,7 +64,7 @@ export default function ActivitiesPage() {
     try {
       setDeleteLoading(id);
       const token = localStorage.getItem("token");
-      const response = await fetch(`${api.baseURL}${api.endpoints.activities.delete.replace(":id", id)}`, {
+      const response = await fetch(`${api.baseURL}${api.endpoints.activities.delete(id)}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -131,8 +134,10 @@ export default function ActivitiesPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Activity</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Destination</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Type</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Location</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Styles</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Price</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Duration</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Rating</th>
               <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-widest">Actions</th>
             </tr>
@@ -142,29 +147,51 @@ export default function ActivitiesPage() {
               <tr key={activity._id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={activity.coverImage} 
-                      alt="" 
-                      className="w-12 h-12 rounded-lg object-cover bg-gray-100"
-                    />
+                    {activity.coverImage ? (
+                      <img
+                        src={activity.coverImage}
+                        alt={activity.title}
+                        className="w-12 h-12 rounded-lg object-cover bg-gray-100"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs font-medium">
+                        N/A
+                      </div>
+                    )}
                     <div>
                       <div className="font-semibold text-gray-900">{activity.title}</div>
-                      <div className="text-xs text-gray-500">{activity.ageGroup}</div>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-600">{activity.destination?.name}</td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {activity.destination?.name}
+                  {activity.location ? `, ${activity.location}` : ""}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex flex-wrap gap-1">
+                    {activity.travelStyles?.slice(0, 2).map((ts) => (
+                      <span key={ts._id} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] uppercase font-medium tracking-wide">
+                        {ts.name}
+                      </span>
+                    ))}
+                    {activity.travelStyles?.length > 2 && (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-[10px] uppercase font-medium tracking-wide">
+                        +{activity.travelStyles.length - 2}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${activity.isFree ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
-                    {activity.isFree ? 'Free' : 'Paid'}
+                    {activity.isFree ? 'Free' : `$${activity.price || 0}`}
                   </span>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {activity.duration ? `${activity.duration} hrs` : "N/A"}
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
-                    <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                    </svg>
-                    Level {activity.physicalRating?.level}
+                    {activity.physicalRating?.name || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">

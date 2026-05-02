@@ -183,6 +183,12 @@ const countrySchema = new mongoose.Schema(
         ref: "Blog",
       },
     ],
+    localActivities: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "Activity",
+      },
+    ],
     travelStoryBlogs: [
       {
         type: mongoose.Schema.ObjectId,

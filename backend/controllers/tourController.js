@@ -53,7 +53,9 @@ const getTour = catchAsync(async (req, res, next) => {
         path: "user",
         select: "name avatar",
       },
-    });
+    })
+    .populate("itinerary.activities")
+    .populate("itinerary.optionalActivities");
 
   if (!tour) {
     return next(new AppError("No tour found with that ID", 404));
