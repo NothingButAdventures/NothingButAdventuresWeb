@@ -61,7 +61,7 @@ interface Tour {
     optionalActivities: Array<{
       name: string;
       title?: string;
-      price: {
+      price: number | {
         amount: number;
         currency: string;
       };
@@ -129,6 +129,37 @@ const iconMap: { [key: string]: string } = {
   Clock: "🕐",
   Heart: "❤️",
 };
+
+function InclusionsList({ items }: { items: string[] }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const displayItems = isExpanded ? items : items.slice(0, 15);
+
+  return (
+    <div>
+      <ul className="space-y-2 list-disc list-inside text-gray-700 text-[15px]">
+        {displayItems.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+      {items.length > 15 && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="mt-4 text-[#3b82f6] font-semibold text-[14px] flex items-center gap-1 hover:underline"
+        >
+          {isExpanded ? (
+            <>
+              Show less <CaretDown className="rotate-180" />
+            </>
+          ) : (
+            <>
+              Show more <CaretDown />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function TourDetailPage() {
   const params = useParams();
@@ -919,7 +950,7 @@ export default function TourDetailPage() {
                           <span className="border border-gray-400 text-gray-800 rounded-full px-4 py-1.5 text-xs font-semibold">Day {day.day}</span>
                           <h3 className="font-bold text-xl text-gray-900">
                             {day.title ? (
-                              day.title.split(",").filter(t => t.trim()).length > 1 
+                              day.title.split(",").filter(t => t.trim()).length > 1
                                 ? `${day.title.split(",").filter(t => t.trim())[0]} to ${day.title.split(",").filter(t => t.trim())[1]}`
                                 : day.title.split(",").filter(t => t.trim())[0]
                             ) : "Itinerary"}
@@ -935,69 +966,100 @@ export default function TourDetailPage() {
 
                             {(!isOverview || (day.accommodations && day.accommodations.length > 0)) && (
                               <>
-                                <h4 className="font-semibold text-gray-900 mb-5 text-[15px]">Activities</h4>
-
-                                <div className="border-l border-gray-300 ml-2 space-y-7 pt-2 pb-2 relative">
-                                  {(!isOverview || (day.activities && day.activities.length > 0)) && day.activities && day.activities.map((act, i) => (
-                                    <div key={`act-${i}`} className="relative pl-6">
-                                      <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full"></div>
-                                      <h5 className="font-bold text-gray-900 text-[15px]">
-                                        {act.name || act.title}
-                                      </h5>
-                                      <div className="flex justify-between items-center mt-0.5">
-                                        <p className="text-gray-500 text-[12px] font-medium">{act.placeName || act.location}</p>
-                                        {act.duration && (
-                                          <span className="text-gray-900 font-bold text-[12px]">
-                                            {act.duration} hrs
-                                          </span>
-                                        )}
-                                      </div>
-                                      <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                {(() => {
+                                  const timelineActivities = (!isOverview || (day.activities && day.activities.length > 0)) && day.activities ? day.activities : [];
+                                  const timelineAccommodations = day.accommodations || [];
+                                  const allItems = [
+                                    ...timelineActivities.map((act: any, i: number) => ({ type: 'activity' as const, data: act, key: `act-${i}` })),
+                                    ...timelineAccommodations.map((acc: any, i: number) => ({ type: 'accommodation' as const, data: acc, key: `acc-${i}` })),
+                                  ];
+                                  const totalItems = allItems.length;
+                                  return (
+                                    <div className="ml-2 space-y-7 relative">
+                                      {allItems.map((item, idx) => {
+                                        const isLastItem = idx === totalItems - 1;
+                                        const showConnector = totalItems > 1 && !isLastItem;
+                                        if (item.type === 'activity') {
+                                          const act = item.data;
+                                          return (
+                                            <div key={item.key} className="relative pl-6">
+                                              <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                              {showConnector && (
+                                                <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                              )}
+                                              <div className="flex justify-between items-center">
+                                                <h5 className="font-bold text-gray-900 text-[15px]">
+                                                  {act.name || act.title}
+                                                </h5>
+                                                <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                                  {act.placeName || act.location}{act.duration ? `, ${act.duration} hrs` : ''}
+                                                </span>
+                                              </div>
+                                              <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                            </div>
+                                          );
+                                        } else {
+                                          const acc = item.data;
+                                          return (
+                                            <div key={item.key} className="relative pl-6">
+                                              <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                              {showConnector && (
+                                                <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                              )}
+                                              <h5 className="font-bold text-gray-900 text-[15px]">Accommodation</h5>
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <span className="text-gray-800 text-[10px]">
+                                                  {Array(acc.rating || 5).fill("★").join("")}
+                                                </span>
+                                              </div>
+                                              <p className="text-gray-700 text-[13px] mt-1">{acc.type}</p>
+                                            </div>
+                                          );
+                                        }
+                                      })}
                                     </div>
-                                  ))}
-
-                                  {day.accommodations && day.accommodations.map((acc, i) => (
-                                    <div key={`acc-${i}`} className="relative pl-6">
-                                      <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full"></div>
-                                      <h5 className="font-bold text-gray-900 text-[15px]">Accommodation</h5>
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-gray-800 text-[10px]">
-                                          {Array(acc.rating || 5).fill("★").join("")}
-                                        </span>
-                                      </div>
-                                      <p className="text-gray-700 text-[13px] mt-1">{acc.type}</p>
-                                    </div>
-                                  ))}
-                                </div>
+                                  );
+                                })()}
 
                                 {/* Optional Activities for this day - OUTSIDE activities/accommodations timeline, EXACT SAME UI as activities */}
                                 {day.optionalActivities && day.optionalActivities.length > 0 && (
                                   <div className="mt-8">
-                                    <h4 className="font-semibold text-gray-900 mb-5 text-[15px]">Optional Activities</h4>
-                                    <div className="border-l border-gray-300 ml-2 space-y-7 pt-2 pb-2 relative">
+                                    <div className="flex items-center gap-3 mb-5">
+                                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold shrink-0">
+                                        {day.optionalActivities.length}
+                                      </div>
+                                      <h4 className="font-semibold text-gray-900 text-[15px]">
+                                        Optional activities in Day {day.day}
+                                      </h4>
+                                    </div>
+                                    <div className="ml-2 space-y-7 relative">
                                       {day.optionalActivities.map((act, i) => (
                                         <div key={`opt-${i}`} className="relative pl-6">
-                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-blue-400 rounded-full"></div>
-                                          <h5 className="font-bold text-gray-900 text-[15px]">
-                                            {act.name}
-                                          </h5>
-                                          <div className="flex justify-between items-center mt-0.5">
-                                            <p className="text-gray-500 text-[12px] font-medium">{act.place}</p>
-                                            <span className="text-gray-900 font-bold text-[12px]">
-                                              {act.price && typeof act.price.amount === "number"
-                                                ? (Number(act.price.amount) > 0
-                                                  ? `${act.price.currency}${Number(act.price.amount).toLocaleString()}`
-                                                  : "Free")
-                                                : "Free"}
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                          {day.optionalActivities.length > 1 && i < day.optionalActivities.length - 1 && (
+                                            <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                          )}
+                                          <div className="flex justify-between items-center">
+                                            <h5 className="font-bold text-gray-900 text-[15px]">
+                                              {act.name || act.title}
+                                            </h5>
+                                            <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                              {(() => {
+                                                if (typeof act.price === "number") {
+                                                  return act.price > 0 ? `$${Number(act.price).toLocaleString()}` : "Free";
+                                                }
+
+                                                if (act.price && typeof act.price.amount === "number") {
+                                                  return Number(act.price.amount) > 0
+                                                    ? `${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
+                                                    : "Free";
+                                                }
+
+                                                return "Free";
+                                              })()}
                                             </span>
                                           </div>
-                                          {act.duration && (
-                                            <span className="text-gray-900 font-bold text-[12px] block mt-1">{act.duration} hrs</span>
-                                          )}
-                                          {act.title && (
-                                            <div className="text-gray-900 font-semibold text-[13px] mt-2 leading-relaxed">{act.title}</div>
-                                          )}
-                                          <p className="text-gray-700 text-[13px] mt-1 leading-relaxed">{act.description}</p>
+                                          <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
                                         </div>
                                       ))}
                                     </div>
@@ -1142,7 +1204,7 @@ export default function TourDetailPage() {
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                       <div className="font-semibold text-gray-900 text-sm">
                         {tour.itinerary[currentDay - 1].title ? (
-                          tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim()).length > 1 
+                          tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim()).length > 1
                             ? `${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]} to ${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[1]}`
                             : tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]
                         ) : "Itinerary"}
@@ -1223,131 +1285,139 @@ export default function TourDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
             <div>
               <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-8 tracking-tight">What&apos;s Included</h2>
-              <div className="border border-gray-300 rounded-[20px] bg-white overflow-hidden shadow-sm">
-                {/* Tabs Header */}
-                <div className="grid grid-cols-5 border-b border-gray-200">
-                  {[
-                    {
-                      id: "activities", label: (
-                        <div className="flex flex-col items-center leading-none mt-1">
-                          <span className="text-[10px] font-bold tracking-widest flex items-center normal-case">
-                            NOTHING
-                            <span className="lowercase font-normal ml-0.5" style={{ fontFamily: '"Brush Script MT", "League Script", "Dancing Script", cursive', fontSize: '15px' }}>but</span>
-                          </span>
-                          <span className="text-[10px] font-bold tracking-widest mt-0.5 normal-case">ADVENTURES</span>
-                        </div>
-                      ),
-                      svg: <Image src="/7.svg" alt="Activities" width={26} height={26} />
-                    },
-                    {
-                      id: "accommodation", label: "ACCOMMODATION",
-                      svg: <Image src="/10.svg" alt="Accommodation" width={26} height={26} />
-                    },
-                    {
-                      id: "meals", label: "MEALS",
-                      svg: <Image src="/11.svg" alt="Meals" width={26} height={26} />
-                    },
-                    {
-                      id: "transport", label: "TRANSPORT",
-                      svg: <Image src="/9.svg" alt="Transport" width={26} height={26} />
-                    },
-                    {
-                      id: "tour_leader", label: "STAFF & EXPERTS",
-                      svg: <Image src="/8.svg" alt="Trip Leader" width={26} height={26} />
-                    },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      className={`flex flex-col items-center justify-center pt-8 pb-5 border-b-[3px] transition-all relative ${tourForMeTab === tab.id
-                        ? "border-[#0B1D3A] z-10"
-                        : "border-transparent"
-                        }`}
-                      onClick={() => setTourForMeTab(tab.id as any)}
-                      onMouseEnter={() => setTourForMeTab(tab.id as any)}
-                    >
-                      <div className={`w-[60px] h-[60px] rounded-full flex items-center justify-center transition-colors shadow-sm ${tourForMeTab === tab.id ? "bg-black text-white" : "bg-[#AFAFAF] text-white"
-                        }`}>
-                        {tab.svg}
+              <div className="bg-white rounded-[24px] p-8 md:p-12 shadow-sm border border-gray-100">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+                  {/* Left Column: Categories */}
+                  <div className="space-y-10">
+                    {/* Destinations */}
+                    <div className="flex gap-4">
+                      <div className="mt-1 shrink-0">
+                        <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
                       </div>
-                      <span className={`text-[13px] font-bold mt-4 tracking-wider flex items-center justify-center text-center ${tourForMeTab === tab.id ? "text-[#0B1D3A]" : "text-[#0B1D3A]"
-                        }`}>{tab.label}</span>
-                    </button>
-                  ))}
-                </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-gray-900 mb-2">Destinations</h3>
+                        <Link
+                          href={`/destinations/${tour.country.slug}`}
+                          className="text-[#3b82f6] hover:underline text-[15px] font-medium"
+                        >
+                          {tour.country.name}
+                        </Link>
+                      </div>
+                    </div>
 
-                {/* Tab Content */}
-                <div className="px-10 py-12 min-h-[300px]">
-                  {tourForMeTab === "activities" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[18px] gap-x-12">
-                      {Array.from(new Map(
-                        tour.itinerary.flatMap(day => [
-                          ...(day.activities?.map(a => ({ name: a.name, isAddon: false })) || [])
-                        ]).map(item => [item.name, item])
-                      ).values()).map((act, i) => (
-                        <div key={i} className="flex items-center text-[#333333] text-[15px] leading-snug">
-                          {act.isAddon && (
-                            <span className="bg-black text-white text-[10px] uppercase font-bold px-2 py-[2px] rounded-full mr-[12px] whitespace-nowrap">+ Add On</span>
+                    {/* Meals */}
+                    <div className="flex gap-4">
+                      <div className="mt-1 shrink-0">
+                        <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 8V6a2 2 0 00-2-2H4a2 2 0 00-2 2v7a2 2 0 002 2h8" />
+                          <path d="M18 8h3a1 1 0 011 1v5a2 2 0 01-2 2h-7a2 2 0 01-2-2v-3" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-gray-900 mb-2">Meals</h3>
+                        <p className="text-gray-700 text-[15px] leading-relaxed">
+                          {tour.meals || (
+                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.breakfast ? 1 : 0), 0) || 0} breakfasts, ` +
+                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.lunch ? 1 : 0), 0) || 0} lunches, ` +
+                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.dinner ? 1 : 0), 0) || 0} dinners`
                           )}
-                          <span className={act.isAddon ? "" : "ml-0"}>{act.name}</span>
-                        </div>
-                      ))}
-                      {tour.itinerary.flatMap(d => d.activities || []).length === 0 && (
-                        <p className="text-gray-500">Activities will be listed soon.</p>
-                      )}
-                    </div>
-                  )}
-
-                  {tourForMeTab === "tour_leader" && (
-                    <div>
-                      <h4 className="font-bold text-xl text-gray-900 mb-4">Staff & Experts</h4>
-                      <p className="text-[#333333] leading-relaxed text-[15px]">
-                        {tour.staffExperts || "Professional Group Leaders and dedicated support staff."}
-                      </p>
-                    </div>
-                  )}
-
-                  {tourForMeTab === "transport" && (
-                    <div>
-                      <h4 className="font-bold text-xl text-gray-900 mb-4">Transportation Methods</h4>
-                      <p className="text-[#333333] leading-relaxed text-[15px]">
-                        {tour.transportation || "Local flights, comfortable modern trains, private buses, and specialty local transport."}
-                      </p>
-                    </div>
-                  )}
-
-                  {tourForMeTab === "accommodation" && (
-                    <div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-[18px] gap-x-12">
-                        {Array.from(new Set(
-                          tour.itinerary.flatMap(day => day.accommodations?.map(a => `${a.name} (${a.type})`) || [])
-                        )).map((acc, i) => (
-                          <div key={i} className="flex items-center text-[#333333] text-[15px]">
-                            <span>{acc}</span>
-                          </div>
-                        ))}
+                        </p>
                       </div>
-                      {(!tour.itinerary || !tour.itinerary.some(d => d.accommodations && d.accommodations.length > 0)) && (
-                        <p className="text-[#333333] leading-relaxed text-[15px]">
-                          {tour.accommodation || "Standard and comfort grade local accommodations."}
-                        </p>
-                      )}
                     </div>
-                  )}
 
-                  {tourForMeTab === "meals" && (
-                    <div>
-                      <h4 className="font-bold text-xl text-gray-900 mb-4">Dining Included</h4>
-                      {tour.meals ? (
-                        <p className="text-[#333333] leading-relaxed text-[15px]">{tour.meals}</p>
-                      ) : (
-                        <p className="text-[#333333] leading-relaxed text-[15px]">
-                          {tour.itinerary?.reduce((acc, day) => acc + (day.meals?.breakfast ? 1 : 0), 0) || 0} breakfasts,{" "}
-                          {tour.itinerary?.reduce((acc, day) => acc + (day.meals?.lunch ? 1 : 0), 0) || 0} lunches,{" "}
-                          {tour.itinerary?.reduce((acc, day) => acc + (day.meals?.dinner ? 1 : 0), 0) || 0} dinners.
+                    {/* Transport */}
+                    <div className="flex gap-4">
+                      <div className="mt-1 shrink-0">
+                        <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="7" y="13" width="10" height="8" rx="2" />
+                          <path d="M7 17H2m15 0h5M9 6h6l2 7H7l2-7z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-gray-900 mb-2">Transport</h3>
+                        <p className="text-gray-700 text-[15px] leading-relaxed">
+                          {tour.transportation || "Private Vehicle, Train, Boat, Plane"}
                         </p>
-                      )}
+                      </div>
                     </div>
-                  )}
+
+                    {/* Accommodation */}
+                    <div className="flex gap-4">
+                      <div className="mt-1 shrink-0">
+                        <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                          <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-gray-900 mb-2">Accommodation</h3>
+                        <p className="text-gray-700 text-[15px] leading-relaxed">
+                          {tour.accommodation || (
+                            Array.from(new Set(
+                              tour.itinerary.flatMap(day => day.accommodations?.map(a => a.type) || [])
+                            )).join(", ") || "Hotel, Guesthouse"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Premium inclusions (Paid only) */}
+                    {(() => {
+                      const paidActivities = Array.from(new Set(
+                        tour.itinerary.flatMap(day => day.optionalActivities?.map(a => a.name) || [])
+                      )).filter(Boolean);
+
+                      return (
+                        <div className="flex gap-4">
+                          <div className="mt-1 shrink-0">
+                            <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-[17px] font-bold text-gray-900 mb-2">Premium inclusions</h3>
+                            {paidActivities.length > 0 ? (
+                              <ul className="space-y-2 list-disc list-inside text-gray-700 text-[15px]">
+                                {paidActivities.map((act, i) => (
+                                  <li key={i}>{act}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <p className="text-gray-500 text-[14px]">No premium inclusions listed for this trip.</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Right Column: Included activities (All free and paid) */}
+                  <div>
+                    <div className="flex items-center gap-3 mb-6">
+                      <svg className="w-6 h-6 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      <h3 className="text-[20px] font-bold text-gray-900">Included activities</h3>
+                    </div>
+
+                    {(() => {
+                      const allActs = Array.from(new Set([
+                        ...tour.itinerary.flatMap(day => day.activities?.map(a => a.name || a.title) || []),
+                        ...tour.itinerary.flatMap(day => day.optionalActivities?.map(a => a.name) || [])
+                      ])).filter(Boolean);
+
+                      // Use a state-like approach with a local var for rendering toggle
+                      // But since we are in a component, we can use a small local state if needed
+                      // For now, let's just show them all or a subset with a button that we'll handle
+                      return (
+                        <InclusionsList items={allActs as string[]} />
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
 
@@ -1372,11 +1442,19 @@ export default function TourDetailPage() {
                               <div className="flex flex-col items-end">
                                 <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
                                 <span className="text-[20px] font-bold text-gray-900">
-                                  {act.price && typeof act.price.amount === "number"
-                                    ? (act.price.amount === 0
-                                      ? "Free"
-                                      : `${act.price.currency}${act.price.amount.toFixed(0)}`)
-                                    : "Free"}
+                                  {(() => {
+                                    if (typeof act.price === "number") {
+                                      return act.price === 0 ? "Free" : `$${act.price.toFixed(0)}`;
+                                    }
+
+                                    if (act.price && typeof act.price.amount === "number") {
+                                      return act.price.amount === 0
+                                        ? "Free"
+                                        : `${act.price.currency || "$"}${act.price.amount.toFixed(0)}`;
+                                    }
+
+                                    return "Free";
+                                  })()}
                                 </span>
                               </div>
                             </div>

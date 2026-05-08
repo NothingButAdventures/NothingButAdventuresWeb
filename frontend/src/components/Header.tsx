@@ -86,7 +86,7 @@ export default function Header() {
   }
 
   return (
-    <header className="relative bg-white border-b sticky top-0 z-50 font-outfit px-4 md:px-8">
+    <header className="relative bg-white sticky top-0 z-50 font-outfit px-4 md:px-8">
       <div className="mx-auto">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
@@ -128,11 +128,11 @@ export default function Header() {
               <svg className={`transition-transform duration-200 w-4 h-4 ${activeMenu === "destinations" ? "rotate-180 text-black" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
             <div className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors">
-              <span className="text-[16px] font-medium">Why Us</span>
+              <span className="text-[16px] font-medium">Deals</span>
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
             <div className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors">
-              <span className="text-[16px] font-medium">Resources</span>
+              <span className="text-[16px] font-medium">Why Us</span>
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </nav>

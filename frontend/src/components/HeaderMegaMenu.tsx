@@ -161,6 +161,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
   const [selectedStyleIndex, setSelectedStyleIndex] = useState(0);
   const [selectedStyleTours, setSelectedStyleTours] = useState<Tour[]>([]);
+  const [styleToursById, setStyleToursById] = useState<Record<string, Tour[]>>({});
   const [adventureLoading, setAdventureLoading] = useState(false);
 
   // ── Destinations state ──
@@ -169,11 +170,10 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   const [popularCountries, setPopularCountries] = useState<Country[]>([]);
   const [destinationLoading, setDestinationLoading] = useState(false);
   const [continentTours, setContinentTours] = useState<Tour[]>([]);
+  const [continentToursById, setContinentToursById] = useState<Record<string, Tour[]>>({});
 
   // ── Load Adventures ──
   useEffect(() => {
-    if (activeMenu !== "adventures") return;
-
     let cancelled = false;
 
     const loadAdventures = async () => {
@@ -193,37 +193,38 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
         if (travelStylesList.length === 0) {
           setSelectedStyleIndex(0);
+          setStyleToursById({});
           setSelectedStyleTours([]);
           return;
         }
 
-        const nextStyleIndex = Math.min(
-          selectedStyleIndex,
-          travelStylesList.length - 1
+        const toursByIdEntries = await Promise.all(
+          travelStylesList.map(async (style) => {
+            const styleName = style.name?.trim();
+            if (!styleName) {
+              return [style._id, []] as const;
+            }
+
+            const toursResponse = await fetch(
+              `${api.baseURL}${api.endpoints.tours.search}?travelStyle=${encodeURIComponent(styleName)}&limit=10&sort=-ratingsAverage,-ratingsQuantity`
+            );
+            const toursData = await toursResponse.json();
+
+            return [style._id, toursData?.data?.tours || []] as const;
+          })
         );
-        setSelectedStyleIndex(nextStyleIndex);
 
-        const selectedStyle =
-          travelStylesList[nextStyleIndex] || travelStylesList[0];
-        const selectedStyleName = selectedStyle?.name?.trim();
-
-        if (!selectedStyleName) {
-          setSelectedStyleTours([]);
-          return;
-        }
-
-        const toursResponse = await fetch(
-          `${api.baseURL}${api.endpoints.tours.search}?travelStyle=${encodeURIComponent(selectedStyleName)}&limit=10&sort=-ratingsAverage,-ratingsQuantity`
-        );
-        const toursData = await toursResponse.json();
+        const toursById = Object.fromEntries(toursByIdEntries);
 
         if (cancelled) return;
 
-        setSelectedStyleTours(toursData?.data?.tours || []);
+        setStyleToursById(toursById);
+        setSelectedStyleTours(toursById[travelStylesList[0]._id] || []);
       } catch (error) {
         console.error("Failed to load adventure mega menu:", error);
         if (!cancelled) {
           setTravelStyles([]);
+          setStyleToursById({});
           setSelectedStyleTours([]);
         }
       } finally {
@@ -236,12 +237,21 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
     return () => {
       cancelled = true;
     };
-  }, [activeMenu, selectedStyleIndex]);
+  }, []);
+
+  useEffect(() => {
+    const selectedStyle = travelStyles[selectedStyleIndex];
+
+    if (!selectedStyle) {
+      setSelectedStyleTours([]);
+      return;
+    }
+
+    setSelectedStyleTours(styleToursById[selectedStyle._id] || []);
+  }, [selectedStyleIndex, styleToursById, travelStyles]);
 
   // ── Load Destinations ──
   useEffect(() => {
-    if (activeMenu !== "destinations") return;
-
     let cancelled = false;
 
     const loadDestinations = async () => {
@@ -262,6 +272,76 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
           continentsData?.data?.continents || [];
         setContinents(continentList);
         setPopularCountries(countriesData?.data?.countries || []);
+
+          // Preload data for all continents
+          const results = await Promise.all(
+            continentList.map(async (continent) => {
+              try {
+                // 1. Fetch countries for this continent
+                const countriesRes = await fetch(`${api.baseURL}/countries/continent/${continent.slug || continent.name.toLowerCase().replace(/ /g, '-')}`);
+                const countriesData = await countriesRes.json();
+                const continentCountries: Country[] = countriesData?.data?.countries || countriesData?.data || [];
+                
+                // 2. Fetch tours for the first few countries
+                let tours: Tour[] = [];
+                const countryIds = continentCountries.slice(0, 3).map(c => c._id);
+                
+                if (countryIds.length > 0) {
+                  // Try to get tours for the first country
+                  const res = await fetch(`${api.baseURL}/tours/country/${countryIds[0]}`);
+                  const d = await res.json();
+                  tours = d?.data?.tours || [];
+
+                  // If first country has no tours, try second
+                  if (tours.length === 0 && countryIds[1]) {
+                    const res2 = await fetch(`${api.baseURL}/tours/country/${countryIds[1]}`);
+                    const d2 = await res2.json();
+                    tours = d2?.data?.tours || [];
+                  }
+                }
+
+                // Fallback: if still no tours, fetch global featured
+                if (tours.length === 0) {
+                  const response = await fetch(
+                    `${api.baseURL}${api.endpoints.tours.search}?limit=2&sort=-ratingsAverage,-ratingsQuantity`
+                  );
+                  const data = await response.json();
+                  tours = data?.data?.tours || [];
+                }
+
+                // Preload tour images
+                tours.forEach(t => {
+                  const imgUrl = getTourImage(t);
+                  if (imgUrl) {
+                    const img = new Image();
+                    img.src = imgUrl;
+                  }
+                });
+
+                // Return both the updated continent and its tours
+                return { 
+                  continent: { ...continent, countries: continentCountries }, 
+                  tours,
+                  id: continent._id 
+                };
+              } catch (err) {
+                console.error(`Error preloading for ${continent.name}:`, err);
+                return { continent, tours: [], id: continent._id };
+              }
+            })
+          );
+
+          if (!cancelled) {
+            const newContinents = results.map(r => r.continent);
+            const newToursById = Object.fromEntries(results.map(r => [r.id, r.tours]));
+            
+            setContinents(newContinents);
+            setContinentToursById(newToursById);
+            
+            if (newContinents.length > 0) {
+              setContinentTours(newToursById[newContinents[0]._id] || []);
+            }
+          }
 
         if (continentList.length === 0) {
           setSelectedContinentIndex(0);
@@ -286,37 +366,17 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
     return () => {
       cancelled = true;
     };
-  }, [activeMenu]);
+  }, []);
 
-  // ── Load tours for selected continent panel ──
+  // ── Update tours when selected continent changes ──
   useEffect(() => {
-    if (activeMenu !== "destinations") return;
-    if (continents.length === 0) return;
-
-    let cancelled = false;
-    const continent = continents[selectedContinentIndex];
-    if (!continent) return;
-
-    const loadContinentTours = async () => {
-      try {
-        const response = await fetch(
-          `${api.baseURL}${api.endpoints.tours.search}?limit=2&sort=-ratingsAverage,-ratingsQuantity`
-        );
-        const data = await response.json();
-        if (!cancelled) {
-          setContinentTours(data?.data?.tours || []);
-        }
-      } catch {
-        if (!cancelled) setContinentTours([]);
-      }
-    };
-
-    loadContinentTours();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [activeMenu, selectedContinentIndex, continents]);
+    const selectedContinent = continents[selectedContinentIndex];
+    if (!selectedContinent) {
+      setContinentTours([]);
+      return;
+    }
+    setContinentTours(continentToursById[selectedContinent._id] || []);
+  }, [selectedContinentIndex, continentToursById, continents]);
 
   // ── Derived data for Adventures ──
   const selectedStyle = travelStyles[selectedStyleIndex] || travelStyles[0];
@@ -430,13 +490,11 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       <button
                         key={style._id}
                         type="button"
-                        onMouseEnter={() => setSelectedStyleIndex(index)}
                         onClick={() => setSelectedStyleIndex(index)}
-                        className={`rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${
-                          isActive
-                            ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
-                            : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#1a1a1a] hover:bg-white hover:text-[#1a1a1a]"
-                        }`}
+                        className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${isActive
+                          ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
+                          : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#a3a3a3] hover:bg-[#d1d5db] hover:text-[#1a1a1a]"
+                          }`}
                       >
                         {style.name}
                       </button>
@@ -495,11 +553,24 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
               className="relative overflow-hidden rounded-2xl bg-[#e5e5e1]"
               style={{ gridColumn: "3", gridRow: "1" }}
             >
-              <img
-                src={styleHeroImage}
-                alt={selectedStyle?.name || "Adventure travel style"}
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
+              {travelStyles.length > 0 ? (
+                travelStyles.map((style, idx) => (
+                  <img
+                    key={style._id}
+                    src={style.image && style.image.trim() !== "" ? style.image : fallbackAdventureImage}
+                    alt={style.name}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${
+                      idx === selectedStyleIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                    } hover:scale-110`}
+                  />
+                ))
+              ) : (
+                <img
+                  src={fallbackAdventureImage}
+                  alt="Adventure travel style"
+                  className="h-full w-full object-cover"
+                />
+              )}
             </div>
 
             {/* Col 4 – Popular Regions (spans both rows) */}
@@ -558,56 +629,56 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {adventureLoading && selectedStyleTours.length === 0
                   ? [1, 2, 3, 4].map((item) => (
-                      <div
-                        key={item}
-                        className="h-[94px] animate-pulse rounded-xl border border-[#ecece8] bg-[#efefec]"
-                      />
-                    ))
+                    <div
+                      key={item}
+                      className="h-[94px] animate-pulse rounded-xl border border-[#ecece8] bg-[#efefec]"
+                    />
+                  ))
                   : bestsellingTourSlots.map((tour, index) =>
-                      tour ? (
-                        <Link
-                          key={tour._id}
-                          href={getTourHref(tour)}
-                          className="group flex h-[94px] flex-col justify-between rounded-xl bg-[#F2F3F7] px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.01em] text-[#172035]">
-                              {tour.name}
-                            </h4>
-                            <span className="shrink-0 rounded-full bg-[#8f8f8c] px-2.5 py-0.5 text-[11px] font-medium text-white">
-                              Bestseller
+                    tour ? (
+                      <Link
+                        key={tour._id}
+                        href={getTourHref(tour)}
+                        className="group flex h-[94px] flex-col justify-between rounded-xl bg-[#F2F3F7] px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.01em] text-[#172035]">
+                            {tour.name}
+                          </h4>
+                          <span className="shrink-0 rounded-full bg-[#8f8f8c] px-2.5 py-0.5 text-[11px] font-medium text-white">
+                            Bestseller
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-4 text-[13px] text-[#6f6f6a]">
+                          {Number(tour.duration?.days) > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {tour.duration?.days} Days
                             </span>
-                          </div>
-                          <div className="mt-2 flex items-center gap-4 text-[13px] text-[#6f6f6a]">
-                            {Number(tour.duration?.days) > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {tour.duration?.days} Days
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1 truncate">
-                              <MapPin className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{getTourLocation(tour)}</span>
+                          )}
+                          <span className="flex items-center gap-1 truncate">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{getTourLocation(tour)}</span>
+                          </span>
+                          {Number(tour.ratingsAverage) > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5" />
+                              {tour.ratingsAverage}
                             </span>
-                            {Number(tour.ratingsAverage) > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Star className="h-3.5 w-3.5" />
-                                {tour.ratingsAverage}
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-1 text-[11px] text-[#9a9a94]">
-                            {formatTourDate(tour.startDates?.[0]?.startDate)}
-                          </p>
-                        </Link>
-                      ) : (
-                        <div
-                          key={`tour-slot-empty-${index}`}
-                          aria-hidden="true"
-                          className="h-[94px]"
-                        />
-                      )
-                    )}
+                          )}
+                        </div>
+                        <p className="mt-1 text-[11px] text-[#9a9a94]">
+                          {formatTourDate(tour.startDates?.[0]?.startDate)}
+                        </p>
+                      </Link>
+                    ) : (
+                      <div
+                        key={`tour-slot-empty-${index}`}
+                        aria-hidden="true"
+                        className="h-[94px]"
+                      />
+                    )
+                  )}
               </div>
             </div>
           </div>
@@ -643,13 +714,11 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       <button
                         key={continent._id}
                         type="button"
-                        onMouseEnter={() => setSelectedContinentIndex(index)}
                         onClick={() => setSelectedContinentIndex(index)}
-                        className={`rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${
-                          isActive
-                            ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
-                            : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#1a1a1a] hover:bg-white hover:text-[#1a1a1a]"
-                        }`}
+                        className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${isActive
+                          ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
+                          : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#a3a3a3] hover:bg-[#d1d5db] hover:text-[#1a1a1a]"
+                          }`}
                       >
                         {continent.name}
                       </button>
@@ -702,11 +771,24 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
               className="relative overflow-hidden rounded-2xl bg-[#e5e5e1]"
               style={{ gridColumn: "3", gridRow: "1" }}
             >
-              <img
-                src={continentHeroImage}
-                alt={selectedContinent?.name || "Destination"}
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
+              {continents.length > 0 ? (
+                continents.map((continent, idx) => (
+                  <img
+                    key={continent._id}
+                    src={continent.image && continent.image.trim() !== "" ? continent.image : fallbackDestinationImage}
+                    alt={continent.name}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${
+                      idx === selectedContinentIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                    } hover:scale-110`}
+                  />
+                ))
+              ) : (
+                <img
+                  src={fallbackDestinationImage}
+                  alt="Destination"
+                  className="h-full w-full object-cover"
+                />
+              )}
             </div>
 
             {/* Col 4 – Featured tours (spans both rows) */}

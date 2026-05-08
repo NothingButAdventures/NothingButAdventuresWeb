@@ -6,20 +6,17 @@ const physicalRatingSchema = new mongoose.Schema(
         name: {
             type: String,
             required: [true, "A physical rating must have a name"],
-            unique: true,
             trim: true,
             maxlength: [50, "A physical rating name must have less than 50 characters"],
         },
         slug: {
             type: String,
-            unique: true,
         },
         level: {
             type: Number,
             required: [true, "A physical rating must have a level"],
             min: 1,
             max: 5,
-            unique: true,
         },
         description: {
             type: String,

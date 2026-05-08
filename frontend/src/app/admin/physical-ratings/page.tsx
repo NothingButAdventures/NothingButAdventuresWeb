@@ -34,8 +34,16 @@ export default function PhysicalRatingsPage() {
     const fetchPhysicalRatings = async () => {
         try {
             const res = await fetch(`${api.baseURL}/physical-ratings`);
-            const data = await res.json();
-            if (data.status === "success") {
+            let data: any = null;
+            const contentType = res.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await res.json();
+            } else {
+                const text = await res.text();
+                throw new Error(`Unexpected response from server: ${text.slice(0, 200)}`);
+            }
+
+            if (data?.status === "success") {
                 setPhysicalRatings(data.data.physicalRatings);
             }
         } catch (err) {
@@ -58,18 +66,32 @@ export default function PhysicalRatingsPage() {
                 }),
                 credentials: "include",
             });
-            const data = await res.json();
-            if (data.status === "success") {
+            let data: any = null;
+            if (res.headers.get('content-type')?.includes('application/json')) {
+                try {
+                    data = await res.json();
+                } catch (parseErr) {
+                    const text = await res.text();
+                    throw new Error(`Failed to parse JSON response: ${text.slice(0, 200)}`);
+                }
+            } else {
+                const text = await res.text();
+                throw new Error(`Server returned non-JSON response: ${text.slice(0, 200)}`);
+            }
+
+            if (res.ok && data?.status === "success") {
                 setNewRatingName("");
                 setNewRatingLevel(1);
                 setNewRatingDescription("");
                 setIsModalOpen(false);
                 fetchPhysicalRatings();
             } else {
-                alert('Error creating physical rating: ' + data.message);
+                const msg = data?.message || `Request failed with status ${res.status}`;
+                alert('Error creating physical rating: ' + msg);
             }
         } catch (err) {
             console.error("Error creating physical rating:", err);
+            alert((err as Error).message || 'Failed to create physical rating');
         }
     };
 
@@ -89,8 +111,20 @@ export default function PhysicalRatingsPage() {
                 setPhysicalRatings(physicalRatings.filter((rating) => rating._id !== ratingId));
                 alert("Physical rating deleted successfully!");
             } else {
-                const data = await res.json();
-                alert(`Failed to delete: ${data.message}`);
+                let msg = `Failed to delete (status ${res.status})`;
+                try {
+                    const contentType = res.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const data = await res.json();
+                        msg = data?.message || msg;
+                    } else {
+                        const text = await res.text();
+                        msg = text || msg;
+                    }
+                } catch (parseErr) {
+                    // keep fallback msg
+                }
+                alert(`Failed to delete: ${msg}`);
             }
         } catch (error) {
             console.error("Error deleting physical rating:", error);

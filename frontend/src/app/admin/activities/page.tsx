@@ -133,12 +133,12 @@ export default function ActivitiesPage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Activity</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Activities</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Location</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Styles</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Travel Styles</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Price</th>
               <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Duration</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Rating</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-widest">Physical Rating</th>
               <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-widest">Actions</th>
             </tr>
           </thead>
@@ -191,7 +191,9 @@ export default function ActivitiesPage() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
-                    {activity.physicalRating?.name || "N/A"}
+                    {activity.physicalRating?.level
+                      ? `${activity.physicalRating.level} - ${activity.physicalRating.name}`
+                      : activity.physicalRating?.name || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">

@@ -47,7 +47,7 @@ interface Tour {
         }>;
         optionalActivities: Array<{
             name: string;
-            price: {
+            price: number | {
                 amount: number;
                 currency: string;
             };
@@ -480,6 +480,13 @@ export default function CheckoutPage() {
                 prev.filter((a) => !(a.dayNumber === dayNumber && a.activityIndex === activityIndex))
             );
         } else {
+            const activityPrice = typeof activity.price === "number"
+                ? activity.price
+                : (activity.price?.amount || 0);
+            const activityCurrency = typeof activity.price === "number"
+                ? "USD"
+                : (activity.price?.currency || "USD");
+
             setSelectedActivities((prev) => {
                 const existing = prev.find((a) => a.dayNumber === dayNumber && a.activityIndex === activityIndex);
                 if (existing) {
@@ -495,8 +502,8 @@ export default function CheckoutPage() {
                             dayNumber,
                             activityIndex,
                             name: activity.name,
-                            price: activity.price.amount,
-                            currency: activity.price.currency,
+                            price: activityPrice,
+                            currency: activityCurrency,
                             count: newCount,
                         },
                     ];
@@ -1130,7 +1137,11 @@ export default function CheckoutPage() {
                                                                                                 ℹ️ Learn more
                                                                                             </span>
                                                                                             <span className="font-bold text-gray-900">
-                                                                                                ${activity.price.amount}
+                                                                                                {typeof activity.price === "number"
+                                                                                                    ? (activity.price > 0 ? `$${activity.price.toLocaleString()}` : "Free")
+                                                                                                    : (activity.price?.amount > 0
+                                                                                                        ? `${activity.price.currency || "$"}${Number(activity.price.amount).toLocaleString()}`
+                                                                                                        : "Free")}
                                                                                                 <span className="text-xs font-normal text-gray-500"> USD per person</span>
                                                                                             </span>
                                                                                         </div>
