@@ -225,7 +225,7 @@ export default function ToursManagementPage() {
                     Duration
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Price
+                    Base Price
                   </th>
                   <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Status

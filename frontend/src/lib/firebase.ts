@@ -5,6 +5,9 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     FirebaseStorage,
+    listAll,
+    getMetadata,
+    updateMetadata,
 } from "firebase/storage";
 
 // Firebase project configuration for Nothing But Adventures
@@ -46,7 +49,8 @@ export { storage };
 export const uploadToFirebase = async (
     file: File,
     folder: string = "uploads",
-    onProgress?: (pct: number) => void
+    onProgress?: (pct: number) => void,
+    customTitle?: string
 ): Promise<string> => {
     const ext = file.name.split(".").pop() || "jpg";
     const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
@@ -72,6 +76,12 @@ export const uploadToFirebase = async (
             },
             async () => {
                 try {
+                    // Store custom title as metadata if provided
+                    if (customTitle) {
+                        await updateMetadata(uploadTask.snapshot.ref, {
+                            customMetadata: { title: customTitle },
+                        });
+                    }
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     resolve(downloadURL);
                 } catch (err) {
@@ -80,6 +90,55 @@ export const uploadToFirebase = async (
             }
         );
     });
+};
+
+/**
+ * List all images in a specific folder in Firebase Storage.
+ * 
+ * @param folder Storage folder path, e.g. "tour-images"
+ */
+export const listAllImages = async (folder: string = "tour-images"): Promise<string[]> => {
+    const folderRef = ref(storage, folder);
+    const result = await listAll(folderRef);
+    const urls = await Promise.all(result.items.map((item) => getDownloadURL(item)));
+    return urls;
+};
+
+export interface ImageWithTitle {
+    url: string;
+    title: string;
+}
+
+/**
+ * List all images in a folder with their titles (from custom metadata or filename).
+ */
+export const listAllImagesWithTitles = async (folder: string = "tour-images"): Promise<ImageWithTitle[]> => {
+    const folderRef = ref(storage, folder);
+    const result = await listAll(folderRef);
+
+    const images = await Promise.all(
+        result.items.map(async (item) => {
+            const [url, metadata] = await Promise.all([
+                getDownloadURL(item),
+                getMetadata(item).catch(() => null),
+            ]);
+            // Use custom title if set, otherwise derive from filename
+            const customTitle = metadata?.customMetadata?.title;
+            const fallbackTitle = item.name
+                .replace(/\.[^.]+$/, "") // remove extension
+                .replace(/^\d+-[a-z0-9]+$/, "") // remove auto-generated names
+                .replace(/[-_]/g, " ") // dashes/underscores to spaces
+                .trim();
+            return {
+                url,
+                title: customTitle || fallbackTitle || item.name,
+                createdAt: metadata?.timeCreated || "",
+            };
+        })
+    );
+    // Sort newest first
+    images.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return images;
 };
 
 // ─────────────────────────────────────────────

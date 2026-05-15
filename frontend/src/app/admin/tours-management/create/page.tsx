@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { uploadTourImage } from "@/lib/firebase";
 import { Toaster, toast } from "react-hot-toast";
+import ImagePickerModal from "@/components/ImagePickerModal";
+import CreateActivityModal from "@/components/CreateActivityModal";
 
 interface Country {
   _id: string;
@@ -118,12 +120,26 @@ export default function CreateTourPage() {
   // Destinations for the selected country
   const [destinations, setDestinations] = useState<any[]>([]);
   const [showLocationPopup, setShowLocationPopup] = useState<{ dayIndex: number } | null>(null);
+  const [showCityPopup, setShowCityPopup] = useState<'start' | 'end' | null>(null);
   const [showActivityPopup, setShowActivityPopup] = useState<{ dayIndex: number; activityIndex: number; isOptional: boolean } | null>(null);
   const [locationSearch, setLocationSearch] = useState("");
+  const [addingLocation, setAddingLocation] = useState(false);
   const [activitySearch, setActivitySearchInput] = useState("");
+  const [showCreateActivityModal, setShowCreateActivityModal] = useState(false);
 
   // Image uploads
   const [images, setImages] = useState<ImageUpload[]>([]);
+
+  // Image Picker Modal State
+  const [imagePickerModal, setImagePickerModal] = useState<{
+    isOpen: boolean;
+    target: "main" | "description" | "map";
+    multiple: boolean;
+  }>({
+    isOpen: false,
+    target: "main",
+    multiple: false,
+  });
 
   // Description Image
   const [descriptionImage, setDescriptionImage] = useState<{
@@ -167,7 +183,10 @@ export default function CreateTourPage() {
     physicalRatingLevel: "",
     priceAmount: "",
     priceCurrency: "USD",
+    bookingType: "Percentage",
     bookingPercentage: "",
+    bookingAmount: "",
+    ownRoomPrice: "",
     travelStyle: "",
     tripType: "",
     startCity: "",
@@ -177,7 +196,6 @@ export default function CreateTourPage() {
     whatsIncluded: "",
     transportation: "",
     staffExperts: "",
-    meals: "",
     accommodation: "",
     ageMin: "0",
     isFeatured: false,
@@ -274,6 +292,62 @@ export default function CreateTourPage() {
     }
   };
 
+  const handleAddLocation = async () => {
+    if (!locationSearch.trim() || !formData.country) return;
+    setAddingLocation(true);
+    try {
+      const token = localStorage.getItem("token");
+      const updatedDestinations = [
+        ...destinations,
+        { name: locationSearch.trim(), description: "" },
+      ];
+
+      const response = await fetch(`${api.baseURL}/countries/${formData.country}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ destinations: updatedDestinations }),
+      });
+
+      const data = await response.json();
+      if (data.status === "success") {
+        setDestinations(data.data.country.destinations || []);
+
+        // Handle city popup
+        if (showCityPopup) {
+          if (showCityPopup === 'start') {
+            setFormData(prev => ({ ...prev, startCity: locationSearch.trim() }));
+          } else {
+            setFormData(prev => ({ ...prev, endCity: locationSearch.trim() }));
+          }
+          setShowCityPopup(null);
+        }
+
+        // Handle location popup (itinerary)
+        if (showLocationPopup) {
+          const dayIndex = showLocationPopup.dayIndex;
+          const currentTags = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
+          if (!currentTags.includes(locationSearch.trim()) && currentTags.length < 2) {
+            const newTitle = [...currentTags, locationSearch.trim()].join(",");
+            updateItinerary(dayIndex, "title", newTitle);
+          }
+          setShowLocationPopup(null);
+        }
+
+        setLocationSearch("");
+      } else {
+        alert("Failed to add location: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error adding location:", error);
+      alert("Failed to add location");
+    } finally {
+      setAddingLocation(false);
+    }
+  };
+
   useEffect(() => {
     if (formData.country) {
       fetchDestinations(formData.country);
@@ -318,6 +392,40 @@ export default function CreateTourPage() {
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleImagePickerSelect = (urls: string[]) => {
+    const target = imagePickerModal.target;
+
+    if (target === "main") {
+      urls.forEach((url) => {
+        setImages((prev) => [
+          ...prev,
+          {
+            file: null,
+            preview: url,
+            caption: "",
+            isPrimary: prev.length === 0,
+            uploading: false,
+            url: url,
+          },
+        ]);
+      });
+    } else if (target === "description") {
+      setDescriptionImage({
+        file: null,
+        preview: urls[0],
+        uploading: false,
+        url: urls[0],
+      });
+    } else if (target === "map") {
+      setItineraryMapImage({
+        file: null,
+        preview: urls[0],
+        uploading: false,
+        url: urls[0],
+      });
+    }
   };
 
   const uploadImageToSupabase = async (file: File): Promise<string> => {
@@ -378,7 +486,7 @@ export default function CreateTourPage() {
         description: "",
         activities: [],
         optionalActivities: [],
-        accommodations: [],
+        accommodations: [{ name: "", type: "Hotel" }],
         meals: "",
       },
     ]);
@@ -645,9 +753,28 @@ export default function CreateTourPage() {
     field: keyof AvailableDate,
     value: string | number,
   ) => {
-    setAvailableDates((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
-    );
+    setAvailableDates((prev) => {
+      const updated = prev.map((item, i) => (i === index ? { ...item, [field]: value } : item));
+      
+      // Auto-calculate end date if start date is updated and duration is set
+      if (field === "startDate" && value) {
+        const days = parseInt(formData.durationDays, 10);
+        if (!isNaN(days) && days > 0) {
+          const [year, month, day] = (value as string).split('-').map(Number);
+          if (year && month && day) {
+            const start = new Date(year, month - 1, day);
+            start.setDate(start.getDate() + (days - 1));
+            
+            const newYear = start.getFullYear();
+            const newMonth = String(start.getMonth() + 1).padStart(2, '0');
+            const newDay = String(start.getDate()).padStart(2, '0');
+            
+            updated[index].endDate = `${newYear}-${newMonth}-${newDay}`;
+          }
+        }
+      }
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -661,7 +788,7 @@ export default function CreateTourPage() {
       !formData.tripType ||
       !formData.priceAmount
     ) {
-      toast.error("Please fill in all required fields: Tour Name, Country, Physical Rating, Travel Style, Trip Type, and Base Price");
+      toast.error("Please fill in all required fields: Tour Name, Destination, Physical Rating, Travel Style, Trip Type, and Base Price");
       return;
     }
 
@@ -678,21 +805,27 @@ export default function CreateTourPage() {
               caption: img.caption,
               isPrimary: img.isPrimary,
             };
+          } else if (img.url) {
+            return {
+              url: img.url,
+              caption: img.caption,
+              isPrimary: img.isPrimary,
+            };
           }
           return null;
         }),
       );
 
-      const validImages = uploadedImages.filter((img) => img !== null);
+      const validImages = uploadedImages.filter((img) => img !== null) as { url: string; caption: string; isPrimary: boolean }[];
 
       // Upload description image if exists
-      let descriptionImageUrl = "";
+      let descriptionImageUrl = descriptionImage.url || "";
       if (descriptionImage.file) {
         descriptionImageUrl = await uploadImageToSupabase(descriptionImage.file);
       }
 
       // Upload itinerary map image if exists
-      let itineraryMapImageUrl = "";
+      let itineraryMapImageUrl = itineraryMapImage.url || "";
       if (itineraryMapImage.file) {
         itineraryMapImageUrl = await uploadImageToSupabase(itineraryMapImage.file);
       }
@@ -707,7 +840,11 @@ export default function CreateTourPage() {
             activities: day.activities.map(act => act._id || act),
             optionalActivities: day.optionalActivities.map(act => act._id || act),
             accommodations: day.accommodations,
-            meals: day.meals || "",
+            meals: {
+              breakfast: day.meals.includes("Breakfast"),
+              lunch: day.meals.includes("Lunch"),
+              dinner: day.meals.includes("Dinner"),
+            },
           };
         }),
       );
@@ -741,7 +878,10 @@ export default function CreateTourPage() {
         price: {
           amount: parseFloat(formData.priceAmount) || undefined,
           currency: formData.priceCurrency || "USD",
+          bookingType: formData.bookingType,
           bookingPercentage: parseFloat(formData.bookingPercentage) || 20,
+          bookingAmount: parseFloat(formData.bookingAmount) || 0,
+          ownRoomPrice: parseFloat(formData.ownRoomPrice) || 0,
         },
         travelStyle: formData.travelStyle || undefined,
         tripType: formData.tripType || undefined,
@@ -755,14 +895,13 @@ export default function CreateTourPage() {
         whatsIncluded: formData.whatsIncluded,
         transportation: formData.transportation,
         staffExperts: formData.staffExperts,
-        meals: formData.meals,
         accommodation: formData.accommodation,
         images: validImages,
         itinerary: itineraryWithImages,
         startDates: availableDates.map((ad) => ({
           startDate: ad.startDate ? new Date(ad.startDate) : undefined,
           endDate: ad.endDate ? new Date(ad.endDate) : undefined,
-          availableSpots: ad.availableSpots || undefined,
+          availableSpots: parseInt(formData.maxGroupSize) || undefined,
           discount: ad.discount || undefined,
           isActive: true,
         })).filter((ad) => ad.startDate && ad.endDate),
@@ -845,23 +984,11 @@ export default function CreateTourPage() {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Summary 
-                  </label>
-                  <textarea
-                    name="summary"
-                    value={formData.summary}
-                    onChange={handleChange}
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="Brief summary"
-                  />
-                </div>
+
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description 
+                    Description
                   </label>
                   <textarea
                     name="description"
@@ -882,32 +1009,27 @@ export default function CreateTourPage() {
                   </p>
 
                   {!descriptionImage.preview ? (
-                    <label className="block w-full">
-                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition">
-                        <svg
-                          className="mx-auto h-8 w-8 text-gray-400"
-                          stroke="currentColor"
-                          fill="none"
-                          viewBox="0 0 48 48"
-                        >
-                          <path
-                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <p className="mt-1 text-sm text-gray-600">
-                          Click to upload description image
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleDescriptionImageSelect}
-                        className="hidden"
-                      />
-                    </label>
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition"
+                      onClick={() => setImagePickerModal({ isOpen: true, target: "description", multiple: false })}
+                    >
+                      <svg
+                        className="mx-auto h-8 w-8 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Click to select or upload description image
+                      </p>
+                    </div>
                   ) : (
                     <div className="relative">
                       <img
@@ -948,32 +1070,27 @@ export default function CreateTourPage() {
                   </p>
 
                   {!itineraryMapImage.preview ? (
-                    <label className="block w-full">
-                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition">
-                        <svg
-                          className="mx-auto h-8 w-8 text-gray-400"
-                          stroke="currentColor"
-                          fill="none"
-                          viewBox="0 0 48 48"
-                        >
-                          <path
-                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <p className="mt-1 text-sm text-gray-600">
-                          Click to upload map image
-                        </p>
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleItineraryMapImageSelect}
-                        className="hidden"
-                      />
-                    </label>
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center cursor-pointer hover:border-gray-400 transition"
+                      onClick={() => setImagePickerModal({ isOpen: true, target: "map", multiple: false })}
+                    >
+                      <svg
+                        className="mx-auto h-8 w-8 text-gray-400"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 48 48"
+                      >
+                        <path
+                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Click to select or upload map image
+                      </p>
+                    </div>
                   ) : (
                     <div className="relative">
                       <img
@@ -1006,7 +1123,7 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Country <span className="text-red-500">*</span>
+                    Destination <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
@@ -1026,7 +1143,7 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Max Group Size 
+                    Max Group Size
                   </label>
                   <input
                     type="number"
@@ -1042,7 +1159,7 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (Days) 
+                    Duration (Days)
                   </label>
                   <input
                     type="number"
@@ -1060,7 +1177,7 @@ export default function CreateTourPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Physical Rating{" "} <span className="text-red-500">*</span>
-                    
+
                   </label>
                   <select
                     required
@@ -1118,47 +1235,41 @@ export default function CreateTourPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start City 
-                  </label>
-                  <input
-                    type="text"
-                    name="startCity"
-                    value={formData.startCity}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="Kathmandu"
-                  />
-                </div>
+                {formData.country && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start City
+                      </label>
+                      <input
+                        type="text"
+                        name="startCity"
+                        value={formData.startCity}
+                        onClick={() => setShowCityPopup('start')}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 cursor-pointer"
+                        placeholder="Select Start City"
+                      />
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End City 
-                  </label>
-                  <input
-                    type="text"
-                    name="endCity"
-                    value={formData.endCity}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="Kathmandu"
-                  />
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        End City
+                      </label>
+                      <input
+                        type="text"
+                        name="endCity"
+                        value={formData.endCity}
+                        onClick={() => setShowCityPopup('end')}
+                        readOnly
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 cursor-pointer"
+                        placeholder="Select End City"
+                      />
+                    </div>
+                  </>
+                )}
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Visited Cities (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    name="visitedCities"
-                    value={formData.visitedCities}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="Kathmandu, Lukla, Namche Bazaar"
-                  />
-                </div>
+
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1174,22 +1285,7 @@ export default function CreateTourPage() {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    What&apos;s Included (skip a line between points)
-                  </label>
-                  <textarea
-                    name="whatsIncluded"
-                    value={formData.whatsIncluded}
-                    onChange={handleChange}
-                    rows={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="Your G for Good Moment: Women With Wheels Transfer, Indira Gandhi International Airport&#10;&#10;Your G for Good Moment: City Walk, Delhi&#10;&#10;Your G for Good Moment: Anoathi Block Printing Experience, Jaipur"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Skip one line between different points. Each separated block will be displayed as a bullet point.
-                  </p>
-                </div>
+
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1219,33 +1315,9 @@ export default function CreateTourPage() {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Meals
-                  </label>
-                  <textarea
-                    name="meals"
-                    value={formData.meals}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="e.g. 11 breakfasts, 10 lunches, 12 dinners."
-                  />
-                </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Accommodation
-                  </label>
-                  <textarea
-                    name="accommodation"
-                    value={formData.accommodation}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="e.g. Hotels (12 nts), Camping (3 nts)."
-                  />
-                </div>
+
+
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1293,12 +1365,87 @@ export default function CreateTourPage() {
             </div>
           </div>
 
+          {showCityPopup && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900">Select {showCityPopup === 'start' ? 'Start' : 'End'} City</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowCityPopup(null)}
+                    className="p-1 hover:bg-gray-100 rounded-full"
+                  >
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="p-4">
+                  <input
+                    type="text"
+                    placeholder="Search locations..."
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    autoFocus
+                  />
+                  <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                    {destinations
+                      .filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase()))
+                      .slice(0, 10)
+                      .map((d) => (
+                        <button
+                          key={d._id || d.name}
+                          type="button"
+                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          onClick={() => {
+                            if (showCityPopup === 'start') {
+                              setFormData(prev => ({ ...prev, startCity: d.name }));
+                            } else {
+                              setFormData(prev => ({ ...prev, endCity: d.name }));
+                            }
+                            setShowCityPopup(null);
+                            setLocationSearch("");
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 group-hover:text-blue-600">{d.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                      <div className="text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
+                        <p>No locations found</p>
+                        {locationSearch.trim() !== "" && (
+                          <button
+                            type="button"
+                            onClick={handleAddLocation}
+                            disabled={addingLocation}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                          >
+                            {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showLocationPopup && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="font-bold text-gray-900">Select Location</h3>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowLocationPopup(null)}
                     className="p-1 hover:bg-gray-100 rounded-full"
@@ -1347,8 +1494,18 @@ export default function CreateTourPage() {
                         </button>
                       ))}
                     {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
-                      <div className="text-center py-8 text-gray-500 text-sm">
-                        No locations found
+                      <div className="text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
+                        <p>No locations found</p>
+                        {locationSearch.trim() !== "" && (
+                          <button
+                            type="button"
+                            onClick={handleAddLocation}
+                            disabled={addingLocation}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                          >
+                            {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1362,7 +1519,7 @@ export default function CreateTourPage() {
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="font-bold text-gray-900">Select Activity</h3>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setShowActivityPopup(null)}
                     className="p-1 hover:bg-gray-100 rounded-full"
@@ -1386,7 +1543,7 @@ export default function CreateTourPage() {
                       .filter(opt => {
                         const dayIndex = showActivityPopup.dayIndex;
                         const dayLocations = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
-                        
+
                         // Filter by selected country
                         const destId = typeof opt.destination === "string" ? opt.destination : opt.destination?._id;
                         if (destId !== formData.country) return false;
@@ -1407,8 +1564,8 @@ export default function CreateTourPage() {
                           className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
                           onClick={() => {
                             applyActivityOption(
-                              showActivityPopup.dayIndex, 
-                              showActivityPopup.activityIndex, 
+                              showActivityPopup.dayIndex,
+                              showActivityPopup.activityIndex,
                               opt._id,
                               showActivityPopup.isOptional
                             );
@@ -1436,14 +1593,50 @@ export default function CreateTourPage() {
                       if (activitySearch && !opt.title.toLowerCase().includes(activitySearch.toLowerCase())) return false;
                       return true;
                     }).length === 0 && (
-                      <div className="text-center py-8 text-gray-500 text-sm">
-                        No activities found matching your criteria
-                      </div>
-                    )}
+                        <div className="text-center py-8 text-gray-500 text-sm">
+                          No activities found matching your criteria
+                        </div>
+                      )}
+                  </div>
+                  {/* Create Activity Button */}
+                  <div className="pt-3 mt-3 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateActivityModal(true)}
+                      className="w-full text-center px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+                    >
+                      + Create New Activity
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Create Activity Modal */}
+          {showActivityPopup && (
+            <CreateActivityModal
+              isOpen={showCreateActivityModal}
+              onClose={() => setShowCreateActivityModal(false)}
+              destinationId={formData.country}
+              locationTags={
+                itinerary[showActivityPopup.dayIndex]?.title
+                  ? itinerary[showActivityPopup.dayIndex].title.split(",").map((t: string) => t.trim()).filter(Boolean)
+                  : []
+              }
+              onCreated={(newActivity) => {
+                setActivityOptions((prev) => [newActivity, ...prev]);
+                // Auto-select the newly created activity
+                applyActivityOption(
+                  showActivityPopup.dayIndex,
+                  showActivityPopup.activityIndex,
+                  newActivity._id,
+                  showActivityPopup.isOptional
+                );
+                setShowActivityPopup(null);
+                setActivitySearchInput("");
+              }}
+            />
           )}
 
           {/* Images Section */}
@@ -1453,36 +1646,30 @@ export default function CreateTourPage() {
             </h2>
 
             <div className="mb-4">
-              <label className="block w-full">
-                <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition">
-                  <svg
-                    className="mx-auto h-10 w-10 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <p className="mt-2 text-sm text-gray-600">
-                    Click to upload images
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    PNG, JPG up to 10MB
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="hidden"
-                />
-              </label>
+              <div
+                className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center cursor-pointer hover:border-gray-400 transition"
+                onClick={() => setImagePickerModal({ isOpen: true, target: "main", multiple: true })}
+              >
+                <svg
+                  className="mx-auto h-10 w-10 text-gray-400"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                >
+                  <path
+                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <p className="mt-2 text-sm text-gray-600">
+                  Click to select or upload images
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  Select from library or upload from device
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1579,7 +1766,7 @@ export default function CreateTourPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Currency 
+                  Currency
                 </label>
                 <select
                   name="priceCurrency"
@@ -1598,17 +1785,56 @@ export default function CreateTourPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Booking Percentage %
+                  Booking Type
+                </label>
+                <select
+                  name="bookingType"
+                  value={formData.bookingType}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                >
+                  <option value="Percentage">Percentage</option>
+                  <option value="Amount">Amount</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {formData.bookingType === "Percentage" ? "Booking Percentage %" : "Booking Amount"}
                 </label>
                 <input
                   type="number"
-                  name="bookingPercentage"
-                  value={formData.bookingPercentage}
+                  name={formData.bookingType === "Percentage" ? "bookingPercentage" : "bookingAmount"}
+                  value={formData.bookingType === "Percentage" ? formData.bookingPercentage : formData.bookingAmount}
                   onChange={handleChange}
                   min="0"
-                  max="100"
+                  max={formData.bookingType === "Percentage" ? "100" : undefined}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                  placeholder="20"
+                  placeholder={formData.bookingType === "Percentage" ? "20" : "500"}
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* Add-ons Section */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Add-ons
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Add your own room price
+                </label>
+                <input
+                  type="number"
+                  name="ownRoomPrice"
+                  value={formData.ownRoomPrice}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  placeholder="0"
                 />
               </div>
             </div>
@@ -1617,357 +1843,321 @@ export default function CreateTourPage() {
           {/* Itinerary Section */}
           {formData.country && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Day-by-Day Itinerary
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Itinerary
+                </h2>
+                <button
+                  type="button"
+                  onClick={addItineraryDay}
+                  className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition"
+                >
+                  + Add Day
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {itinerary.map((day, dayIndex) => (
+                  <div
+                    key={dayIndex}
+                    className="border border-gray-200 rounded-lg p-6 bg-gray-50"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Day {day.day}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => removeItineraryDay(dayIndex)}
+                        className="text-red-500 hover:text-red-700 text-sm bg-white px-2 py-1 rounded border"
+                      >
+                        Remove Day
+                      </button>
+                    </div>
+
+                    {/* Basic day info */}
+                    <div className="space-y-3 mb-6">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {(day.title ? day.title.split(",").filter(t => t.trim()) : []).map((tag, tagIndex) => (
+                          <span key={tagIndex} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200">
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const currentTags = day.title.split(",").filter(t => t.trim());
+                                currentTags.splice(tagIndex, 1);
+                                updateItinerary(dayIndex, "title", currentTags.join(","));
+                              }}
+                              className="hover:text-blue-900"
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </span>
+                        ))}
+                        {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) < 2 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowLocationPopup({ dayIndex });
+                              setLocationSearch("");
+                            }}
+                            className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium border border-gray-200 hover:bg-gray-200 transition"
+                          >
+                            + Add Location Tag
+                          </button>
+                        )}
+                      </div>
+
+                      <textarea
+                        value={day.description}
+                        onChange={(e) =>
+                          updateItinerary(dayIndex, "description", e.target.value)
+                        }
+                        placeholder="Day description *"
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                      />
+                    </div>
+
+
+                    {/* Activities Section */}
+                    {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) > 0 && (
+                      <div className="mb-6">
+                        <div className="flex justify-between items-center mb-3">
+                          <h4 className="text-md font-semibold text-gray-800">
+                            Activities
+                          </h4>
+                        </div>
+
+                        <div className="space-y-3">
+                          {day.activities.map((activity, actIndex) => (
+                            <div
+                              key={actIndex}
+                              className="bg-white p-4 rounded border border-gray-200"
+                            >
+                              <div className="flex justify-between items-start mb-3">
+                                <h5 className="text-sm font-medium text-gray-700">
+                                  Activity #{actIndex + 1}
+                                </h5>
+                                <button
+                                  type="button"
+                                  onClick={() => removeActivity(dayIndex, actIndex)}
+                                  className="text-red-500 hover:text-red-700 text-xs"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+
+                              <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                                <p className="text-xs text-gray-500 mb-2">
+                                  Select activity name only. Other details are auto-filled from Admin Activities.
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowActivityPopup({ dayIndex, activityIndex: actIndex, isOptional: false });
+                                    setActivitySearchInput("");
+                                  }}
+                                  className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
+                                >
+                                  <span className="text-sm text-gray-700">
+                                    {activity.title || activity.name || "Select activity..."}
+                                  </span>
+                                  <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </button>
+
+
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => addActivity(dayIndex)}
+                          className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+                        >
+                          + Add Activity
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Optional Activities Section */}
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-md font-semibold text-gray-800">
+                          Optional Activities
+                        </h4>
+                      </div>
+
+                      <div className="space-y-3">
+                        {day.optionalActivities.map((optActivity, optIndex) => (
+                          <div
+                            key={optIndex}
+                            className="bg-white p-4 rounded border border-gray-200"
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <h5 className="text-sm font-medium text-gray-700">
+                                Optional Activity #{optIndex + 1}
+                              </h5>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeOptionalActivity(dayIndex, optIndex)
+                                }
+                                className="text-red-500 hover:text-red-700 text-xs"
+                              >
+                                Remove
+                              </button>
+                            </div>
+
+                            <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                              <p className="text-xs text-gray-500 mb-2">
+                                Select activity name only. Other details are auto-filled from Admin Activities.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowActivityPopup({ dayIndex, activityIndex: optIndex, isOptional: true });
+                                  setActivitySearchInput("");
+                                }}
+                                className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
+                              >
+                                <span className="text-sm text-gray-700">
+                                  {optActivity.title || optActivity.name || "Select activity..."}
+                                </span>
+                                <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </button>
+
+
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => addOptionalActivity(dayIndex)}
+                        className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+                      >
+                        + Add Optional Activity
+                      </button>
+                    </div>
+
+                    {/* Accommodation Section */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="text-md font-semibold text-gray-800">
+                          Accommodation
+                        </h4>
+                      </div>
+
+                      <div className="space-y-3">
+                        {day.accommodations.map((accommodation, accIndex) => (
+                          <div
+                            key={accIndex}
+                            className="bg-white p-4 rounded border border-gray-200"
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <h5 className="text-sm font-medium text-gray-700">
+                                Accommodation
+                              </h5>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <input
+                                type="text"
+                                value={accommodation.name}
+                                onChange={(e) =>
+                                  updateAccommodation(
+                                    dayIndex,
+                                    accIndex,
+                                    "name",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Accommodation name *"
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                              />
+                              <select
+                                value={accommodation.type}
+                                onChange={(e) =>
+                                  updateAccommodation(
+                                    dayIndex,
+                                    accIndex,
+                                    "type",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
+                              >
+                                <option value="Hotel">Hotel</option>
+                                <option value="Lounge">Lounge</option>
+                                <option value="Cottage">Cottage</option>
+                                <option value="Guestroom">Guestroom</option>
+                                <option value="Camp">Camp</option>
+                              </select>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Meals Section */}
+                    <div className="mb-4">
+                      <h4 className="text-md font-semibold text-gray-800 mb-3">
+                        Meals
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {["Breakfast", "Lunch", "Dinner"].map((meal) => {
+                          const currentMeals = day.meals ? day.meals.split(",").map(m => m.trim()) : [];
+                          const isSelected = currentMeals.includes(meal);
+                          return (
+                            <button
+                              key={meal}
+                              type="button"
+                              onClick={() => {
+                                let newMeals;
+                                if (isSelected) {
+                                  newMeals = currentMeals.filter(m => m !== meal).join(",");
+                                } else {
+                                  newMeals = [...currentMeals, meal].join(",");
+                                }
+                                updateItinerary(dayIndex, "meals", newMeals);
+                              }}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
+                                ? "bg-blue-600 text-white border-blue-600"
+                                : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                }`}
+                            >
+                              {meal}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {itinerary.length === 0 && (
+                <div className="text-center py-6 text-gray-500 text-sm">
+                  No itinerary days added yet
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={addItineraryDay}
-                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition"
+                className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
               >
                 + Add Day
               </button>
             </div>
-
-            <div className="space-y-6">
-              {itinerary.map((day, dayIndex) => (
-                <div
-                  key={dayIndex}
-                  className="border border-gray-200 rounded-lg p-6 bg-gray-50"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Day {day.day}
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => removeItineraryDay(dayIndex)}
-                      className="text-red-500 hover:text-red-700 text-sm bg-white px-2 py-1 rounded border"
-                    >
-                      Remove Day
-                    </button>
-                  </div>
-
-                  {/* Basic day info */}
-                  <div className="space-y-3 mb-6">
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {(day.title ? day.title.split(",").filter(t => t.trim()) : []).map((tag, tagIndex) => (
-                        <span key={tagIndex} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200">
-                          {tag}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const currentTags = day.title.split(",").filter(t => t.trim());
-                              currentTags.splice(tagIndex, 1);
-                              updateItinerary(dayIndex, "title", currentTags.join(","));
-                            }}
-                            className="hover:text-blue-900"
-                          >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </span>
-                      ))}
-                      {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) < 2 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowLocationPopup({ dayIndex });
-                            setLocationSearch("");
-                          }}
-                          className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium border border-gray-200 hover:bg-gray-200 transition"
-                        >
-                          + Add Location Tag
-                        </button>
-                      )}
-                    </div>
-
-                    <textarea
-                      value={day.description}
-                      onChange={(e) =>
-                        updateItinerary(dayIndex, "description", e.target.value)
-                      }
-                      placeholder="Day description *"
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
-                    />
-                  </div>
-
-
-                  {/* Activities Section */}
-                  {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) > 0 && (
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-md font-semibold text-gray-800">
-                        Activities
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addActivity(dayIndex)}
-                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
-                      >
-                        + Add
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {day.activities.map((activity, actIndex) => (
-                        <div
-                          key={actIndex}
-                          className="bg-white p-4 rounded border border-gray-200"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <h5 className="text-sm font-medium text-gray-700">
-                              Activity #{actIndex + 1}
-                            </h5>
-                            <button
-                              type="button"
-                              onClick={() => removeActivity(dayIndex, actIndex)}
-                              className="text-red-500 hover:text-red-700 text-xs"
-                            >
-                              Remove
-                            </button>
-                          </div>
-
-                          <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-                            <p className="text-xs text-gray-500 mb-2">
-                              Select activity name only. Other details are auto-filled from Admin Activities.
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowActivityPopup({ dayIndex, activityIndex: actIndex, isOptional: false });
-                                setActivitySearchInput("");
-                              }}
-                              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
-                            >
-                              <span className="text-sm text-gray-700">
-                                {activity.title || activity.name || "Select activity..."}
-                              </span>
-                              <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                            
-                            {(activity.title || activity.name) && (
-                              <div className="mt-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
-                                <p className="font-medium text-gray-900">
-                                  {activity.title || activity.name}
-                                </p>
-                                {(activity.location || activity.placeName) && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {activity.location || activity.placeName}
-                                    {activity.duration ? ` • ${activity.duration}` : ""}
-                                  </p>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  )}
-
-                  {/* Optional Activities Section */}
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-md font-semibold text-gray-800">
-                        Optional Activities
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addOptionalActivity(dayIndex)}
-                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
-                      >
-                        + Add
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {day.optionalActivities.map((optActivity, optIndex) => (
-                        <div
-                          key={optIndex}
-                          className="bg-white p-4 rounded border border-gray-200"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <h5 className="text-sm font-medium text-gray-700">
-                              Optional Activity #{optIndex + 1}
-                            </h5>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeOptionalActivity(dayIndex, optIndex)
-                              }
-                              className="text-red-500 hover:text-red-700 text-xs"
-                            >
-                              Remove
-                            </button>
-                          </div>
-
-                          <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
-                            <p className="text-xs text-gray-500 mb-2">
-                              Select activity name only. Other details are auto-filled from Admin Activities.
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowActivityPopup({ dayIndex, activityIndex: optIndex, isOptional: true });
-                                setActivitySearchInput("");
-                              }}
-                              className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
-                            >
-                              <span className="text-sm text-gray-700">
-                                {optActivity.title || optActivity.name || "Select activity..."}
-                              </span>
-                              <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                            
-                            {(optActivity.title || optActivity.name) && (
-                              <div className="mt-3 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
-                                <p className="font-medium text-gray-900">
-                                  {optActivity.title || optActivity.name}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {optActivity.location || optActivity.place || ""}
-                                  {optActivity.price ? ` • ${optActivity.price} USD` : ""}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Accommodation Section */}
-                  <div className="mb-4">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-md font-semibold text-gray-800">
-                        Accommodation
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => addAccommodation(dayIndex)}
-                        className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-700 transition"
-                      >
-                        + Add
-                      </button>
-                    </div>
-
-                    <div className="space-y-3">
-                      {day.accommodations.map((accommodation, accIndex) => (
-                        <div
-                          key={accIndex}
-                          className="bg-white p-4 rounded border border-gray-200"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <h5 className="text-sm font-medium text-gray-700">
-                              Accommodation #{accIndex + 1}
-                            </h5>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeAccommodation(dayIndex, accIndex)
-                              }
-                              className="text-red-500 hover:text-red-700 text-xs"
-                            >
-                              Remove
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <input
-                              type="text"
-                              value={accommodation.name}
-                              onChange={(e) =>
-                                updateAccommodation(
-                                  dayIndex,
-                                  accIndex,
-                                  "name",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Accommodation name *"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            />
-                            <select
-                              value={accommodation.type}
-                              onChange={(e) =>
-                                updateAccommodation(
-                                  dayIndex,
-                                  accIndex,
-                                  "type",
-                                  e.target.value,
-                                )
-                              }
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            >
-                              <option value="Hotel">Hotel</option>
-                              <option value="Lounge">Lounge</option>
-                              <option value="Cottage">Cottage</option>
-                              <option value="Guestroom">Guestroom</option>
-                              <option value="Camp">Camp</option>
-                            </select>
-                            <select
-                              value={accommodation.rating || 3}
-                              onChange={(e) =>
-                                updateAccommodation(
-                                  dayIndex,
-                                  accIndex,
-                                  "rating",
-                                  parseInt(e.target.value),
-                                )
-                              }
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900"
-                            >
-                              <option value={1}>⭐ 1 Star</option>
-                              <option value={2}>⭐⭐ 2 Stars</option>
-                              <option value={3}>⭐⭐⭐ 3 Stars</option>
-                              <option value={4}>⭐⭐⭐⭐ 4 Stars</option>
-                              <option value={5}>⭐⭐⭐⭐⭐ 5 Stars</option>
-                            </select>
-                            <textarea
-                              value={accommodation.description || ""}
-                              onChange={(e) =>
-                                updateAccommodation(
-                                  dayIndex,
-                                  accIndex,
-                                  "description",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Accommodation description (optional)"
-                              rows={2}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 md:col-span-3"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {itinerary.length === 0 && (
-              <div className="text-center py-6 text-gray-500 text-sm">
-                No itinerary days added yet
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={addItineraryDay}
-              className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
-            >
-              + Add Day
-            </button>
-          </div>
           )}
 
           {/* Available Dates Section */}
@@ -2011,6 +2201,7 @@ export default function CreateTourPage() {
                       onChange={(e) =>
                         updateAvailableDate(index, "startDate", e.target.value)
                       }
+                      max={ad.endDate || undefined}
                       placeholder="Start Date"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     />
@@ -2020,23 +2211,11 @@ export default function CreateTourPage() {
                       onChange={(e) =>
                         updateAvailableDate(index, "endDate", e.target.value)
                       }
+                      min={ad.startDate || undefined}
                       placeholder="End Date"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
                     />
-                    <input
-                      type="number"
-                      value={ad.availableSpots}
-                      onChange={(e) =>
-                        updateAvailableDate(
-                          index,
-                          "availableSpots",
-                          e.target.value === "" ? "" : parseInt(e.target.value, 10),
-                        )
-                      }
-                      placeholder="Available spots"
-                      min="1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    />
+
                     <select
                       value={ad.discount}
                       onChange={(e) =>
@@ -2089,6 +2268,13 @@ export default function CreateTourPage() {
           </div>
         </form>
       </div>
+      <ImagePickerModal
+        isOpen={imagePickerModal.isOpen}
+        onClose={() => setImagePickerModal((prev) => ({ ...prev, isOpen: false }))}
+        onSelect={handleImagePickerSelect}
+        multiple={imagePickerModal.multiple}
+        folder="tour-images"
+      />
     </div>
   );
 }

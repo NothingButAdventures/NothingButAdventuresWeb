@@ -28,6 +28,10 @@ interface Tour {
   price: {
     amount: number;
     currency: string;
+    ownRoomPrice?: number;
+    bookingType?: "Percentage" | "Amount";
+    bookingPercentage?: number;
+    bookingAmount?: number;
   };
   duration: {
     days: number;
@@ -57,6 +61,7 @@ interface Tour {
       location?: string;
       duration: string;
       icon: string;
+      price?: number;
     }>;
     optionalActivities: Array<{
       name: string;
@@ -130,9 +135,9 @@ const iconMap: { [key: string]: string } = {
   Heart: "❤️",
 };
 
-function InclusionsList({ items }: { items: string[] }) {
+function InclusionsList({ items, limit = 6 }: { items: string[], limit?: number }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const displayItems = isExpanded ? items : items.slice(0, 15);
+  const displayItems = isExpanded ? items : items.slice(0, limit);
 
   return (
     <div>
@@ -141,7 +146,7 @@ function InclusionsList({ items }: { items: string[] }) {
           <li key={i}>{item}</li>
         ))}
       </ul>
-      {items.length > 15 && (
+      {items.length > limit && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="mt-4 text-[#3b82f6] font-semibold text-[14px] flex items-center gap-1 hover:underline"
@@ -152,7 +157,7 @@ function InclusionsList({ items }: { items: string[] }) {
             </>
           ) : (
             <>
-              Show more <CaretDown />
+              Expand all remaining {items.length - limit} activities <CaretDown />
             </>
           )}
         </button>
@@ -176,6 +181,7 @@ export default function TourDetailPage() {
   const [currentDay, setCurrentDay] = useState(1);
   const [relatedTours, setRelatedTours] = useState<Tour[]>([]);
   const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
+  const [physicalRatings, setPhysicalRatings] = useState<any[]>([]);
   const dayRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   const [showStickyFooter, setShowStickyFooter] = useState(false);
@@ -184,6 +190,9 @@ export default function TourDetailPage() {
 
   // Hold Space state
   const [showHoldModal, setShowHoldModal] = useState(false);
+  const [showHoldAuthModal, setShowHoldAuthModal] = useState(false);
+  const [holdAuthData, setHoldAuthData] = useState({ fullName: "", email: "", password: "" });
+  const [isLoginView, setIsLoginView] = useState(false);
   const [holdSelectedDate, setHoldSelectedDate] = useState<string>("");
   const [holdLoading, setHoldLoading] = useState(false);
   const [holdMessage, setHoldMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -196,6 +205,13 @@ export default function TourDetailPage() {
 
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [expandedOptionalDays, setExpandedOptionalDays] = useState<number[]>([]);
+
+  const toggleOptionalDay = (dayNum: number) => {
+    setExpandedOptionalDays(prev =>
+      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
+    );
+  };
 
   useEffect(() => {
     if (tour) {
@@ -312,6 +328,17 @@ export default function TourDetailPage() {
         console.error("Failed to fetch discounts:", error);
       }
 
+      // Fetch physical ratings
+      try {
+        const prResponse = await fetch(`${api.baseURL}/physical-ratings`);
+        if (prResponse.ok) {
+          const prData = await prResponse.json();
+          setPhysicalRatings(prData.data.physicalRatings || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch physical ratings:", error);
+      }
+
       const response = await fetch(`${api.baseURL}${"/tours/"}${slug}`);
       const data = await response.json();
 
@@ -354,6 +381,48 @@ export default function TourDetailPage() {
     }
   };
 
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHoldLoading(true);
+
+    try {
+      const endpoint = isLoginView ? api.endpoints.auth.login : api.endpoints.auth.register;
+      const payload = isLoginView 
+        ? { email: holdAuthData.email, password: holdAuthData.password }
+        : { 
+            name: holdAuthData.fullName, 
+            email: holdAuthData.email, 
+            password: holdAuthData.password,
+            passwordConfirm: holdAuthData.password,
+            role: "user"
+          };
+
+      const response = await fetch(`${api.baseURL}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        setShowHoldAuthModal(false);
+        // Automatically proceed to hold space
+        setTimeout(() => {
+          handleHoldSpace();
+        }, 500);
+      } else {
+        alert(data.message || "Authentication failed");
+      }
+    } catch (error) {
+      console.error("Auth error:", error);
+      alert("Network error. Please try again.");
+    } finally {
+      setHoldLoading(false);
+    }
+  };
+
   const handleHoldSpace = async () => {
     if (!holdSelectedDate || !tour) return;
 
@@ -363,7 +432,8 @@ export default function TourDetailPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/login");
+        setShowHoldModal(false);
+        setShowHoldAuthModal(true);
         return;
       }
 
@@ -441,6 +511,13 @@ export default function TourDetailPage() {
   const basePrice = tour.price.amount;
   const bestDiscount = getDiscountPercentage(bestDealDate?.discount);
   const discountedPrice = bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
+
+  let computedBookingAmount = 200; // Default fallback
+  if (tour.price.bookingType === "Percentage" && tour.price.bookingPercentage) {
+    computedBookingAmount = (basePrice * tour.price.bookingPercentage) / 100;
+  } else if (tour.price.bookingType === "Amount" && tour.price.bookingAmount) {
+    computedBookingAmount = tour.price.bookingAmount;
+  }
 
   // Top 2 discounted dates for list
   const topDiscountedDates = sortedDates
@@ -615,7 +692,7 @@ export default function TourDetailPage() {
                         </div>
                       </div>
                       <div className="text-[18px] font-semibold text-black tracking-tight">
-                        $200.00
+                        ${computedBookingAmount.toFixed(2)}
                       </div>
                     </div>
 
@@ -766,7 +843,13 @@ export default function TourDetailPage() {
                   <div className="mb-5">
                     <Image src="/3.svg" alt="Physical Rating" width={36} height={36} />
                   </div>
-                  <span className="text-base font-bold text-black mb-1">{tour.physicalRating.level}/5</span>
+                  <span className="text-base font-bold text-black mb-1">
+                    {tour.physicalRating.level}/5
+                    {(() => {
+                      const rating = physicalRatings.find(r => r.level === tour.physicalRating.level);
+                      return rating ? ` · ${rating.name}` : "";
+                    })()}
+                  </span>
                   <span className="text-xs text-gray-400 tracking-wide">Physical Rating</span>
                 </div>
 
@@ -964,14 +1047,12 @@ export default function TourDetailPage() {
                               {day.description}
                             </p>
 
-                            {(!isOverview || (day.accommodations && day.accommodations.length > 0)) && (
+                            {!isOverview && (
                               <>
                                 {(() => {
                                   const timelineActivities = (!isOverview || (day.activities && day.activities.length > 0)) && day.activities ? day.activities : [];
-                                  const timelineAccommodations = day.accommodations || [];
                                   const allItems = [
                                     ...timelineActivities.map((act: any, i: number) => ({ type: 'activity' as const, data: act, key: `act-${i}` })),
-                                    ...timelineAccommodations.map((acc: any, i: number) => ({ type: 'accommodation' as const, data: acc, key: `acc-${i}` })),
                                   ];
                                   const totalItems = allItems.length;
                                   return (
@@ -979,43 +1060,24 @@ export default function TourDetailPage() {
                                       {allItems.map((item, idx) => {
                                         const isLastItem = idx === totalItems - 1;
                                         const showConnector = totalItems > 1 && !isLastItem;
-                                        if (item.type === 'activity') {
-                                          const act = item.data;
-                                          return (
-                                            <div key={item.key} className="relative pl-6">
-                                              <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                              {showConnector && (
-                                                <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                              )}
-                                              <div className="flex justify-between items-center">
-                                                <h5 className="font-bold text-gray-900 text-[15px]">
-                                                  {act.name || act.title}
-                                                </h5>
-                                                <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
-                                                  {act.placeName || act.location}{act.duration ? `, ${act.duration} hrs` : ''}
-                                                </span>
-                                              </div>
-                                              <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                        const act = item.data;
+                                        return (
+                                          <div key={item.key} className="relative pl-6">
+                                            <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                            {showConnector && (
+                                              <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                            )}
+                                            <div className="flex justify-between items-center">
+                                              <h5 className="font-bold text-gray-900 text-[15px]">
+                                                {act.name || act.title}
+                                              </h5>
+                                              <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                                {act.placeName || act.location}{act.duration ? `, ${act.duration} hrs` : ''}
+                                              </span>
                                             </div>
-                                          );
-                                        } else {
-                                          const acc = item.data;
-                                          return (
-                                            <div key={item.key} className="relative pl-6">
-                                              <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                              {showConnector && (
-                                                <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                              )}
-                                              <h5 className="font-bold text-gray-900 text-[15px]">Accommodation</h5>
-                                              <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-gray-800 text-[10px]">
-                                                  {Array(acc.rating || 5).fill("★").join("")}
-                                                </span>
-                                              </div>
-                                              <p className="text-gray-700 text-[13px] mt-1">{acc.type}</p>
-                                            </div>
-                                          );
-                                        }
+                                            <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                          </div>
+                                        );
                                       })}
                                     </div>
                                   );
@@ -1024,46 +1086,120 @@ export default function TourDetailPage() {
                                 {/* Optional Activities for this day - OUTSIDE activities/accommodations timeline, EXACT SAME UI as activities */}
                                 {day.optionalActivities && day.optionalActivities.length > 0 && (
                                   <div className="mt-8">
-                                    <div className="flex items-center gap-3 mb-5">
+                                    <div
+                                      className="flex items-center gap-3 mb-5 cursor-pointer"
+                                      onClick={() => toggleOptionalDay(day.day)}
+                                    >
                                       <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold shrink-0">
                                         {day.optionalActivities.length}
                                       </div>
-                                      <h4 className="font-semibold text-gray-900 text-[15px]">
+                                      <h4 className="font-semibold text-gray-900 text-[15px] flex items-center gap-2">
                                         Optional activities in Day {day.day}
+                                        <svg
+                                          className={`w-4 h-4 transform transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`}
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
                                       </h4>
                                     </div>
-                                    <div className="ml-2 space-y-7 relative">
-                                      {day.optionalActivities.map((act, i) => (
-                                        <div key={`opt-${i}`} className="relative pl-6">
-                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                          {day.optionalActivities.length > 1 && i < day.optionalActivities.length - 1 && (
-                                            <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                          )}
-                                          <div className="flex justify-between items-center">
-                                            <h5 className="font-bold text-gray-900 text-[15px]">
-                                              {act.name || act.title}
-                                            </h5>
-                                            <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
-                                              {(() => {
-                                                if (typeof act.price === "number") {
-                                                  return act.price > 0 ? `$${Number(act.price).toLocaleString()}` : "Free";
-                                                }
-
-                                                if (act.price && typeof act.price.amount === "number") {
-                                                  return Number(act.price.amount) > 0
-                                                    ? `${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
-                                                    : "Free";
-                                                }
-
-                                                return "Free";
-                                              })()}
-                                            </span>
+                                    {expandedOptionalDays.includes(day.day) && (
+                                      <div className="ml-2 space-y-7 relative transition-all duration-300">
+                                        {day.optionalActivities.map((act: any, i) => (
+                                          <div key={`opt-${i}`} className="relative pl-6">
+                                            <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                            {day.optionalActivities.length > 1 && i < day.optionalActivities.length - 1 && (
+                                              <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                            )}
+                                            <div className="flex justify-between items-center">
+                                              <h5 className="font-bold text-gray-900 text-[15px]">
+                                                {act.name || act.title}
+                                                {(() => {
+                                                  let priceStr = "";
+                                                  if (typeof act.price === "number") {
+                                                    priceStr = act.price > 0 ? `$${Number(act.price).toLocaleString()}` : "Free";
+                                                  } else if (act.price && typeof act.price.amount === "number") {
+                                                    priceStr = Number(act.price.amount) > 0
+                                                      ? `${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
+                                                      : "Free";
+                                                  }
+                                                  return priceStr ? `, ${priceStr}` : "";
+                                                })()}
+                                              </h5>
+                                              <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                                {act.placeName || act.location || act.place ? `${act.placeName || act.location || act.place}` : ''}
+                                                {act.duration ? `${(act.placeName || act.location || act.place) ? ', ' : ''}${act.duration} hrs` : ''}
+                                              </span>
+                                            </div>
+                                            <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
                                           </div>
-                                          <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Accommodations Section */}
+                                {!isOverview && day.accommodations && day.accommodations.length > 0 && (
+                                  <div className="mt-6">
+                                    <h4 className="font-semibold text-gray-900 text-[15px] mb-2">Accommodation</h4>
+                                    <div className="space-y-2 ml-2">
+                                      {day.accommodations.map((acc: any, idx: number) => (
+                                        <div key={idx} className="relative pl-6">
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                          <div className="flex justify-between items-center">
+                                             <h5 className="font-bold text-gray-900 text-[15px]">
+                                                {acc.name && acc.type ? `${acc.name}, ${acc.type}` : acc.name || acc.type}
+                                             </h5>
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
                                   </div>
+                                )}
+
+                                {/* Meals Section */}
+                                {day.meals && (
+                                  (() => {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    const m = day.meals as any;
+                                    const hasMeals = typeof m === 'string'
+                                      ? (m.trim().length > 0)
+                                      : (m.breakfast || m.lunch || m.dinner);
+
+                                    if (!hasMeals) return null;
+
+                                    return (
+                                      <div className="mt-4">
+                                        <h4 className="font-semibold text-gray-900 text-[15px] mb-2">Meals Included</h4>
+                                        <div className="flex gap-2">
+                                          {typeof m === 'string' ? (
+                                            m.split(',').map((meal: string, idx: number) => (
+                                              meal.trim() && (
+                                                <span key={idx} className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
+                                                  {meal.trim()}
+                                                </span>
+                                              )
+                                            ))
+                                          ) : (
+                                            <>
+                                              {m.breakfast && (
+                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">Breakfast</span>
+                                              )}
+                                              {m.lunch && (
+                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">Lunch</span>
+                                              )}
+                                              {m.dinner && (
+                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">Dinner</span>
+                                              )}
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })()
                                 )}
                               </>
                             )}
@@ -1284,7 +1420,7 @@ export default function TourDetailPage() {
         <div className="w-full px-4 sm:px-6 lg:px-10 pb-12 pt-6">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
             <div>
-              <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-8 tracking-tight">What&apos;s Included</h2>
+              <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 mb-8 tracking-tight">Inclusions and activities</h2>
               <div className="bg-white rounded-[24px] p-8 md:p-12 shadow-sm border border-gray-100">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
                   {/* Left Column: Categories */}
@@ -1320,9 +1456,21 @@ export default function TourDetailPage() {
                         <h3 className="text-[17px] font-bold text-gray-900 mb-2">Meals</h3>
                         <p className="text-gray-700 text-[15px] leading-relaxed">
                           {tour.meals || (
-                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.breakfast ? 1 : 0), 0) || 0} breakfasts, ` +
-                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.lunch ? 1 : 0), 0) || 0} lunches, ` +
-                            `${tour.itinerary?.reduce((acc, day) => acc + (day.meals?.dinner ? 1 : 0), 0) || 0} dinners`
+                            `${tour.itinerary?.reduce((acc, day) => {
+                              const m = day.meals as any;
+                              if (!m || typeof m === 'string') return acc;
+                              return acc + (m.breakfast ? 1 : 0);
+                            }, 0) || 0} breakfasts, ` +
+                            `${tour.itinerary?.reduce((acc, day) => {
+                              const m = day.meals as any;
+                              if (!m || typeof m === 'string') return acc;
+                              return acc + (m.lunch ? 1 : 0);
+                            }, 0) || 0} lunches, ` +
+                            `${tour.itinerary?.reduce((acc, day) => {
+                              const m = day.meals as any;
+                              if (!m || typeof m === 'string') return acc;
+                              return acc + (m.dinner ? 1 : 0);
+                            }, 0) || 0} dinners`
                           )}
                         </p>
                       </div>
@@ -1364,34 +1512,7 @@ export default function TourDetailPage() {
                       </div>
                     </div>
 
-                    {/* Premium inclusions (Paid only) */}
-                    {(() => {
-                      const paidActivities = Array.from(new Set(
-                        tour.itinerary.flatMap(day => day.optionalActivities?.map(a => a.name) || [])
-                      )).filter(Boolean);
 
-                      return (
-                        <div className="flex gap-4">
-                          <div className="mt-1 shrink-0">
-                            <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
-                          </div>
-                          <div>
-                            <h3 className="text-[17px] font-bold text-gray-900 mb-2">Premium inclusions</h3>
-                            {paidActivities.length > 0 ? (
-                              <ul className="space-y-2 list-disc list-inside text-gray-700 text-[15px]">
-                                {paidActivities.map((act, i) => (
-                                  <li key={i}>{act}</li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-gray-500 text-[14px]">No premium inclusions listed for this trip.</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
                   </div>
 
                   {/* Right Column: Included activities (All free and paid) */}
@@ -1410,11 +1531,47 @@ export default function TourDetailPage() {
                         ...tour.itinerary.flatMap(day => day.optionalActivities?.map(a => a.name) || [])
                       ])).filter(Boolean);
 
-                      // Use a state-like approach with a local var for rendering toggle
-                      // But since we are in a component, we can use a small local state if needed
-                      // For now, let's just show them all or a subset with a button that we'll handle
                       return (
-                        <InclusionsList items={allActs as string[]} />
+                        <div className="mb-10">
+                          <InclusionsList items={allActs as string[]} limit={6} />
+                        </div>
+                      );
+                    })()}
+
+                    {/* Optional activities moved here */}
+                    {(() => {
+                      const optionalActivities = Array.from(new Set(
+                        tour.itinerary.flatMap(day => day.optionalActivities?.map(a => {
+                          const name = a.name || a.title;
+                          if (!name) return null;
+                          
+                          let priceStr = "Free";
+                          if (typeof a.price === "number") {
+                            priceStr = a.price > 0 ? `$${Number(a.price).toLocaleString()}` : "Free";
+                          } else if (a.price && typeof a.price.amount === "number") {
+                            priceStr = Number(a.price.amount) > 0
+                              ? `${a.price.currency || "$"}${Number(a.price.amount).toLocaleString()}`
+                              : "Free";
+                          }
+                          
+                          return `${name}, ${priceStr}`;
+                        }) || [])
+                      )).filter(Boolean);
+
+                      return (
+                        <div>
+                          <div className="flex items-center gap-3 mb-6">
+                            <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                            <h3 className="text-[20px] font-bold text-gray-900">Optional activities</h3>
+                          </div>
+                          {optionalActivities.length > 0 ? (
+                            <InclusionsList items={optionalActivities as string[]} limit={4} />
+                          ) : (
+                            <p className="text-gray-500 text-[14px]">No optional activities listed for this trip.</p>
+                          )}
+                        </div>
                       );
                     })()}
                   </div>
@@ -1424,68 +1581,31 @@ export default function TourDetailPage() {
               {/* Available Extras Section */}
               <div className="mt-14">
                 <div className="flex flex-wrap items-baseline gap-3 mb-8">
-                  <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 tracking-tight">Available Extras</h2>
+                  <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900 tracking-tight">Add-ons</h2>
                   <p className="text-gray-500 text-[18px] md:text-[22px] font-medium">(add this to your tour when you book)</p>
                 </div>
 
                 <div className="space-y-4">
-                  {uniqueOptionalActivities.length > 0 ? (
-                    uniqueOptionalActivities.map((act, i) => (
-                      <div key={i} className="border border-gray-300 rounded-[20px] p-8 bg-white shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex items-start gap-6">
-                          <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0 mt-1">
-                            <Plus size={24} weight="light" className="text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="text-[22px] font-bold text-gray-900">{act.name}</h3>
-                              <div className="flex flex-col items-end">
-                                <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
-                                <span className="text-[20px] font-bold text-gray-900">
-                                  {(() => {
-                                    if (typeof act.price === "number") {
-                                      return act.price === 0 ? "Free" : `$${act.price.toFixed(0)}`;
-                                    }
-
-                                    if (act.price && typeof act.price.amount === "number") {
-                                      return act.price.amount === 0
-                                        ? "Free"
-                                        : `${act.price.currency || "$"}${act.price.amount.toFixed(0)}`;
-                                    }
-
-                                    return "Free";
-                                  })()}
-                                </span>
-                              </div>
-                            </div>
-                            <p className="text-gray-600 text-[15px] leading-relaxed max-w-2xl">
-                              {act.description || `Experience ${act.name} during your visit to ${act.place}.`}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    /* Fallback to template if no optional activities found */
-                    <div className="border border-gray-300 rounded-[20px] p-8 bg-white shadow-sm">
-                      <div className="flex items-start gap-6">
-                        <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0 mt-1">
-                          <Plus size={24} weight="light" className="text-white" />
+                  {tour?.price?.ownRoomPrice ? (
+                    <div className="border border-gray-200 rounded-[12px] p-6 bg-white">
+                      <div className="flex items-start gap-4">
+                        <div className="w-8 h-8 rounded-full bg-[#1A1A1A] flex items-center justify-center shrink-0">
+                          <Plus size={16} weight="bold" className="text-white" />
                         </div>
                         <div className="flex-1">
-                          <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-[22px] font-bold text-gray-900">Heading</h3>
-                            <div className="flex flex-col items-end">
-                              <span className="text-gray-500 text-xs font-medium uppercase tracking-wider">From</span>
-                              <span className="text-[20px] font-bold text-gray-900">$49</span>
-                            </div>
+                          <div className="flex items-baseline mb-1">
+                            <h3 className="text-[18px] font-bold text-gray-900 mr-2">My Own Room</h3>
+                            <span className="text-gray-500 text-[16px] mr-1">- From</span>
+                            <span className="text-[18px] font-bold text-gray-900">${tour.price.ownRoomPrice.toFixed(0)}</span>
                           </div>
-                          <p className="text-gray-600 text-[15px] leading-relaxed max-w-2xl">
-                            Travel here and there Travel here and there Travel here
+                          <p className="text-gray-600 text-[14px] leading-relaxed">
+                            If you&apos;re travelling solo and would prefer to have your own private room throughout your trip,<br />select this option during the online booking process.
                           </p>
                         </div>
                       </div>
                     </div>
+                  ) : (
+                    <div className="text-gray-500 text-center py-4">No single supplement available</div>
                   )}
                 </div>
               </div>
@@ -2042,6 +2162,91 @@ export default function TourDetailPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hold Auth Modal */}
+      {showHoldAuthModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowHoldAuthModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold flex items-center gap-2">
+                    <span>{isLoginView ? "Sign In" : "Create Account"}</span>
+                  </h3>
+                  <p className="text-sm text-white/80 mt-1">
+                    {isLoginView ? "Sign in to hold your space" : "Create an account to start managing travels"}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowHoldAuthModal(false)}
+                  className="text-white/80 hover:text-white text-2xl leading-none p-1"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <form onSubmit={handleAuthSubmit} className="p-6 space-y-4">
+              {!isLoginView && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
+                    value={holdAuthData.fullName}
+                    onChange={(e) => setHoldAuthData({ ...holdAuthData, fullName: e.target.value })}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Email address</label>
+                <input
+                  type="email"
+                  required
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
+                  value={holdAuthData.email}
+                  onChange={(e) => setHoldAuthData({ ...holdAuthData, email: e.target.value })}
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
+                  value={holdAuthData.password}
+                  onChange={(e) => setHoldAuthData({ ...holdAuthData, password: e.target.value })}
+                  placeholder={isLoginView ? "Enter your password" : "Create a password"}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={holdLoading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-sm hover:from-purple-700 hover:to-indigo-700 transition disabled:opacity-50 shadow-md"
+              >
+                {holdLoading ? "Processing..." : (isLoginView ? "Sign In" : "Create Account")}
+              </button>
+
+              <div className="text-center text-sm text-gray-600 mt-4">
+                {isLoginView ? "Don't have an account? " : "Already have an account? "}
+                <button
+                  type="button"
+                  onClick={() => setIsLoginView(!isLoginView)}
+                  className="text-purple-600 font-semibold hover:underline"
+                >
+                  {isLoginView ? "Register here" : "Sign in here"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

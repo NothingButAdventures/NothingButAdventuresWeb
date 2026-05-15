@@ -91,6 +91,12 @@ interface Traveller {
     title: string;
     firstName: string;
     lastName: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    postalCode?: string;
+    country?: string;
 }
 
 interface SelectedActivity {
@@ -164,6 +170,7 @@ export default function CheckoutPage() {
         firstName: "",
         lastName: "",
     });
+    const [otherTravellers, setOtherTravellers] = useState<Traveller[]>([]);
 
     // Step 2: Date Selection
     const [selectedDateId, setSelectedDateId] = useState<string | null>(null);
@@ -229,6 +236,18 @@ export default function CheckoutPage() {
                 count: adultCount,
             });
         }
+
+        setOtherTravellers((prev) => {
+            const newTravellers = [...prev];
+            if (adultCount - 1 > newTravellers.length) {
+                for (let i = newTravellers.length; i < adultCount - 1; i++) {
+                    newTravellers.push({ title: "", firstName: "", lastName: "" });
+                }
+            } else if (adultCount - 1 < newTravellers.length) {
+                newTravellers.splice(adultCount - 1);
+            }
+            return newTravellers;
+        });
     }, [adultCount]);
 
     const handleApplyPromoCode = async () => {
@@ -611,13 +630,23 @@ export default function CheckoutPage() {
                 lastName: primaryTraveller.lastName,
                 email: contactInfo.email,
                 phone: contactInfo.phone,
+                address: contactInfo.address,
+                city: contactInfo.city,
+                postalCode: contactInfo.postalCode,
+                country: contactInfo.country,
             });
 
-            // Add other travelers as placeholders
-            for (let i = 1; i < adultCount; i++) {
+            // Add other travelers from state
+            for (let i = 0; i < otherTravellers.length; i++) {
                 travelersList.push({
-                    firstName: `Guest ${i + 1}`,
-                    lastName: "Traveller",
+                    firstName: otherTravellers[i].firstName || `Guest ${i + 2}`,
+                    lastName: otherTravellers[i].lastName || "Traveller",
+                    email: otherTravellers[i].email,
+                    phone: otherTravellers[i].phone,
+                    address: otherTravellers[i].address,
+                    city: otherTravellers[i].city,
+                    postalCode: otherTravellers[i].postalCode,
+                    country: otherTravellers[i].country,
                 });
             }
 
@@ -896,21 +925,45 @@ export default function CheckoutPage() {
 
                                                                 const checkDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
                                                                 const dateStatus = getDateStatus(day, monthDate);
-                                                                const isSelected = dateStatus && selectedDateId === dateStatus._id;
                                                                 const isPast = checkDate < new Date(new Date().setHours(0, 0, 0, 0));
+
+                                                                const selectedDateObj = selectedDate;
+                                                                let isInSelectedRange = false;
+                                                                let isSelectedStart = false;
+                                                                let isSelectedEnd = false;
+
+                                                                if (selectedDateObj) {
+                                                                    const parseLocal = (dateStr: string) => {
+                                                                        const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+                                                                        return new Date(year, month - 1, day).getTime();
+                                                                    };
+                                                                    const sTime = parseLocal(selectedDateObj.startDate);
+                                                                    const eTime = parseLocal(selectedDateObj.endDate);
+                                                                    const checkTime = checkDate.getTime();
+                                                                    
+                                                                    if (checkTime === sTime) isSelectedStart = true;
+                                                                    if (checkTime === eTime) isSelectedEnd = true;
+                                                                    if (checkTime > sTime && checkTime < eTime) {
+                                                                        isInSelectedRange = true;
+                                                                    }
+                                                                }
+
+                                                                const isSelected = dateStatus && selectedDateId === dateStatus._id;
 
                                                                 return (
                                                                     <button
                                                                         key={idx}
                                                                         onClick={() => dateStatus && setSelectedDateId(dateStatus._id!)}
                                                                         disabled={!dateStatus || isPast}
-                                                                        className={`h-10 rounded-lg text-sm font-medium transition relative ${isSelected
+                                                                        className={`h-10 rounded-lg text-sm font-medium transition relative ${isSelectedStart || isSelectedEnd || isSelected
                                                                             ? "bg-purple-600 text-white"
-                                                                            : dateStatus && !isPast
-                                                                                ? "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                                                                                : isPast
-                                                                                    ? "text-gray-300"
-                                                                                    : "text-gray-400"
+                                                                            : isInSelectedRange
+                                                                                ? "bg-purple-100 text-purple-700"
+                                                                                : dateStatus && !isPast
+                                                                                    ? "bg-purple-50 text-purple-600 hover:bg-purple-100 border border-purple-200"
+                                                                                    : isPast
+                                                                                        ? "text-gray-300"
+                                                                                        : "text-gray-400 hover:bg-gray-50"
                                                                             }`}
                                                                     >
                                                                         {day}
@@ -1362,13 +1415,9 @@ export default function CheckoutPage() {
                                         <div className="mb-8">
                                             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                                 <span className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm">1</span>
-                                                {primaryTraveller.title} {primaryTraveller.firstName} {primaryTraveller.lastName}
+                                                {primaryTraveller.title} {primaryTraveller.firstName} {primaryTraveller.lastName} (Primary)
                                             </h3>
-                                        </div>
-
-                                        <div className="border-t pt-6 mb-8">
-                                            <h3 className="font-semibold text-gray-900 mb-4">Contact Information</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                                 <div>
                                                     <label className="block text-sm text-gray-600 mb-1">Email *</label>
                                                     <input
@@ -1431,6 +1480,149 @@ export default function CheckoutPage() {
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {otherTravellers.map((traveller, idx) => (
+                                            <div key={idx} className="mb-8 border-t pt-6">
+                                                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                                    <span className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm">{idx + 2}</span>
+                                                    Traveller {idx + 2}
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Title</label>
+                                                        <select
+                                                            value={traveller.title}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].title = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        >
+                                                            <option value="">--</option>
+                                                            <option value="Mr">Mr</option>
+                                                            <option value="Mrs">Mrs</option>
+                                                            <option value="Ms">Ms</option>
+                                                            <option value="Dr">Dr</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">First name</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.firstName}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].firstName = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="First Name"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Last name</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.lastName}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].lastName = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="Last Name"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Email *</label>
+                                                        <input
+                                                            type="email"
+                                                            value={traveller.email || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].email = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="email@example.com"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Phone *</label>
+                                                        <input
+                                                            type="tel"
+                                                            value={traveller.phone || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].phone = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="+1 234 567 8900"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <label className="block text-sm text-gray-600 mb-1">Address</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.address || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].address = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="Street address"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">City</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.city || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].city = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="City"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Postal Code</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.postalCode || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].postalCode = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="Postal code"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm text-gray-600 mb-1">Country</label>
+                                                        <input
+                                                            type="text"
+                                                            value={traveller.country || ""}
+                                                            onChange={(e) => {
+                                                                const newT = [...otherTravellers];
+                                                                newT[idx].country = e.target.value;
+                                                                setOtherTravellers(newT);
+                                                            }}
+                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                            placeholder="Country"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
 
                                         {/* Payment Options */}
                                         <div className="border-t pt-6">

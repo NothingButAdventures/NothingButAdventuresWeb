@@ -37,6 +37,22 @@ const bookingSchema = new mongoose.Schema(
           type: String,
           required: false,
         },
+        address: {
+          type: String,
+          required: false,
+        },
+        city: {
+          type: String,
+          required: false,
+        },
+        postalCode: {
+          type: String,
+          required: false,
+        },
+        country: {
+          type: String,
+          required: false,
+        },
         dateOfBirth: {
           type: Date,
           required: false,

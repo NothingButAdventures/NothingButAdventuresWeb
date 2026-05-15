@@ -73,11 +73,26 @@ const tourSchema = new mongoose.Schema(
         default: "USD",
       },
 
+      bookingType: {
+        type: String,
+        enum: ["Percentage", "Amount"],
+        default: "Percentage",
+      },
       bookingPercentage: {
         type: Number,
         default: 20,
         min: [0, "Booking percentage cannot be negative"],
         max: [100, "Booking percentage cannot exceed 100%"],
+      },
+      bookingAmount: {
+        type: Number,
+        default: 0,
+        min: [0, "Booking amount cannot be negative"],
+      },
+      ownRoomPrice: {
+        type: Number,
+        default: 0,
+        min: [0, "Own room price cannot be negative"],
       },
     },
     ratingsAverage: {
