@@ -13,6 +13,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import { uploadContinentImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 
 // --- Types ---
@@ -63,6 +64,7 @@ export default function EditContinentPage() {
     const [image, setImage] = useState("");
     const [uploadingImage, setUploadingImage] = useState(false);
     const [uploadingEditorImage, setUploadingEditorImage] = useState(false);
+    const [showImagePicker, setShowImagePicker] = useState(false);
 
     // TipTap Editor
     const editor = useEditor({
@@ -250,17 +252,21 @@ export default function EditContinentPage() {
                                         <div className="relative w-32 h-24 rounded-lg overflow-hidden border border-gray-100 shadow-sm group">
                                             <img src={image} alt="Preview" className="w-full h-full object-cover" />
                                             <button
+                                                type="button"
                                                 onClick={() => setImage("")}
-                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity"
+                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity font-medium text-xs"
                                             >
                                                 Remove
                                             </button>
                                         </div>
                                     )}
-                                    <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition text-sm font-medium">
-                                        {uploadingImage ? "Uploading..." : "Upload Image"}
-                                        <input type="file" hidden accept="image/*" onChange={handleMainImageUpload} disabled={uploadingImage} />
-                                    </label>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowImagePicker(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition text-sm font-medium"
+                                    >
+                                        Select/Upload Image
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -320,6 +326,14 @@ export default function EditContinentPage() {
                     <EditorContent editor={editor} />
                 </div>
             </div>
+            <ImagePickerModal
+                isOpen={showImagePicker}
+                onClose={() => setShowImagePicker(false)}
+                onSelect={(urls) => {
+                    if (urls.length > 0) setImage(urls[0]);
+                }}
+                multiple={false}
+            />
         </div>
     );
 }

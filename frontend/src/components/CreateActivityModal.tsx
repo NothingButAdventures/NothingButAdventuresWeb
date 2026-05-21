@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { api } from "@/lib/api";
-import { uploadActivityImage } from "@/lib/firebase";
+import { uploadActivityImage } from "../lib/firebase";
+import ImagePickerModal from "./ImagePickerModal";
 import { X } from "@phosphor-icons/react";
 
 interface CreateActivityModalProps {
@@ -35,13 +36,12 @@ export default function CreateActivityModal({
     isFree: false,
     price: "",
     physicalRating: "",
-    ageGroup: "",
+    coverImage: "",
     location: locationTags.length === 1 ? locationTags[0] : "",
     duration: "",
   });
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -58,12 +58,10 @@ export default function CreateActivityModal({
         isFree: false,
         price: "",
         physicalRating: "",
-        ageGroup: "",
+        coverImage: "",
         location: locationTags.length === 1 ? locationTags[0] : "",
         duration: "",
       });
-      setImageFile(null);
-      setImagePreview("");
     }
   }, [isOpen, locationTags]);
 
@@ -84,13 +82,7 @@ export default function CreateActivityModal({
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+  // Image selection is handled via ImagePickerModal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,11 +90,6 @@ export default function CreateActivityModal({
 
     try {
       const token = localStorage.getItem("token");
-      let coverImageUrl = "";
-
-      if (imageFile) {
-        coverImageUrl = await uploadActivityImage(imageFile);
-      }
 
       const parsedPrice = Number(formData.price);
       if (!formData.isFree && (!formData.price || Number.isNaN(parsedPrice) || parsedPrice <= 0)) {
@@ -123,12 +110,15 @@ export default function CreateActivityModal({
         return;
       }
 
-      const payload = {
+      const payload: any = {
         ...formData,
         destination: destinationId,
         price: formData.isFree ? 0 : parsedPrice,
-        coverImage: coverImageUrl,
       };
+
+      if (!payload.physicalRating) {
+        delete payload.physicalRating;
+      }
 
       const response = await fetch(`${api.baseURL}${api.endpoints.activities.create}`, {
         method: "POST",
@@ -310,6 +300,31 @@ export default function CreateActivityModal({
                   Travel Styles <span style={{ color: "#ef4444" }}>*</span>
                 </label>
                 <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const allIds = travelStyles.map(s => s._id);
+                      if (formData.travelStyles.length === allIds.length) {
+                        setFormData({ ...formData, travelStyles: [] });
+                      } else {
+                        setFormData({ ...formData, travelStyles: allIds });
+                      }
+                    }}
+                    style={{
+                      padding: "6px 14px",
+                      borderRadius: "20px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      border: "1px solid",
+                      cursor: "pointer",
+                      borderColor: formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "#2563eb" : "#d1d5db",
+                      backgroundColor: formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "#2563eb" : "#f3f4f6",
+                      color: formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "white" : "#1f2937",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "Deselect All" : "Select All"}
+                  </button>
                   {travelStyles.map((s) => (
                     <button
                       key={s._id}
@@ -341,58 +356,33 @@ export default function CreateActivityModal({
                 </div>
               </div>
 
-              {/* Physical Rating & Age Group */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "4px" }}>
-                    Physical Rating
-                  </label>
-                  <select
-                    required
-                    value={formData.physicalRating}
-                    onChange={(e) => setFormData({ ...formData, physicalRating: e.target.value })}
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      border: "1px solid #d1d5db",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      color: "#111827",
-                      outline: "none",
-                      boxSizing: "border-box",
-                      backgroundColor: "white",
-                    }}
-                  >
-                    <option value="">Select rating</option>
-                    {physicalRatings.map((r) => (
-                      <option key={r._id} value={r._id}>
-                        Level {r.level} - {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "4px" }}>
-                    Age Group
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.ageGroup}
-                    onChange={(e) => setFormData({ ...formData, ageGroup: e.target.value })}
-                    placeholder="e.g. 18-35"
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      border: "1px solid #d1d5db",
-                      borderRadius: "8px",
-                      fontSize: "14px",
-                      color: "#111827",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
+              {/* Physical Rating */}
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: 600, color: "#374151", marginBottom: "4px" }}>
+                  Physical Rating <span style={{ fontSize: "11px", fontWeight: 400, color: "#6b7280" }}>(Optional)</span>
+                </label>
+                <select
+                  value={formData.physicalRating}
+                  onChange={(e) => setFormData({ ...formData, physicalRating: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    color: "#111827",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    backgroundColor: "white",
+                  }}
+                >
+                  <option value="">Select rating</option>
+                  {physicalRatings.map((r) => (
+                    <option key={r._id} value={r._id}>
+                      Level {r.level} - {r.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Free checkbox */}
@@ -472,6 +462,7 @@ export default function CreateActivityModal({
                   Cover Image
                 </label>
                 <div
+                  onClick={() => setShowImagePicker(true)}
                   style={{
                     border: "2px dashed #d1d5db",
                     borderRadius: "8px",
@@ -486,10 +477,10 @@ export default function CreateActivityModal({
                     justifyContent: "center",
                   }}
                 >
-                  {imagePreview ? (
+                  {formData.coverImage ? (
                     <>
                       <img
-                        src={imagePreview}
+                        src={formData.coverImage}
                         alt="Preview"
                         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                       />
@@ -507,21 +498,15 @@ export default function CreateActivityModal({
                         onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
                         onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
                       >
-                        <span style={{ color: "white", fontSize: "13px", fontWeight: 500 }}>Change Image</span>
+                        <span style={{ color: "white", fontSize: "13px", fontWeight: 500 }}>Select/Upload Image</span>
                       </div>
                     </>
                   ) : (
                     <div>
-                      <p style={{ fontSize: "13px", color: "#6b7280" }}>Click to upload</p>
+                      <p style={{ fontSize: "13px", color: "#6b7280" }}>Click to select or upload</p>
                       <p style={{ fontSize: "11px", color: "#9ca3af" }}>PNG, JPG up to 10MB</p>
                     </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }}
-                  />
                 </div>
               </div>
             </div>
@@ -574,6 +559,16 @@ export default function CreateActivityModal({
           </div>
         </form>
       </div>
+      <ImagePickerModal
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={(urls) => {
+          if (urls.length > 0) {
+            setFormData((prev) => ({ ...prev, coverImage: urls[0] }));
+          }
+        }}
+        multiple={false}
+      />
     </div>,
     document.body
   );

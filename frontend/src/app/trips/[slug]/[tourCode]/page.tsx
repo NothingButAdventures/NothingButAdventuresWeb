@@ -25,6 +25,7 @@ interface Tour {
   meals?: string;
   accommodation?: string;
   ownRoomAvailable: boolean;
+  wifiAvailable?: boolean;
   price: {
     amount: number;
     currency: string;
@@ -53,6 +54,7 @@ interface Tour {
     day: number;
     title: string;
     description: string;
+    importantNote?: string;
     activities: Array<{
       name?: string;
       title?: string;
@@ -62,6 +64,7 @@ interface Tour {
       duration: string;
       icon: string;
       price?: number;
+      isFree?: boolean;
     }>;
     optionalActivities: Array<{
       name: string;
@@ -97,6 +100,11 @@ interface Tour {
     _id: string;
     name: string;
     slug: string;
+    continent?: {
+      _id: string;
+      name: string;
+      slug: string;
+    };
   };
   travelStyle: string;
   serviceLevel: string;
@@ -206,9 +214,16 @@ export default function TourDetailPage() {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [expandedOptionalDays, setExpandedOptionalDays] = useState<number[]>([]);
+  const [expandedPremiumDays, setExpandedPremiumDays] = useState<number[]>([]);
 
   const toggleOptionalDay = (dayNum: number) => {
     setExpandedOptionalDays(prev =>
+      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
+    );
+  };
+
+  const togglePremiumDay = (dayNum: number) => {
+    setExpandedPremiumDays(prev =>
       prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
     );
   };
@@ -533,6 +548,30 @@ export default function TourDetailPage() {
       {/* Tour Header - Full Width */}
       <div className="bg-white">
         <div className="w-full px-4 sm:px-6 lg:px-10 pt-10 pb-0">
+          {/* Breadcrumbs */}
+          <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
+            <Link href="/" className="hover:text-black transition-colors">
+              Home
+            </Link>
+            <span className="text-[#9CA3AF]">/</span>
+            <Link href="/destinations" className="hover:text-black transition-colors">
+              Destinations
+            </Link>
+            {tour.country?.continent && (
+              <>
+                <span className="text-[#9CA3AF]">/</span>
+                <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-black transition-colors capitalize">
+                  {tour.country.continent.slug}
+                </Link>
+              </>
+            )}
+            <span className="text-[#9CA3AF]">/</span>
+            <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-black transition-colors">
+              {tour.country.name}
+            </Link>
+            <span className="text-[#9CA3AF]">/</span>
+            <span className="text-[#1F2937] font-medium">{tour.name}</span>
+          </nav>
 
           {/* Title Row */}
           <div className="flex items-start justify-between mb-6">
@@ -871,15 +910,37 @@ export default function TourDetailPage() {
                   <span className="text-xs text-gray-400 tracking-wide">Service Level</span>
                 </div>
 
-                {/* Minimum Age */}
+                {/* Age Requirements */}
                 <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 text-center">
                   <div className="mb-5">
-                    <Image src="/6.png" alt="Minimum Age" width={36} height={36} />
+                    <Image src="/6.png" alt="Age Requirements" width={36} height={36} />
                   </div>
                   <span className="text-base font-bold text-black mb-1">{tour.ageRequirement.min} years</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Minimum Age</span>
+                  <span className="text-xs text-gray-400 tracking-wide">Age Requirements</span>
                 </div>
               </div>
+
+              {/* Tour Highlights */}
+              {tour.highlights && tour.highlights.length > 0 && (
+                <div className="mt-12 p-8 bg-gray-50/50 border border-gray-100 rounded-[24px]">
+                  <h3 className="text-[22px] font-bold text-gray-900 mb-6 flex items-center gap-2.5">
+                    <svg className="w-6 h-6 text-[#1A1A1A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                    Tour Highlights
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    {tour.highlights.map((highlight, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-2.5"></span>
+                        <p className="text-[15px] font-medium text-gray-700 leading-relaxed">
+                          {highlight}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Empty Right Column spacer */}
@@ -1040,12 +1101,87 @@ export default function TourDetailPage() {
                           </h3>
                         </div>
 
+                        {!isOverview && day.importantNote && day.importantNote.trim() && (
+                          <div className="mt-3 mb-4 p-3.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-start gap-2.5">
+                            <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="12" y1="8" x2="12" y2="12" />
+                              <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            <div>
+                              <span className="text-[12px] font-bold text-amber-800 uppercase tracking-wider block mb-0.5">Important note</span>
+                              <p className="text-[13.5px] font-medium text-amber-900 leading-relaxed">
+                                {day.importantNote}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="mt-6">
                           {/* Descriptions & Timeline */}
                           <div>
                             <p className="text-gray-600 text-[13px] mb-8 leading-relaxed">
                               {day.description}
                             </p>
+
+                            {/* Premium Inclusions for Overview */}
+                            {isOverview && (() => {
+                              const premiumActivities = (day.activities || []).filter((act: any) => {
+                                const hasPrice = (typeof act.price === 'number' && act.price > 0) || (act.price && typeof act.price === 'object' && act.price.amount > 0);
+                                return hasPrice && !act.isFree;
+                              });
+                              if (premiumActivities.length === 0) return null;
+                              return (
+                                <div className="mt-2 mb-4">
+                                  <div
+                                    className="flex justify-between items-center mb-5 cursor-pointer w-full group"
+                                    onClick={() => togglePremiumDay(day.day)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold shrink-0">
+                                        {premiumActivities.length}
+                                      </div>
+                                      <h4 className="font-semibold text-gray-900 text-[15px] flex items-center gap-2">
+                                        Premium Inclusions in Day {day.day}
+                                        <svg
+                                          className={`w-4 h-4 transform transition-transform ${expandedPremiumDays.includes(day.day) ? 'rotate-180' : ''}`}
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </h4>
+                                    </div>
+                                    <span className="text-[13px] font-bold text-gray-500 group-hover:text-black transition-colors shrink-0">
+                                      {expandedPremiumDays.includes(day.day) ? 'Hide' : 'Show'}
+                                    </span>
+                                  </div>
+                                  {expandedPremiumDays.includes(day.day) && (
+                                    <div className="ml-2 space-y-7 relative transition-all duration-300">
+                                      {premiumActivities.map((act: any, i: number) => (
+                                        <div key={`premium-${i}`} className="relative pl-6">
+                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
+                                          {premiumActivities.length > 1 && i < premiumActivities.length - 1 && (
+                                            <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
+                                          )}
+                                          <div className="flex justify-between items-center">
+                                            <h5 className="font-bold text-gray-900 text-[15px]">
+                                              {act.name || act.title}
+                                            </h5>
+                                            <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                              {act.placeName || act.location ? `${act.placeName || act.location}` : ''}
+                                              {act.duration ? `${(act.placeName || act.location) ? ', ' : ''}${act.duration} hrs` : ''}
+                                            </span>
+                                          </div>
+                                          <p className="text-gray-700 text-[13px] mt-2 leading-relaxed">{act.description}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
 
                             {!isOverview && (
                               <>
@@ -1087,23 +1223,28 @@ export default function TourDetailPage() {
                                 {day.optionalActivities && day.optionalActivities.length > 0 && (
                                   <div className="mt-8">
                                     <div
-                                      className="flex items-center gap-3 mb-5 cursor-pointer"
+                                      className="flex justify-between items-center mb-5 cursor-pointer w-full group"
                                       onClick={() => toggleOptionalDay(day.day)}
                                     >
-                                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold shrink-0">
-                                        {day.optionalActivities.length}
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[12px] font-bold shrink-0">
+                                          {day.optionalActivities.length}
+                                        </div>
+                                        <h4 className="font-semibold text-gray-900 text-[15px] flex items-center gap-2">
+                                          Optional activities in Day {day.day}
+                                          <svg
+                                            className={`w-4 h-4 transform transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`}
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                          </svg>
+                                        </h4>
                                       </div>
-                                      <h4 className="font-semibold text-gray-900 text-[15px] flex items-center gap-2">
-                                        Optional activities in Day {day.day}
-                                        <svg
-                                          className={`w-4 h-4 transform transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`}
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                          stroke="currentColor"
-                                        >
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                      </h4>
+                                      <span className="text-[13px] font-bold text-gray-500 group-hover:text-black transition-colors shrink-0">
+                                        {expandedOptionalDays.includes(day.day) ? 'Hide' : 'Show'}
+                                      </span>
                                     </div>
                                     {expandedOptionalDays.includes(day.day) && (
                                       <div className="ml-2 space-y-7 relative transition-all duration-300">
@@ -1149,11 +1290,16 @@ export default function TourDetailPage() {
                                       {day.accommodations.map((acc: any, idx: number) => (
                                         <div key={idx} className="relative pl-6">
                                           <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                          <div className="flex justify-between items-center">
-                                             <h5 className="font-bold text-gray-900 text-[15px]">
-                                                {acc.name && acc.type ? `${acc.name}, ${acc.type}` : acc.name || acc.type}
-                                             </h5>
-                                          </div>
+                                           <div className="flex justify-between items-center">
+                                              <h5 className="font-bold text-gray-900 text-[15px]">
+                                                 {acc.name || acc.type}
+                                              </h5>
+                                              {acc.name && acc.type && (
+                                                <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                                  {acc.type}
+                                                </span>
+                                              )}
+                                           </div>
                                         </div>
                                       ))}
                                     </div>
@@ -1512,6 +1658,34 @@ export default function TourDetailPage() {
                       </div>
                     </div>
 
+                    {/* Wifi Availability */}
+                    <div className="flex gap-4 mt-6">
+                      <div className="mt-1 shrink-0">
+                        <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M5 12.55a11 11 0 0114.08 0" />
+                          <path d="M1.42 9a16 16 0 0121.16 0" />
+                          <path d="M8.53 16.11a6 6 0 016.94 0" />
+                          <line x1="12" y1="20" x2="12.01" y2="20" strokeWidth="3" strokeLinecap="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-gray-900 mb-2">Wifi Availability</h3>
+                        <p className="text-gray-700 text-[15px] leading-relaxed flex items-center gap-2">
+                          {tour.wifiAvailable ? (
+                            <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1.5 border border-emerald-100">
+                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                              Yes, Free WiFi Included
+                            </span>
+                          ) : (
+                            <span className="text-sm font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded flex items-center gap-1.5 border border-gray-100">
+                              <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                              No WiFi Available
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+
 
                   </div>
 
@@ -1533,28 +1707,59 @@ export default function TourDetailPage() {
 
                       return (
                         <div className="mb-10">
-                          <InclusionsList items={allActs as string[]} limit={6} />
+                          {allActs.length > 0 ? (
+                            <InclusionsList items={allActs as string[]} limit={6} />
+                          ) : (
+                            <p className="text-gray-500 text-[14px]">No Included activities listed for this trip.</p>
+                          )}
                         </div>
                       );
                     })()}
 
-                    {/* Optional activities moved here */}
+                    {/* Premium Inclusions */}
+                    {(() => {
+                      const premiumInclusions = Array.from(new Set(
+                        tour.itinerary.flatMap(day => 
+                          (day.activities || [])
+                            .filter(a => a && !a.isFree && typeof a.price === "number" && a.price > 0)
+                            .map(a => a.title || a.name) || []
+                        )
+                      )).filter(Boolean);
+
+                      return (
+                        <div className="mb-10">
+                          <div className="flex items-center gap-3 mb-6">
+                            <svg className="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" />
+                            </svg>
+                            <h3 className="text-[20px] font-bold text-gray-900">Premium Inclusions</h3>
+                          </div>
+                          {premiumInclusions.length > 0 ? (
+                            <InclusionsList items={premiumInclusions as string[]} limit={3} />
+                          ) : (
+                            <p className="text-gray-500 text-[14px]">No premium inclusions listed for this trip.</p>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Optional activities */}
                     {(() => {
                       const optionalActivities = Array.from(new Set(
                         tour.itinerary.flatMap(day => day.optionalActivities?.map(a => {
                           const name = a.name || a.title;
                           if (!name) return null;
                           
-                          let priceStr = "Free";
+                          let priceStr = "";
                           if (typeof a.price === "number") {
-                            priceStr = a.price > 0 ? `$${Number(a.price).toLocaleString()}` : "Free";
+                            priceStr = a.price > 0 ? ` - From $${Number(a.price).toLocaleString()} USD` : " - Free";
                           } else if (a.price && typeof a.price.amount === "number") {
                             priceStr = Number(a.price.amount) > 0
-                              ? `${a.price.currency || "$"}${Number(a.price.amount).toLocaleString()}`
-                              : "Free";
+                              ? ` - From $${Number(a.price.amount).toLocaleString()} USD`
+                              : " - Free";
                           }
                           
-                          return `${name}, ${priceStr}`;
+                          return `${name}${priceStr}`;
                         }) || [])
                       )).filter(Boolean);
 

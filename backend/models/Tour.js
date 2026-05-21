@@ -159,6 +159,10 @@ const tourSchema = new mongoose.Schema(
           type: String,
           trim: true,
         },
+        importantNote: {
+          type: String,
+          trim: true,
+        },
 
         activities: [
           {
@@ -263,6 +267,10 @@ const tourSchema = new mongoose.Schema(
         default: 99,
       },
       description: String,
+    },
+    wifiAvailable: {
+      type: Boolean,
+      default: false,
     },
     specialMoments: [
       {

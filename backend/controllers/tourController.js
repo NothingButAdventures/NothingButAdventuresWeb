@@ -44,7 +44,13 @@ const getTour = catchAsync(async (req, res, next) => {
   }
 
   const tour = await Tour.findOne(query)
-    .populate("country")
+    .populate({
+      path: "country",
+      populate: {
+        path: "continent",
+        select: "name slug",
+      },
+    })
     .populate({
       path: "reviews",
       match: { isVisible: true, moderationStatus: "approved" },

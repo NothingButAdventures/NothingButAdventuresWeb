@@ -20,8 +20,10 @@ interface Tour {
         currency: string;
         discountPercent: number;
         bookingPercentage?: number;
+        ownRoomPrice?: number;
     };
     ownRoomAvailable: boolean;
+    ownRoomPrice?: number;
     duration: {
         days: number;
         nights: number;
@@ -46,7 +48,8 @@ interface Tour {
             icon: string;
         }>;
         optionalActivities: Array<{
-            name: string;
+            name?: string;
+            title?: string;
             price: number | {
                 amount: number;
                 currency: string;
@@ -72,6 +75,11 @@ interface Tour {
         _id: string;
         name: string;
         slug: string;
+        continent?: {
+            _id: string;
+            name: string;
+            slug: string;
+        };
     };
     startDates: Array<{
         _id?: string;
@@ -520,7 +528,7 @@ export default function CheckoutPage() {
                         {
                             dayNumber,
                             activityIndex,
-                            name: activity.name,
+                            name: activity.name || activity.title || "",
                             price: activityPrice,
                             currency: activityCurrency,
                             count: newCount,
@@ -536,9 +544,9 @@ export default function CheckoutPage() {
             setAccommodationUpgrade(null);
         } else {
             setAccommodationUpgrade({
-                name: "My Own Room",
+                name: "Add your own room",
                 description: "Private room upgrade",
-                price: 279,
+                price: tour?.price?.ownRoomPrice ?? tour?.ownRoomPrice ?? 0,
                 currency: "USD",
                 count: newCount,
             });
@@ -740,20 +748,32 @@ export default function CheckoutPage() {
             {/* Header */}
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 py-4">
-                    <nav className="flex text-sm mb-4">
-                        <Link href="/" className="text-gray-500 hover:text-gray-700">
+                    <nav className="mb-4 flex items-center space-x-2 text-sm text-[#4B5563]">
+                        <Link href="/" className="hover:text-black transition-colors">
                             Home
                         </Link>
-                        <span className="mx-2 text-gray-400">/</span>
-                        <Link href="/trips" className="text-gray-500 hover:text-gray-700">
-                            Trips
+                        <span className="text-[#9CA3AF]">/</span>
+                        <Link href="/destinations" className="hover:text-black transition-colors">
+                            Destinations
                         </Link>
-                        <span className="mx-2 text-gray-400">/</span>
-                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="text-gray-500 hover:text-gray-700">
+                        {tour.country?.continent && (
+                            <>
+                                <span className="text-[#9CA3AF]">/</span>
+                                <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-black transition-colors capitalize">
+                                    {tour.country.continent.slug}
+                                </Link>
+                            </>
+                        )}
+                        <span className="text-[#9CA3AF]">/</span>
+                        <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-black transition-colors">
+                            {tour.country.name}
+                        </Link>
+                        <span className="text-[#9CA3AF]">/</span>
+                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="hover:text-black transition-colors">
                             {tour.name}
                         </Link>
-                        <span className="mx-2 text-gray-400">/</span>
-                        <span className="text-gray-900">Checkout</span>
+                        <span className="text-[#9CA3AF]">/</span>
+                        <span className="text-[#1F2937] font-medium">Checkout</span>
                     </nav>
 
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{tour.name}</h1>
@@ -940,7 +960,7 @@ export default function CheckoutPage() {
                                                                     const sTime = parseLocal(selectedDateObj.startDate);
                                                                     const eTime = parseLocal(selectedDateObj.endDate);
                                                                     const checkTime = checkDate.getTime();
-                                                                    
+
                                                                     if (checkTime === sTime) isSelectedStart = true;
                                                                     if (checkTime === eTime) isSelectedEnd = true;
                                                                     if (checkTime > sTime && checkTime < eTime) {
@@ -1114,9 +1134,6 @@ export default function CheckoutPage() {
                                                                 className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition"
                                                             >
                                                                 <div className="flex items-center gap-4">
-                                                                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                        <span className="text-lg">📅</span>
-                                                                    </div>
                                                                     <div className="text-left">
                                                                         <div className="font-bold text-gray-900">Day {day.day}</div>
                                                                         {selectedDate && (
@@ -1145,16 +1162,27 @@ export default function CheckoutPage() {
                                                                         return (
                                                                             <div key={actIdx} className="border rounded-lg p-4">
                                                                                 <div className="flex gap-4">
-                                                                                    <div className="w-32 h-24 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden">
-                                                                                        <div className="w-full h-full flex items-center justify-center text-3xl">
-                                                                                            🎯
-                                                                                        </div>
+                                                                                    <div className="w-32 h-24 rounded-lg bg-gray-200 flex-shrink-0 overflow-hidden relative">
+                                                                                        {primaryImage?.url ? (
+                                                                                            <Image
+                                                                                                src={primaryImage.url}
+                                                                                                alt={activity.name || activity.title || "Activity"}
+                                                                                                fill
+                                                                                                className="object-cover"
+                                                                                            />
+                                                                                        ) : (
+                                                                                            <div className="w-full h-full flex items-center justify-center text-3xl">
+                                                                                                🎯
+                                                                                            </div>
+                                                                                        )}
                                                                                     </div>
                                                                                     <div className="flex-1">
-                                                                                        <h4 className="font-bold text-gray-900">{activity.name}</h4>
-                                                                                        <p className="text-xs text-gray-500 uppercase mt-1">
-                                                                                            {activity.duration} • {activity.place}
-                                                                                        </p>
+                                                                                        <h4 className="font-bold text-gray-900">{activity.name || activity.title}</h4>
+                                                                                        {activity.place && (
+                                                                                            <p className="text-xs text-gray-500 uppercase mt-1">
+                                                                                                {activity.place}
+                                                                                            </p>
+                                                                                        )}
                                                                                         <p className="text-sm text-gray-600 mt-2 line-clamp-2">
                                                                                             {activity.description}
                                                                                         </p>
@@ -1218,9 +1246,9 @@ export default function CheckoutPage() {
                                         </div>
 
                                         {/* Accommodation Customization */}
-                                        {tour.ownRoomAvailable && (
+                                        {(tour.ownRoomAvailable || (tour.price?.ownRoomPrice !== undefined && tour.price.ownRoomPrice > 0)) && (
                                             <div className="border-t pt-6">
-                                                <h3 className="text-lg font-bold text-gray-900 mb-2">Customize your accommodation</h3>
+                                                <h3 className="text-lg font-bold text-gray-900 mb-2">Add-ons</h3>
                                                 <p className="text-gray-600 text-sm mb-4">
                                                     Basic accommodation is included in your tour, but you can customize and upgrade your options below
                                                 </p>
@@ -1231,14 +1259,14 @@ export default function CheckoutPage() {
                                                             <span className="text-2xl">🏨</span>
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900">My Own Room</h4>
+                                                            <h4 className="font-bold text-gray-900">Add your own room</h4>
                                                             <p className="text-sm text-gray-600 mt-1">
                                                                 During your tour, sometimes it&apos;s more convenient and comfortable to have your own room. We offer this option so you can treat yourself.
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
                                                             <div className="font-bold text-gray-900">
-                                                                $279<span className="text-xs font-normal text-gray-500"> USD per person</span>
+                                                                ${tour.price?.ownRoomPrice ?? tour.ownRoomPrice ?? 0}<span className="text-xs font-normal text-gray-500"> USD per person</span>
                                                             </div>
                                                             {accommodationUpgrade ? (
                                                                 <div className="mt-2 flex items-center justify-end gap-3">
@@ -1865,7 +1893,7 @@ export default function CheckoutPage() {
                                                                 : `$${promoData.discountAmount} off`}
                                                         </div>
                                                     </div>
-                                                    <button 
+                                                    <button
                                                         onClick={clearPromoCode}
                                                         className="p-1 hover:bg-emerald-100 rounded-full transition-colors"
                                                     >
@@ -1884,9 +1912,8 @@ export default function CheckoutPage() {
                                                             }}
                                                             onKeyDown={(e) => e.key === 'Enter' && handleApplyPromoCode()}
                                                             placeholder="Enter code"
-                                                            className={`flex-1 text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition uppercase font-mono tracking-wider ${
-                                                                promoError ? "border-red-300 bg-red-50" : "border-gray-300"
-                                                            }`}
+                                                            className={`flex-1 text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition uppercase font-mono tracking-wider ${promoError ? "border-red-300 bg-red-50" : "border-gray-300"
+                                                                }`}
                                                         />
                                                         <button
                                                             onClick={handleApplyPromoCode}

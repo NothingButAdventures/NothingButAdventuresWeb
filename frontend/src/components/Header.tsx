@@ -86,11 +86,11 @@ export default function Header() {
   }
 
   return (
-    <header className="relative bg-white sticky top-0 z-50 font-outfit px-4 md:px-8">
+    <header className={`relative sticky top-0 z-50 font-outfit px-4 md:px-8 transition-colors duration-200 ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}>
       <div className="mx-auto">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center md:grid md:grid-cols-[1fr_auto_1fr] py-4">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center space-x-3">
               <img src="/icon.png" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain" />
               <div className="flex flex-col leading-none text-black">
@@ -104,71 +104,74 @@ export default function Header() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-5 bg-[#f5f5f5] rounded-2xl px-4 py-2">
-            <button
-              type="button"
-              onMouseEnter={() => handleMenuEnter("adventures")}
-              onMouseLeave={handleMenuLeave}
-              onClick={() => setActiveMenu((currentMenu) => (currentMenu === "adventures" ? null : "adventures"))}
-              aria-expanded={activeMenu === "adventures"}
-              className="flex items-center space-x-1.5 rounded-full px-3.5 py-1.5 text-gray-800 transition-colors hover:text-black"
-            >
-              <span className="text-[16px] font-medium">Adventures</span>
-              <svg className={`transition-transform duration-200 w-4 h-4 ${activeMenu === "adventures" ? "rotate-180 text-black" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <button
-              type="button"
-              onMouseEnter={() => handleMenuEnter("destinations")}
-              onMouseLeave={handleMenuLeave}
-              onClick={() => setActiveMenu((currentMenu) => (currentMenu === "destinations" ? null : "destinations"))}
-              aria-expanded={activeMenu === "destinations"}
-              className="flex items-center space-x-1.5 rounded-full px-3.5 py-1.5 text-gray-800 transition-colors hover:text-black"
-            >
-              <span className="text-[16px] font-medium">Destinations</span>
-              <svg className={`transition-transform duration-200 w-4 h-4 ${activeMenu === "destinations" ? "rotate-180 text-black" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            <div className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors">
-              <span className="text-[16px] font-medium">Deals</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
-            <div className="flex items-center space-x-1.5 cursor-pointer text-gray-800 hover:text-black transition-colors">
-              <span className="text-[16px] font-medium">Why Us</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
-          </nav>
+          <div className="hidden md:flex justify-center">
+            <nav className={`flex items-stretch rounded-xl overflow-hidden transition-colors duration-200 ${activeMenu ? "bg-[#f3f8ff]" : "bg-[#f5f5f5]"}`}>
+              <button
+                type="button"
+                onMouseEnter={() => handleMenuEnter("adventures")}
+                onClick={() => setActiveMenu((currentMenu) => (currentMenu === "adventures" ? null : "adventures"))}
+                aria-expanded={activeMenu === "adventures"}
+                className={`flex items-center justify-center px-6 py-3.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "adventures" ? "bg-white text-[#a64dff]  font-semibold" : "hover:text-black"
+                  }`}
+              >
+                <span>Adventures</span>
+              </button>
+              <button
+                type="button"
+                onMouseEnter={() => handleMenuEnter("destinations")}
+                onClick={() => setActiveMenu((currentMenu) => (currentMenu === "destinations" ? null : "destinations"))}
+                aria-expanded={activeMenu === "destinations"}
+                className={`flex items-center justify-center px-6 py-2.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "destinations" ? "bg-white text-[#a64dff] font-semibold" : "hover:text-black"
+                  }`}
+              >
+                <span>Destinations</span>
+              </button>
+              <div className="flex items-center justify-center cursor-pointer text-gray-800 hover:text-black transition-all px-6 py-2.5 text-[16px] font-medium">
+                <span>Deals</span>
+              </div>
+              <div className="flex items-center justify-center cursor-pointer text-gray-800 hover:text-black transition-all px-6 py-2.5 text-[16px] font-medium">
+                <span>Why Us</span>
+              </div>
+            </nav>
+          </div>
 
           {/* User Authentication & Action */}
-          <div className="hidden md:flex items-center">
-            {isLoading ? (
+          <div className="hidden md:flex items-center justify-end space-x-4">
+            {activeMenu ? (
+              <button
+                type="button"
+                onClick={() => setActiveMenu(null)}
+                className="w-10 h-10 rounded-full bg-[#a64dff] text-white flex items-center justify-center transition-all hover:bg-[#913be6] cursor-pointer"
+                aria-label="Close megamenu"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            ) : isLoading ? (
               <div className="flex items-center space-x-2 animate-pulse">
                 <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
               </div>
             ) : (
               <>
+                {/* Call Icon */}
+                <a
+                  href="tel:+1234567890"
+                  className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-label="Call us"
+                >
+                  <img src="/call-header.svg" alt="Call" className="w-6 h-6" />
+                </a>
+
+                {/* Profile Icon */}
                 {user ? (
                   <div className="relative">
                     <button
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                      className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                      aria-label="User profile"
                     >
-                      <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all">
-                        {user.avatar ? (
-                          <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-white text-sm font-semibold">
-                            {user.name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-semibold hidden lg:inline">{user.name}</span>
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${isUserMenuOpen ? "rotate-180" : ""}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                      <img src="/profile-header.svg" alt="Profile" className="w-6 h-6" />
                     </button>
 
                     {/* User Dropdown */}
@@ -226,10 +229,11 @@ export default function Header() {
                   </div>
                 ) : (
                   <Link
-                    href="/auth/register"
-                    className="bg-[#111] hover:bg-black text-white text-[16px] font-medium py-3 px-6 rounded-xl transition-all"
+                    href="/auth/login"
+                    className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                    aria-label="Sign in"
                   >
-                    Plan My Trip
+                    <img src="/profile-header.svg" alt="Profile" className="w-6 h-6" />
                   </Link>
                 )}
               </>
@@ -289,7 +293,6 @@ export default function Header() {
             clearTimeout(hoverTimeoutRef.current);
           }
         }}
-        onMouseLeave={handleMenuLeave}
       >
         <HeaderMegaMenu activeMenu={activeMenu} />
       </div>

@@ -37,6 +37,8 @@ interface ActivityOption {
   destination?: { _id?: string; name?: string } | string;
   travelStyle?: { _id?: string; name?: string } | string;
   location?: string;
+  isFree?: boolean;
+  price?: number;
 }
 
 interface OptionalActivity {
@@ -66,6 +68,7 @@ interface ItineraryDay {
   optionalActivities: any[];
   accommodations: Accommodation[];
   meals: string;
+  importantNote?: string;
 }
 
 interface AvailableDate {
@@ -198,8 +201,10 @@ export default function CreateTourPage() {
     staffExperts: "",
     accommodation: "",
     ageMin: "0",
+    ageMax: "0",
     isFeatured: false,
     isActive: true,
+    wifiAvailable: false,
   });
 
   useEffect(() => {
@@ -488,6 +493,7 @@ export default function CreateTourPage() {
         optionalActivities: [],
         accommodations: [{ name: "", type: "Hotel" }],
         meals: "",
+        importantNote: "",
       },
     ]);
   };
@@ -755,7 +761,7 @@ export default function CreateTourPage() {
   ) => {
     setAvailableDates((prev) => {
       const updated = prev.map((item, i) => (i === index ? { ...item, [field]: value } : item));
-      
+
       // Auto-calculate end date if start date is updated and duration is set
       if (field === "startDate" && value) {
         const days = parseInt(formData.durationDays, 10);
@@ -764,11 +770,11 @@ export default function CreateTourPage() {
           if (year && month && day) {
             const start = new Date(year, month - 1, day);
             start.setDate(start.getDate() + (days - 1));
-            
+
             const newYear = start.getFullYear();
             const newMonth = String(start.getMonth() + 1).padStart(2, '0');
             const newDay = String(start.getDate()).padStart(2, '0');
-            
+
             updated[index].endDate = `${newYear}-${newMonth}-${newDay}`;
           }
         }
@@ -837,8 +843,9 @@ export default function CreateTourPage() {
             day: day.day,
             title: day.title,
             description: day.description,
-            activities: day.activities.map(act => act._id || act),
-            optionalActivities: day.optionalActivities.map(act => act._id || act),
+            importantNote: day.importantNote,
+            activities: day.activities.map(act => act._id || (typeof act === "string" ? act : null)).filter(Boolean),
+            optionalActivities: day.optionalActivities.map(act => act._id || (typeof act === "string" ? act : null)).filter(Boolean),
             accommodations: day.accommodations,
             meals: {
               breakfast: day.meals.includes("Breakfast"),
@@ -907,7 +914,9 @@ export default function CreateTourPage() {
         })).filter((ad) => ad.startDate && ad.endDate),
         ageRequirement: {
           min: parseInt(formData.ageMin) || 0,
+          max: parseInt(formData.ageMax) || 99,
         },
+        wifiAvailable: formData.wifiAvailable,
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
       };
@@ -1321,17 +1330,61 @@ export default function CreateTourPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Min Age
+                    Age Requirements
                   </label>
-                  <input
-                    type="number"
-                    name="ageMin"
-                    value={formData.ageMin}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
-                    placeholder="0"
-                  />
+                  <div className="flex items-center gap-3">
+                    <div className="w-24">
+                      <input
+                        type="number"
+                        name="ageMin"
+                        value={formData.ageMin}
+                        onChange={handleChange}
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                        placeholder="Min"
+                      />
+                    </div>
+                    <span className="text-gray-400">to</span>
+                    <div className="w-24">
+                      <input
+                        type="number"
+                        name="ageMax"
+                        value={formData.ageMax}
+                        onChange={handleChange}
+                        min="0"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                        placeholder="Max"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Wifi Availability
+                  </label>
+                  <div className="flex items-center gap-6 mt-1">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="wifiAvailable"
+                        checked={formData.wifiAvailable === true}
+                        onChange={() => setFormData({ ...formData, wifiAvailable: true })}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 font-medium">Yes</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="wifiAvailable"
+                        checked={formData.wifiAvailable === false}
+                        onChange={() => setFormData({ ...formData, wifiAvailable: false })}
+                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className="ml-2 text-sm text-gray-700 font-medium">No</span>
+                    </label>
+                  </div>
                 </div>
 
 
@@ -1579,8 +1632,16 @@ export default function CreateTourPage() {
                             </svg>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-700 block">{opt.title}</span>
-                            <span className="text-xs text-gray-400">{opt.location}</span>
+                            <span className="font-medium text-gray-700 block text-sm">{opt.title}</span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-gray-500 font-medium">{opt.location}</span>
+                              <span className="text-xs text-gray-300">•</span>
+                              {opt.isFree ? (
+                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Free</span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">${opt.price}</span>
+                              )}
+                            </div>
                           </div>
                         </button>
                       ))}
@@ -1613,31 +1674,6 @@ export default function CreateTourPage() {
             </div>
           )}
 
-          {/* Create Activity Modal */}
-          {showActivityPopup && (
-            <CreateActivityModal
-              isOpen={showCreateActivityModal}
-              onClose={() => setShowCreateActivityModal(false)}
-              destinationId={formData.country}
-              locationTags={
-                itinerary[showActivityPopup.dayIndex]?.title
-                  ? itinerary[showActivityPopup.dayIndex].title.split(",").map((t: string) => t.trim()).filter(Boolean)
-                  : []
-              }
-              onCreated={(newActivity) => {
-                setActivityOptions((prev) => [newActivity, ...prev]);
-                // Auto-select the newly created activity
-                applyActivityOption(
-                  showActivityPopup.dayIndex,
-                  showActivityPopup.activityIndex,
-                  newActivity._id,
-                  showActivityPopup.isOptional
-                );
-                setShowActivityPopup(null);
-                setActivitySearchInput("");
-              }}
-            />
-          )}
 
           {/* Images Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -1919,6 +1955,16 @@ export default function CreateTourPage() {
                         rows={2}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                       />
+
+                      <textarea
+                        value={day.importantNote || ""}
+                        onChange={(e) =>
+                          updateItinerary(dayIndex, "importantNote", e.target.value)
+                        }
+                        placeholder="Important note (Optional)"
+                        rows={2}
+                        className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                      />
                     </div>
 
 
@@ -1938,8 +1984,8 @@ export default function CreateTourPage() {
                               className="bg-white p-4 rounded border border-gray-200"
                             >
                               <div className="flex justify-between items-start mb-3">
-                                <h5 className="text-sm font-medium text-gray-700">
-                                  Activity #{actIndex + 1}
+                                <h5 className="text-sm font-semibold text-gray-800">
+                                  {activity.title || activity.name || `Activity #${actIndex + 1}`}
                                 </h5>
                                 <button
                                   type="button"
@@ -2000,8 +2046,8 @@ export default function CreateTourPage() {
                             className="bg-white p-4 rounded border border-gray-200"
                           >
                             <div className="flex justify-between items-start mb-3">
-                              <h5 className="text-sm font-medium text-gray-700">
-                                Optional Activity #{optIndex + 1}
+                              <h5 className="text-sm font-semibold text-gray-800">
+                                {optActivity.title || optActivity.name || `Optional Activity #${optIndex + 1}`}
                               </h5>
                               <button
                                 type="button"
@@ -2275,6 +2321,34 @@ export default function CreateTourPage() {
         multiple={imagePickerModal.multiple}
         folder="tour-images"
       />
+      {/* Create Activity Modal */}
+      {showActivityPopup && (
+        <CreateActivityModal
+          isOpen={showCreateActivityModal}
+          onClose={() => setShowCreateActivityModal(false)}
+          destinationId={formData.country}
+          locationTags={
+            itinerary[showActivityPopup.dayIndex]?.title
+              ? itinerary[showActivityPopup.dayIndex].title.split(",").map((t: string) => t.trim()).filter(Boolean)
+              : []
+          }
+          onCreated={(newActivity) => {
+            setActivityOptions((prev) => [newActivity, ...prev]);
+            // Auto-select the newly created activity directly in the state to avoid stale closure state
+            setItinerary((prevItinerary) => {
+              const newItinerary = [...prevItinerary];
+              if (showActivityPopup.isOptional) {
+                newItinerary[showActivityPopup.dayIndex].optionalActivities[showActivityPopup.activityIndex] = newActivity;
+              } else {
+                newItinerary[showActivityPopup.dayIndex].activities[showActivityPopup.activityIndex] = newActivity;
+              }
+              return newItinerary;
+            });
+            setShowActivityPopup(null);
+            setActivitySearchInput("");
+          }}
+        />
+      )}
     </div>
   );
 }

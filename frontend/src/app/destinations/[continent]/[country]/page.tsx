@@ -24,6 +24,10 @@ interface Country {
       answer?: string;
     }>;
   };
+  bestTime?: {
+    title?: string;
+    subtitle?: string;
+  };
   bestTimeInsights?: {
     mostPopularTime?: string;
     budgetFriendly?: string;
@@ -31,6 +35,8 @@ interface Country {
     culturallySignificantTimes?: string;
   };
   needToKnow?: {
+    title?: string;
+    subtitle?: string;
     timeZone?: string;
     climate?: string;
     currency?: string;
@@ -471,17 +477,17 @@ export default async function CountryDestinationsPage({
   const travelStoryCards =
     (travelStoryBlogs.length > 0
       ? travelStoryBlogs.slice(0, 4).map((blog, index) => ({
-          id: blog._id,
-          title: blog.title,
-          subtitle:
-            stripHtml(blog.excerpt) ||
-            stripHtml(blog.content).slice(0, 80) ||
-            `${countryName} travel story`,
-          image:
-            blog.featuredImage?.url && blog.featuredImage.url.trim() !== ""
-              ? blog.featuredImage.url
-              : FALLBACK_TRAVEL_STORIES[index % FALLBACK_TRAVEL_STORIES.length].image,
-        }))
+        id: blog._id,
+        title: blog.title,
+        subtitle:
+          stripHtml(blog.excerpt) ||
+          stripHtml(blog.content).slice(0, 80) ||
+          `${countryName} travel story`,
+        image:
+          blog.featuredImage?.url && blog.featuredImage.url.trim() !== ""
+            ? blog.featuredImage.url
+            : FALLBACK_TRAVEL_STORIES[index % FALLBACK_TRAVEL_STORIES.length].image,
+      }))
       : FALLBACK_TRAVEL_STORIES).slice(0, 4);
   const bestTimeItems = [
     {
@@ -505,6 +511,23 @@ export default async function CountryDestinationsPage({
   return (
     <main className="min-h-screen w-full bg-white pb-24">
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
+        {/* Breadcrumbs */}
+        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
+          <Link href="/" className="hover:text-black transition-colors">
+            Home
+          </Link>
+          <span className="text-[#9CA3AF]">/</span>
+          <Link href="/destinations" className="hover:text-black transition-colors">
+            Destinations
+          </Link>
+          <span className="text-[#9CA3AF]">/</span>
+          <Link href={`/destinations/${continent}`} className="hover:text-black transition-colors capitalize">
+            {continent}
+          </Link>
+          <span className="text-[#9CA3AF]">/</span>
+          <span className="text-[#1F2937] font-medium">{countryName}</span>
+        </nav>
+
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
             <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
@@ -666,11 +689,11 @@ export default async function CountryDestinationsPage({
             </span>
 
             <h3 className="mt-5 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
-              Best Time to Travel
+              {country.bestTime?.title?.trim() || "Best Time to Travel"}
             </h3>
 
             <p className="mt-4 text-[16px] leading-[1.4] text-[#4e5564] md:text-[22px]">
-              {country.bestTimeInsights?.mostPopularTime?.trim() || `Best seasons to visit ${countryName}`}
+              {country.bestTime?.subtitle?.trim() || country.bestTimeInsights?.mostPopularTime?.trim() || `Best seasons to visit ${countryName}`}
             </p>
 
             <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 md:grid-cols-2 xl:grid-cols-4">

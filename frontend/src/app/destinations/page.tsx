@@ -32,6 +32,15 @@ export default async function DestinationsPage() {
   return (
     <main className="min-h-screen w-full bg-[#f5f5f5] pb-24">
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
+        {/* Breadcrumbs */}
+        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
+          <Link href="/" className="hover:text-black transition-colors">
+            Home
+          </Link>
+          <span className="text-[#9CA3AF]">/</span>
+          <span className="text-[#1F2937] font-medium">Destinations</span>
+        </nav>
+
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
             <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">

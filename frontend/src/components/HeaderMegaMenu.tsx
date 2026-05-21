@@ -456,7 +456,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   }
 
   return (
-    <div className="absolute left-0 top-full z-50 w-full bg-white px-4 pb-5 pt-3 md:px-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]  border-black/5">
+    <div className="absolute left-0 top-full z-50 w-full bg-[#f3f8ff] px-4 pb-5 pt-3 md:px-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]  border-black/5">
       <div className="mx-auto w-full max-w-[1600px]">
         {activeMenu === "adventures" ? (
           /* ═══════════════ ADVENTURES ═══════════════ */
@@ -470,7 +470,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
           >
             {/* Col 1 – Tour Categories (spans both rows) */}
             <div
-              className="overflow-y-auto rounded-2xl bg-[#F2F3F7] p-5"
+              className="overflow-y-auto rounded-2xl bg-white p-5"
               style={{ gridColumn: "1", gridRow: "1 / 3" }}
             >
               <div className="flex flex-col gap-2">
@@ -506,7 +506,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
             {/* Col 2, Row 1 – Description */}
             <div
-              className="flex flex-col overflow-y-auto rounded-2xl bg-[#F2F3F7] p-6 h-fit max-h-full"
+              className="flex flex-col overflow-y-auto rounded-2xl bg-white p-6 h-fit max-h-full"
               style={{ gridColumn: "2", gridRow: "1" }}
             >
               <div>
@@ -575,7 +575,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
             {/* Col 4 – Popular Regions (spans both rows) */}
             <div
-              className="overflow-y-auto rounded-2xl bg-[#F2F3F7] p-5"
+              className="overflow-y-auto rounded-2xl bg-white p-5"
               style={{ gridColumn: "4", gridRow: "1 / 3" }}
             >
               <h3 className="text-[18px] font-bold tracking-[-0.01em] text-[#111]">
@@ -639,7 +639,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       <Link
                         key={tour._id}
                         href={getTourHref(tour)}
-                        className="group flex h-[94px] flex-col justify-between rounded-xl bg-[#F2F3F7] px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                        className="group flex h-[94px] flex-col justify-between rounded-xl bg-white px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.01em] text-[#172035]">
@@ -694,7 +694,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
           >
             {/* Col 1 – Continents (spans both rows) */}
             <div
-              className="overflow-y-auto rounded-2xl bg-[#F2F3F7] p-5"
+              className="overflow-y-auto rounded-2xl bg-white p-5"
               style={{ gridColumn: "1", gridRow: "1 / 3" }}
             >
               <div className="flex flex-col gap-2">
@@ -730,7 +730,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
             {/* Col 2, Row 1 – Description */}
             <div
-              className="flex flex-col overflow-y-auto rounded-2xl bg-[#F2F3F7] p-6 h-fit max-h-full"
+              className="flex flex-col overflow-y-auto rounded-2xl bg-white p-6 h-fit max-h-full"
               style={{ gridColumn: "2", gridRow: "1" }}
             >
               <div>
@@ -793,7 +793,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
             {/* Col 4 – Featured tours (spans both rows) */}
             <div
-              className="overflow-y-auto rounded-2xl bg-[#F2F3F7] p-5"
+              className="overflow-y-auto rounded-2xl bg-white p-5"
               style={{ gridColumn: "4", gridRow: "1 / 3" }}
             >
               {destinationLoading && continentTours.length === 0 ? (
@@ -873,7 +873,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
             {/* Col 2-3, Row 2 – Countries grid */}
             <div
-              className="rounded-2xl bg-[#F2F3F7] px-6 py-4"
+              className="rounded-2xl bg-white px-6 py-4"
               style={{ gridColumn: "2 / 4", gridRow: "2" }}
             >
               <div className="grid grid-cols-3 gap-x-8 gap-y-2">

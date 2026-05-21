@@ -105,6 +105,11 @@ const countrySchema = new mongoose.Schema(
         default: "Best time to travel",
         trim: true,
       },
+      subtitle: {
+        type: String,
+        default: "",
+        trim: true,
+      },
       heading: {
         type: String,
         default: "",
@@ -146,6 +151,16 @@ const countrySchema = new mongoose.Schema(
       },
     },
     needToKnow: {
+      title: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      subtitle: {
+        type: String,
+        default: "",
+        trim: true,
+      },
       timeZone: {
         type: String,
         trim: true,

@@ -1,4 +1,6 @@
 type NeedToKnowData = {
+  title?: string;
+  subtitle?: string;
   timeZone?: string;
   climate?: string;
   currency?: string;
@@ -31,10 +33,12 @@ export default function CountryNeedToKnowSection({
         </span>
 
         <h3 className="mt-4 text-[42px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
-          {countryName} at a Glance
+          {needToKnow?.title?.trim() || `${countryName} at a Glance`}
         </h3>
 
-        <p className="mt-2 text-[34px] font-medium leading-tight text-[#495468] md:text-[36px]">Need to Know</p>
+        <p className="mt-2 text-[34px] font-medium leading-tight text-[#495468] md:text-[36px]">
+          {needToKnow?.subtitle?.trim() || "Need to Know"}
+        </p>
 
         <div className="mt-12 grid grid-cols-1 gap-x-16 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item, index) => (

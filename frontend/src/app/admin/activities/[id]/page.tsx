@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { uploadActivityImage } from "@/lib/firebase";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 export default function EditActivityPage() {
   const router = useRouter();
@@ -24,7 +24,6 @@ export default function EditActivityPage() {
     travelStyles: [] as string[],
     isFree: false,
     physicalRating: "",
-    ageGroup: "",
     coverImage: "",
     location: "",
     price: "",
@@ -35,9 +34,7 @@ export default function EditActivityPage() {
   const [showLocationPopup, setShowLocationPopup] = useState(false);
   const [locationSearch, setLocationSearch] = useState("");
   const [addingLocation, setAddingLocation] = useState(false);
-
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState("");
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -71,14 +68,12 @@ export default function EditActivityPage() {
         destination: act.destination?._id || act.destination,
         travelStyles: act.travelStyles?.map((s: any) => s._id || s) || (act.travelStyle ? [act.travelStyle?._id || act.travelStyle] : []),
         isFree: act.isFree,
-        physicalRating: act.physicalRating?._id || act.physicalRating,
-        ageGroup: act.ageGroup,
+        physicalRating: act.physicalRating?._id || act.physicalRating || "",
         coverImage: act.coverImage,
         location: act.location || "",
         price: act.price?.toString() || "0",
         duration: act.duration || "",
       });
-      setImagePreview(act.coverImage);
 
       if (act.destination?._id || act.destination) {
         fetchDestinations(act.destination?._id || act.destination);
@@ -147,13 +142,7 @@ export default function EditActivityPage() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+  // Image selection is now handled via ImagePickerModal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,16 +150,20 @@ export default function EditActivityPage() {
 
     try {
       const token = localStorage.getItem("token");
-      let coverImageUrl = formData.coverImage;
-
-      if (imageFile) {
-        coverImageUrl = await uploadActivityImage(imageFile);
-      }
 
       if (formData.travelStyles.length === 0) {
         alert("Please select at least one travel style");
         setSubmitting(false);
         return;
+      }
+
+      const payload: any = {
+        ...formData,
+        price: formData.isFree ? 0 : Number(formData.price),
+      };
+
+      if (!payload.physicalRating) {
+        delete payload.physicalRating;
       }
 
       const response = await fetch(`${api.baseURL}${api.endpoints.activities.update(id as string)}`, {
@@ -179,11 +172,7 @@ export default function EditActivityPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
-          ...formData, 
-          price: formData.isFree ? 0 : Number(formData.price),
-          coverImage: coverImageUrl 
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
@@ -256,6 +245,24 @@ export default function EditActivityPage() {
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Travel Styles</label>
             <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const allIds = travelStyles.map(s => s._id);
+                  if (formData.travelStyles.length === allIds.length) {
+                    setFormData({ ...formData, travelStyles: [] });
+                  } else {
+                    setFormData({ ...formData, travelStyles: allIds });
+                  }
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-bold transition-colors border ${
+                  formData.travelStyles.length === travelStyles.length && travelStyles.length > 0
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200"
+                }`}
+              >
+                {formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "Deselect All" : "Select All"}
+              </button>
               {travelStyles.map((s) => (
                 <button
                   key={s._id}
@@ -366,31 +373,18 @@ export default function EditActivityPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Physical Rating</label>
-              <select
-                required
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
-                value={formData.physicalRating}
-                onChange={(e) => setFormData({ ...formData, physicalRating: e.target.value })}
-              >
-                <option value="">Select rating</option>
-                {physicalRatings.map((r) => (
-                  <option key={r._id} value={r._id}>Level {r.level} - {r.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Age Group</label>
-              <input
-                type="text"
-                required
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
-                value={formData.ageGroup}
-                onChange={(e) => setFormData({ ...formData, ageGroup: e.target.value })}
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Physical Rating (Optional)</label>
+            <select
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              value={formData.physicalRating}
+              onChange={(e) => setFormData({ ...formData, physicalRating: e.target.value })}
+            >
+              <option value="">Select rating</option>
+              {physicalRatings.map((r) => (
+                <option key={r._id} value={r._id}>Level {r.level} - {r.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex items-center gap-3">
@@ -433,20 +427,22 @@ export default function EditActivityPage() {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
-            <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden group">
-              {imagePreview ? (
+            <div 
+              onClick={() => setShowImagePicker(true)}
+              className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden group min-h-[140px] items-center"
+            >
+              {formData.coverImage ? (
                 <div className="absolute inset-0">
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={formData.coverImage} alt="Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">Change Image</span>
+                    <span className="text-white text-sm font-medium">Select/Upload Image</span>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-1 text-center">
-                  <p className="text-sm text-gray-600">Click to upload</p>
+                  <p className="text-sm text-gray-600">Click to select from Media Library or Upload</p>
                 </div>
               )}
-              <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleImageChange} accept="image/*" />
             </div>
           </div>
 
@@ -461,6 +457,16 @@ export default function EditActivityPage() {
           </div>
         </form>
       </div>
+      <ImagePickerModal
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={(urls) => {
+          if (urls.length > 0) {
+            setFormData({ ...formData, coverImage: urls[0] });
+          }
+        }}
+        multiple={false}
+      />
     </div>
   );
 }

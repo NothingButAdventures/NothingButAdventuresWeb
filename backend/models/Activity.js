@@ -41,11 +41,9 @@ const activitySchema = new mongoose.Schema(
     physicalRating: {
       type: mongoose.Schema.ObjectId,
       ref: "PhysicalRating",
-      required: [true, "An activity must have a physical rating"],
     },
     ageGroup: {
       type: String,
-      required: [true, "An activity must specify an age group"],
       trim: true,
     },
     coverImage: {

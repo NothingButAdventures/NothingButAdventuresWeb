@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { listAllImagesWithTitles, uploadToFirebase, ImageWithTitle } from "@/lib/firebase";
-import { X, CloudArrowUp, Image as ImageIcon, Check, MagnifyingGlass } from "@phosphor-icons/react";
+import { listAllImagesWithTitles, uploadToFirebase, ImageWithTitle, deleteImageFromFirebase } from "@/lib/firebase";
+import { X, CloudArrowUp, Image as ImageIcon, Check, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 
 interface ImagePickerModalProps {
   isOpen: boolean;
@@ -89,6 +89,25 @@ export default function ImagePickerModal({
     setSelectedUrls([]);
   };
 
+  const handleDeleteImage = async (url: string, title: string) => {
+    const confirmed = window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      // Remove from selected list if it was selected
+      setSelectedUrls((prev) => prev.filter((u) => u !== url));
+      
+      // Perform the deletion
+      await deleteImageFromFirebase(url);
+      
+      // Refresh the image library
+      await fetchImages();
+    } catch (error) {
+      console.error("Failed to delete image:", error);
+      alert("Error deleting image: " + (error instanceof Error ? error.message : "Unknown error"));
+    }
+  };
+
   const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -147,7 +166,7 @@ export default function ImagePickerModal({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 9999,
+        zIndex: 20000,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -310,6 +329,42 @@ export default function ImagePickerModal({
                               display: 'block',
                             }}
                           />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteImage(img.url, img.title);
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: '6px',
+                              right: '6px',
+                              backgroundColor: 'white',
+                              color: '#ef4444',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '26px',
+                              height: '26px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              cursor: 'pointer',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                              transition: 'all 0.2s',
+                              zIndex: 10,
+                            }}
+                            title="Delete Image"
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = '#fef2f2';
+                              e.currentTarget.style.transform = 'scale(1.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'white';
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                          >
+                            <Trash size={14} weight="bold" />
+                          </button>
                           {isSelected && (
                             <div
                               style={{

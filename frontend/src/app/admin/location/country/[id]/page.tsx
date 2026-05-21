@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { uploadCountryImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
+import CreateActivityModal from "@/components/CreateActivityModal";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 
 // --- Types ---
@@ -33,6 +35,10 @@ interface Country {
             answer?: string;
         }>;
     };
+    bestTime?: {
+        title?: string;
+        subtitle?: string;
+    };
     bestTimeInsights?: {
         mostPopularTime?: string;
         budgetFriendly?: string;
@@ -40,6 +46,8 @@ interface Country {
         culturallySignificantTimes?: string;
     };
     needToKnow?: {
+        title?: string;
+        subtitle?: string;
         timeZone?: string;
         climate?: string;
         currency?: string;
@@ -120,10 +128,14 @@ export default function EditCountryPage() {
     const [faqTitle, setFaqTitle] = useState("FAQ");
     const [faqSubtitle, setFaqSubtitle] = useState("Everything you need to know before your desert journey - from booking to what to pack.");
     const [faqItems, setFaqItems] = useState<Array<{ question: string; answer: string }>>([]);
+    const [bestTimeTitle, setBestTimeTitle] = useState("");
+    const [bestTimeSubtitle, setBestTimeSubtitle] = useState("");
     const [mostPopularTimeDescription, setMostPopularTimeDescription] = useState("");
     const [budgetFriendlyDescription, setBudgetFriendlyDescription] = useState("");
     const [favouriteSeasonDescription, setFavouriteSeasonDescription] = useState("");
     const [culturallySignificantTimesDescription, setCulturallySignificantTimesDescription] = useState("");
+    const [needToKnowTitle, setNeedToKnowTitle] = useState("");
+    const [needToKnowSubtitle, setNeedToKnowSubtitle] = useState("");
     const [needToKnowTimeZone, setNeedToKnowTimeZone] = useState("");
     const [needToKnowClimate, setNeedToKnowClimate] = useState("");
     const [needToKnowCurrency, setNeedToKnowCurrency] = useState("");
@@ -139,15 +151,21 @@ export default function EditCountryPage() {
     const [travelStoryBlogSearch, setTravelStoryBlogSearch] = useState("");
     const [selectedTravelStoryBlogIds, setSelectedTravelStoryBlogIds] = useState<string[]>([]);
     const [blogsLoading, setBlogsLoading] = useState(true);
+    const [showCreateActivityModal, setShowCreateActivityModal] = useState(false);
+    const [showImagePicker, setShowImagePicker] = useState(false);
+
+    const handleActivityCreated = (newActivity: any) => {
+        setAllActivities((prev) => [newActivity, ...prev]);
+        setSelectedActivityIds((prev) => [...prev, String(newActivity._id)]);
+    };
 
     useEffect(() => {
-        if (id) fetchCountry();
+        if (id) {
+            fetchCountry();
+            fetchActivities();
+            fetchBlogs();
+        }
     }, [id]);
-
-    useEffect(() => {
-        fetchActivities();
-        fetchBlogs();
-    }, []);
 
     const fetchCountry = async () => {
         try {
@@ -177,10 +195,14 @@ export default function EditCountryPage() {
                 } else {
                     setFaqItems([]);
                 }
+                setBestTimeTitle(c.bestTime?.title || "");
+                setBestTimeSubtitle(c.bestTime?.subtitle || "");
                 setMostPopularTimeDescription(c.bestTimeInsights?.mostPopularTime || "");
                 setBudgetFriendlyDescription(c.bestTimeInsights?.budgetFriendly || "");
                 setFavouriteSeasonDescription(c.bestTimeInsights?.favouriteSeason || "");
                 setCulturallySignificantTimesDescription(c.bestTimeInsights?.culturallySignificantTimes || "");
+                setNeedToKnowTitle(c.needToKnow?.title || "");
+                setNeedToKnowSubtitle(c.needToKnow?.subtitle || "");
                 setNeedToKnowTimeZone(c.needToKnow?.timeZone || "");
                 setNeedToKnowClimate(c.needToKnow?.climate || "");
                 setNeedToKnowCurrency(c.needToKnow?.currency || "");
@@ -206,9 +228,10 @@ export default function EditCountryPage() {
     };
 
     const fetchActivities = async () => {
+        if (!id) return;
         try {
             setActivitiesLoading(true);
-            const res = await fetch(`${api.baseURL}/activities?limit=500`, {
+            const res = await fetch(`${api.baseURL}/activities?destination=${id}&limit=500`, {
                 credentials: "include",
             });
             const data = await res.json();
@@ -307,6 +330,10 @@ export default function EditCountryPage() {
                     subtitle: faqSubtitle,
                     items: faqItems.filter((item) => item.question.trim() !== ""),
                 },
+                bestTime: {
+                    title: bestTimeTitle.trim(),
+                    subtitle: bestTimeSubtitle.trim(),
+                },
                 bestTimeInsights: {
                     mostPopularTime: mostPopularTimeDescription.trim(),
                     budgetFriendly: budgetFriendlyDescription.trim(),
@@ -314,6 +341,8 @@ export default function EditCountryPage() {
                     culturallySignificantTimes: culturallySignificantTimesDescription.trim(),
                 },
                 needToKnow: {
+                    title: needToKnowTitle.trim(),
+                    subtitle: needToKnowSubtitle.trim(),
                     timeZone: needToKnowTimeZone.trim(),
                     climate: needToKnowClimate.trim(),
                     currency: needToKnowCurrency.trim(),
@@ -334,7 +363,7 @@ export default function EditCountryPage() {
             });
             const data = await res.json();
             if (data.status === "success") {
-                alert("Country saved successfully!");
+                alert("Destination saved successfully!");
                 router.refresh();
             } else {
                 alert("Error saving: " + data.message);
@@ -347,8 +376,8 @@ export default function EditCountryPage() {
         }
     };
 
-    if (loading) return <div className="p-10 flex justify-center text-gray-500 animate-pulse">Loading country...</div>;
-    if (!country) return <div className="p-10 text-center">Country not found</div>;
+    if (loading) return <div className="p-10 flex justify-center text-gray-500 animate-pulse">Loading destination...</div>;
+    if (!country) return <div className="p-10 text-center">Destination not found</div>;
 
     const filteredActivities = allActivities.filter((activity) => {
         const q = activitySearch.trim().toLowerCase();
@@ -387,7 +416,7 @@ export default function EditCountryPage() {
                                 <Icons.Back className="w-5 h-5" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Edit Country</h1>
+                                <h1 className="text-xl font-bold text-gray-900">Edit Destination</h1>
                                 <p className="text-sm text-gray-500">Update details for {country.name}</p>
                             </div>
                         </div>
@@ -413,7 +442,7 @@ export default function EditCountryPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">General Information</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Country Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Destination Name</label>
                         <input
                             type="text"
                             value={name}
@@ -433,7 +462,7 @@ export default function EditCountryPage() {
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Describe this country... (Culture, History, Top Destinations)"
+                            placeholder="Describe this destination... (Culture, History, Top Destinations)"
                             rows={5}
                             className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-gray-800 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
                         />
@@ -443,31 +472,24 @@ export default function EditCountryPage() {
                 {/* Cover Image Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">Cover Image</h2>
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                    <div
+                        onClick={() => setShowImagePicker(true)}
+                        className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer min-h-[200px]"
+                    >
                         {image ? (
                             <div className="relative w-full max-w-lg aspect-video rounded-lg overflow-hidden shadow-md group">
                                 <img src={image} alt="Cover" className="w-full h-full object-cover" />
-                                <button
-                                    onClick={() => setImage("")}
-                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity"
-                                >
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
                                     Change Image
-                                </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="text-center">
                                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                                     <Icons.Image className="w-8 h-8" />
                                 </div>
-                                <p className="text-gray-500 mb-4">Upload a high-quality cover image for this country</p>
+                                <p className="text-gray-500 mb-4">Click to select from Media Library or Upload a cover image</p>
                             </div>
-                        )}
-
-                        {!image && (
-                            <label className="cursor-pointer flex items-center gap-2 px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition shadow-lg mt-4">
-                                {uploadingImage ? "Uploading..." : "Upload Cover Image"}
-                                <input type="file" hidden accept="image/*" onChange={handleMainImageUpload} disabled={uploadingImage} />
-                            </label>
                         )}
                     </div>
                 </div>
@@ -478,13 +500,24 @@ export default function EditCountryPage() {
                         Select one or more activities for the "Popular Activities" section on {name || country.name} page.
                     </p>
 
-                    <input
-                        type="text"
-                        value={activitySearch}
-                        onChange={(e) => setActivitySearch(e.target.value)}
-                        placeholder="Search activities by title or slug"
-                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-                    />
+                    <div className="flex gap-3 mb-4">
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                value={activitySearch}
+                                onChange={(e) => setActivitySearch(e.target.value)}
+                                placeholder="Search activities by title or slug"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setShowCreateActivityModal(true)}
+                            className="px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-semibold shadow-sm flex items-center gap-1.5 whitespace-nowrap"
+                        >
+                            + Create New Activity
+                        </button>
+                    </div>
 
                     <div className="mt-4 border border-gray-200 rounded-xl max-h-80 overflow-y-auto">
                         {activitiesLoading ? (
@@ -550,8 +583,31 @@ export default function EditCountryPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-4">Best Time</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Fill only these 4 descriptions. Labels are fixed on frontend.
+                        Fill the section title/description and these 4 descriptions. Labels are fixed on frontend.
                     </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b border-gray-100 pb-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Heading (fallback: Best Time to Travel)</label>
+                            <input
+                                type="text"
+                                value={bestTimeTitle}
+                                onChange={(e) => setBestTimeTitle(e.target.value)}
+                                placeholder="Best Time to Travel"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Subheading (fallback: Best seasons to visit [Country])</label>
+                            <input
+                                type="text"
+                                value={bestTimeSubtitle}
+                                onChange={(e) => setBestTimeSubtitle(e.target.value)}
+                                placeholder="e.g. Best seasons to visit India"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                    </div>
 
                     <div className="space-y-4">
                         <div>
@@ -601,9 +657,9 @@ export default function EditCountryPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                    <h2 className="text-lg font-semibold mb-2">Country Video</h2>
+                    <h2 className="text-lg font-semibold mb-2">Destination Video</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Add a video link (YouTube/Vimeo/embed URL). This video will appear in the same video section on the country page.
+                        Add a video link (YouTube/Vimeo/embed URL). This video will appear in the same video section on the destination page.
                     </p>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
                     <input
@@ -618,8 +674,31 @@ export default function EditCountryPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-4">Need to know</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Fill these 6 details for the country page section shown below the video preview.
+                        Fill the section title/description and these 6 details for the destination page section shown below the video preview.
                     </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b border-gray-100 pb-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Heading (fallback: [Country] at a Glance)</label>
+                            <input
+                                type="text"
+                                value={needToKnowTitle}
+                                onChange={(e) => setNeedToKnowTitle(e.target.value)}
+                                placeholder="India at a Glance"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Subheading (fallback: Need to Know)</label>
+                            <input
+                                type="text"
+                                value={needToKnowSubtitle}
+                                onChange={(e) => setNeedToKnowSubtitle(e.target.value)}
+                                placeholder="Need to Know"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                            />
+                        </div>
+                    </div>
 
                     <div className="space-y-4">
                         <div>
@@ -628,7 +707,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowTimeZone}
                                 onChange={(e) => setNeedToKnowTimeZone(e.target.value)}
-                                placeholder="India Standard Time (UTC +5:30)"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -639,7 +717,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowClimate}
                                 onChange={(e) => setNeedToKnowClimate(e.target.value)}
-                                placeholder="Tropical with wet and dry seasons"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -650,7 +727,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowCurrency}
                                 onChange={(e) => setNeedToKnowCurrency(e.target.value)}
-                                placeholder="Indian Rupee (INR)"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -661,7 +737,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowTransportation}
                                 onChange={(e) => setNeedToKnowTransportation(e.target.value)}
-                                placeholder="Trains, buses, rickshaws, taxis, scooters"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -672,7 +747,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowLocalCuisine}
                                 onChange={(e) => setNeedToKnowLocalCuisine(e.target.value)}
-                                placeholder="Veg-Thali, Masala Dosa, Biryani rice, pani puri"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -683,7 +757,6 @@ export default function EditCountryPage() {
                                 type="text"
                                 value={needToKnowLanguagesSpoken}
                                 onChange={(e) => setNeedToKnowLanguagesSpoken(e.target.value)}
-                                placeholder="Hindi, English"
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
                             />
                         </div>
@@ -691,7 +764,7 @@ export default function EditCountryPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                    <h2 className="text-lg font-semibold mb-4">India Travel Stories Blogs</h2>
+                    <h2 className="text-lg font-semibold mb-4">{name || country.name} Travel Stories Blogs</h2>
                     <p className="text-sm text-gray-500 mb-4">
                         Select one or more existing blogs for the "{name || country.name} Travel Stories" section.
                     </p>
@@ -768,7 +841,7 @@ export default function EditCountryPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-4">FAQ Section</h2>
                     <p className="text-sm text-gray-500 mb-4">
-                        Manage FAQ heading and questions for the country page.
+                        Manage FAQ heading and questions for the destination page.
                     </p>
 
                     <div className="space-y-4">
@@ -846,6 +919,23 @@ export default function EditCountryPage() {
                     </div>
                 </div>
             </div>
+            {showCreateActivityModal && (
+                <CreateActivityModal
+                    isOpen={showCreateActivityModal}
+                    onClose={() => setShowCreateActivityModal(false)}
+                    destinationId={id}
+                    locationTags={name || (country && country.name) ? [name || country.name] : []}
+                    onCreated={handleActivityCreated}
+                />
+            )}
+            <ImagePickerModal
+                isOpen={showImagePicker}
+                onClose={() => setShowImagePicker(false)}
+                onSelect={(urls) => {
+                    if (urls.length > 0) setImage(urls[0]);
+                }}
+                multiple={false}
+            />
         </div>
     );
 }

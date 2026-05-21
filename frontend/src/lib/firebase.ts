@@ -8,6 +8,7 @@ import {
     listAll,
     getMetadata,
     updateMetadata,
+    deleteObject,
 } from "firebase/storage";
 
 // Firebase project configuration for Nothing But Adventures
@@ -174,3 +175,11 @@ export const uploadTravelStyleImage = (file: File, onProgress?: (pct: number) =>
 
 export const uploadActivityImage = (file: File, onProgress?: (pct: number) => void) =>
     uploadToFirebase(file, "activities", onProgress);
+
+/**
+ * Delete an image from Firebase Storage by its URL.
+ */
+export const deleteImageFromFirebase = async (url: string): Promise<void> => {
+    const storageRef = ref(storage, url);
+    await deleteObject(storageRef);
+};

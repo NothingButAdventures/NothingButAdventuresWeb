@@ -13,6 +13,7 @@ import Underline from "@tiptap/extension-underline";
 import Highlight from "@tiptap/extension-highlight";
 import { uploadDiscountImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 
 // --- Types ---
@@ -72,6 +73,7 @@ export default function EditDiscountPage() {
     const [validUntil, setValidUntil] = useState("");
     const [uploadingImage, setUploadingImage] = useState(false);
     const [uploadingEditorImage, setUploadingEditorImage] = useState(false);
+    const [showImagePicker, setShowImagePicker] = useState(false);
 
     // TipTap Editor
     const editor = useEditor({
@@ -366,31 +368,24 @@ export default function EditDiscountPage() {
                 {/* Cover Image Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">Cover Image</h2>
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                    <div 
+                        onClick={() => setShowImagePicker(true)}
+                        className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer min-h-[200px]"
+                    >
                         {image ? (
                             <div className="relative w-full max-w-lg aspect-video rounded-lg overflow-hidden shadow-md group">
                                 <img src={image} alt="Cover" className="w-full h-full object-cover" />
-                                <button
-                                    onClick={() => setImage("")}
-                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity"
-                                >
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
                                     Change Image
-                                </button>
+                                </div>
                             </div>
                         ) : (
                             <div className="text-center">
                                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                                     <Icons.Image className="w-8 h-8" />
                                 </div>
-                                <p className="text-gray-500 mb-4">Upload a high-quality cover image for this discount</p>
+                                <p className="text-gray-500 mb-4">Click to select from Media Library or Upload a cover image</p>
                             </div>
-                        )}
-
-                        {!image && (
-                            <label className="cursor-pointer flex items-center gap-2 px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition shadow-lg mt-4">
-                                {uploadingImage ? "Uploading..." : "Upload Cover Image"}
-                                <input type="file" hidden accept="image/*" onChange={handleMainImageUpload} disabled={uploadingImage} />
-                            </label>
                         )}
                     </div>
                 </div>
@@ -448,6 +443,14 @@ export default function EditDiscountPage() {
                     <EditorContent editor={editor} />
                 </div>
             </div>
+            <ImagePickerModal
+                isOpen={showImagePicker}
+                onClose={() => setShowImagePicker(false)}
+                onSelect={(urls) => {
+                    if (urls.length > 0) setImage(urls[0]);
+                }}
+                multiple={false}
+            />
         </div>
     );
 }
