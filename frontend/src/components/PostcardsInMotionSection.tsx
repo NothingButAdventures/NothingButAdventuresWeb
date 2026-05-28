@@ -8,28 +8,28 @@ const hardcodedPostcards = [
         id: 1,
         title: "Desert Safari",
         subtitle: "100+ successful planed trips",
-        image: "https://images.unsplash.com/photo-1545645607-775b111ad5a4?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?w=800&auto=format&fit=crop",
         link: "#",
     },
     {
         id: 2,
         title: "K2 Treck",
         subtitle: "40+ successful planed trips",
-        image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop",
         link: "#",
     },
     {
         id: 3,
         title: "Luxurious Jodhpur",
         subtitle: "500+ successful planed trips",
-        image: "https://images.unsplash.com/photo-1598418012643-4f9db2ea6cbb?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=800&auto=format&fit=crop",
         link: "#",
     },
     {
         id: 4,
         title: "Jungle Trails",
         subtitle: "300+ successful planed trips",
-        image: "https://images.unsplash.com/photo-1536697246787-1fa68bc3e5ed?q=80&w=1200&auto=format&fit=crop",
+        image: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format&fit=crop",
         link: "#",
     }
 ];
@@ -39,37 +39,63 @@ export default function PostcardsInMotionSection() {
 
     const scroll = (direction: "left" | "right") => {
         if (scrollRef.current) {
-            const scrollAmount = 400;
-            if (direction === "left") {
-                scrollRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
-            } else {
-                scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            const container = scrollRef.current;
+            const firstChild = container.firstElementChild as HTMLElement;
+            if (firstChild) {
+                const gap = parseFloat(window.getComputedStyle(container).gap) || 24;
+                const scrollAmount = firstChild.clientWidth + gap;
+                if (direction === "left") {
+                    container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+                } else {
+                    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+                }
             }
         }
     };
 
     return (
         <section className="md:-mx-6 mt-32 mb-16 relative">
-            <div className="mb-10 px-4 md:px-6">
-                <div className="inline-block px-5 py-2 bg-[#e8e9eb] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
-                    Tours Snippets
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 px-4 md:px-6">
+                <div>
+                    <div className="inline-block px-5 py-2 bg-[#DEECFF] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
+                        Tours Snipits
+                    </div>
+                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight">
+                        Postcards in Motion
+                    </h2>
                 </div>
-                <h2 className="text-[48px] md:text-[56px] font-medium leading-[1.1] text-black">
-                    Postcards in Motion
-                </h2>
+                <div className="hidden md:flex flex-col items-end gap-3 mt-6 md:mt-0">
+                    <Link
+                        href="/trips"
+                        className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
+                    >
+                        View All Trips
+                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                        <button
+                            onClick={() => scroll("left")}
+                            className="bg-[#b3b3b3] hover:bg-[#999] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                            aria-label="Previous tours"
+                        >
+                            <svg className="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => scroll("right")}
+                            className="bg-[#4d4d4d] hover:bg-[#333] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                            aria-label="Next tours"
+                        >
+                            <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div className="relative group w-full">
-                {/* Left Arrow */}
-                <button
-                    onClick={() => scroll("left")}
-                    className="absolute left-1 md:left-3 bottom-9 md:bottom-10 z-10 w-5 h-8 md:w-6 md:h-10 bg-[#111] text-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                >
-                    <svg className="w-3 h-3 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-
+            <div className="relative group w-full px-4 md:px-6">
                 <style dangerouslySetInnerHTML={{
                     __html: `
                     .hide-scroll::-webkit-scrollbar {
@@ -84,13 +110,13 @@ export default function PostcardsInMotionSection() {
                 {/* Scroll Container */}
                 <div
                     ref={scrollRef}
-                    className="flex gap-6 overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory px-4 md:px-6 lg:px-6"
+                    className="flex gap-6 overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
                 >
                     {hardcodedPostcards.map((card) => (
                         <Link
                             key={card.id}
                             href={card.link}
-                            className="relative min-w-[300px] md:min-w-[340px] w-full max-w-[360px] h-[450px] md:h-[500px] rounded-[28px] overflow-hidden snap-center shrink-0 block group/card shadow-sm"
+                            className="relative w-[calc((100%-16px)/1.3)] md:w-[calc((100%-24px)/2.4)] lg:w-[calc((100%-72px)/4)] lg:min-w-[calc((100%-72px)/4)] h-[450px] md:h-[500px] rounded-[28px] overflow-hidden snap-start shrink-0 block group/card shadow-sm"
                         >
                             <img
                                 src={card.image}
@@ -99,9 +125,12 @@ export default function PostcardsInMotionSection() {
                             />
 
                             {/* Top Right Arrow Pill */}
-                            <div className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover/card:scale-110 z-20">
-                                <svg className="w-5 h-5 text-black transition-transform duration-300 group-hover/card:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19L19 5M19 5v10M19 5H9" />
+                            <div
+                                className="absolute top-6 right-6 w-10 h-10 bg-white rounded-full flex items-center justify-center transition-all duration-300 group-hover/card:scale-110 z-20"
+                                style={{ border: '2px solid #512AA7', boxShadow: '0 0 0 2.5px white' }}
+                            >
+                                <svg className="w-5 h-5 transition-transform duration-300 group-hover/card:rotate-45" fill="none" stroke="#512AA7" viewBox="0 0 24 24" style={{ stroke: '#512AA7' }}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 19L19 5M19 5v10M19 5H9" />
                                 </svg>
                             </div>
 
@@ -120,16 +149,36 @@ export default function PostcardsInMotionSection() {
                         </Link>
                     ))}
                 </div>
+            </div>
 
-                {/* Right Arrow */}
-                <button
-                    onClick={() => scroll("right")}
-                    className="absolute right-1 md:right-3 bottom-9 md:bottom-10 z-10 w-5 h-8 md:w-6 md:h-10 bg-[#111] text-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
+            {/* Mobile View All Trips Link and Buttons */}
+            <div className="mt-8 flex flex-col items-center gap-6 md:hidden">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => scroll("left")}
+                        className="bg-[#b3b3b3] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                        aria-label="Previous tours"
+                    >
+                        <svg className="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => scroll("right")}
+                        className="bg-[#4d4d4d] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                        aria-label="Next tours"
+                    >
+                        <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                <Link
+                    href="/trips"
+                    className="inline-block font-medium text-lg text-black underline underline-offset-4 decoration-1"
                 >
-                    <svg className="w-3 h-3 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
+                    View All Trips
+                </Link>
             </div>
         </section>
     );

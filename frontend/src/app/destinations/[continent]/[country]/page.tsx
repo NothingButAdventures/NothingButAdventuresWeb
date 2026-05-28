@@ -794,7 +794,7 @@ export default async function CountryDestinationsPage({
 
         <ReviewsSection
           title={`What to Expect in ${countryName}`}
-          pillClasses="bg-[#e8e9eb] text-[#5e6678]"
+          pillClasses="bg-[#DEECFF] text-[#5e6678]"
           btnClasses="bg-[#42c46e] hover:bg-[#33b55e]"
           btnText="Book This Trip"
           titleClassName="text-[40px] md:text-[56px] font-semibold leading-tight text-[#121b2f]"

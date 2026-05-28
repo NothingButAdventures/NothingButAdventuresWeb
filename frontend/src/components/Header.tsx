@@ -86,14 +86,17 @@ export default function Header() {
   }
 
   return (
-    <header className={`relative sticky top-0 z-50 font-outfit px-4 md:px-8 transition-colors duration-200 ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}>
+    <header 
+      onMouseLeave={() => setActiveMenu(null)}
+      className={`relative sticky top-0 z-50 font-outfit px-4 md:px-8 transition-colors duration-200 ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}
+    >
       <div className="mx-auto">
         <div className="flex justify-between items-center md:grid md:grid-cols-[1fr_auto_1fr] py-4">
           {/* Logo */}
           <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center space-x-3">
               <img src="/icon.png" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain" />
-              <div className="flex flex-col leading-none text-black">
+              <div className="flex flex-col leading-none logo-text">
                 <span className="text-[18px] font-bold tracking-widest mt-0.5 flex items-center">
                   NOTHING
                   <span className="lowercase font-normal ml-1" style={{ fontFamily: '"Brush Script MT", "League Script", "Dancing Script", cursive', fontSize: '24px', letterSpacing: 'normal', transform: 'translateY(-2px)' }}>but</span>
@@ -109,7 +112,13 @@ export default function Header() {
               <button
                 type="button"
                 onMouseEnter={() => handleMenuEnter("adventures")}
-                onClick={() => setActiveMenu((currentMenu) => (currentMenu === "adventures" ? null : "adventures"))}
+                onClick={() => {
+                  if (activeMenu === "adventures") {
+                    setActiveMenu(null);
+                  } else {
+                    setActiveMenu("adventures");
+                  }
+                }}
                 aria-expanded={activeMenu === "adventures"}
                 className={`flex items-center justify-center px-6 py-3.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "adventures" ? "bg-white text-[#a64dff]  font-semibold" : "hover:text-black"
                   }`}
@@ -119,7 +128,13 @@ export default function Header() {
               <button
                 type="button"
                 onMouseEnter={() => handleMenuEnter("destinations")}
-                onClick={() => setActiveMenu((currentMenu) => (currentMenu === "destinations" ? null : "destinations"))}
+                onClick={() => {
+                  if (activeMenu === "destinations") {
+                    setActiveMenu(null);
+                  } else {
+                    setActiveMenu("destinations");
+                  }
+                }}
                 aria-expanded={activeMenu === "destinations"}
                 className={`flex items-center justify-center px-6 py-2.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "destinations" ? "bg-white text-[#a64dff] font-semibold" : "hover:text-black"
                   }`}

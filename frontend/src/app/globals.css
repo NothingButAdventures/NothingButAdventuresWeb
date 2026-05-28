@@ -3,13 +3,13 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #3F3F42;
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --popover: #ffffff;
-  --popover-foreground: #171717;
+  --popover-foreground: #3F3F42;
   --card: #ffffff;
-  --card-foreground: #171717;
+  --card-foreground: #3F3F42;
   --border: #e5e5e5;
   --input: #e5e5e5;
   --primary: #2563eb;
@@ -43,7 +43,10 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-ring: var(--ring);
-  --font-sans: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-gray-900: #3F3F42;
+  --color-gray-950: #3F3F42;
+  --font-sans: var(--font-outfit), sans-serif;
+  --font-mono: var(--font-outfit), monospace;
   --font-outfit: var(--font-outfit), sans-serif;
 }
 
@@ -53,7 +56,7 @@
 }
 
 body {
-  font-family: "Avenir Next", Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   background: var(--background);
   color: var(--foreground);
 }
@@ -244,4 +247,105 @@ body {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+/* Override text-black and variants to use #3F3F42 for text only */
+.text-black {
+  color: #3F3F42 !important;
+}
+
+.hover\:text-black:hover {
+  color: #3F3F42 !important;
+}
+
+.group:hover .group-hover\:text-black {
+  color: #3F3F42 !important;
+}
+
+/* Opacity utilities for black text */
+.text-black\/95 { color: color-mix(in srgb, #3F3F42 95%, transparent) !important; }
+.text-black\/90 { color: color-mix(in srgb, #3F3F42 90%, transparent) !important; }
+.text-black\/85 { color: color-mix(in srgb, #3F3F42 85%, transparent) !important; }
+.text-black\/80 { color: color-mix(in srgb, #3F3F42 80%, transparent) !important; }
+.text-black\/75 { color: color-mix(in srgb, #3F3F42 75%, transparent) !important; }
+.text-black\/70 { color: color-mix(in srgb, #3F3F42 70%, transparent) !important; }
+.text-black\/65 { color: color-mix(in srgb, #3F3F42 65%, transparent) !important; }
+.text-black\/60 { color: color-mix(in srgb, #3F3F42 60%, transparent) !important; }
+.text-black\/50 { color: color-mix(in srgb, #3F3F42 50%, transparent) !important; }
+.text-black\/40 { color: color-mix(in srgb, #3F3F42 40%, transparent) !important; }
+.text-black\/30 { color: color-mix(in srgb, #3F3F42 30%, transparent) !important; }
+.text-black\/20 { color: color-mix(in srgb, #3F3F42 20%, transparent) !important; }
+.text-black\/10 { color: color-mix(in srgb, #3F3F42 10%, transparent) !important; }
+
+/* Responsive text-black overrides */
+@media (min-width: 640px) {
+  .sm\:text-black { color: #3F3F42 !important; }
+  .sm\:hover\:text-black:hover { color: #3F3F42 !important; }
+}
+@media (min-width: 768px) {
+  .md\:text-black { color: #3F3F42 !important; }
+  .md\:hover\:text-black:hover { color: #3F3F42 !important; }
+}
+@media (min-width: 1024px) {
+  .lg\:text-black { color: #3F3F42 !important; }
+  .lg\:hover\:text-black:hover { color: #3F3F42 !important; }
+}
+
+/* Hover opacity variations */
+.hover\:text-black\/75:hover {
+  color: color-mix(in srgb, #3F3F42 75%, transparent) !important;
+}
+.hover\:text-black\/65:hover {
+  color: color-mix(in srgb, #3F3F42 65%, transparent) !important;
+}
+.hover\:text-black\/70:hover {
+  color: color-mix(in srgb, #3F3F42 70%, transparent) !important;
+}
+
+/* Override text-gray-900 and variants to use #3F3F42 for text only */
+.text-gray-900 {
+  color: #3F3F42 !important;
+}
+
+.hover\:text-gray-900:hover {
+  color: #3F3F42 !important;
+}
+
+.group:hover .group-hover\:text-gray-900 {
+  color: #3F3F42 !important;
+}
+
+/* Opacity utilities for gray-900 text */
+.text-gray-900\/95 { color: color-mix(in srgb, #3F3F42 95%, transparent) !important; }
+.text-gray-900\/90 { color: color-mix(in srgb, #3F3F42 90%, transparent) !important; }
+.text-gray-900\/85 { color: color-mix(in srgb, #3F3F42 85%, transparent) !important; }
+.text-gray-900\/80 { color: color-mix(in srgb, #3F3F42 80%, transparent) !important; }
+.text-gray-900\/75 { color: color-mix(in srgb, #3F3F42 75%, transparent) !important; }
+.text-gray-900\/70 { color: color-mix(in srgb, #3F3F42 70%, transparent) !important; }
+.text-gray-900\/65 { color: color-mix(in srgb, #3F3F42 65%, transparent) !important; }
+.text-gray-900\/60 { color: color-mix(in srgb, #3F3F42 60%, transparent) !important; }
+.text-gray-900\/50 { color: color-mix(in srgb, #3F3F42 50%, transparent) !important; }
+.text-gray-900\/40 { color: color-mix(in srgb, #3F3F42 40%, transparent) !important; }
+.text-gray-900\/30 { color: color-mix(in srgb, #3F3F42 30%, transparent) !important; }
+.text-gray-900\/20 { color: color-mix(in srgb, #3F3F42 20%, transparent) !important; }
+.text-gray-900\/10 { color: color-mix(in srgb, #3F3F42 10%, transparent) !important; }
+
+/* Responsive text-gray-900 overrides */
+@media (min-width: 640px) {
+  .sm\:text-gray-900 { color: #3F3F42 !important; }
+  .sm\:hover\:text-gray-900:hover { color: #3F3F42 !important; }
+}
+@media (min-width: 768px) {
+  .md\:text-gray-900 { color: #3F3F42 !important; }
+  .md\:hover\:text-gray-900:hover { color: #3F3F42 !important; }
+}
+@media (min-width: 1024px) {
+  .lg\:text-gray-900 { color: #3F3F42 !important; }
+  .lg\:hover\:text-gray-900:hover { color: #3F3F42 !important; }
+}
+
+/* Ensure the header logo text remains pure black */
+.logo-text,
+.logo-text * {
+  color: #000000 !important;
 }

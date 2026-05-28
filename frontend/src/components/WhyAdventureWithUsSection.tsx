@@ -63,7 +63,7 @@ export default function WhyAdventureWithUsSection() {
     return (
         <section className="mx-auto mt-24 mb-16">
             <div className="mb-10">
-                <div className="inline-block px-4 py-1.5 bg-[#e8e9eb] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
+                <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
                     About
                 </div>
                 <h2 className="text-[48px] md:text-[64px] font-medium leading-[1.1] text-black mb-4">

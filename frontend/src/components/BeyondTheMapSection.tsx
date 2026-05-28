@@ -39,7 +39,7 @@ export default function BeyondTheMapSection({ blogs = [] }: BeyondTheMapSectionP
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6 md:gap-0">
                 <div>
-                    <div className="inline-block px-5 py-2 bg-[#e8e9eb] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
+                    <div className="inline-block px-5 py-2 bg-[#DEECFF] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
                         Blogs
                     </div>
                     <h2 className="text-[48px] md:text-[56px] font-medium leading-[1.1] text-black">

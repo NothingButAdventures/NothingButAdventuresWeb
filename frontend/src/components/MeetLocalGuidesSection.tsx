@@ -116,7 +116,7 @@ export default function MeetLocalGuidesSection() {
                     </div>
 
                     <div className="flex-1 pb-6 sm:pb-0">
-                        <div className="inline-block px-4 py-1.5 bg-[#e8e9eb] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6 shadow-sm">
+                        <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6 shadow-sm">
                             400+ Local Guides
                         </div>
                         <p className="text-[20px] md:text-[22px] font-medium text-black leading-[1.5] mb-6 relative">

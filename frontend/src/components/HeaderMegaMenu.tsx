@@ -491,6 +491,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                         key={style._id}
                         type="button"
                         onClick={() => setSelectedStyleIndex(index)}
+                        onMouseEnter={() => setSelectedStyleIndex(index)}
                         className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${isActive
                           ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
                           : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#a3a3a3] hover:bg-[#d1d5db] hover:text-[#1a1a1a]"
@@ -715,6 +716,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                         key={continent._id}
                         type="button"
                         onClick={() => setSelectedContinentIndex(index)}
+                        onMouseEnter={() => setSelectedContinentIndex(index)}
                         className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 ${isActive
                           ? "border-[#1a1a1a] bg-[#1a1a1a] text-white shadow-sm"
                           : "border-[#c5c5c0] bg-transparent text-[#5a5a55] hover:border-[#a3a3a3] hover:bg-[#d1d5db] hover:text-[#1a1a1a]"

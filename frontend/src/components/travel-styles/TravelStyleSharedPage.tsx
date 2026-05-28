@@ -96,7 +96,7 @@ export default function TravelStyleSharedPage({ config = defaultStyleConfig }: T
         <TravelStyleGallerySection />
         <ReviewsSection
           title="See how your trip uplifts communities"
-          pillClasses="bg-[#e8e9eb] text-[#5e6678]"
+          pillClasses="bg-[#DEECFF] text-[#5e6678]"
           btnClasses="bg-[#42c46e] hover:bg-[#33b55e]"
           btnText="Book This Trip"
         />

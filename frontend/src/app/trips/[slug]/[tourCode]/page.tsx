@@ -216,6 +216,59 @@ export default function TourDetailPage() {
   const [expandedOptionalDays, setExpandedOptionalDays] = useState<number[]>([]);
   const [expandedPremiumDays, setExpandedPremiumDays] = useState<number[]>([]);
 
+  const [showFullItineraryModal, setShowFullItineraryModal] = useState(false);
+  const [expandedItineraryDays, setExpandedItineraryDays] = useState<number[]>([]);
+
+  const toggleItineraryDay = (dayNum: number) => {
+    setCurrentDay(dayNum);
+    setExpandedItineraryDays(prev =>
+      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
+    );
+  };
+
+  const scrollToModalDay = (dayNum: number) => {
+    setCurrentDay(dayNum);
+    setExpandedItineraryDays(prev => prev.includes(dayNum) ? prev : [...prev, dayNum]);
+    setTimeout(() => {
+      const element = document.getElementById(`itinerary-day-${dayNum}`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 50);
+  };
+
+  const handleModalScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (!tour) return;
+    const viewportCenter = window.innerHeight / 2;
+    let closestDay = currentDay;
+    let closestDistance = Infinity;
+
+    tour.itinerary.forEach((day) => {
+      const el = document.getElementById(`itinerary-day-${day.day}`);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      
+      // If the center of the viewport is within the element's bounds
+      if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
+        closestDay = day.day;
+        closestDistance = 0;
+      } else {
+        // Otherwise, calculate the distance from the viewport center to the closest edge of the element
+        const distanceToTop = Math.abs(rect.top - viewportCenter);
+        const distanceToBottom = Math.abs(rect.bottom - viewportCenter);
+        const minDistance = Math.min(distanceToTop, distanceToBottom);
+        if (minDistance < closestDistance) {
+          closestDistance = minDistance;
+          closestDay = day.day;
+        }
+      }
+    });
+
+    if (closestDay !== currentDay) {
+      setCurrentDay(closestDay);
+    }
+  };
+
   const toggleOptionalDay = (dayNum: number) => {
     setExpandedOptionalDays(prev =>
       prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
@@ -231,6 +284,37 @@ export default function TourDetailPage() {
   useEffect(() => {
     if (tour) {
       checkWishlistStatus();
+      try {
+        const recentlyViewedStr = localStorage.getItem("nba-recently-viewed");
+        let recentlyViewed: any[] = recentlyViewedStr ? JSON.parse(recentlyViewedStr) : [];
+        recentlyViewed = recentlyViewed.filter((t: any) => t._id !== tour._id);
+        const tourDataToSave = {
+          _id: tour._id,
+          name: tour.name,
+          slug: tour.slug,
+          tourCode: tour.tourCode,
+          price: tour.price,
+          duration: tour.duration,
+          images: tour.images,
+          descriptionImage: tour.descriptionImage,
+          country: tour.country,
+          summary: tour.summary,
+          startDates: tour.startDates,
+          travelStyle: tour.travelStyle,
+          rating: tour.ratingsAverage || 4.8
+        };
+        recentlyViewed.unshift(tourDataToSave);
+        recentlyViewed = recentlyViewed.slice(0, 4);
+        localStorage.setItem("nba-recently-viewed", JSON.stringify(recentlyViewed));
+      } catch (err) {
+        console.error("Failed to save recently viewed tour:", err);
+      }
+    }
+  }, [tour]);
+
+  useEffect(() => {
+    if (tour && tour.itinerary) {
+      setExpandedItineraryDays(tour.itinerary.map(d => d.day));
     }
   }, [tour]);
 
@@ -402,15 +486,15 @@ export default function TourDetailPage() {
 
     try {
       const endpoint = isLoginView ? api.endpoints.auth.login : api.endpoints.auth.register;
-      const payload = isLoginView 
+      const payload = isLoginView
         ? { email: holdAuthData.email, password: holdAuthData.password }
-        : { 
-            name: holdAuthData.fullName, 
-            email: holdAuthData.email, 
-            password: holdAuthData.password,
-            passwordConfirm: holdAuthData.password,
-            role: "user"
-          };
+        : {
+          name: holdAuthData.fullName,
+          email: holdAuthData.email,
+          password: holdAuthData.password,
+          passwordConfirm: holdAuthData.password,
+          role: "user"
+        };
 
       const response = await fetch(`${api.baseURL}${endpoint}`, {
         method: "POST",
@@ -1034,11 +1118,8 @@ export default function TourDetailPage() {
               Overview
             </button>
             <button
-              onClick={() => setActiveTab("itinerary")}
-              className={`px-6 py-2 rounded-full font-medium text-[15px] transition-all ${activeTab === "itinerary"
-                ? "bg-[#1C1A1A] text-white border border-[#1C1A1A]"
-                : "bg-white text-gray-900 border border-gray-200 hover:border-gray-300"
-                }`}
+              onClick={() => setShowFullItineraryModal(true)}
+              className="px-6 py-2 rounded-full font-medium text-[15px] transition-all bg-white text-gray-900 border border-gray-200 hover:border-gray-300"
             >
               Full Itinerary
             </button>
@@ -1060,7 +1141,7 @@ export default function TourDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
           {/* Main Content */}
           <div>
-            {(activeTab === "overview" || activeTab === "itinerary") && (
+            {(activeTab === "overview") && (
               <div className="bg-white">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-[32px] md:text-[40px] font-medium text-gray-900">
@@ -1290,16 +1371,16 @@ export default function TourDetailPage() {
                                       {day.accommodations.map((acc: any, idx: number) => (
                                         <div key={idx} className="relative pl-6">
                                           <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                           <div className="flex justify-between items-center">
-                                              <h5 className="font-bold text-gray-900 text-[15px]">
-                                                 {acc.name || acc.type}
-                                              </h5>
-                                              {acc.name && acc.type && (
-                                                <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
-                                                  {acc.type}
-                                                </span>
-                                              )}
-                                           </div>
+                                          <div className="flex justify-between items-center">
+                                            <h5 className="font-bold text-gray-900 text-[15px]">
+                                              {acc.name || acc.type}
+                                            </h5>
+                                            {acc.name && acc.type && (
+                                              <span className="text-gray-900 font-bold text-[12px] shrink-0 ml-4">
+                                                {acc.type}
+                                              </span>
+                                            )}
+                                          </div>
                                         </div>
                                       ))}
                                     </div>
@@ -1719,7 +1800,7 @@ export default function TourDetailPage() {
                     {/* Premium Inclusions */}
                     {(() => {
                       const premiumInclusions = Array.from(new Set(
-                        tour.itinerary.flatMap(day => 
+                        tour.itinerary.flatMap(day =>
                           (day.activities || [])
                             .filter(a => a && !a.isFree && typeof a.price === "number" && a.price > 0)
                             .map(a => a.title || a.name) || []
@@ -1729,9 +1810,7 @@ export default function TourDetailPage() {
                       return (
                         <div className="mb-10">
                           <div className="flex items-center gap-3 mb-6">
-                            <svg className="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" />
-                            </svg>
+                            <img src="/premium_inclusion.svg" className="w-6 h-6 object-contain" alt="Premium Inclusions" />
                             <h3 className="text-[20px] font-bold text-gray-900">Premium Inclusions</h3>
                           </div>
                           {premiumInclusions.length > 0 ? (
@@ -1749,7 +1828,7 @@ export default function TourDetailPage() {
                         tour.itinerary.flatMap(day => day.optionalActivities?.map(a => {
                           const name = a.name || a.title;
                           if (!name) return null;
-                          
+
                           let priceStr = "";
                           if (typeof a.price === "number") {
                             priceStr = a.price > 0 ? ` - From $${Number(a.price).toLocaleString()} USD` : " - Free";
@@ -1758,7 +1837,7 @@ export default function TourDetailPage() {
                               ? ` - From $${Number(a.price.amount).toLocaleString()} USD`
                               : " - Free";
                           }
-                          
+
                           return `${name}${priceStr}`;
                         }) || [])
                       )).filter(Boolean);
@@ -2452,6 +2531,251 @@ export default function TourDetailPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Full Itinerary Modal */}
+      {showFullItineraryModal && (
+        <div 
+          onScroll={handleModalScroll} 
+          className="fixed inset-0 z-[100] bg-[#F3F8FF] overflow-y-auto pb-20"
+        >
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-[101] bg-[#F3F8FF] pt-8 pb-6 px-6 lg:px-10 flex items-center justify-between border-b border-gray-200/50">
+            <div className="flex flex-col">
+              <span className="text-[15px] md:text-[17px] text-[#4B5563] font-medium leading-snug">
+                {tour.name}
+              </span>
+              <span className="text-[13px] md:text-[14px] text-gray-500 font-normal mt-0.5">
+                {tour.duration.days} Days, {tour.location.startCity} to {tour.location.endCity}
+              </span>
+              <h2 className="text-[32px] md:text-[40px] font-semibold text-black tracking-tight mt-2">
+                Itinerary Breakdown
+              </h2>
+            </div>
+            <div className="flex items-center gap-6">
+              <button className="bg-[#1C1A1A] text-white pl-4 pr-1.5 py-1.5 rounded-full text-[13px] font-semibold flex items-center gap-2 hover:bg-black transition hidden sm:flex">
+                <svg className="w-4 h-4 text-white ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="ml-1 mr-1">Download Itinerary</span>
+                <span className="bg-[#A855F7] w-7 h-7 rounded-full flex items-center justify-center">
+                  <ArrowUpRight size={14} className="text-white" weight="bold" />
+                </span>
+              </button>
+              <button
+                onClick={() => setShowFullItineraryModal(false)}
+                className="w-12 h-12 bg-[#A855F7] text-white rounded-full flex items-center justify-center hover:bg-[#9333EA] transition shadow-lg shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className="w-full px-6 lg:px-10 mt-8 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_30%] gap-8 items-start">
+              {/* Left Side: Accordion */}
+              <div className="space-y-4">
+                {tour.itinerary.map((day, index) => {
+                  const isExpanded = expandedItineraryDays.includes(day.day);
+                  return (
+                    <div
+                      id={`itinerary-day-${day.day}`}
+                      key={day.day}
+                      className="bg-white border-2 rounded-[24px] overflow-hidden transition-colors"
+                      style={{ borderColor: isExpanded ? '#c7c7c7ff' : '#E5E7EB' }}
+                    >
+                      <div className="p-6">
+                        <div
+                          className="flex items-center justify-between cursor-pointer group"
+                          onClick={() => toggleItineraryDay(day.day)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <span className="border text-black rounded-full px-4 py-1.5 text-[15px] font-medium" style={{ borderColor: '#c7c7c7ff' }}>Day {day.day}</span>
+                            <h3 className="font-medium text-[20px] text-black transition-colors">
+                              {day.title || "Itinerary"}
+                            </h3>
+                          </div>
+                          <CaretDown className={`text-black transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                        </div>
+
+                        {isExpanded && (
+                          <div className="mt-5 pl-1 pr-4">
+                            {day.importantNote && day.importantNote.trim() && (
+                              <div className="mb-6 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl flex items-start gap-3 shadow-sm">
+                                <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <line x1="12" y1="8" x2="12" y2="12" />
+                                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                                </svg>
+                                <div>
+                                  <span className="text-[12px] font-bold text-amber-800 uppercase tracking-wider block mb-0.5">Important note</span>
+                                  <p className="text-[14px] font-medium text-amber-900 leading-relaxed">
+                                    {day.importantNote}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            <p className="text-black text-[16px] mb-8 leading-relaxed">
+                              {day.description}
+                            </p>
+
+                            {/* Activities */}
+                            {day.activities && day.activities.length > 0 && (
+                              <div className="space-y-6 relative ml-1">
+                                {day.activities.map((act, i) => (
+                                  <div key={i} className="relative pl-6">
+                                    {i !== day.activities.length - 1 && (
+                                      <div className="absolute left-[3px] top-[14px] bottom-[-24px] w-0 border-l-[1.5px] border-dotted border-gray-300"></div>
+                                    )}
+                                    <div className="absolute left-[0px] top-[7px] w-[7px] h-[7px] bg-[#A855F7] rounded-full z-10"></div>
+                                    <div className="flex justify-between items-center">
+                                      <h5 className="font-medium text-black text-[17px]">
+                                        {act.name || act.title}
+                                      </h5>
+                                      <span className="text-black text-[14px] shrink-0 ml-4 font-medium">
+                                        {act.placeName || act.location}{act.duration ? `  ${act.duration}hrs` : ''}
+                                      </span>
+                                    </div>
+                                    <p className="text-black text-[15px] mt-1.5 leading-relaxed max-w-3xl">{act.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Optional Activities */}
+                            {day.optionalActivities && day.optionalActivities.length > 0 && (
+                              <div className="mt-8 border-t border-gray-100 pt-6">
+                                <div className="flex items-center justify-between mb-6 cursor-pointer group" onClick={() => toggleOptionalDay(day.day)}>
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white text-[14px] font-bold shrink-0">
+                                      +{day.optionalActivities.length}
+                                    </div>
+                                    <h4 className="font-medium text-black text-[17px]">Optional Activities - Day {day.day}</h4>
+                                  </div>
+                                  <div className="text-black text-[15px] flex items-center gap-1 transition-colors">
+                                    {expandedOptionalDays.includes(day.day) ? 'Hide' : 'Show'} <CaretDown className={`transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`} />
+                                  </div>
+                                </div>
+
+                                {expandedOptionalDays.includes(day.day) && (
+                                  <div className="space-y-6 relative ml-1">
+                                    {day.optionalActivities.map((act, i) => (
+                                      <div key={`opt-${i}`} className="relative pl-6">
+                                        <div className="absolute left-[0px] top-[4px] w-[14px] h-[14px] bg-[#A855F7] rounded-full flex items-center justify-center">
+                                          <Plus className="w-2.5 h-2.5 text-white font-bold" />
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                          <h5 className="font-medium text-black text-[17px] flex items-center gap-2">
+                                            {act.name || act.title}
+                                            {(() => {
+                                              let priceStr = "";
+                                              if (typeof act.price === "number") {
+                                                priceStr = act.price > 0 ? `+$${Number(act.price).toLocaleString()}` : "";
+                                              } else if (act.price && typeof act.price.amount === "number") {
+                                                priceStr = Number(act.price.amount) > 0
+                                                  ? `+${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
+                                                  : "";
+                                              }
+                                              return priceStr ? <span className="text-black font-medium text-[17px]">from {priceStr}</span> : null;
+                                            })()}
+                                          </h5>
+                                          <span className="text-black text-[14px] shrink-0 ml-4 font-medium">
+                                            {(act as any).placeName || (act as any).location || (act as any).place || ""}{act.duration ? `  ${act.duration}hrs` : ''}
+                                          </span>
+                                        </div>
+                                        <p className="text-black text-[15px] mt-1.5 leading-relaxed max-w-3xl">{act.description}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Accommodation */}
+                            {day.accommodations && day.accommodations.length > 0 && (
+                              <div className="mt-8 border-t border-gray-100 pt-6">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center text-white shrink-0">
+                                  </div>
+                                  <div className="flex-1 flex justify-between items-center">
+                                    <div>
+                                      <h4 className="font-medium text-black text-[17px]">Accommodation</h4>
+                                      <p className="text-black text-[15px] mt-1">{day.accommodations[0].name || day.accommodations[0].type} (Or Similar)</p>
+                                    </div>
+                                    <span className="text-black text-[14px] font-medium">Hotel</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Meals */}
+                            {day.meals && (
+                              <div className="mt-6 text-[15px] text-black font-medium">
+                                Meal Included:
+                                {(() => {
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                  const m = day.meals as any;
+                                  const mealArray = [];
+                                  if (typeof m === 'string') {
+                                    mealArray.push(...m.split(',').map(s => s.trim()).filter(s => s));
+                                  } else {
+                                    if (m.breakfast) mealArray.push("Breakfast");
+                                    if (m.lunch) mealArray.push("Lunch");
+                                    if (m.dinner) mealArray.push("Dinner");
+                                  }
+                                  return mealArray.length > 0 ? <span className="text-black ml-1 font-normal">{mealArray.join(" | ")}</span> : <span className="text-black ml-1 font-normal">None</span>;
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Right Side: Map and Places Visited */}
+              <div className="space-y-6 lg:sticky lg:top-[120px]">
+                <div className="bg-black rounded-[20px] overflow-hidden aspect-[16/9] relative shadow-sm">
+                  <Image src={tour.itineraryMapImage || tour.images?.[0]?.url || "/placeholder-image.jpg"} fill className="object-cover opacity-70" alt="Map" />
+                  <div className="absolute inset-0 bg-black/20"></div>
+                  <div className="absolute bottom-5 left-5 text-white font-bold tracking-widest text-[14px]">
+                    {tour.country?.continent?.name?.toUpperCase() || tour.country?.name?.toUpperCase() || "DESTINATION"}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-[20px] p-6 shadow-sm">
+                  <div className="flex gap-2.5 flex-wrap">
+                    {tour.itinerary.map(d => (
+                      <button
+                        key={d.day}
+                        onClick={() => scrollToModalDay(d.day)}
+                        className={`w-[48px] h-[48px] rounded-[12px] border flex items-center justify-center text-[17px] transition-colors cursor-pointer ${currentDay === d.day
+                          ? 'bg-[#A855F7] text-white border-[#A855F7] font-semibold'
+                          : 'border-gray-200 text-black bg-white hover:border-black'
+                          }`}
+                      >
+                        {d.day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-1 mt-6">
+                  <h4 className="font-semibold text-black text-[18px]">Places Visited</h4>
+                  <p className="text-[#4B5563] text-[16px] mt-2 font-medium">
+                    {tour.location.visitedCities && tour.location.visitedCities.length > 0
+                      ? tour.location.visitedCities.join(" | ")
+                      : (tour.country?.name || "")}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

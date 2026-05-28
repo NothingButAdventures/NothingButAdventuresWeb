@@ -111,6 +111,9 @@ interface TripTypeOption {
 export default function CreateTourPage() {
   const router = useRouter();
   const [countries, setCountries] = useState<Country[]>([]);
+  const [continents, setContinents] = useState<any[]>([]);
+  const [showDestinationPopup, setShowDestinationPopup] = useState(false);
+  const [expandedContinent, setExpandedContinent] = useState<string | null>(null);
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
   const [activityOptions, setActivityOptions] = useState<ActivityOption[]>([]);
   const [activitySearchTerms, setActivitySearchTerms] = useState<Record<string, string>>({});
@@ -235,13 +238,16 @@ export default function CreateTourPage() {
         return;
       }
 
-      const countriesResponse = await fetch(`${api.baseURL}/countries`, {
+      const continentsResponse = await fetch(`${api.baseURL}/continents`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (countriesResponse.ok) {
-        const countriesData = await countriesResponse.json();
-        setCountries(countriesData.data.countries);
+      if (continentsResponse.ok) {
+        const continentsData = await continentsResponse.json();
+        const fetchedContinents = continentsData.data.continents || [];
+        setContinents(fetchedContinents);
+        const flatCountries = fetchedContinents.flatMap((c: any) => c.countries || []);
+        setCountries(flatCountries);
       }
 
       // Fetch travel styles
@@ -1134,20 +1140,21 @@ export default function CreateTourPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Destination <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    required
-                    name="country"
-                    value={formData.country}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  <button
+                    type="button"
+                    onClick={() => setShowDestinationPopup(true)}
+                    className="w-full text-left px-3 py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white flex items-center justify-between shadow-sm hover:border-gray-400 transition"
                   >
-                    <option value="">Select country</option>
-                    {countries.map((country) => (
-                      <option key={country._id} value={country._id}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
+                    <span className={formData.country ? "text-gray-900 font-medium" : "text-gray-400"}>
+                      {formData.country
+                        ? countries.find((c) => c._id === formData.country || c.id === formData.country)?.name || "Select destination"
+                        : "Select destination"}
+                    </span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <input type="hidden" name="country" value={formData.country} required />
                 </div>
 
                 <div>
@@ -1945,26 +1952,35 @@ export default function CreateTourPage() {
                           </button>
                         )}
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Day Description <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          value={day.description}
+                          onChange={(e) =>
+                            updateItinerary(dayIndex, "description", e.target.value)
+                          }
+                          placeholder="Day description *"
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                        />
+                      </div>
 
-                      <textarea
-                        value={day.description}
-                        onChange={(e) =>
-                          updateItinerary(dayIndex, "description", e.target.value)
-                        }
-                        placeholder="Day description *"
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
-                      />
-
-                      <textarea
-                        value={day.importantNote || ""}
-                        onChange={(e) =>
-                          updateItinerary(dayIndex, "importantNote", e.target.value)
-                        }
-                        placeholder="Important note (Optional)"
-                        rows={2}
-                        className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
-                      />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Important Note (Optional)
+                        </label>
+                        <textarea
+                          value={day.importantNote || ""}
+                          onChange={(e) =>
+                            updateItinerary(dayIndex, "importantNote", e.target.value)
+                          }
+                          placeholder="Important note (Optional)"
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                        />
+                      </div>
                     </div>
 
 
@@ -2348,6 +2364,100 @@ export default function CreateTourPage() {
             setActivitySearchInput("");
           }}
         />
+      )}
+
+      {/* Destination Selection Popup Modal */}
+      {showDestinationPopup && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 flex flex-col max-h-[85vh]">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
+              <h2 className="text-lg font-bold text-gray-900">Select Destination</h2>
+              <button 
+                type="button"
+                onClick={() => setShowDestinationPopup(false)} 
+                className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-3 flex-1">
+              {continents.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-sm">
+                  Loading destinations...
+                </div>
+              ) : (
+                continents.map((continent) => {
+                  const id = continent.id || continent._id;
+                  const isExpanded = expandedContinent === id;
+                  const countryCount = continent.countries?.length || 0;
+                  
+                  return (
+                    <div 
+                      key={id}
+                      className="border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedContinent(isExpanded ? null : id)}
+                        className="w-full px-5 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left font-medium text-gray-900"
+                      >
+                        <span>{continent.name}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-normal">
+                            {countryCount} {countryCount === 1 ? "country" : "countries"}
+                          </span>
+                          <svg 
+                            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </button>
+                      
+                      {isExpanded && (
+                        <div className="bg-gray-50 border-t border-gray-150 p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 animate-in slide-in-from-top-1 duration-150">
+                          {countryCount === 0 ? (
+                            <div className="col-span-full text-center text-sm text-gray-400 py-2">
+                              No countries found in this continent
+                            </div>
+                          ) : (
+                            continent.countries.map((country: any) => {
+                              const countryId = country.id || country._id;
+                              const isSelected = formData.country === countryId;
+                              return (
+                                <button
+                                  type="button"
+                                  key={countryId}
+                                  onClick={() => {
+                                    setFormData((prev) => ({ ...prev, country: countryId }));
+                                    setShowDestinationPopup(false);
+                                  }}
+                                  className={`px-4 py-2.5 rounded-lg border text-sm font-medium text-left transition-all ${
+                                    isSelected
+                                      ? "bg-blue-50 border-blue-500 text-blue-700 shadow-sm"
+                                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/30"
+                                  }`}
+                                >
+                                  {country.name}
+                                </button>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

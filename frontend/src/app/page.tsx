@@ -3,12 +3,13 @@ import TourCard from "@/components/TourCard";
 import PopularToursSection from "@/components/PopularToursSection";
 import ExploreSection from "@/components/ExploreSection";
 import PostcardsInMotionSection from "@/components/PostcardsInMotionSection";
-import WhyAdventureWithUsSection from "@/components/WhyAdventureWithUsSection";
+import WhyNothingButAdventuresSection from "@/components/WhyNothingButAdventuresSection";
 import PopularDestinationsSection from "@/components/PopularDestinationsSection";
 import ReviewsSection from "@/components/ReviewsSection";
 import MeetLocalGuidesSection from "@/components/MeetLocalGuidesSection";
 import StartPlanningSection from "@/components/StartPlanningSection";
 import BeyondTheMapSection from "@/components/BeyondTheMapSection";
+import RecentlyViewedSection from "@/components/RecentlyViewedSection";
 import { api } from "@/lib/api";
 
 async function getFeaturedTours() {
@@ -25,7 +26,7 @@ async function getFeaturedTours() {
 async function getCountries() {
   try {
     const res = await fetch(
-      `${api.baseURL}${api.endpoints.countries.getAll}?limit=4&sort=-statistics.popularityScore`,
+      `${api.baseURL}${api.endpoints.countries.getAll}?limit=100&sort=-statistics.popularityScore`,
       { next: { revalidate: 60 } }
     );
     const data = await res.json();
@@ -122,11 +123,56 @@ export default async function Home() {
       </div>
 
       <div className="px-4 md:px-6">
+        <RecentlyViewedSection />
+      </div>
+
+      <section className="py-20 bg-white">
+        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-6xl md:text-[68px] font-medium text-black max-w-full leading-tight tracking-tight">
+            Small Group Adventures Changing<br />the way you see life and Yourself
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x md:divide-gray-200  lg:mx-32 max-w-full items-stretch mt-16">
+            {/* Feature 1 */}
+            <div className="flex flex-col items-center text-center md:pr-12 pb-8 md:pb-0">
+              <div className="mb-6 flex justify-center">
+                <img src="/ns-1.svg" className="w-[96px] h-[96px] object-contain" alt="1000s of experiences" />
+              </div>
+              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+                1000s of experiences,<br />over 100 countries
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="flex flex-col items-center text-center md:px-12 py-8 md:py-0">
+              <div className="mb-6 flex justify-center">
+                <img src="/ns-2.svg" className="w-[96px] h-[96px] object-contain" alt="Shared adventures" />
+              </div>
+              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+                Shared adventures with<br />like-minded people
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="flex flex-col items-center text-center md:pl-12 pt-8 md:pt-0">
+              <div className="mb-6 flex justify-center">
+                <img src="/ns-3.svg" className="w-[96px] h-[96px] object-contain" alt="Creating positive change" />
+              </div>
+              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+                Creating positive change around the<br />place you visit
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="px-4 md:px-6">
         <PopularToursSection tours={tours} /> </div>
       <div className="px-4 md:px-6">
         <ExploreSection /></div> <div className="px-4 md:px-6">
-        <PostcardsInMotionSection /></div> <div className="px-4 md:px-6">
-        <WhyAdventureWithUsSection /></div> <div className="px-4 md:px-6">
+        <PostcardsInMotionSection /></div> 
+      <WhyNothingButAdventuresSection />
+      <div className="px-4 md:px-6">
         <PopularDestinationsSection countries={countries} /></div> <div className="px-4 md:px-6">
         <ReviewsSection /></div> <div className="px-4 md:px-6">
         <MeetLocalGuidesSection /></div>

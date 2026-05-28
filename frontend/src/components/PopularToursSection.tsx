@@ -10,20 +10,51 @@ interface PopularToursSectionProps {
 
 export default function PopularToursSection({ tours }: PopularToursSectionProps) {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+    const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+    const checkScrollLimits = () => {
+        if (scrollContainerRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+            setCanScrollLeft(scrollLeft > 5);
+            setCanScrollRight(scrollWidth - scrollLeft - clientWidth > 5);
+        }
+    };
+
+    React.useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            checkScrollLimits();
+            container.addEventListener("scroll", checkScrollLimits);
+            window.addEventListener("resize", checkScrollLimits);
+            return () => {
+                container.removeEventListener("scroll", checkScrollLimits);
+                window.removeEventListener("resize", checkScrollLimits);
+            };
+        }
+    }, [tours]);
 
     const scrollNext = () => {
         if (scrollContainerRef.current) {
-            const firstChild = scrollContainerRef.current.firstElementChild as HTMLElement;
-            const scrollAmount = firstChild ? firstChild.clientWidth + 24 : 400; // 24px gap
-            scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            const container = scrollContainerRef.current;
+            const firstChild = container.firstElementChild as HTMLElement;
+            if (firstChild) {
+                const gap = parseFloat(window.getComputedStyle(container).gap) || 24;
+                const scrollAmount = firstChild.clientWidth + gap;
+                container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            }
         }
     };
 
     const scrollPrev = () => {
         if (scrollContainerRef.current) {
-            const firstChild = scrollContainerRef.current.firstElementChild as HTMLElement;
-            const scrollAmount = firstChild ? firstChild.clientWidth + 24 : 400;
-            scrollContainerRef.current.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+            const container = scrollContainerRef.current;
+            const firstChild = container.firstElementChild as HTMLElement;
+            if (firstChild) {
+                const gap = parseFloat(window.getComputedStyle(container).gap) || 24;
+                const scrollAmount = firstChild.clientWidth + gap;
+                container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+            }
         }
     };
 
@@ -31,40 +62,20 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
         <section className="mx-auto mt-24 relative">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
                 <div>
-                    <div className="inline-block px-4 py-1.5 bg-[#e8e9eb] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
-                        Popular
+                    <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
+                        Popular Deals
                     </div>
-                    <h2 className="text-[32px] md:text-[40px] font-medium leading-tight text-gray-900">
-                        Find your perfect trip experience
+                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight">
+                        Loved by travellers,<br />fueled by purpose
                     </h2>
                 </div>
-                <div className="hidden md:flex flex-col items-end gap-3 mt-6">
+                <div className="hidden md:flex flex-col items-end justify-end mt-6">
                     <Link
                         href="/trips"
                         className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
                     >
                         View All Trips
                     </Link>
-                    <div className="flex items-center justify-end gap-2">
-                        <button
-                            onClick={scrollPrev}
-                            className="bg-[#b3b3b3] hover:bg-[#999] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                            aria-label="Previous tours"
-                        >
-                            <svg className="w-4 h-4 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={scrollNext}
-                            className="bg-[#4d4d4d] hover:bg-[#333] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                            aria-label="Next tours"
-                        >
-                            <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
-                    </div>
                 </div>
             </div>
 
@@ -79,12 +90,39 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                         scrollbar-width: none; /* Firefox */
                     }
                 `}} />
+
+                {/* Left Arrow Button */}
+                <button
+                    onClick={scrollPrev}
+                    className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 bg-[#b3b3b3] hover:bg-[#999] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
+                        canScrollLeft ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
+                    }`}
+                    aria-label="Previous tours"
+                >
+                    <svg className="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                {/* Right Arrow Button */}
+                <button
+                    onClick={scrollNext}
+                    className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#4d4d4d] hover:bg-[#333] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
+                        canScrollRight ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
+                    }`}
+                    aria-label="Next tours"
+                >
+                    <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
                 <div
                     ref={scrollContainerRef}
-                    className="flex gap-4 md:gap-6 overflow-x-auto md:overflow-x-hidden pb-4 hide-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
+                    className="flex gap-4 md:gap-6 overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
                 >
                     {tours.map((tour: any) => (
-                        <div key={tour._id} className="w-full min-w-[320px] max-w-[400px] md:min-w-0 md:max-w-none md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] snap-center shrink-0">
+                        <div key={tour._id} className="w-[calc((100%-16px)/1.3)] md:w-[calc((100%-72px)/3.6)] snap-start shrink-0">
                             <TourCard tour={tour} />
                         </div>
                     ))}

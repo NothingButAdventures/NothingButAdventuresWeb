@@ -77,7 +77,7 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
 
 export default function ReviewsSection({
     title = "What travellers say about our tours",
-    pillClasses = "bg-[#e8e9eb] text-gray-500",
+    pillClasses = "bg-[#DEECFF] text-gray-500",
     btnClasses = "bg-[#111] hover:bg-black",
     btnText = "Plan Your Trip",
     titleClassName = "text-[32px] md:text-[40px] font-medium leading-tight text-gray-900",
