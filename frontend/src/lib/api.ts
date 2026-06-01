@@ -1,5 +1,5 @@
-const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
-// const API_BASE_URL = "http://localhost:3001/api/v1";
+// const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
+const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -88,6 +88,14 @@ export const api = {
       create: "/travel-styles",
       update: (id: string) => `/travel-styles/${id}`,
       delete: (id: string) => `/travel-styles/${id}`,
+    },
+    interests: {
+      getAll: "/interests",
+      getById: (id: string) => `/interests/${id}`,
+      getBySlug: (slug: string) => `/interests/slug/${slug}`,
+      create: "/interests",
+      update: (id: string) => `/interests/${id}`,
+      delete: (id: string) => `/interests/${id}`,
     },
     continents: {
       getAll: "/continents",

@@ -26,6 +26,7 @@ interface Tour {
   accommodation?: string;
   ownRoomAvailable: boolean;
   wifiAvailable?: boolean;
+  interests?: string[];
   price: {
     amount: number;
     currency: string;
@@ -247,7 +248,7 @@ export default function TourDetailPage() {
       const el = document.getElementById(`itinerary-day-${day.day}`);
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      
+
       // If the center of the viewport is within the element's bounds
       if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
         closestDay = day.day;
@@ -1767,6 +1768,28 @@ export default function TourDetailPage() {
                       </div>
                     </div>
 
+                    {/* Interests */}
+                    {tour.interests && tour.interests.length > 0 && (
+                      <div className="flex gap-4 mt-6">
+                        <div className="mt-1 shrink-0">
+                          <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                            <line x1="7" y1="7" x2="7.01" y2="7" strokeWidth="2" strokeLinecap="round" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-[17px] font-bold text-gray-900 mb-2">Interests</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {tour.interests.map((interest, idx) => (
+                              <span key={idx} className="px-3 py-1 bg-blue-50 rounded-full text-xs font-semibold text-blue-700 border border-blue-100">
+                                {interest}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
 
                   </div>
 
@@ -2231,8 +2254,8 @@ export default function TourDetailPage() {
       </div>
 
       {/* Sticky Footer */}
-      {showStickyFooter && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 animate-in slide-in-from-bottom duration-300">
+      {(showStickyFooter || showFullItineraryModal) && (
+        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] animate-in slide-in-from-bottom duration-300 ${showFullItineraryModal ? 'z-[102]' : 'z-50'}`}>
           <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
 
@@ -2536,21 +2559,21 @@ export default function TourDetailPage() {
       )}
       {/* Full Itinerary Modal */}
       {showFullItineraryModal && (
-        <div 
-          onScroll={handleModalScroll} 
+        <div
+          onScroll={handleModalScroll}
           className="fixed inset-0 z-[100] bg-[#F3F8FF] overflow-y-auto pb-20"
         >
-          {/* Sticky Header */}
-          <div className="sticky top-0 z-[101] bg-[#F3F8FF] pt-8 pb-6 px-6 lg:px-10 flex items-center justify-between border-b border-gray-200/50">
+          {/* Scrollable Header */}
+          <div className="pt-8 pb-6 px-6 lg:px-10 flex items-center justify-between border-b border-gray-200/50">
             <div className="flex flex-col">
-              <span className="text-[15px] md:text-[17px] text-[#4B5563] font-medium leading-snug">
+              <h1 className="text-[34px] md:text-[44px] lg:text-[48px] font-semibold text-[#1F2937] leading-[1.2] tracking-tight">
                 {tour.name}
-              </span>
-              <span className="text-[13px] md:text-[14px] text-gray-500 font-normal mt-0.5">
+              </h1>
+              <div className="text-[18px] md:text-[22px] text-[#4B5563] mt-2">
                 {tour.duration.days} Days, {tour.location.startCity} to {tour.location.endCity}
-              </span>
-              <h2 className="text-[32px] md:text-[40px] font-semibold text-black tracking-tight mt-2">
-                Itinerary Breakdown
+              </div>
+              <h2 className="text-[26px] font-semibold text-black tracking-tight mt-6">
+                Full Itenary
               </h2>
             </div>
             <div className="flex items-center gap-6">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import HeaderMegaMenu from "./HeaderMegaMenu";
+import WhyUsMegaMenu from "./WhyUsMegaMenu";
 
 interface User {
   name: string;
@@ -22,10 +23,10 @@ export default function Header() {
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<"adventures" | "destinations" | null>(null);
+  const [activeMenu, setActiveMenu] = useState<"adventures" | "destinations" | "why-us" | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleMenuEnter = (menu: "adventures" | "destinations") => {
+  const handleMenuEnter = (menu: "adventures" | "destinations" | "why-us") => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
@@ -113,11 +114,7 @@ export default function Header() {
                 type="button"
                 onMouseEnter={() => handleMenuEnter("adventures")}
                 onClick={() => {
-                  if (activeMenu === "adventures") {
-                    setActiveMenu(null);
-                  } else {
-                    setActiveMenu("adventures");
-                  }
+                  setActiveMenu("adventures");
                 }}
                 aria-expanded={activeMenu === "adventures"}
                 className={`flex items-center justify-center px-6 py-3.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "adventures" ? "bg-white text-[#a64dff]  font-semibold" : "hover:text-black"
@@ -129,11 +126,7 @@ export default function Header() {
                 type="button"
                 onMouseEnter={() => handleMenuEnter("destinations")}
                 onClick={() => {
-                  if (activeMenu === "destinations") {
-                    setActiveMenu(null);
-                  } else {
-                    setActiveMenu("destinations");
-                  }
+                  setActiveMenu("destinations");
                 }}
                 aria-expanded={activeMenu === "destinations"}
                 className={`flex items-center justify-center px-6 py-2.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "destinations" ? "bg-white text-[#a64dff] font-semibold" : "hover:text-black"
@@ -144,9 +137,18 @@ export default function Header() {
               <div className="flex items-center justify-center cursor-pointer text-gray-800 hover:text-black transition-all px-6 py-2.5 text-[16px] font-medium">
                 <span>Deals</span>
               </div>
-              <div className="flex items-center justify-center cursor-pointer text-gray-800 hover:text-black transition-all px-6 py-2.5 text-[16px] font-medium">
+              <button
+                type="button"
+                onMouseEnter={() => handleMenuEnter("why-us")}
+                onClick={() => {
+                  setActiveMenu("why-us");
+                }}
+                aria-expanded={activeMenu === "why-us"}
+                className={`flex items-center justify-center px-6 py-2.5 text-gray-800 transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "why-us" ? "bg-white text-[#a64dff] font-semibold" : "hover:text-black"
+                  }`}
+              >
                 <span>Why Us</span>
-              </div>
+              </button>
             </nav>
           </div>
 
@@ -301,7 +303,7 @@ export default function Header() {
         )}
       </div>
 
-      {/* Adventures Mega Menu */}
+      {/* Mega Menus */}
       <div
         onMouseEnter={() => {
           if (hoverTimeoutRef.current) {
@@ -309,7 +311,11 @@ export default function Header() {
           }
         }}
       >
-        <HeaderMegaMenu activeMenu={activeMenu} />
+        {activeMenu === "why-us" ? (
+          <WhyUsMegaMenu isHovered={true} />
+        ) : (
+          <HeaderMegaMenu activeMenu={activeMenu as "adventures" | "destinations" | null} />
+        )}
       </div>
 
     </header>

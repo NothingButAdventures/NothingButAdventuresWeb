@@ -11,6 +11,7 @@ import CreateActivityModal from "@/components/CreateActivityModal";
 interface Country {
   _id: string;
   name: string;
+  id?: string;
 }
 
 interface ImageUpload {
@@ -107,6 +108,13 @@ interface TripTypeOption {
   isActive: boolean;
 }
 
+interface InterestOption {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
 
 export default function CreateTourPage() {
   const router = useRouter();
@@ -119,6 +127,8 @@ export default function CreateTourPage() {
   const [activitySearchTerms, setActivitySearchTerms] = useState<Record<string, string>>({});
   const [physicalRatings, setPhysicalRatings] = useState<PhysicalRatingOption[]>([]);
   const [tripTypes, setTripTypes] = useState<TripTypeOption[]>([]);
+  const [interestsOptions, setInterestsOptions] = useState<InterestOption[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [discounts, setDiscounts] = useState<DiscountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -269,6 +279,13 @@ export default function CreateTourPage() {
       if (tripTypesResponse.ok) {
         const tripTypesData = await tripTypesResponse.json();
         setTripTypes(tripTypesData.data.tripTypes || []);
+      }
+
+      // Fetch interests
+      const interestsResponse = await fetch(`${api.baseURL}${api.endpoints.interests.getAll}`);
+      if (interestsResponse.ok) {
+        const interestsData = await interestsResponse.json();
+        setInterestsOptions(interestsData.data.interests || []);
       }
 
       // Fetch discounts
@@ -898,6 +915,7 @@ export default function CreateTourPage() {
         },
         travelStyle: formData.travelStyle || undefined,
         tripType: formData.tripType || undefined,
+        interests: selectedInterests,
         serviceLevel: "Standard",
         location: {
           startCity: formData.startCity || undefined,
@@ -1248,6 +1266,58 @@ export default function CreateTourPage() {
                         {type.name}
                       </option>
                     ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Interests
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Select interests/categories related to this tour (click below to add multiple)
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {selectedInterests.map((interest) => (
+                      <span
+                        key={interest}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200"
+                      >
+                        {interest}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedInterests(selectedInterests.filter((i) => i !== interest))}
+                          className="hover:bg-blue-100 rounded-full p-0.5"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </span>
+                    ))}
+                    {selectedInterests.length === 0 && (
+                      <span className="text-sm text-gray-400 italic">No interests selected</span>
+                    )}
+                  </div>
+
+                  <select
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val && !selectedInterests.includes(val)) {
+                        setSelectedInterests([...selectedInterests, val]);
+                      }
+                      e.target.value = "";
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                  >
+                    <option value="">Add interest...</option>
+                    {interestsOptions
+                      .filter((i) => !selectedInterests.includes(i.name))
+                      .map((interest) => (
+                        <option key={interest._id} value={interest.name}>
+                          {interest.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
 

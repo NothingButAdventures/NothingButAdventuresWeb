@@ -248,6 +248,10 @@ const tourSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    interests: {
+      type: [String],
+      default: [],
+    },
     tripType: {
       type: String,
       trim: true,
