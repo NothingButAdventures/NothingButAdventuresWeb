@@ -8,10 +8,10 @@ export default function AdminLoading() {
                 {/* Logo Section */}
                 <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700">
                     <div className="flex items-center gap-3 animate-pulse">
-                        <div className="w-8 h-8 bg-slate-700 rounded-lg"></div>
-                        <div className="h-5 bg-slate-700 rounded w-16"></div>
+                        <div className="w-8 h-8 bg-[#3F3F42] rounded-lg"></div>
+                        <div className="h-5 bg-[#3F3F42] rounded w-16"></div>
                     </div>
-                    <div className="w-8 h-8 bg-slate-700 rounded-lg animate-pulse"></div>
+                    <div className="w-8 h-8 bg-[#3F3F42] rounded-lg animate-pulse"></div>
                 </div>
 
                 {/* Navigation Skeleton */}
@@ -19,11 +19,11 @@ export default function AdminLoading() {
                     {[1, 2, 3, 4, 5, 6, 7].map((i) => (
                         <div
                             key={i}
-                            className={`flex items-center gap-3 px-3 py-3 rounded-xl animate-pulse ${i === 1 ? "bg-slate-700/50" : ""
+                            className={`flex items-center gap-3 px-3 py-3 rounded-xl animate-pulse ${i === 1 ? "bg-[#3F3F42]/50" : ""
                                 }`}
                         >
-                            <div className="w-5 h-5 bg-slate-700 rounded"></div>
-                            <div className="h-4 bg-slate-700 rounded w-24"></div>
+                            <div className="w-5 h-5 bg-[#3F3F42] rounded"></div>
+                            <div className="h-4 bg-[#3F3F42] rounded w-24"></div>
                         </div>
                     ))}
                 </nav>
@@ -31,13 +31,13 @@ export default function AdminLoading() {
                 {/* User Profile Section Skeleton */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700">
                     <div className="flex items-center gap-3 animate-pulse">
-                        <div className="w-10 h-10 bg-slate-700 rounded-full"></div>
+                        <div className="w-10 h-10 bg-[#3F3F42] rounded-full"></div>
                         <div className="flex-1">
-                            <div className="h-4 bg-slate-700 rounded w-24 mb-2"></div>
-                            <div className="h-3 bg-slate-700 rounded w-32"></div>
+                            <div className="h-4 bg-[#3F3F42] rounded w-24 mb-2"></div>
+                            <div className="h-3 bg-[#3F3F42] rounded w-32"></div>
                         </div>
                     </div>
-                    <div className="mt-4 h-9 bg-slate-700/50 rounded-lg animate-pulse"></div>
+                    <div className="mt-4 h-9 bg-[#3F3F42]/50 rounded-lg animate-pulse"></div>
                 </div>
             </aside>
 

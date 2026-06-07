@@ -87,14 +87,14 @@ export default async function TravelStylesPage() {
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
-            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
+            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#3F3F42] md:text-[58px]">
               Travel Styles
             </h1>
-            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3f3f3f]">
+            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3F3F42]">
               Immersive travel is about experiencing a destination through the eyes of a local. It is eating at family restaurants, learning traditions and crafts, and sleeping in authentic accommodations that tell stories.
             </p>
             {heroBullets.length > 0 && (
-              <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#2f2f2f]">
+              <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#3F3F42]">
                 {heroBullets.map((name: string) => (
                   <li key={name}>{name}</li>
                 ))}
@@ -102,7 +102,7 @@ export default async function TravelStylesPage() {
             )}
             <Link
               href={heroCtaHref}
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#101010] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F3F42]"
             >
               View all Tours
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[11px] leading-none">↗</span>
@@ -144,10 +144,10 @@ export default async function TravelStylesPage() {
                   >
                     Travel Styles
                   </span>
-                  <h2 className="mt-3 text-[42px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#151515]">
+                  <h2 className="mt-3 text-[42px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#3F3F42]">
                     <Link
                       href={styleHref}
-                      className="transition-colors hover:text-black/75 hover:underline hover:underline-offset-4"
+                      className="transition-colors hover:text-[#3F3F42]/75 hover:underline hover:underline-offset-4"
                     >
                       {title}
                     </Link>
@@ -162,15 +162,15 @@ export default async function TravelStylesPage() {
                 </div>
 
                 <div className={`rounded-2xl bg-[#ededed] px-7 py-7 md:px-9 md:py-9 ${isReversed ? "lg:order-1" : "lg:order-2"}`}>
-                  <h3 className="text-[56px] font-semibold leading-[1.03] tracking-[-0.02em] text-[#151515]">
+                  <h3 className="text-[56px] font-semibold leading-[1.03] tracking-[-0.02em] text-[#3F3F42]">
                     {title}
                   </h3>
 
-                  <p className="mt-6 text-[18px] leading-[1.5] text-[#333333]">
+                  <p className="mt-6 text-[18px] leading-[1.5] text-[#3F3F42]">
                     {cleanShortDescription || cleanDescription || "Immersive travel is about experiencing a destination through the eyes of a local. It is eating at family restaurants, learning traditions and crafts, and sleeping in authentic accommodations that tell stories."}
                   </p>
 
-                  <ul className="mt-4 list-disc pl-6 text-[16px] leading-[1.5] text-[#222222]">
+                  <ul className="mt-4 list-disc pl-6 text-[16px] leading-[1.5] text-[#3F3F42]">
                     {bullets.map((bullet) => (
                       <li key={bullet}>{bullet}</li>
                     ))}

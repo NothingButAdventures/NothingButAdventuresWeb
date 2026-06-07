@@ -105,7 +105,7 @@ export default function ActivitiesPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Activities</h1>
+          <h1 className="text-2xl font-bold text-[#3F3F42]">Activities</h1>
           <p className="text-gray-500 text-sm">Manage excursions and local experiences</p>
         </div>
         <Link
@@ -159,7 +159,7 @@ export default function ActivitiesPage() {
                       </div>
                     )}
                     <div>
-                      <div className="font-semibold text-gray-900">{activity.title}</div>
+                      <div className="font-semibold text-[#3F3F42]">{activity.title}</div>
                     </div>
                   </div>
                 </td>
@@ -190,7 +190,7 @@ export default function ActivitiesPage() {
                   {activity.duration ? `${activity.duration} hrs` : "N/A"}
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-1 text-sm font-medium text-gray-900">
+                  <div className="flex items-center gap-1 text-sm font-medium text-[#3F3F42]">
                     {activity.physicalRating?.level
                       ? `${activity.physicalRating.level} - ${activity.physicalRating.name}`
                       : activity.physicalRating?.name || "N/A"}

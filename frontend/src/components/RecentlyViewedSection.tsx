@@ -78,7 +78,7 @@ export default function RecentlyViewedSection() {
           <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
             Recently Viewed
           </div>
-          <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight">
+          <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight">
             Still thinking about these?<br />So are we.
           </h2>
         </div>
@@ -112,7 +112,7 @@ export default function RecentlyViewedSection() {
         {/* Right Arrow Button */}
         <button
           onClick={scrollNext}
-          className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#4d4d4d] hover:bg-[#333] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
+          className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
             canScrollRight ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
           }`}
           aria-label="Next tours"
@@ -148,7 +148,7 @@ export default function RecentlyViewedSection() {
           </button>
           <button
             onClick={scrollNext}
-            className="bg-[#4d4d4d] text-white w-10 h-10 rounded-full flex items-center justify-center"
+            className="bg-[#3F3F42] text-white w-10 h-10 rounded-full flex items-center justify-center"
             aria-label="Next tours"
           >
             <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

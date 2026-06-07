@@ -81,7 +81,7 @@ body {
 
 /* Prose Styling for Blog Content */
 .prose {
-  color: #374151;
+  color: #3F3F42;
   max-width: 65ch;
   font-size: 1.125rem;
   line-height: 1.75;
@@ -93,7 +93,7 @@ body {
 }
 
 .prose h1 {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 800;
   font-size: 2.25em;
   margin-top: 0;
@@ -102,7 +102,7 @@ body {
 }
 
 .prose h2 {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 700;
   font-size: 1.5em;
   margin-top: 2em;
@@ -111,7 +111,7 @@ body {
 }
 
 .prose h3 {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 600;
   font-size: 1.25em;
   margin-top: 1.6em;
@@ -120,7 +120,7 @@ body {
 }
 
 .prose h4 {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 600;
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -138,7 +138,7 @@ body {
 }
 
 .prose strong {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 600;
 }
 
@@ -164,7 +164,7 @@ body {
 .prose blockquote {
   font-weight: 500;
   font-style: italic;
-  color: #111827;
+  color: #3F3F42;
   border-left-width: 0.25rem;
   border-left-color: #e5e7eb;
   margin-top: 1.6em;
@@ -185,7 +185,7 @@ body {
 }
 
 .prose code {
-  color: #111827;
+  color: #3F3F42;
   font-weight: 600;
   font-size: 0.875em;
   background-color: #f3f4f6;

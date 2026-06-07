@@ -106,29 +106,29 @@ export default async function ContinentDestinationsPage({
     <main className="min-h-screen w-full bg-[#f5f5f5] pb-24">
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
         {/* Breadcrumbs */}
-        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
-          <Link href="/" className="hover:text-black transition-colors">
+        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#3F3F42]">
+          <Link href="/" className="hover:text-[#3F3F42] transition-colors">
             Home
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <Link href="/destinations" className="hover:text-black transition-colors">
+          <Link href="/destinations" className="hover:text-[#3F3F42] transition-colors">
             Destinations
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <span className="text-[#1F2937] font-medium">{continent.name}</span>
+          <span className="text-[#3F3F42] font-medium">{continent.name}</span>
         </nav>
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
-            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
+            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#3F3F42] md:text-[58px]">
               {continent.name}
             </h1>
-            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3f3f3f]">
+            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3F3F42]">
               {cleanDescription}
             </p>
             <Link
               href="/trips"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#101010] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F3F42]"
             >
               View all {continent.name} Tours
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[11px] leading-none">
@@ -152,10 +152,10 @@ export default async function ContinentDestinationsPage({
         </section>
 
         <section className="mt-14 md:mt-16">
-          <span className="inline-block rounded-full bg-[#111111] px-3 py-1 text-[11px] font-medium leading-none text-white">
+          <span className="inline-block rounded-full bg-[#3F3F42] px-3 py-1 text-[11px] font-medium leading-none text-white">
             Destinations
           </span>
-          <h2 className="mt-3 text-[40px] font-semibold leading-[1.08] tracking-[-0.02em] text-[#151515] md:text-[54px]">
+          <h2 className="mt-3 text-[40px] font-semibold leading-[1.08] tracking-[-0.02em] text-[#3F3F42] md:text-[54px]">
             Popular destinations in {continent.name}
           </h2>
 
@@ -181,16 +181,16 @@ export default async function ContinentDestinationsPage({
                       </div>
 
                       <div className="px-4 py-3">
-                        <h3 className="text-[33px] font-semibold leading-[1.08] text-[#1a1a1a]">
+                        <h3 className="text-[33px] font-semibold leading-[1.08] text-[#3F3F42]">
                           {tour.country?.name || tour.name}
                         </h3>
-                        <p className="mt-2 overflow-hidden text-[16px] leading-[1.45] text-[#5b5b5b] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] md:text-[17px]">
+                        <p className="mt-2 overflow-hidden text-[16px] leading-[1.45] text-[#3F3F42] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3] md:text-[17px]">
                           {stripHtml(tour.summary) ||
                             "40+ successful planned trips and immersive local experiences."}
                         </p>
                         <Link
                           href={`/trips/${tour.slug}/${tour.tourCode}`}
-                          className="mt-3 inline-block text-[21px] font-medium text-[#1b1b1b] transition-colors hover:text-black/65"
+                          className="mt-3 inline-block text-[21px] font-medium text-[#3F3F42] transition-colors hover:text-[#3F3F42]/65"
                         >
                           Learn More about {tour.country?.name || tour.name}
                         </Link>
@@ -199,24 +199,24 @@ export default async function ContinentDestinationsPage({
                   );
                 })
               ) : (
-                <div className="rounded-2xl border border-[#d6d6d6] bg-[#f8f8f8] p-8 text-[20px] text-[#666666]">
+                <div className="rounded-2xl border border-[#d6d6d6] bg-[#f8f8f8] p-8 text-[20px] text-[#3F3F42]">
                   No tours found for this continent yet.
                 </div>
               )}
             </div>
 
             <aside className="rounded-2xl bg-[#ededed] px-6 py-6 md:px-7 md:py-7">
-              <h3 className="text-[42px] font-semibold leading-[1.1] text-[#161616]">
+              <h3 className="text-[42px] font-semibold leading-[1.1] text-[#3F3F42]">
                 All Adventures in {continent.name}
               </h3>
 
               {countries.length > 0 ? (
-                <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-[17px] leading-[1.35] text-[#4f4f4f] marker:text-[#5b5b5b]">
+                <ul className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-[17px] leading-[1.35] text-[#3F3F42] marker:text-[#3F3F42]">
                   {countries.map((country) => (
                     <li key={country._id || country.id || country.name} className="list-disc">
                       <Link
                         href={country.slug ? `/destinations/${continent.slug}/${country.slug}` : `/destinations/${continent.slug}/${encodeURIComponent(country.name.toLowerCase())}`}
-                        className="transition-colors hover:text-[#111111]"
+                        className="transition-colors hover:text-[#3F3F42]"
                       >
                         {country.name}
                       </Link>
@@ -224,7 +224,7 @@ export default async function ContinentDestinationsPage({
                   ))}
                 </ul>
               ) : (
-                <p className="mt-4 text-[17px] text-[#5f5f5f]">No countries available for this continent yet.</p>
+                <p className="mt-4 text-[17px] text-[#3F3F42]">No countries available for this continent yet.</p>
               )}
             </aside>
           </div>

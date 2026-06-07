@@ -132,7 +132,7 @@ export default function ToursManagementPage() {
       <div className="bg-white border-b border-gray-200">
         <div className="px-8 py-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Tours Management</h1>
+            <h1 className="text-2xl font-bold text-[#3F3F42]">Tours Management</h1>
             <p className="text-gray-500 text-sm mt-1">
               Manage all tours in the system ({tours.length} total)
             </p>
@@ -193,7 +193,7 @@ export default function ToursManagementPage() {
                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
               />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
               {searchQuery ? "No tours found" : "No tours yet"}
             </h3>
             <p className="text-gray-500 mb-6">
@@ -248,7 +248,7 @@ export default function ToursManagementPage() {
                         <div>
                           <Link
                             href={`/trips/${tour.slug}/${tour.tourCode}`}
-                            className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                            className="text-sm font-medium text-[#3F3F42] hover:text-blue-600 transition-colors"
                           >
                             {tour.name}
                           </Link>
@@ -259,17 +259,17 @@ export default function ToursManagementPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-[#3F3F42]">
                         {tour.country?.name || "N/A"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-700">
+                      <span className="text-sm text-[#3F3F42]">
                         {tour.duration.days}D
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-gray-900">
+                      <span className="text-sm font-semibold text-[#3F3F42]">
                         ${tour.price.amount}
                       </span>
                     </td>

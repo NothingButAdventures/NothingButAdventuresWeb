@@ -34,15 +34,15 @@ const reasons = [
 export default function WhyLocalLivingSection() {
   return (
     <section className="mt-14 md:mt-16">
-      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">5 Reasons</span>
+      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">5 Reasons</span>
 
-      <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[58px]">
+      <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[58px]">
         Why Local Living Adv.
       </h2>
 
       <div className="mt-7 grid grid-cols-1 gap-8 lg:grid-cols-[290px_minmax(0,1fr)] lg:gap-10">
         <div>
-          <h3 className="text-[26px] font-medium leading-[1.1] text-[#111b31] md:text-[34px] lg:text-[46px]">
+          <h3 className="text-[26px] font-medium leading-[1.1] text-[#3F3F42] md:text-[34px] lg:text-[46px]">
             4 Reasons To Choose
             <br />
             Local Living
@@ -62,8 +62,8 @@ export default function WhyLocalLivingSection() {
               </div>
 
               <div className="min-w-0 pt-0.5">
-                <h4 className="text-[22px] font-semibold leading-tight text-[#18243b] md:text-[23px]">{item.title}</h4>
-                <p className="mt-1.5 line-clamp-2 text-[12px] leading-[1.35] text-[#4f586b] md:text-[13px]">{item.description}</p>
+                <h4 className="text-[22px] font-semibold leading-tight text-[#3F3F42] md:text-[23px]">{item.title}</h4>
+                <p className="mt-1.5 line-clamp-2 text-[12px] leading-[1.35] text-[#3F3F42] md:text-[13px]">{item.description}</p>
               </div>
             </article>
           ))}

@@ -28,7 +28,7 @@ const faqs = [
 function Arrow({ open }: { open: boolean }) {
   return (
     <svg
-      className={`h-4 w-4 text-[#1a2438] transition-transform duration-200 ${open ? "rotate-180" : "rotate-0"}`}
+      className={`h-4 w-4 text-[#3F3F42] transition-transform duration-200 ${open ? "rotate-180" : "rotate-0"}`}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -43,11 +43,11 @@ export default function TravelStyleFaqSection() {
 
   return (
     <section className="mt-16 md:mt-20">
-      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">FAQ</span>
+      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">FAQ</span>
 
       <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
         <div>
-          <h2 className="max-w-[760px] text-[36px] font-semibold leading-tight text-[#121b2f] md:text-[50px]">
+          <h2 className="max-w-[760px] text-[36px] font-semibold leading-tight text-[#3F3F42] md:text-[50px]">
             Everything you need to know before your desert journey - from booking to what to pack.
           </h2>
 
@@ -63,13 +63,13 @@ export default function TravelStyleFaqSection() {
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${index}`}
                   >
-                    <span className="text-[17px] font-medium text-[#121b2f] md:text-[18px]">{item.question}</span>
+                    <span className="text-[17px] font-medium text-[#3F3F42] md:text-[18px]">{item.question}</span>
                     <Arrow open={isOpen} />
                   </button>
 
                   {isOpen && (
                     <div id={`faq-answer-${index}`} className="pt-3">
-                      <p className="text-[15px] leading-relaxed text-[#586176] md:text-[16px]">{item.answer}</p>
+                      <p className="text-[15px] leading-relaxed text-[#3F3F42] md:text-[16px]">{item.answer}</p>
                     </div>
                   )}
                 </div>
@@ -79,8 +79,8 @@ export default function TravelStyleFaqSection() {
         </div>
 
         <aside className="rounded-[16px] border border-[#e5e9ef] bg-white p-6 md:p-8 lg:sticky lg:top-24">
-          <h3 className="text-[42px] font-semibold leading-tight text-[#121b2f] md:text-[46px]">Still Have Questions</h3>
-          <p className="mt-4 text-[26px] leading-[1.35] text-[#4f586b] md:text-[28px]">
+          <h3 className="text-[42px] font-semibold leading-tight text-[#3F3F42] md:text-[46px]">Still Have Questions</h3>
+          <p className="mt-4 text-[26px] leading-[1.35] text-[#3F3F42] md:text-[28px]">
             Our travel experts are here to help you plan the perfect trip
           </p>
 

@@ -208,14 +208,14 @@ export default function EditContinentPage() {
                                 <Icons.Back className="w-5 h-5" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Edit Continent</h1>
+                                <h1 className="text-xl font-bold text-[#3F3F42]">Edit Continent</h1>
                                 <p className="text-sm text-gray-500">Update details for {continent.name}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition shadow-lg"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] disabled:opacity-50 transition shadow-lg"
                         >
                             {saving ? (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -236,7 +236,7 @@ export default function EditContinentPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Continent Name</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Continent Name</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -246,7 +246,7 @@ export default function EditContinentPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Cover Image</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Cover Image</label>
                                 <div className="mt-1 flex items-center gap-4">
                                     {image && (
                                         <div className="relative w-32 h-24 rounded-lg overflow-hidden border border-gray-100 shadow-sm group">
@@ -254,7 +254,7 @@ export default function EditContinentPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => setImage("")}
-                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity font-medium text-xs"
+                                                className="absolute inset-0 bg-[#3F3F42]/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity font-medium text-xs"
                                             >
                                                 Remove
                                             </button>
@@ -263,7 +263,7 @@ export default function EditContinentPage() {
                                     <button 
                                         type="button"
                                         onClick={() => setShowImagePicker(true)}
-                                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition text-sm font-medium"
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#3F3F42] rounded-lg transition text-sm font-medium"
                                     >
                                         Select/Upload Image
                                     </button>
@@ -276,7 +276,7 @@ export default function EditContinentPage() {
                 {/* Editor Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Content & Description</h2>
+                        <h2 className="text-lg font-semibold text-[#3F3F42]">Content & Description</h2>
                         {/* Simple Toolbar */}
                         <div className="flex bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
                             <ToolbarButton
@@ -343,7 +343,7 @@ function ToolbarButton({ onClick, isActive, label, icon, bold, italic }: any) {
         <button
             onClick={onClick}
             className={`p-2 min-w-[32px] rounded-md transition text-sm font-medium flex items-center justify-center
-                ${isActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-100'}
+                ${isActive ? 'bg-[#3F3F42] text-white' : 'text-gray-600 hover:bg-gray-100'}
                 ${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}
             `}
         >

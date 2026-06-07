@@ -148,7 +148,7 @@ const getPopularTours = catchAsync(async (req, res, next) => {
 });
 
 const searchTours = catchAsync(async (req, res, next) => {
-  const { q, country, duration, priceMin, priceMax, difficulty, travelStyle } =
+  const { q, country, duration, priceMin, priceMax, difficulty, travelStyle, interests } =
     req.query;
 
   const query = { isActive: true };
@@ -189,6 +189,13 @@ const searchTours = catchAsync(async (req, res, next) => {
   // Travel style filter
   if (travelStyle) {
     query.travelStyle = travelStyle;
+  }
+
+  // Interests filter
+  if (interests) {
+    query.interests = interests;
+  } else if (req.query.interest) {
+    query.interests = req.query.interest;
   }
 
   const features = new APIFeatures(Tour.find(query), req.query)

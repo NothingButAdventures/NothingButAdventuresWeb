@@ -147,7 +147,7 @@ export default function MyBlogsPage() {
                 );
             case "archived":
                 return (
-                    <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                    <span className="px-3 py-1 bg-gray-100 text-[#3F3F42] rounded-full text-xs font-medium">
                         Archived
                     </span>
                 );
@@ -166,7 +166,7 @@ export default function MyBlogsPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">My Blogs</h1>
+                        <h1 className="text-3xl font-bold text-[#3F3F42]">My Blogs</h1>
                         <p className="text-gray-600 mt-1">
                             Manage and create your travel articles
                         </p>
@@ -196,7 +196,7 @@ export default function MyBlogsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                         <p className="text-sm text-gray-500 mb-1">Total Articles</p>
-                        <p className="text-3xl font-bold text-gray-900">{blogs.length}</p>
+                        <p className="text-3xl font-bold text-[#3F3F42]">{blogs.length}</p>
                     </div>
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                         <p className="text-sm text-gray-500 mb-1">Published</p>
@@ -224,7 +224,7 @@ export default function MyBlogsPage() {
                         onClick={() => setFilter("all")}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "all"
                             ? "bg-blue-600 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
+                            : "bg-white text-[#3F3F42] hover:bg-gray-100"
                             }`}
                     >
                         All ({blogs.length})
@@ -233,7 +233,7 @@ export default function MyBlogsPage() {
                         onClick={() => setFilter("published")}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "published"
                             ? "bg-green-600 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
+                            : "bg-white text-[#3F3F42] hover:bg-gray-100"
                             }`}
                     >
                         Published ({blogs.filter((b) => b.status === "published").length})
@@ -242,7 +242,7 @@ export default function MyBlogsPage() {
                         onClick={() => setFilter("draft")}
                         className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "draft"
                             ? "bg-yellow-600 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100"
+                            : "bg-white text-[#3F3F42] hover:bg-gray-100"
                             }`}
                     >
                         Drafts ({blogs.filter((b) => b.status === "draft").length})
@@ -255,22 +255,22 @@ export default function MyBlogsPage() {
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Article
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Category
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Status
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Views
                                     </th>
-                                    <th className="text-left px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-left px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Date
                                     </th>
-                                    <th className="text-right px-6 py-4 text-sm font-semibold text-gray-700">
+                                    <th className="text-right px-6 py-4 text-sm font-semibold text-[#3F3F42]">
                                         Actions
                                     </th>
                                 </tr>
@@ -306,7 +306,7 @@ export default function MyBlogsPage() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-gray-900 line-clamp-1">
+                                                    <h3 className="font-semibold text-[#3F3F42] line-clamp-1">
                                                         {blog.title}
                                                     </h3>
                                                     <p className="text-sm text-gray-500">
@@ -428,7 +428,7 @@ export default function MyBlogsPage() {
                                 />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-xl font-semibold text-[#3F3F42] mb-2">
                             {filter === "all"
                                 ? "No articles yet"
                                 : `No ${filter} articles`}

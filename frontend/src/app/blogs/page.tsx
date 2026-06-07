@@ -256,7 +256,7 @@ export default function BlogsPage() {
             {!selectedCategory && featuredBlogs.length > 0 && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-3xl font-bold text-gray-900">Featured</h2>
+                        <h2 className="text-3xl font-bold text-[#3F3F42]">Featured</h2>
                         <Link
                             href="/blogs?featured=true"
                             className="text-blue-500 hover:text-blue-600 font-medium flex items-center gap-1"
@@ -333,7 +333,7 @@ export default function BlogsPage() {
                                             />
                                         </div>
                                         <div className="flex flex-col justify-center">
-                                            <h4 className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                            <h4 className="font-bold text-[#3F3F42] group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
                                                 {blog.title}
                                             </h4>
                                             <p className="text-sm text-gray-500">
@@ -365,7 +365,7 @@ export default function BlogsPage() {
 
             {/* All Blogs Section */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                <h2 className="text-3xl font-bold text-[#3F3F42] mb-8">
                     {selectedCategory || "Latest Articles"}
                 </h2>
 
@@ -385,7 +385,7 @@ export default function BlogsPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                                             <div className="absolute top-4 left-4">
-                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                     {blogs[0].category}
                                                 </span>
                                             </div>
@@ -418,7 +418,7 @@ export default function BlogsPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                                             <div className="absolute top-4 left-4">
-                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                     {blogs[1].category}
                                                 </span>
                                             </div>
@@ -449,17 +449,17 @@ export default function BlogsPage() {
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                                 <div className="absolute top-4 left-4">
-                                                    <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                         {blog.category}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                                            <h3 className="font-bold text-xl text-[#3F3F42] group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
                                                 {blog.title}
                                             </h3>
                                             <p className="text-sm text-gray-500 mb-2">
                                                 Written by{" "}
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-medium text-[#3F3F42]">
                                                     {blog.author.name}
                                                 </span>{" "}
                                                 on {formatDate(blog.publishedAt)}
@@ -500,7 +500,7 @@ export default function BlogsPage() {
                                 />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-xl font-semibold text-[#3F3F42] mb-2">
                             No articles found
                         </h3>
                         <p className="text-gray-500">
@@ -515,7 +515,7 @@ export default function BlogsPage() {
             {/* Blogs by Continent Sections */}
             {continentBlogs.map((item) => (
                 <div key={item.continent._id} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                    <h2 className="text-3xl font-bold text-[#3F3F42] mb-8">
                         {item.continent.name}
                     </h2>
 
@@ -534,7 +534,7 @@ export default function BlogsPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                                             <div className="absolute top-4 left-4">
-                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                     {item.blogs[0].category}
                                                 </span>
                                             </div>
@@ -567,7 +567,7 @@ export default function BlogsPage() {
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                                             <div className="absolute top-4 left-4">
-                                                <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                     {item.blogs[1].category}
                                                 </span>
                                             </div>
@@ -598,17 +598,17 @@ export default function BlogsPage() {
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                 />
                                                 <div className="absolute top-4 left-4">
-                                                    <span className="bg-white/90 text-gray-800 text-xs font-medium px-3 py-1 rounded-full">
+                                                    <span className="bg-white/90 text-[#3F3F42] text-xs font-medium px-3 py-1 rounded-full">
                                                         {blog.category}
                                                     </span>
                                                 </div>
                                             </div>
-                                            <h3 className="font-bold text-xl text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                                            <h3 className="font-bold text-xl text-[#3F3F42] group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
                                                 {blog.title}
                                             </h3>
                                             <p className="text-sm text-gray-500 mb-2">
                                                 Written by{" "}
-                                                <span className="font-medium text-gray-700">
+                                                <span className="font-medium text-[#3F3F42]">
                                                     {blog.author.name}
                                                 </span>{" "}
                                                 on {formatDate(blog.publishedAt)}

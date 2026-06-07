@@ -15,15 +15,15 @@ export default function LocalVsClassicalComparisonSection() {
         <div className="relative z-20">
           <div className="grid grid-cols-[34%_34%_32%] border-b border-[#dfe3ea]">
             <div />
-            <div className="px-6 py-6 text-center text-[40px] font-semibold text-[#162138] md:text-[42px]">Local Living Adventures</div>
-            <div className="px-6 py-6 text-center text-[40px] font-semibold text-[#2d374a] md:text-[42px]">Classical Adventures</div>
+            <div className="px-6 py-6 text-center text-[40px] font-semibold text-[#3F3F42] md:text-[42px]">Local Living Adventures</div>
+            <div className="px-6 py-6 text-center text-[40px] font-semibold text-[#3F3F42] md:text-[42px]">Classical Adventures</div>
           </div>
 
           {rows.map((row, index) => (
             <div key={index} className="grid grid-cols-[34%_34%_32%] border-b border-[#dfe3ea]">
-              <div className="px-4 py-7 text-[22px] leading-[1.32] text-[#4d5568] md:px-6 md:text-[23px]">{row}</div>
+              <div className="px-4 py-7 text-[22px] leading-[1.32] text-[#3F3F42] md:px-6 md:text-[23px]">{row}</div>
               <div className="flex items-center justify-center px-6 py-7" />
-              <div className="flex items-center justify-center px-6 py-7 text-[36px] font-semibold text-[#e63a34]">x</div>
+              <div className="flex items-center justify-center px-6 py-7 text-[36px] font-semibold text-[#3F3F42]">x</div>
             </div>
           ))}
         </div>

@@ -731,7 +731,7 @@ export default function CheckoutPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">Trip not found</h1>
+                    <h1 className="text-2xl font-bold text-[#3F3F42] mb-2">Trip not found</h1>
                     <p className="text-gray-600 mb-4">The tour you&apos;re looking for doesn&apos;t exist.</p>
                     <Link href="/trips" className="text-purple-600 hover:underline">
                         Browse all trips
@@ -748,35 +748,35 @@ export default function CheckoutPage() {
             {/* Header */}
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto px-4 py-4">
-                    <nav className="mb-4 flex items-center space-x-2 text-sm text-[#4B5563]">
-                        <Link href="/" className="hover:text-black transition-colors">
+                    <nav className="mb-4 flex items-center space-x-2 text-sm text-[#3F3F42]">
+                        <Link href="/" className="hover:text-[#3F3F42] transition-colors">
                             Home
                         </Link>
                         <span className="text-[#9CA3AF]">/</span>
-                        <Link href="/destinations" className="hover:text-black transition-colors">
+                        <Link href="/destinations" className="hover:text-[#3F3F42] transition-colors">
                             Destinations
                         </Link>
                         {tour.country?.continent && (
                             <>
                                 <span className="text-[#9CA3AF]">/</span>
-                                <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-black transition-colors capitalize">
+                                <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-[#3F3F42] transition-colors capitalize">
                                     {tour.country.continent.slug}
                                 </Link>
                             </>
                         )}
                         <span className="text-[#9CA3AF]">/</span>
-                        <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-black transition-colors">
+                        <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-[#3F3F42] transition-colors">
                             {tour.country.name}
                         </Link>
                         <span className="text-[#9CA3AF]">/</span>
-                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="hover:text-black transition-colors">
+                        <Link href={`/trips/${tour.slug}/${tour.tourCode}`} className="hover:text-[#3F3F42] transition-colors">
                             {tour.name}
                         </Link>
                         <span className="text-[#9CA3AF]">/</span>
-                        <span className="text-[#1F2937] font-medium">Checkout</span>
+                        <span className="text-[#3F3F42] font-medium">Checkout</span>
                     </nav>
 
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{tour.name}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#3F3F42]">{tour.name}</h1>
                     <p className="text-gray-600 mt-1">Depart from {tour.location.startCity}, {tour.country.name}</p>
                 </div>
             </div>
@@ -790,7 +790,7 @@ export default function CheckoutPage() {
                         {currentStep >= 1 && (
                             <div className={`bg-white rounded-xl shadow-sm border p-6 ${currentStep !== 1 ? "opacity-60" : ""}`}>
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-xl font-bold text-gray-900">Who&apos;s travelling?</h2>
+                                    <h2 className="text-xl font-bold text-[#3F3F42]">Who&apos;s travelling?</h2>
                                     {currentStep > 1 && (
                                         <button
                                             onClick={() => setCurrentStep(1)}
@@ -823,7 +823,7 @@ export default function CheckoutPage() {
 
                                         {/* Primary Traveller */}
                                         <div className="border-t pt-6">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Primary traveller</h3>
+                                            <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">Primary traveller</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                                 <div>
                                                     <label className="block text-sm text-gray-600 mb-1">
@@ -871,7 +871,7 @@ export default function CheckoutPage() {
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-gray-700">
+                                    <div className="text-[#3F3F42]">
                                         {adultCount} traveller(s) • {primaryTraveller.title} {primaryTraveller.firstName} {primaryTraveller.lastName}
                                     </div>
                                 )}
@@ -918,7 +918,7 @@ export default function CheckoutPage() {
                                                                     ‹
                                                                 </button>
                                                             )}
-                                                            <h3 className="font-semibold text-gray-900 flex-1 text-center">
+                                                            <h3 className="font-semibold text-[#3F3F42] flex-1 text-center">
                                                                 {monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                                                             </h3>
                                                             {offset === 1 && (
@@ -1017,7 +1017,7 @@ export default function CheckoutPage() {
                                                         >
                                                             <div className="flex items-center gap-4">
                                                                 <div>
-                                                                    <div className="font-semibold text-gray-900">
+                                                                    <div className="font-semibold text-[#3F3F42]">
                                                                         {formatDate(date.startDate)} to {formatDate(date.endDate)}
                                                                     </div>
                                                                     <div className="flex items-center gap-2 mt-1">
@@ -1036,7 +1036,7 @@ export default function CheckoutPage() {
                                                             </div>
                                                             <div className="flex items-center gap-4">
                                                                 <div className="text-right">
-                                                                    <div className="font-bold text-gray-900">
+                                                                    <div className="font-bold text-[#3F3F42]">
                                                                         ${Math.round(tour.price.amount * (1 - getBestDiscountPct(getDiscountPercentage(date.discount), tour.price.amount) / 100))}
                                                                         <span className="text-xs font-normal text-gray-500"> USD</span>
                                                                     </div>
@@ -1046,7 +1046,7 @@ export default function CheckoutPage() {
                                                                     onClick={() => setSelectedDateId(date._id!)}
                                                                     className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${selectedDateId === date._id
                                                                         ? "bg-purple-600 text-white"
-                                                                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                                        : "border border-gray-300 text-[#3F3F42] hover:bg-gray-50"
                                                                         }`}
                                                                 >
                                                                     {selectedDateId === date._id ? "Selected" : "Select"}
@@ -1068,7 +1068,7 @@ export default function CheckoutPage() {
                                     </>
                                 ) : (
                                     selectedDate && (
-                                        <div className="text-gray-700">
+                                        <div className="text-[#3F3F42]">
                                             {formatShortDate(selectedDate.startDate)} - {formatShortDate(selectedDate.endDate)}
                                         </div>
                                     )
@@ -1080,7 +1080,7 @@ export default function CheckoutPage() {
                         {currentStep >= 3 && (
                             <div className={`bg-white rounded-xl shadow-sm border p-6 ${currentStep !== 3 ? "opacity-60" : ""}`}>
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900">Activities & Extras</h2>
+                                    <h2 className="text-xl font-bold text-[#3F3F42]">Activities & Extras</h2>
                                     {currentStep > 3 && (
                                         <button
                                             onClick={() => setCurrentStep(3)}
@@ -1107,7 +1107,7 @@ export default function CheckoutPage() {
                                                 )}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-gray-900">We&apos;re showing you add-ons and extras for all tours selected</p>
+                                                <p className="font-semibold text-[#3F3F42]">We&apos;re showing you add-ons and extras for all tours selected</p>
                                                 <p className="text-sm text-gray-600 mt-1">
                                                     Below are your options for &apos;{tour.name}&apos;
                                                 </p>
@@ -1116,7 +1116,7 @@ export default function CheckoutPage() {
 
                                         {/* Activities Section */}
                                         <div className="mb-8">
-                                            <h3 className="text-lg font-bold text-gray-900 mb-2">
+                                            <h3 className="text-lg font-bold text-[#3F3F42] mb-2">
                                                 Activities for {tour.name}
                                             </h3>
                                             <p className="text-gray-600 text-sm mb-6">
@@ -1135,7 +1135,7 @@ export default function CheckoutPage() {
                                                             >
                                                                 <div className="flex items-center gap-4">
                                                                     <div className="text-left">
-                                                                        <div className="font-bold text-gray-900">Day {day.day}</div>
+                                                                        <div className="font-bold text-[#3F3F42]">Day {day.day}</div>
                                                                         {selectedDate && (
                                                                             <div className="text-sm text-gray-500">
                                                                                 {new Date(
@@ -1177,7 +1177,7 @@ export default function CheckoutPage() {
                                                                                         )}
                                                                                     </div>
                                                                                     <div className="flex-1">
-                                                                                        <h4 className="font-bold text-gray-900">{activity.name || activity.title}</h4>
+                                                                                        <h4 className="font-bold text-[#3F3F42]">{activity.name || activity.title}</h4>
                                                                                         {activity.place && (
                                                                                             <p className="text-xs text-gray-500 uppercase mt-1">
                                                                                                 {activity.place}
@@ -1217,7 +1217,7 @@ export default function CheckoutPage() {
                                                                                             <span className="text-sm text-gray-500 flex items-center gap-1">
                                                                                                 ℹ️ Learn more
                                                                                             </span>
-                                                                                            <span className="font-bold text-gray-900">
+                                                                                            <span className="font-bold text-[#3F3F42]">
                                                                                                 {typeof activity.price === "number"
                                                                                                     ? (activity.price > 0 ? `$${activity.price.toLocaleString()}` : "Free")
                                                                                                     : (activity.price?.amount > 0
@@ -1239,7 +1239,7 @@ export default function CheckoutPage() {
 
                                             <button
                                                 onClick={() => setExpandedDays(tour.itinerary.filter(d => d.optionalActivities?.length > 0).map(d => d.day))}
-                                                className="mt-4 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+                                                className="mt-4 bg-[#3F3F42] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#3F3F42] transition"
                                             >
                                                 View activities for all days
                                             </button>
@@ -1248,7 +1248,7 @@ export default function CheckoutPage() {
                                         {/* Accommodation Customization */}
                                         {(tour.ownRoomAvailable || (tour.price?.ownRoomPrice !== undefined && tour.price.ownRoomPrice > 0)) && (
                                             <div className="border-t pt-6">
-                                                <h3 className="text-lg font-bold text-gray-900 mb-2">Add-ons</h3>
+                                                <h3 className="text-lg font-bold text-[#3F3F42] mb-2">Add-ons</h3>
                                                 <p className="text-gray-600 text-sm mb-4">
                                                     Basic accommodation is included in your tour, but you can customize and upgrade your options below
                                                 </p>
@@ -1259,13 +1259,13 @@ export default function CheckoutPage() {
                                                             <span className="text-2xl">🏨</span>
                                                         </div>
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-gray-900">Add your own room</h4>
+                                                            <h4 className="font-bold text-[#3F3F42]">Add your own room</h4>
                                                             <p className="text-sm text-gray-600 mt-1">
                                                                 During your tour, sometimes it&apos;s more convenient and comfortable to have your own room. We offer this option so you can treat yourself.
                                                             </p>
                                                         </div>
                                                         <div className="text-right">
-                                                            <div className="font-bold text-gray-900">
+                                                            <div className="font-bold text-[#3F3F42]">
                                                                 ${tour.price?.ownRoomPrice ?? tour.ownRoomPrice ?? 0}<span className="text-xs font-normal text-gray-500"> USD per person</span>
                                                             </div>
                                                             {accommodationUpgrade ? (
@@ -1301,7 +1301,7 @@ export default function CheckoutPage() {
                                         )}
                                     </>
                                 ) : (
-                                    <div className="text-gray-700">
+                                    <div className="text-[#3F3F42]">
                                         {selectedActivities.length} activities selected
                                         {accommodationUpgrade && " • Room upgrade included"}
                                     </div>
@@ -1313,7 +1313,7 @@ export default function CheckoutPage() {
                         {currentStep >= 4 && (
                             <div className={`bg-white rounded-xl shadow-sm border p-6 ${currentStep !== 4 ? "opacity-60" : ""}`}>
                                 <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-xl font-bold text-gray-900">Travel extras</h2>
+                                    <h2 className="text-xl font-bold text-[#3F3F42]">Travel extras</h2>
                                     {currentStep > 4 && (
                                         <button
                                             onClick={() => setCurrentStep(4)}
@@ -1331,7 +1331,7 @@ export default function CheckoutPage() {
                                         </p>
 
                                         <div className="mb-6">
-                                            <h3 className="font-bold text-gray-900 mb-2">Extra days</h3>
+                                            <h3 className="font-bold text-[#3F3F42] mb-2">Extra days</h3>
                                             <p className="text-gray-600 text-sm mb-4">
                                                 Do you need to arrive earlier or leave later? Select the dates you need and we will help you with transport and accommodation.
                                             </p>
@@ -1351,7 +1351,7 @@ export default function CheckoutPage() {
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <h4 className="font-bold text-gray-900">{tour.name}</h4>
+                                                            <h4 className="font-bold text-[#3F3F42]">{tour.name}</h4>
                                                             <p className="text-sm text-gray-500">
                                                                 From {formatShortDate(selectedDate.startDate)} to {formatShortDate(selectedDate.endDate)}
                                                             </p>
@@ -1361,7 +1361,7 @@ export default function CheckoutPage() {
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                                         <div>
                                                             <div className="text-sm text-gray-600 mb-1">Arrive</div>
-                                                            <div className="font-semibold text-gray-900">
+                                                            <div className="font-semibold text-[#3F3F42]">
                                                                 {new Date(selectedDate.startDate).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
                                                             </div>
                                                             <p className="text-xs text-gray-500 mt-1">You&apos;re arriving the same day as your tour starts</p>
@@ -1389,7 +1389,7 @@ export default function CheckoutPage() {
 
                                                         <div>
                                                             <div className="text-sm text-gray-600 mb-1">Depart</div>
-                                                            <div className="font-semibold text-gray-900">
+                                                            <div className="font-semibold text-[#3F3F42]">
                                                                 {new Date(selectedDate.endDate).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
                                                             </div>
                                                             <p className="text-xs text-gray-500 mt-1">You&apos;re leaving the same day as your tour ends</p>
@@ -1420,7 +1420,7 @@ export default function CheckoutPage() {
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-gray-700">
+                                    <div className="text-[#3F3F42]">
                                         Arrival: {arrivalOption} • Departure: {departureOption}
                                     </div>
                                 )}
@@ -1430,7 +1430,7 @@ export default function CheckoutPage() {
                         {/* Step 5: Traveller Details & Contact Info */}
                         {currentStep >= 5 && (
                             <div className={`bg-white rounded-xl shadow-sm border p-6 ${currentStep !== 5 ? "opacity-60" : ""}`}>
-                                <h2 className="text-xl font-bold text-gray-900 mb-6">Traveller & Contact Information</h2>
+                                <h2 className="text-xl font-bold text-[#3F3F42] mb-6">Traveller & Contact Information</h2>
 
                                 {currentStep === 5 && (
                                     <>
@@ -1441,7 +1441,7 @@ export default function CheckoutPage() {
                                         </div>
 
                                         <div className="mb-8">
-                                            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                            <h3 className="font-semibold text-[#3F3F42] mb-4 flex items-center gap-2">
                                                 <span className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm">1</span>
                                                 {primaryTraveller.title} {primaryTraveller.firstName} {primaryTraveller.lastName} (Primary)
                                             </h3>
@@ -1511,8 +1511,8 @@ export default function CheckoutPage() {
 
                                         {otherTravellers.map((traveller, idx) => (
                                             <div key={idx} className="mb-8 border-t pt-6">
-                                                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                                                    <span className="w-8 h-8 rounded-full bg-gray-200 text-gray-700 flex items-center justify-center text-sm">{idx + 2}</span>
+                                                <h3 className="font-semibold text-[#3F3F42] mb-4 flex items-center gap-2">
+                                                    <span className="w-8 h-8 rounded-full bg-gray-200 text-[#3F3F42] flex items-center justify-center text-sm">{idx + 2}</span>
                                                     Traveller {idx + 2}
                                                 </h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -1654,7 +1654,7 @@ export default function CheckoutPage() {
 
                                         {/* Payment Options */}
                                         <div className="border-t pt-6">
-                                            <h3 className="font-semibold text-gray-900 mb-4">Payment Options</h3>
+                                            <h3 className="font-semibold text-[#3F3F42] mb-4">Payment Options</h3>
 
                                             <div className="grid grid-cols-1 gap-4">
                                                 {/* Full Payment Option */}
@@ -1672,8 +1672,8 @@ export default function CheckoutPage() {
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between">
-                                                                <span className="font-semibold text-gray-900">Pay Full Amount</span>
-                                                                <span className="font-bold text-gray-900">{formatPrice(calculateTotalPrice)}</span>
+                                                                <span className="font-semibold text-[#3F3F42]">Pay Full Amount</span>
+                                                                <span className="font-bold text-[#3F3F42]">{formatPrice(calculateTotalPrice)}</span>
                                                             </div>
                                                             <p className="text-sm text-gray-500 mt-1">Pay the total amount now and you&apos;re all set!</p>
                                                         </div>
@@ -1698,10 +1698,10 @@ export default function CheckoutPage() {
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between">
-                                                                <span className={`font-semibold ${!isDepositAvailable ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                <span className={`font-semibold ${!isDepositAvailable ? 'text-gray-500' : 'text-[#3F3F42]'}`}>
                                                                     Pay Deposit ({tour.price.bookingPercentage || 20}%)
                                                                 </span>
-                                                                <span className={`font-bold ${!isDepositAvailable ? 'text-gray-500' : 'text-gray-900'}`}>
+                                                                <span className={`font-bold ${!isDepositAvailable ? 'text-gray-500' : 'text-[#3F3F42]'}`}>
                                                                     {formatPrice(depositAmount)}
                                                                 </span>
                                                             </div>
@@ -1788,7 +1788,7 @@ export default function CheckoutPage() {
                             <div className="relative z-10 p-4 h-full overflow-y-auto no-scrollbar">
                                 <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-white/50 overflow-hidden">
                                     <div className="p-6">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-2">Trip summary</h3>
+                                        <h3 className="text-lg font-bold text-[#3F3F42] mb-2">Trip summary</h3>
                                         <div className="text-sm text-gray-500 mb-4">
                                             {adultCount} traveller{adultCount > 1 ? "s" : ""}
                                             {selectedDate && (
@@ -1800,7 +1800,7 @@ export default function CheckoutPage() {
 
                                         {/* Your Impact */}
                                         <div className="py-3 border-t border-gray-100">
-                                            <button className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 group">
+                                            <button className="w-full flex items-center justify-between text-[#3F3F42] hover:text-[#3F3F42] group">
                                                 <span className="font-medium group-hover:text-purple-700 transition-colors">Your impact</span>
                                                 <span className="text-gray-400">▼</span>
                                             </button>
@@ -1808,7 +1808,7 @@ export default function CheckoutPage() {
 
                                         {/* Tours Section */}
                                         <div className="py-3 border-t border-gray-100">
-                                            <button className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 mb-3 group">
+                                            <button className="w-full flex items-center justify-between text-[#3F3F42] hover:text-[#3F3F42] mb-3 group">
                                                 <span className="font-medium group-hover:text-purple-700 transition-colors">Trips</span>
                                                 <span className="text-purple-600">▲</span>
                                             </button>
@@ -1829,10 +1829,10 @@ export default function CheckoutPage() {
                                                     )}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">{tour.name}</h4>
+                                                    <h4 className="font-semibold text-[#3F3F42] text-sm line-clamp-2">{tour.name}</h4>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="font-bold text-gray-900">{formatPrice(pricePerPerson * adultCount)}</span>
+                                                    <span className="font-bold text-[#3F3F42]">{formatPrice(pricePerPerson * adultCount)}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1840,7 +1840,7 @@ export default function CheckoutPage() {
                                         {/* Extras Section */}
                                         {(selectedActivities.length > 0 || accommodationUpgrade) && (
                                             <div className="py-3 border-t border-gray-100">
-                                                <button className="w-full flex items-center justify-between text-gray-700 hover:text-gray-900 mb-3 group">
+                                                <button className="w-full flex items-center justify-between text-[#3F3F42] hover:text-[#3F3F42] mb-3 group">
                                                     <span className="font-medium group-hover:text-purple-700 transition-colors">Extras</span>
                                                     <span className="text-purple-600">▲</span>
                                                 </button>
@@ -1853,11 +1853,11 @@ export default function CheckoutPage() {
                                                                     <span className="text-sm">🎯</span>
                                                                 </div>
                                                                 <div className="min-w-0">
-                                                                    <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">{activity.name}</div>
+                                                                    <div className="text-sm font-medium text-[#3F3F42] truncate max-w-[120px]">{activity.name}</div>
                                                                     <div className="text-xs text-gray-500">x{activity.count} traveller{activity.count > 1 ? 's' : ''}</div>
                                                                 </div>
                                                             </div>
-                                                            <span className="font-bold text-gray-900 text-sm">{formatPrice(activity.price * activity.count)}</span>
+                                                            <span className="font-bold text-[#3F3F42] text-sm">{formatPrice(activity.price * activity.count)}</span>
                                                         </div>
                                                     ))}
 
@@ -1868,11 +1868,11 @@ export default function CheckoutPage() {
                                                                     <span className="text-sm">🏨</span>
                                                                 </div>
                                                                 <div className="min-w-0">
-                                                                    <div className="text-sm font-medium text-gray-900 truncate max-w-[120px]">{accommodationUpgrade.name}</div>
+                                                                    <div className="text-sm font-medium text-[#3F3F42] truncate max-w-[120px]">{accommodationUpgrade.name}</div>
                                                                     <div className="text-xs text-gray-500">x{accommodationUpgrade.count} traveller{accommodationUpgrade.count > 1 ? 's' : ''}</div>
                                                                 </div>
                                                             </div>
-                                                            <span className="font-bold text-gray-900 text-sm">{formatPrice(accommodationUpgrade.price * accommodationUpgrade.count)}</span>
+                                                            <span className="font-bold text-[#3F3F42] text-sm">{formatPrice(accommodationUpgrade.price * accommodationUpgrade.count)}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -1881,7 +1881,7 @@ export default function CheckoutPage() {
 
                                         {/* Promo Code Section */}
                                         <div className="py-3 border-t border-gray-100">
-                                            <div className="text-sm font-bold text-gray-900 mb-2">Promo Code</div>
+                                            <div className="text-sm font-bold text-[#3F3F42] mb-2">Promo Code</div>
                                             {promoData ? (
                                                 <div className="flex items-center gap-2 bg-emerald-50 rounded-lg p-3 border border-emerald-100">
                                                     <Tag size={18} className="text-emerald-600" weight="fill" />
@@ -1937,7 +1937,7 @@ export default function CheckoutPage() {
                                         <div className="pt-4 mt-2 border-t border-gray-100">
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <div className="font-bold text-gray-900">Total price</div>
+                                                    <div className="font-bold text-[#3F3F42]">Total price</div>
                                                     <div className="text-xs text-gray-500">Taxes included</div>
                                                 </div>
                                                 <div className="text-right">
@@ -1974,7 +1974,7 @@ export default function CheckoutPage() {
                                         <span className="text-green-600 text-lg">💳</span>
                                     </div>
                                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                        <h3 className="text-lg leading-6 font-medium text-[#3F3F42]" id="modal-title">
                                             Payment Simulation
                                         </h3>
                                         <div className="mt-2">
@@ -1993,7 +1993,7 @@ export default function CheckoutPage() {
                                                     <span className="text-gray-600">Total Booking Value:</span>
                                                     <span className="font-semibold">{formatPrice(calculateTotalPrice)}</span>
                                                 </div>
-                                                <div className="flex justify-between text-lg mb-2 font-bold text-gray-900 border-t border-gray-200 pt-2">
+                                                <div className="flex justify-between text-lg mb-2 font-bold text-[#3F3F42] border-t border-gray-200 pt-2">
                                                     <span>Pay Now:</span>
                                                     <span>{formatPrice(payNowAmount)}</span>
                                                 </div>
@@ -2033,7 +2033,7 @@ export default function CheckoutPage() {
                                     type="button"
                                     onClick={() => setShowPaymentModal(false)}
                                     disabled={isBooking}
-                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#3F3F42] hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     Cancel
                                 </button>

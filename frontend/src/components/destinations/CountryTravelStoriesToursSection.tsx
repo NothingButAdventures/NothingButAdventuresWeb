@@ -25,6 +25,7 @@ type TourListItem = {
   travelStyle?: string;
   rating?: number;
   tags?: string[];
+  interests?: string[];
   serviceLevel?: string;
   physicalRating?: {
     level: number;
@@ -92,8 +93,8 @@ function FilterDropdown({
         onClick={onToggle}
         className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-medium transition ${
           active || selected.length > 0
-            ? "border-[#121b2f] bg-[#121b2f] text-white"
-            : "border-[#bfc4ce] bg-white text-[#2f3a52] hover:border-[#121b2f]"
+            ? "border-[#121b2f] bg-[#3F3F42] text-white"
+            : "border-[#bfc4ce] bg-white text-[#3F3F42] hover:border-[#121b2f]"
         }`}
       >
         <span>{label}</span>
@@ -114,15 +115,15 @@ function FilterDropdown({
                   onChange={() => onOptionChange(option)}
                   className="h-4 w-4 rounded border-gray-300"
                 />
-                <span className="ml-3 text-sm text-gray-700">{option}</span>
+                <span className="ml-3 text-sm text-[#3F3F42]">{option}</span>
               </label>
             ))}
           </div>
           <div className="flex items-center justify-between border-t border-gray-100 px-3 py-2">
-            <button type="button" onClick={onClear} className="text-xs font-medium text-gray-500 hover:text-gray-900">
+            <button type="button" onClick={onClear} className="text-xs font-medium text-gray-500 hover:text-[#3F3F42]">
               Clear
             </button>
-            <button type="button" onClick={onToggle} className="text-xs font-medium text-[#121b2f] hover:text-black">
+            <button type="button" onClick={onToggle} className="text-xs font-medium text-[#3F3F42] hover:text-[#3F3F42]">
               Done
             </button>
           </div>
@@ -146,7 +147,7 @@ export default function CountryTravelStoriesToursSection({
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
-  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [selectedDiscounts, setSelectedDiscounts] = useState<string[]>([]);
   const [selectedPhysical, setSelectedPhysical] = useState<string[]>([]);
   const [selectedService, setSelectedService] = useState<string[]>([]);
@@ -167,11 +168,11 @@ export default function CountryTravelStoriesToursSection({
     return Array.from(unique).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   }, [tours]);
 
-  const availableCollections = useMemo(() => {
+  const availableInterests = useMemo(() => {
     const unique = new Set<string>();
     tours.forEach((tour) => {
-      (tour.tags || []).forEach((tag) => {
-        if (tag) unique.add(tag);
+      (tour.interests || []).forEach((interest) => {
+        if (interest) unique.add(interest);
       });
     });
     return Array.from(unique).sort();
@@ -197,9 +198,9 @@ export default function CountryTravelStoriesToursSection({
         if (!isPriceMatch(discountedPrice, selectedPrices)) return false;
       }
 
-      if (selectedCollections.length > 0) {
-        const tags = tour.tags || [];
-        if (!selectedCollections.some((tag) => tags.includes(tag))) return false;
+      if (selectedInterests.length > 0) {
+        const interests = tour.interests || [];
+        if (!selectedInterests.some((interest) => interests.includes(interest))) return false;
       }
 
       if (selectedDiscounts.length > 0) {
@@ -233,7 +234,7 @@ export default function CountryTravelStoriesToursSection({
     selectedDurations,
     selectedDates,
     selectedPrices,
-    selectedCollections,
+    selectedInterests,
     selectedDiscounts,
     selectedPhysical,
     selectedService,
@@ -251,12 +252,12 @@ export default function CountryTravelStoriesToursSection({
 
   return (
     <section className="mt-14 md:mt-16">
-      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">
+      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">
         {countryName} Tour
       </span>
 
       <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">{countryName} Travel Stories</h2>
+        <h2 className="text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">{countryName} Travel Stories</h2>
         <p className="text-[13px] text-[#6f7787]">Showing {displayedTours.length} results out of {tours.length}</p>
       </div>
 
@@ -313,13 +314,13 @@ export default function CountryTravelStoriesToursSection({
       {showMoreFilters && (
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <FilterDropdown
-            label="Collections"
-            data={availableCollections}
-            selected={selectedCollections}
-            active={activeFilter === "Collections"}
-            onToggle={() => setActiveFilter((prev) => (prev === "Collections" ? null : "Collections"))}
-            onOptionChange={(option) => toggleInList(option, selectedCollections, setSelectedCollections)}
-            onClear={() => setSelectedCollections([])}
+            label="Interests"
+            data={availableInterests}
+            selected={selectedInterests}
+            active={activeFilter === "Interests"}
+            onToggle={() => setActiveFilter((prev) => (prev === "Interests" ? null : "Interests"))}
+            onOptionChange={(option) => toggleInList(option, selectedInterests, setSelectedInterests)}
+            onClear={() => setSelectedInterests([])}
           />
 
           <FilterDropdown

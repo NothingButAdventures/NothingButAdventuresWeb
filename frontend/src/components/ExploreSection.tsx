@@ -10,14 +10,14 @@ export default function ExploreSection() {
                     <div className="inline-block px-4 py-1 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-medium tracking-wide mb-6">
                         Explore
                     </div>
-                    <h2 className="text-[32px] md:text-[36px] lg:text-[40px] font-medium leading-[1.2] text-[#1a1a1a] mb-8">
+                    <h2 className="text-[32px] md:text-[36px] lg:text-[40px] font-medium leading-[1.2] text-[#3F3F42] mb-8">
                         The Adventure Sale is On
                     </h2>
                     <div className="flex items-center gap-3 group">
-                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#333336] text-white px-7 py-3 rounded-full font-medium text-[16px] hover:bg-black hover:scale-105 transition-all">
+                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#3F3F42] text-white px-7 py-3 rounded-full font-medium text-[16px] hover:bg-[#3F3F42] hover:scale-105 transition-all">
                             Learn More
                         </Link>
-                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#333336] text-white w-12 h-12 rounded-full hover:bg-black hover:scale-105 transition-all shrink-0">
+                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#3F3F42] text-white w-12 h-12 rounded-full hover:bg-[#3F3F42] hover:scale-105 transition-all shrink-0">
                             <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 19L19 5M19 5v10M19 5H9" />
                             </svg>
@@ -33,14 +33,14 @@ export default function ExploreSection() {
                             className="h-60 rounded-[16px] p-6 lg:p-7 flex flex-col justify-between relative aspect-square overflow-hidden group"
                             style={{ backgroundColor: '#C2FD1E' }}
                         >
-                            <div className="text-black">
+                            <div className="text-[#3F3F42]">
                                 <div className="text-[64px] font-bold leading-none mb-1">20%</div>
-                                <div className="text-[20px] font-semibold leading-[1.25] text-black/90">
+                                <div className="text-[20px] font-semibold leading-[1.25] text-[#3F3F42]/90">
                                     off on Selected<br />Trips
                                 </div>
                             </div>
                             <div className="absolute bottom-5 right-5 lg:bottom-6 lg:right-6">
-                                <Link href="/tours" className="w-9 h-9 md:w-10 md:h-10 bg-white text-black rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-md">
+                                <Link href="/tours" className="w-9 h-9 md:w-10 md:h-10 bg-white text-[#3F3F42] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-md">
                                     <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 19L19 5M19 5v10M19 5H9" />
                                     </svg>
@@ -57,7 +57,7 @@ export default function ExploreSection() {
                                     className="w-full h-full object-cover"
                                 />
                             </div>
-                            <p className="text-[16px] md:text-[17px] text-[#1a1a1a] font-medium leading-[1.3] pr-2">
+                            <p className="text-[16px] md:text-[17px] text-[#3F3F42] font-medium leading-[1.3] pr-2">
                                 Discover beautiful routes and scenic spots across Asia Region.
                             </p>
                         </div>

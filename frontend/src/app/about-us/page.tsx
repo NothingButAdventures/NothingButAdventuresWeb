@@ -16,10 +16,10 @@ export default function AboutUsPage() {
       {/* About Our Community Section */}
       <div className="w-full px-4 md:px-8 py-12 md:py-16">
         <div className="w-full bg-[#F6F9FD] rounded-2xl p-8 md:p-12">
-          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.1] text-[#111] mb-10">
+          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.1] text-[#3F3F42] mb-10">
             About our<br />community
           </h2>
-          <div className="text-[16px] md:text-[18px] text-[#333] leading-[1.6]">
+          <div className="text-[16px] md:text-[18px] text-[#3F3F42] leading-[1.6]">
             <p>
               Changing the world through travel: that's been our goal since 1990. Sure, call us dreamers (wouldn't be the first time), but that idea has been at the heart of everything we've ever done and has helped us grow into one of the biggest adventure travel companies on the planet. *woot woot*<br />
               But, to us, being big is meaningless if it comes at the expense of making someone else feel small. You know what... let's drop the metaphors and get straight to the point: Nothing but Adventures is a social enterprise as much as we are a small group travel company.<br />
@@ -48,10 +48,10 @@ export default function AboutUsPage() {
               </div>
             </div>
             <div className="w-full md:w-1/2 flex flex-col">
-              <h2 className="text-[36px] md:text-[48px] font-medium leading-[1.2] text-[#111] mb-6">
+              <h2 className="text-[36px] md:text-[48px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
                 About Founder
               </h2>
-              <p className="text-[16px] md:text-[18px] text-[#333] leading-[1.6]">
+              <p className="text-[16px] md:text-[18px] text-[#3F3F42] leading-[1.6]">
                 Changing the world through travel: that's been our goal since 1990. Sure, call us dreamers (wouldn't be the first time), but that idea has been at the heart of everything we've ever done and has helped us grow into one of the biggest adventure travel companies on the planet. *woot woot*<br />
                 But, to us, being big is meaningless if it comes at the expense of making someone else feel small. You know what... let's drop the metaphors and get straight to the point: Nothing but Adventures is a social enterprise as much as we are a small group travel company.
               </p>
@@ -70,18 +70,18 @@ export default function AboutUsPage() {
               </div>
             </div>
             <div className="w-full md:w-1/2 flex flex-col items-start">
-              <h2 className="text-[36px] md:text-[48px] font-medium leading-[1.2] text-[#111] mb-6">
+              <h2 className="text-[36px] md:text-[48px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
                 The Good Karma
               </h2>
-              <p className="text-[16px] md:text-[18px] text-[#333] leading-[1.6] mb-8">
+              <p className="text-[16px] md:text-[18px] text-[#3F3F42] leading-[1.6] mb-8">
                 Changing the world through travel: that's been our goal since 1990. Sure, call us dreamers (wouldn't be the first time), but that idea has been at the heart of everything we've ever done and has helped us grow into one of the biggest adventure travel companies on the planet. *woot woot*<br />
                 But, to us, being big is meaningless if it comes at the expense of making someone else feel small. You know what... let's drop the metaphors and get straight to the point: Nothing but Adventures is a social enterprise as much as we are a small group travel company.
               </p>
               <div className="flex items-center gap-2">
-                <button className="bg-[#111] hover:bg-black text-white px-6 py-2.5 rounded-full text-[14px] font-medium transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white px-6 py-2.5 rounded-full text-[14px] font-medium transition-colors">
                   Load More
                 </button>
-                <button className="bg-[#111] hover:bg-black text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors">
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
@@ -94,34 +94,34 @@ export default function AboutUsPage() {
       {/* Why Choose NBA Section */}
       <div className="w-full bg-white py-20 md:py-32 px-4 md:px-8">
         <div className="w-full flex flex-col items-start">
-          <span className="bg-[#F0F2F5] text-gray-700 text-[13px] px-4 py-1.5 rounded-full mb-8 font-medium">
+          <span className="bg-[#F0F2F5] text-[#3F3F42] text-[13px] px-4 py-1.5 rounded-full mb-8 font-medium">
             Popular Activities
           </span>
-          <h2 className="text-[40px] md:text-[52px] font-medium leading-[1.2] text-[#0A1128] mb-6">
+          <h2 className="text-[40px] md:text-[52px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
             Why Choose Nothing but Adventures
           </h2>
-          <p className="text-[16px] md:text-[18px] text-[#4A4A4A] leading-[1.6] mb-16 md:mb-24">
+          <p className="text-[16px] md:text-[18px] text-[#3F3F42] leading-[1.6] mb-16 md:mb-24">
             We never take your choice to spend your hard-earned money with us for granted. Our award-winning trips embrace our broader definition of community tourism to put travellers like you on a first-name basis with the planet's people, cultures, landscapes and wildlife. Here are just a few of the things we offer:
           </p>
 
           <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="flex flex-col items-center gap-6">
-              <Globe className="w-24 h-24 text-[#111]" strokeWidth={1} />
-              <h3 className="text-[18px] font-medium text-[#333]">Small Groups, Big Adventures</h3>
+              <Globe className="w-24 h-24 text-[#3F3F42]" strokeWidth={1} />
+              <h3 className="text-[18px] font-medium text-[#3F3F42]">Small Groups, Big Adventures</h3>
             </div>
             <div className="flex flex-col items-center gap-6">
-              <Globe className="w-24 h-24 text-[#111]" strokeWidth={1} />
-              <h3 className="text-[18px] font-medium text-[#333]">Giving Back through Travel</h3>
+              <Globe className="w-24 h-24 text-[#3F3F42]" strokeWidth={1} />
+              <h3 className="text-[18px] font-medium text-[#3F3F42]">Giving Back through Travel</h3>
             </div>
             <div className="flex flex-col items-center gap-6">
-              <Globe className="w-24 h-24 text-[#111]" strokeWidth={1} />
-              <h3 className="text-[18px] font-medium text-[#333]">Flexible Booking Options</h3>
+              <Globe className="w-24 h-24 text-[#3F3F42]" strokeWidth={1} />
+              <h3 className="text-[18px] font-medium text-[#3F3F42]">Flexible Booking Options</h3>
 
               <div className="flex items-center gap-2 mt-8 w-full justify-end lg:pr-8">
-                <button className="bg-[#0A1128] hover:bg-black text-white px-6 py-2.5 rounded-full text-[14px] font-medium transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white px-6 py-2.5 rounded-full text-[14px] font-medium transition-colors">
                   Load More
                 </button>
-                <button className="bg-[#0A1128] hover:bg-black text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors">
                   <ArrowUpRight className="w-4 h-4" />
                 </button>
               </div>
@@ -132,13 +132,13 @@ export default function AboutUsPage() {
       {/* Our Core Values Section */}
       <div className="w-full bg-white py-20 md:py-32 px-4 md:px-8">
         <div className="w-full flex flex-col items-start">
-          <span className="bg-[#F0F2F5] text-gray-700 text-[13px] px-4 py-1.5 rounded-full mb-8 font-medium">
+          <span className="bg-[#F0F2F5] text-[#3F3F42] text-[13px] px-4 py-1.5 rounded-full mb-8 font-medium">
             Popular Activities
           </span>
-          <h2 className="text-[40px] md:text-[52px] font-medium leading-[1.2] text-[#0A1128] mb-6">
+          <h2 className="text-[40px] md:text-[52px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
             Our Core Values
           </h2>
-          <p className="text-[16px] md:text-[18px] text-[#4A4A4A] leading-[1.6]">
+          <p className="text-[16px] md:text-[18px] text-[#3F3F42] leading-[1.6]">
             We never take your choice to spend your hard-earned money with us for granted. Our award-winning trips embrace our broader definition of community tourism to put travellers like you on a first-name basis with the planet's people, cultures, landscapes and wildlife. Here are just a few of the things we offer:
           </p>
         </div>

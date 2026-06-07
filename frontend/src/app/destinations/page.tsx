@@ -43,27 +43,27 @@ export default async function DestinationsPage() {
     <main className="min-h-screen w-full bg-[#f5f5f5] pb-24">
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
         {/* Breadcrumbs */}
-        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
-          <Link href="/" className="hover:text-black transition-colors">
+        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#3F3F42]">
+          <Link href="/" className="hover:text-[#3F3F42] transition-colors">
             Home
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <span className="text-[#1F2937] font-medium">Destinations</span>
+          <span className="text-[#3F3F42] font-medium">Destinations</span>
         </nav>
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)] text-balance">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
-            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
+            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#3F3F42] md:text-[58px]">
               Travel
               <br />
               Destinations
             </h1>
-            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3f3f3f]">
+            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3F3F42]">
               Immersive travel is about experiencing a destination through the eyes of a local. It is eating at family restaurants, learning traditions and crafts, and sleeping in authentic accommodations that tell stories.
             </p>
             <Link
               href={heroCtaSlug ? `/destinations/${heroCtaSlug}` : "/trips"}
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#101010] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F3F42]"
             >
               View all {heroCtaName} Tours
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[11px] leading-none">↗</span>
@@ -95,18 +95,18 @@ export default async function DestinationsPage() {
                 <section key={continent._id} className="border-b border-gray-200 pb-16 last:border-b-0 space-y-8">
                   {/* Continent Heading and Description */}
                   <div className="max-w-4xl">
-                    <span className="inline-block rounded-full bg-[#111111] px-3 py-1 text-[11px] font-medium leading-none text-white">
+                    <span className="inline-block rounded-full bg-[#3F3F42] px-3 py-1 text-[11px] font-medium leading-none text-white">
                       Destinations
                     </span>
-                    <h2 className="mt-3 text-[42px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#151515] md:text-[52px]">
+                    <h2 className="mt-3 text-[42px] font-semibold leading-[1.05] tracking-[-0.02em] text-[#3F3F42] md:text-[52px]">
                       <Link
                         href={continentHref}
-                        className="transition-colors hover:text-black/75 hover:underline hover:underline-offset-4"
+                        className="transition-colors hover:text-[#3F3F42]/75 hover:underline hover:underline-offset-4"
                       >
                         {continent.name} Adventures
                       </Link>
                     </h2>
-                    <p className="mt-5 text-[20px] md:text-[22px] leading-[1.52] text-[#333333]">
+                    <p className="mt-5 text-[20px] md:text-[22px] leading-[1.52] text-[#3F3F42]">
                       {cleanDescription ||
                         "Immersive travel is about experiencing a destination through the eyes of a local. It is eating at family restaurants, learning traditions and crafts, and sleeping in authentic accommodations that tell stories."}
                     </p>
@@ -136,10 +136,10 @@ export default async function DestinationsPage() {
 
                               {/* Content Below Card Image */}
                               <div className="mt-3 px-1">
-                                <h3 className="text-[#1a1a1a] text-[20px] font-bold leading-tight group-hover:text-black transition-colors mb-1">
+                                <h3 className="text-[#3F3F42] text-[20px] font-bold leading-tight group-hover:text-[#3F3F42] transition-colors mb-1">
                                   {country.name}
                                 </h3>
-                                <p className="text-[#5b5b5b] text-[14px] font-medium leading-normal">
+                                <p className="text-[#3F3F42] text-[14px] font-medium leading-normal line-clamp-3">
                                   {country.shortDescription || "Palaces, forts & deserts"}
                                 </p>
                               </div>
@@ -150,24 +150,10 @@ export default async function DestinationsPage() {
 
                       {/* Remaining Countries list in 6 columns if more than 4 */}
                       {remainingCountries.length > 0 && (
-                        <details className="group pt-4 outline-none">
-                          <summary className="list-none flex items-center gap-2 text-[15px] font-semibold text-gray-500 hover:text-black uppercase tracking-wider cursor-pointer select-none transition-colors duration-150 outline-none">
+                        <div className="pt-4">
+                          <div className="flex items-center gap-2 text-[15px] font-semibold text-gray-500 uppercase tracking-wider select-none">
                             <span>More Destinations in {continent.name}</span>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="transition-transform duration-200 group-open:rotate-180"
-                            >
-                              <path d="m6 9 6 6 6-6" />
-                            </svg>
-                          </summary>
+                          </div>
 
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 mt-6">
                             {remainingCountries.map((country) => {
@@ -190,10 +176,10 @@ export default async function DestinationsPage() {
 
                                   {/* Content Below Card Image */}
                                   <div className="mt-3 px-1">
-                                    <h3 className="text-[#1a1a1a] text-[18px] font-bold leading-tight group-hover:text-black transition-colors mb-1">
+                                    <h3 className="text-[#3F3F42] text-[18px] font-bold leading-tight group-hover:text-[#3F3F42] transition-colors mb-1">
                                       {country.name}
                                     </h3>
-                                    <p className="text-[#5b5b5b] text-[13px] font-medium leading-normal">
+                                    <p className="text-[#3F3F42] text-[13px] font-medium leading-normal line-clamp-3">
                                       {country.shortDescription || "Palaces, forts & deserts"}
                                     </p>
                                   </div>
@@ -201,11 +187,11 @@ export default async function DestinationsPage() {
                               );
                             })}
                           </div>
-                        </details>
+                        </div>
                       )}
                     </div>
                   ) : (
-                    <p className="text-[18px] text-[#6d6d6d]">No countries available for this continent yet.</p>
+                    <p className="text-[18px] text-[#3F3F42]">No countries available for this continent yet.</p>
                   )}
                 </section>
               );

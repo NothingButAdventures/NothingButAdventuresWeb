@@ -250,7 +250,7 @@ export default function PartnerToursPage() {
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
+              <h1 className="text-3xl font-bold text-[#3F3F42]">
                 Partner Dashboard
               </h1>
               <p className="mt-2 text-gray-600">
@@ -273,7 +273,7 @@ export default function PartnerToursPage() {
                   localStorage.removeItem("token");
                   window.location.href = "/auth/login";
                 }}
-                className="text-gray-600 hover:text-gray-800"
+                className="text-gray-600 hover:text-[#3F3F42]"
               >
                 Logout
               </button>
@@ -320,7 +320,7 @@ export default function PartnerToursPage() {
               )}
               <div className="p-6">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
+                  <h3 className="text-lg font-semibold text-[#3F3F42] line-clamp-1">
                     {tour.name}
                   </h3>
                   <span className="text-sm font-medium text-gray-600">
@@ -330,7 +330,7 @@ export default function PartnerToursPage() {
                 <p className="text-gray-600 text-sm mb-2">
                   {tour.country.name}
                 </p>
-                <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+                <p className="text-[#3F3F42] text-sm mb-3 line-clamp-2">
                   {tour.summary}
                 </p>
                 <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
@@ -388,14 +388,14 @@ export default function PartnerToursPage() {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+              <h3 className="text-lg font-medium text-[#3F3F42] mb-4">
                 {editingTour ? "Edit Tour" : "Add New Tour"}
               </h3>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Tour Name
                     </label>
                     <input
@@ -413,7 +413,7 @@ export default function PartnerToursPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Country
                     </label>
                     <select
@@ -437,7 +437,7 @@ export default function PartnerToursPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Price ($)
                     </label>
                     <input
@@ -455,7 +455,7 @@ export default function PartnerToursPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Duration (days)
                     </label>
                     <input
@@ -473,7 +473,7 @@ export default function PartnerToursPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Difficulty
                     </label>
                     <select
@@ -493,7 +493,7 @@ export default function PartnerToursPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                       Max Group Size
                     </label>
                     <input
@@ -512,7 +512,7 @@ export default function PartnerToursPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Summary
                   </label>
                   <input
@@ -530,7 +530,7 @@ export default function PartnerToursPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Description
                   </label>
                   <textarea
@@ -548,7 +548,7 @@ export default function PartnerToursPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Cover Image URL
                   </label>
                   <input
@@ -568,7 +568,7 @@ export default function PartnerToursPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="px-4 py-2 text-[#3F3F42] border border-gray-300 rounded-md hover:bg-gray-50"
                   >
                     Cancel
                   </button>

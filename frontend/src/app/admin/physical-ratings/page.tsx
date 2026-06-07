@@ -183,7 +183,7 @@ export default function PhysicalRatingsPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Physical Ratings</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Physical Ratings</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage physical rating levels for your tours ({physicalRatings.length} total)
                         </p>
@@ -244,7 +244,7 @@ export default function PhysicalRatingsPage() {
                                 d="M13 10V3L4 14h7v7l9-11h-7z"
                             />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
                             {searchQuery ? "No physical ratings found" : "No physical ratings yet"}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -296,7 +296,7 @@ export default function PhysicalRatingsPage() {
                                                 <div>
                                                     <Link
                                                         href={`/admin/physical-ratings/${rating._id}`}
-                                                        className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                                                        className="text-sm font-medium text-[#3F3F42] hover:text-blue-600 transition-colors"
                                                     >
                                                         {rating.name}
                                                     </Link>
@@ -370,17 +370,17 @@ export default function PhysicalRatingsPage() {
 
             {/* Add Physical Rating Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-900">Add Physical Rating</h2>
+                            <h2 className="text-lg font-bold text-[#3F3F42]">Add Physical Rating</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <form onSubmit={handleCreateRating} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Rating Name <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Rating Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -391,7 +391,7 @@ export default function PhysicalRatingsPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Level (1-5) <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Level (1-5) <span className="text-red-500">*</span></label>
                                 <select
                                     value={newRatingLevel}
                                     onChange={(e) => setNewRatingLevel(Number(e.target.value))}
@@ -405,7 +405,7 @@ export default function PhysicalRatingsPage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Description</label>
                                 <textarea
                                     value={newRatingDescription}
                                     onChange={(e) => setNewRatingDescription(e.target.value)}
@@ -418,7 +418,7 @@ export default function PhysicalRatingsPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>

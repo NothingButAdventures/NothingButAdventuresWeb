@@ -462,13 +462,13 @@ export default function EditBlogPage({
                                     />
                                 </svg>
                             </Link>
-                            <h1 className="text-xl font-bold text-gray-900">Edit Article</h1>
+                            <h1 className="text-xl font-bold text-[#3F3F42]">Edit Article</h1>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => handleSubmit("draft")}
                                 disabled={saving}
-                                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors disabled:opacity-50"
+                                className="px-4 py-2 text-[#3F3F42] bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors disabled:opacity-50"
                             >
                                 {saving ? "Saving..." : "Save Draft"}
                             </button>
@@ -495,13 +495,13 @@ export default function EditBlogPage({
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Enter your article title..."
-                                className="w-full text-3xl font-bold text-gray-900 placeholder-gray-400 focus:outline-none border-none"
+                                className="w-full text-3xl font-bold text-[#3F3F42] placeholder-gray-400 focus:outline-none border-none"
                             />
                         </div>
 
                         {/* Featured Image */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-4">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-4">
                                 Featured Image
                             </h3>
                             {featuredImage.url ? (
@@ -830,7 +830,7 @@ export default function EditBlogPage({
                     <div className="space-y-6">
                         {/* Excerpt */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 Excerpt
                             </h3>
                             <textarea
@@ -848,7 +848,7 @@ export default function EditBlogPage({
 
                         {/* Category */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 Category
                             </h3>
                             <select
@@ -866,7 +866,7 @@ export default function EditBlogPage({
 
                         {/* Tags */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">Tags</h3>
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">Tags</h3>
                             <div className="flex flex-wrap gap-2 mb-3">
                                 {tags.map((tag) => (
                                     <span
@@ -907,7 +907,7 @@ export default function EditBlogPage({
 
                         {/* Related Countries */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 Related Destinations
                             </h3>
                             <select
@@ -933,7 +933,7 @@ export default function EditBlogPage({
 
                         {/* Related Continents */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 Related Continents
                             </h3>
                             <select
@@ -959,7 +959,7 @@ export default function EditBlogPage({
 
                         {/* Related Tours */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 Related Tours
                             </h3>
                             <select
@@ -985,7 +985,7 @@ export default function EditBlogPage({
 
                         {/* SEO Settings */}
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                            <h3 className="text-sm font-semibold text-[#3F3F42] mb-3">
                                 SEO Settings
                             </h3>
                             <div className="space-y-4">

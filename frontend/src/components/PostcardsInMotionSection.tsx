@@ -61,14 +61,14 @@ export default function PostcardsInMotionSection() {
                     <div className="inline-block px-5 py-2 bg-[#DEECFF] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
                         Tours Snipits
                     </div>
-                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight">
+                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight">
                         Postcards in Motion
                     </h2>
                 </div>
                 <div className="hidden md:flex flex-col items-end gap-3 mt-6 md:mt-0">
                     <Link
                         href="/trips"
-                        className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
+                        className="font-medium text-[16px] text-[#3F3F42] hover:text-gray-600 underline underline-offset-4 decoration-1"
                     >
                         View All Trips
                     </Link>
@@ -84,7 +84,7 @@ export default function PostcardsInMotionSection() {
                         </button>
                         <button
                             onClick={() => scroll("right")}
-                            className="bg-[#4d4d4d] hover:bg-[#333] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                            className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors"
                             aria-label="Next tours"
                         >
                             <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@ export default function PostcardsInMotionSection() {
                     </button>
                     <button
                         onClick={() => scroll("right")}
-                        className="bg-[#4d4d4d] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                        className="bg-[#3F3F42] text-white w-10 h-10 rounded-full flex items-center justify-center"
                         aria-label="Next tours"
                     >
                         <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@ export default function PostcardsInMotionSection() {
                 </div>
                 <Link
                     href="/trips"
-                    className="inline-block font-medium text-lg text-black underline underline-offset-4 decoration-1"
+                    className="inline-block font-medium text-lg text-[#3F3F42] underline underline-offset-4 decoration-1"
                 >
                     View All Trips
                 </Link>

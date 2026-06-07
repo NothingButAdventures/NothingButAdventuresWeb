@@ -148,7 +148,7 @@ export default function InterestsPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Interests</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Interests</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage interests for your tours ({interests.length} total)
                         </p>
@@ -209,7 +209,7 @@ export default function InterestsPage() {
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                             />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
                             {searchQuery ? "No interests found" : "No interests yet"}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -265,7 +265,7 @@ export default function InterestsPage() {
                                                 <div>
                                                     <Link
                                                         href={`/admin/interests/${interest._id}`}
-                                                        className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                                                        className="text-sm font-medium text-[#3F3F42] hover:text-blue-600 transition-colors"
                                                     >
                                                         {interest.name}
                                                     </Link>
@@ -334,17 +334,17 @@ export default function InterestsPage() {
 
              {/* Add Interest Modal */}
              {isModalOpen && (
-                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                             <h2 className="text-lg font-bold text-gray-900">Add Interest</h2>
+                             <h2 className="text-lg font-bold text-[#3F3F42]">Add Interest</h2>
                              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                              </button>
                          </div>
                          <form onSubmit={handleCreateInterest} className="p-6 space-y-4">
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">Interest Name <span className="text-red-500">*</span></label>
+                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">Interest Name <span className="text-red-500">*</span></label>
                                  <input
                                      type="text"
                                      required
@@ -355,7 +355,7 @@ export default function InterestsPage() {
                                  />
                              </div>
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
                                  <input
                                      type="text"
                                      value={newShortDescription}
@@ -365,7 +365,7 @@ export default function InterestsPage() {
                                  />
                              </div>
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">Brand Color</label>
+                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
                                  <div className="flex items-center gap-3">
                                      <input
                                          type="color"
@@ -383,7 +383,7 @@ export default function InterestsPage() {
                                  </div>
                              </div>
                              <div>
-                                 <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">URL</label>
                                  <input
                                      type="text"
                                      value={newUrl}
@@ -396,7 +396,7 @@ export default function InterestsPage() {
                                  <button
                                      type="button"
                                      onClick={() => setIsModalOpen(false)}
-                                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                     className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                  >
                                      Cancel
                                  </button>

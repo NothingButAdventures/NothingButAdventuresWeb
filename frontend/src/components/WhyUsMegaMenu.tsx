@@ -27,7 +27,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
             <div>
               <span className="text-[14px] text-[#3F3F42] tracking-wider">01</span>
               <h3 className="text-[22px] font-medium text-[#3F3F42] mt-1">Why NBA</h3>
-              <div className="w-12 h-[2px] bg-black mt-2 mb-4" />
+              <div className="w-12 h-[2px] bg-[#3F3F42] mt-2 mb-4" />
               <p className="text-[14px] text-[#3F3F42] leading-relaxed">
                 We are young and wise enough to know, Best Adventures are
                 experienced in Small Groups. Big stories, flexible itineraries, freedom
@@ -58,7 +58,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
             <div>
               <span className="text-[14px] text-[#3F3F42] tracking-wider">02</span>
               <h3 className="text-[22px] font-medium text-[#3F3F42] mt-1">About Us</h3>
-              <div className="w-12 h-[2px] bg-black mt-2 mb-4" />
+              <div className="w-12 h-[2px] bg-[#3F3F42] mt-2 mb-4" />
               
               <div className="w-full aspect-[4/4.5] rounded-md bg-white my-4"></div>
             </div>
@@ -80,7 +80,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
                 <h3 className="text-[20px] font-medium text-[#3F3F42] mt-1">
                   NBA Club
                 </h3>
-                <div className="w-12 h-[2px] bg-black mt-2 mb-3" />
+                <div className="w-12 h-[2px] bg-[#3F3F42] mt-2 mb-3" />
                 <p className="text-[14px] text-[#3F3F42] leading-relaxed">
                   Exclusive perks. Priority access. Unforgettable rewards. Travel with
                   us three times or more and unlock your place in our all-new club —
@@ -99,7 +99,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
                 <h3 className="text-[20px] font-medium text-[#3F3F42] mt-1">
                   The Furkind Initiative
                 </h3>
-                <div className="w-12 h-[2px] bg-black mt-2 mb-3" />
+                <div className="w-12 h-[2px] bg-[#3F3F42] mt-2 mb-3" />
                 <p className="text-[14px] text-[#3F3F42] leading-relaxed">
                   Spread a little more kindness around the world — one bowl at a time.
                   Every Journey with helps provide food, care, and support to stray and
@@ -122,7 +122,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
                 <h3 className="text-[20px] font-medium text-[#3F3F42] mt-1">
                   The Living Planet
                 </h3>
-                <div className="w-12 h-[2px] bg-black mt-2 mb-3" />
+                <div className="w-12 h-[2px] bg-[#3F3F42] mt-2 mb-3" />
                 <p className="text-[14px] text-[#3F3F42] leading-relaxed">
                   Travel with purpose. For every day on tour, we'll plant a tree on your
                   behalf and support forests around the world as they grow and flourish

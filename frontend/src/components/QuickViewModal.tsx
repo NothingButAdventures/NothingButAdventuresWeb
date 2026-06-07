@@ -77,7 +77,7 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-[#3F3F42]/50 backdrop-blur-sm transition-opacity"
                 onClick={onClose}
             />
 
@@ -115,19 +115,19 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
                     <div className="p-6 grid grid-cols-2 gap-y-6 gap-x-4">
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Travel Style</h4>
-                            <p className="text-sm font-bold text-gray-900">{tour.travelStyle}</p>
+                            <p className="text-sm font-bold text-[#3F3F42]">{tour.travelStyle}</p>
                         </div>
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Age Requirement</h4>
-                            <p className="text-sm font-bold text-gray-900">
+                            <p className="text-sm font-bold text-[#3F3F42]">
                                 {tour.ageRequirement ? `${tour.ageRequirement.min} - ${tour.ageRequirement.max}` : "All ages"}
                             </p>
                         </div>
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Collection</h4>
-                            <p className="text-sm font-bold text-gray-900">
+                            <p className="text-sm font-bold text-[#3F3F42]">
                                 {/* Display first tag as collection or default */}
                                 {tour.tags && tour.tags.length > 0 ? tour.tags[0] : "Standard"}
                             </p>
@@ -135,13 +135,13 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Physical Rating</h4>
-                            <p className="text-sm font-bold text-gray-900">{physicalRatingText(tour.physicalRating.level)}</p>
+                            <p className="text-sm font-bold text-[#3F3F42]">{physicalRatingText(tour.physicalRating.level)}</p>
                             {/* Dots visualizer could go here */}
                             <div className="flex gap-1 mt-1">
                                 {[1, 2, 3, 4, 5].map((lvl) => (
                                     <div
                                         key={lvl}
-                                        className={`w-2 h-2 rounded-full ${lvl <= tour.physicalRating.level ? 'bg-gray-800' : 'bg-gray-200'}`}
+                                        className={`w-2 h-2 rounded-full ${lvl <= tour.physicalRating.level ? 'bg-[#3F3F42]' : 'bg-gray-200'}`}
                                     />
                                 ))}
                             </div>
@@ -149,12 +149,12 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Service Level</h4>
-                            <p className="text-sm font-bold text-gray-900">{tour.serviceLevel}</p>
+                            <p className="text-sm font-bold text-[#3F3F42]">{tour.serviceLevel}</p>
                         </div>
 
                         <div>
                             <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Trip Code</h4>
-                            <p className="text-sm font-bold text-gray-900">{tripCode}</p>
+                            <p className="text-sm font-bold text-[#3F3F42]">{tripCode}</p>
                         </div>
                     </div>
                 </div>
@@ -162,18 +162,18 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
                 {/* Right Column: Title, Itinerary, Footer */}
                 <div className="w-full md:w-7/12 flex flex-col max-h-[90vh]">
                     <div className="p-8 flex-1 overflow-y-auto">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">{tour.name}</h2>
+                        <h2 className="text-3xl font-bold text-[#3F3F42] mb-2">{tour.name}</h2>
                         <p className="text-lg text-gray-600 mb-8">
                             {tour.duration.days} days, {tour.location?.startCity || "Start"} to {tour.location?.endCity || "End"}
                         </p>
 
                         <div className="space-y-6">
-                            <h3 className="text-lg font-bold text-gray-900">Trip Itinerary</h3>
+                            <h3 className="text-lg font-bold text-[#3F3F42]">Trip Itinerary</h3>
                             <div className="space-y-4">
                                 {tour.itinerary && tour.itinerary.length > 0 ? (
                                     tour.itinerary.map((item) => (
                                         <div key={item.day} className="flex gap-4">
-                                            <span className="font-bold text-gray-900 w-16 flex-shrink-0">Day {item.day}:</span>
+                                            <span className="font-bold text-[#3F3F42] w-16 flex-shrink-0">Day {item.day}:</span>
                                             <span className="text-gray-600">{item.title}</span>
                                         </div>
                                     ))
@@ -194,7 +194,7 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-3xl font-bold text-gray-900">${Math.round(discountedPrice)}</span>
+                                <span className="text-3xl font-bold text-[#3F3F42]">${Math.round(discountedPrice)}</span>
                                 <span className="text-sm text-gray-500">USD</span>
                                 {tour.price.discountPercent > 0 && (
                                     <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">
@@ -206,7 +206,7 @@ export default function QuickViewModal({ tour, onClose }: QuickViewModalProps) {
 
                         <Link
                             href={`/trips/${tour.slug}/${tour.tourCode}`}
-                            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-[#432360] hover:bg-[#321a48] transition-colors"
+                            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-[#432360] hover:bg-[#3F3F42] transition-colors"
                         >
                             View trip details
                         </Link>

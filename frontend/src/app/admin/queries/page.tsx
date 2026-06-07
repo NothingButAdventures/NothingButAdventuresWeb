@@ -112,7 +112,7 @@ export default function QueriesManagementPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">User Inquiries (Queries)</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">User Inquiries (Queries)</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage custom trip inquiries ({queries.length} total)
                         </p>
@@ -146,7 +146,7 @@ export default function QueriesManagementPage() {
                         <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
                             {searchQuery ? "No queries found" : "No queries yet"}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -170,25 +170,25 @@ export default function QueriesManagementPage() {
                                     <tr key={q._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div>
-                                                <div className="text-sm font-medium text-gray-900">{q.fullName}</div>
+                                                <div className="text-sm font-medium text-[#3F3F42]">{q.fullName}</div>
                                                 <div className="text-xs text-blue-600 mt-0.5">{q.email}</div>
                                                 {q.phoneNumber && <div className="text-xs text-gray-500 mt-0.5">{q.phoneNumber}</div>}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-700">
+                                            <div className="text-sm text-[#3F3F42]">
                                                 {q.preferredDestination && <div><span className="font-semibold text-gray-600">To:</span> {q.preferredDestination}</div>}
                                                 {q.travelDates && <div className="mt-0.5"><span className="font-semibold text-gray-600">When:</span> {q.travelDates}</div>}
                                                 {q.numberOfTravelers && <div className="mt-0.5"><span className="font-semibold text-gray-600">Pax:</span> {q.numberOfTravelers}</div>}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-700 max-w-xs break-words line-clamp-3" title={q.dreamTripDetails}>
+                                            <div className="text-sm text-[#3F3F42] max-w-xs break-words line-clamp-3" title={q.dreamTripDetails}>
                                                 {q.dreamTripDetails}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-700">
+                                            <div className="text-sm text-[#3F3F42]">
                                                 {new Date(q.createdAt).toLocaleDateString()}
                                             </div>
                                         </td>
@@ -201,7 +201,7 @@ export default function QueriesManagementPage() {
                                                     onChange={(e) => updateStatus(q._id, e.target.value)}
                                                     className={`text-sm px-3 py-1.5 rounded-full font-medium focus:outline-none appearance-none cursor-pointer border-r-8 border-transparent pr-4 ${q.status === 'resolved' ? 'bg-green-100 text-green-700 border-green-100' :
                                                             q.status === 'in-progress' ? 'bg-orange-100 text-orange-700 border-orange-100' :
-                                                                'bg-gray-100 text-gray-700 border-gray-100'
+                                                                'bg-gray-100 text-[#3F3F42] border-gray-100'
                                                         }`}
                                                 >
                                                     <option value="pending">Pending</option>

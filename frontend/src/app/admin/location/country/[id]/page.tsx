@@ -416,14 +416,14 @@ export default function EditCountryPage() {
                                 <Icons.Back className="w-5 h-5" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Edit Destination</h1>
+                                <h1 className="text-xl font-bold text-[#3F3F42]">Edit Destination</h1>
                                 <p className="text-sm text-gray-500">Update details for {country.name}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition shadow-lg"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] disabled:opacity-50 transition shadow-lg"
                         >
                             {saving ? (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -442,7 +442,7 @@ export default function EditCountryPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                     <h2 className="text-lg font-semibold mb-6">General Information</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Destination Name</label>
+                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">Destination Name</label>
                         <input
                             type="text"
                             value={name}
@@ -455,7 +455,7 @@ export default function EditCountryPage() {
                 {/* Description Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Description</h2>
+                        <h2 className="text-lg font-semibold text-[#3F3F42]">Description</h2>
                     </div>
 
                     <div className="p-6">
@@ -464,7 +464,7 @@ export default function EditCountryPage() {
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Describe this destination... (Culture, History, Top Destinations)"
                             rows={5}
-                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-gray-800 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
+                            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-[#3F3F42] focus:ring-2 focus:ring-black focus:border-transparent outline-none transition resize-y"
                         />
                     </div>
                 </div>
@@ -479,7 +479,7 @@ export default function EditCountryPage() {
                         {image ? (
                             <div className="relative w-full max-w-lg aspect-video rounded-lg overflow-hidden shadow-md group">
                                 <img src={image} alt="Cover" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
+                                <div className="absolute inset-0 bg-[#3F3F42]/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
                                     Change Image
                                 </div>
                             </div>
@@ -513,7 +513,7 @@ export default function EditCountryPage() {
                         <button
                             type="button"
                             onClick={() => setShowCreateActivityModal(true)}
-                            className="px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition text-sm font-semibold shadow-sm flex items-center gap-1.5 whitespace-nowrap"
+                            className="px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] transition text-sm font-semibold shadow-sm flex items-center gap-1.5 whitespace-nowrap"
                         >
                             + Create New Activity
                         </button>
@@ -534,7 +534,7 @@ export default function EditCountryPage() {
                                         type="checkbox"
                                         checked={selectedActivityIds.includes(String(activity._id))}
                                         onChange={() => toggleActivitySelection(activity._id)}
-                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-[#3F3F42] focus:ring-black"
                                     />
                                     {activity.coverImage ? (
                                         <img
@@ -546,7 +546,7 @@ export default function EditCountryPage() {
                                         <div className="w-16 h-12 rounded-md border border-gray-200 bg-gray-100" />
                                     )}
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
+                                        <p className="text-sm font-medium text-[#3F3F42] truncate">{activity.title}</p>
                                         <p className="text-xs text-gray-500 truncate">/{activity.slug || "activity"}</p>
                                     </div>
                                 </label>
@@ -555,7 +555,7 @@ export default function EditCountryPage() {
                     </div>
 
                     <div className="mt-6">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Activities ({selectedActivities.length})</h3>
+                        <h3 className="text-sm font-semibold text-[#3F3F42] mb-2">Selected Activities ({selectedActivities.length})</h3>
                         <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto">
                             {selectedActivities.length === 0 ? (
                                 <div className="p-4 text-sm text-gray-500">No activity selected yet.</div>
@@ -563,13 +563,13 @@ export default function EditCountryPage() {
                                 selectedActivities.map((activity) => (
                                     <div key={activity._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
                                         <div className="min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{activity.title}</p>
+                                            <p className="text-sm font-medium text-[#3F3F42] truncate">{activity.title}</p>
                                             <p className="text-xs text-gray-500 truncate">/{activity.slug || "activity"}</p>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => toggleActivitySelection(activity._id)}
-                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-[#3F3F42] hover:bg-gray-50"
                                         >
                                             Remove
                                         </button>
@@ -588,7 +588,7 @@ export default function EditCountryPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b border-gray-100 pb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Heading (fallback: Best Time to Travel)</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Section Heading (fallback: Best Time to Travel)</label>
                             <input
                                 type="text"
                                 value={bestTimeTitle}
@@ -598,7 +598,7 @@ export default function EditCountryPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Subheading (fallback: Best seasons to visit [Country])</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Section Subheading (fallback: Best seasons to visit [Country])</label>
                             <input
                                 type="text"
                                 value={bestTimeSubtitle}
@@ -611,7 +611,7 @@ export default function EditCountryPage() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Most Popular Time</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Most Popular Time</label>
                             <input
                                 type="text"
                                 value={mostPopularTimeDescription}
@@ -622,7 +622,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Budget Friendly</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Budget Friendly</label>
                             <input
                                 type="text"
                                 value={budgetFriendlyDescription}
@@ -633,7 +633,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Favourite Season</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Favourite Season</label>
                             <input
                                 type="text"
                                 value={favouriteSeasonDescription}
@@ -644,7 +644,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Culturally Significant Times</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Culturally Significant Times</label>
                             <input
                                 type="text"
                                 value={culturallySignificantTimesDescription}
@@ -661,7 +661,7 @@ export default function EditCountryPage() {
                     <p className="text-sm text-gray-500 mb-4">
                         Add a video link (YouTube/Vimeo/embed URL). This video will appear in the same video section on the destination page.
                     </p>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">Video URL</label>
                     <input
                         type="url"
                         value={videoUrl}
@@ -679,7 +679,7 @@ export default function EditCountryPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b border-gray-100 pb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Heading (fallback: [Country] at a Glance)</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Section Heading (fallback: [Country] at a Glance)</label>
                             <input
                                 type="text"
                                 value={needToKnowTitle}
@@ -689,7 +689,7 @@ export default function EditCountryPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Section Subheading (fallback: Need to Know)</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Section Subheading (fallback: Need to Know)</label>
                             <input
                                 type="text"
                                 value={needToKnowSubtitle}
@@ -702,7 +702,7 @@ export default function EditCountryPage() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Time Zone</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Time Zone</label>
                             <input
                                 type="text"
                                 value={needToKnowTimeZone}
@@ -712,7 +712,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Climate</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Climate</label>
                             <input
                                 type="text"
                                 value={needToKnowClimate}
@@ -722,7 +722,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Currency</label>
                             <input
                                 type="text"
                                 value={needToKnowCurrency}
@@ -732,7 +732,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Transportation</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Transportation</label>
                             <input
                                 type="text"
                                 value={needToKnowTransportation}
@@ -742,7 +742,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Local Cuisine</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Local Cuisine</label>
                             <input
                                 type="text"
                                 value={needToKnowLocalCuisine}
@@ -752,7 +752,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Languages Spoken</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">Languages Spoken</label>
                             <input
                                 type="text"
                                 value={needToKnowLanguagesSpoken}
@@ -792,7 +792,7 @@ export default function EditCountryPage() {
                                         type="checkbox"
                                         checked={selectedTravelStoryBlogIds.includes(String(blog._id))}
                                         onChange={() => toggleTravelStoryBlogSelection(blog._id)}
-                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-[#3F3F42] focus:ring-black"
                                     />
                                     {blog.featuredImage?.url ? (
                                         <img
@@ -804,7 +804,7 @@ export default function EditCountryPage() {
                                         <div className="w-16 h-12 rounded-md border border-gray-200 bg-gray-100" />
                                     )}
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                        <p className="text-sm font-medium text-[#3F3F42] truncate">{blog.title}</p>
                                         <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
                                     </div>
                                 </label>
@@ -813,7 +813,7 @@ export default function EditCountryPage() {
                     </div>
 
                     <div className="mt-6">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-2">Selected Blogs ({selectedTravelStoryBlogs.length})</h3>
+                        <h3 className="text-sm font-semibold text-[#3F3F42] mb-2">Selected Blogs ({selectedTravelStoryBlogs.length})</h3>
                         <div className="border border-gray-200 rounded-xl max-h-64 overflow-y-auto">
                             {selectedTravelStoryBlogs.length === 0 ? (
                                 <div className="p-4 text-sm text-gray-500">No blog selected yet.</div>
@@ -821,13 +821,13 @@ export default function EditCountryPage() {
                                 selectedTravelStoryBlogs.map((blog) => (
                                     <div key={blog._id} className="flex items-center justify-between gap-3 p-4 border-b border-gray-100 last:border-b-0">
                                         <div className="min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{blog.title}</p>
+                                            <p className="text-sm font-medium text-[#3F3F42] truncate">{blog.title}</p>
                                             <p className="text-xs text-gray-500 truncate">/{blog.slug}</p>
                                         </div>
                                         <button
                                             type="button"
                                             onClick={() => toggleTravelStoryBlogSelection(blog._id)}
-                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                            className="text-xs px-3 py-1.5 rounded-md border border-gray-300 text-[#3F3F42] hover:bg-gray-50"
                                         >
                                             Remove
                                         </button>
@@ -846,7 +846,7 @@ export default function EditCountryPage() {
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">FAQ Title</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">FAQ Title</label>
                             <input
                                 type="text"
                                 value={faqTitle}
@@ -856,7 +856,7 @@ export default function EditCountryPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">FAQ Subtitle</label>
+                            <label className="block text-sm font-medium text-[#3F3F42] mb-1">FAQ Subtitle</label>
                             <textarea
                                 value={faqSubtitle}
                                 onChange={(e) => setFaqSubtitle(e.target.value)}
@@ -874,11 +874,11 @@ export default function EditCountryPage() {
                                 faqItems.map((item, index) => (
                                     <div key={index} className="rounded-lg border border-gray-200 p-4">
                                         <div className="flex items-center justify-between mb-3">
-                                            <p className="text-sm font-medium text-gray-800">FAQ #{index + 1}</p>
+                                            <p className="text-sm font-medium text-[#3F3F42]">FAQ #{index + 1}</p>
                                             <button
                                                 type="button"
                                                 onClick={() => removeFaqItem(index)}
-                                                className="text-xs px-3 py-1 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                                className="text-xs px-3 py-1 rounded-md border border-gray-300 text-[#3F3F42] hover:bg-gray-50"
                                             >
                                                 Remove
                                             </button>
@@ -911,7 +911,7 @@ export default function EditCountryPage() {
                             <button
                                 type="button"
                                 onClick={addFaqItem}
-                                className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
+                                className="text-sm px-4 py-2 rounded-lg border border-gray-300 text-[#3F3F42] hover:bg-gray-50"
                             >
                                 Add FAQ Item
                             </button>

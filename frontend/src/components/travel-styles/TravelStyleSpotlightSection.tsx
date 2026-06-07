@@ -18,7 +18,7 @@ type TravelStyleSpotlightSectionProps = {
 };
 
 function FeatureIcon({ icon }: { icon: Feature["icon"] }) {
-  const className = "h-5 w-5 text-[#1d1f25]";
+  const className = "h-5 w-5 text-[#3F3F42]";
 
   if (icon === "user") {
     return (
@@ -72,11 +72,11 @@ export default function TravelStyleSpotlightSection({
 }: TravelStyleSpotlightSectionProps) {
   return (
     <section className="mt-14 md:mt-16">
-      <span className="inline-flex rounded-full bg-[#0b1630] px-4 py-1 text-[12px] font-medium text-white">
+      <span className="inline-flex rounded-full bg-[#3F3F42] px-4 py-1 text-[12px] font-medium text-white">
         {badgeText}
       </span>
 
-      <h2 className="mt-4 text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#121b2f] md:text-[58px]">
+      <h2 className="mt-4 text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#3F3F42] md:text-[58px]">
         More about {styleName}
       </h2>
 
@@ -86,7 +86,7 @@ export default function TravelStyleSpotlightSection({
             <Image src={imageSrc} alt={imageAlt} fill className="object-cover" priority={false} />
           </div>
 
-          <div className={`flex flex-col justify-center bg-[#09132c] px-7 py-10 text-white md:px-10 ${minHeightClassName}`}>
+          <div className={`flex flex-col justify-center bg-[#3F3F42] px-7 py-10 text-white md:px-10 ${minHeightClassName}`}>
             <div className="mx-auto flex max-w-[260px] flex-col items-center text-center">
               <div className="flex items-center gap-3 text-left">
                 <img src="/icon.png" alt="Nothing But Adventures" className="h-14 w-14 rounded-xl object-contain" />
@@ -113,7 +113,7 @@ export default function TravelStyleSpotlightSection({
             {features.slice(0, 2).map((feature) => (
               <div key={feature.title} className="flex items-center gap-4 px-6 py-5 md:px-8">
                 <FeatureIcon icon={feature.icon} />
-                <span className="text-[18px] font-medium text-[#1b2334] md:text-[20px]">{feature.title}</span>
+                <span className="text-[18px] font-medium text-[#3F3F42] md:text-[20px]">{feature.title}</span>
               </div>
             ))}
           </div>
@@ -122,7 +122,7 @@ export default function TravelStyleSpotlightSection({
             {features.slice(2, 4).map((feature) => (
               <div key={feature.title} className="flex items-center gap-4 px-6 py-5 md:px-8">
                 <FeatureIcon icon={feature.icon} />
-                <span className="text-[18px] font-medium text-[#1b2334] md:text-[20px]">{feature.title}</span>
+                <span className="text-[18px] font-medium text-[#3F3F42] md:text-[20px]">{feature.title}</span>
               </div>
             ))}
           </div>

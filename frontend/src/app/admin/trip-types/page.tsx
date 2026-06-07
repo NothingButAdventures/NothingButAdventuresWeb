@@ -130,7 +130,7 @@ export default function TripTypesPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Trip Types</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Trip Types</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage trip types for your tours ({tripTypes.length} total)
                         </p>
@@ -191,7 +191,7 @@ export default function TripTypesPage() {
                                 d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                             />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
                             {searchQuery ? "No trip types found" : "No trip types yet"}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -247,7 +247,7 @@ export default function TripTypesPage() {
                                                 <div>
                                                     <Link
                                                         href={`/admin/trip-types/${type._id}`}
-                                                        className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                                                        className="text-sm font-medium text-[#3F3F42] hover:text-blue-600 transition-colors"
                                                     >
                                                         {type.name}
                                                     </Link>
@@ -316,17 +316,17 @@ export default function TripTypesPage() {
 
             {/* Add Trip Type Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-900">Add Trip Type</h2>
+                            <h2 className="text-lg font-bold text-[#3F3F42]">Add Trip Type</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <form onSubmit={handleCreateType} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Trip Type Name <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Trip Type Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -340,7 +340,7 @@ export default function TripTypesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>

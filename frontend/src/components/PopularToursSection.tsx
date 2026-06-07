@@ -65,14 +65,14 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
                         Popular Deals
                     </div>
-                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight">
+                    <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight">
                         Loved by travellers,<br />fueled by purpose
                     </h2>
                 </div>
                 <div className="hidden md:flex flex-col items-end justify-end mt-6">
                     <Link
                         href="/trips"
-                        className="font-medium text-[16px] text-black hover:text-gray-600 underline underline-offset-4 decoration-1"
+                        className="font-medium text-[16px] text-[#3F3F42] hover:text-gray-600 underline underline-offset-4 decoration-1"
                     >
                         View All Trips
                     </Link>
@@ -107,7 +107,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                 {/* Right Arrow Button */}
                 <button
                     onClick={scrollNext}
-                    className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#4d4d4d] hover:bg-[#333] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
+                    className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${
                         canScrollRight ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
                     }`}
                     aria-label="Next tours"
@@ -143,7 +143,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     </button>
                     <button
                         onClick={scrollNext}
-                        className="bg-[#4d4d4d] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                        className="bg-[#3F3F42] text-white w-10 h-10 rounded-full flex items-center justify-center"
                         aria-label="Next tours"
                     >
                         <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +153,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                 </div>
                 <Link
                     href="/trips"
-                    className="inline-block font-medium text-lg text-black underline underline-offset-4 decoration-1"
+                    className="inline-block font-medium text-lg text-[#3F3F42] underline underline-offset-4 decoration-1"
                 >
                     View All Trips
                 </Link>

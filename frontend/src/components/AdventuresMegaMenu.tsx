@@ -338,7 +338,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
         {/* ── Left Panel: Filters ─────────────────────────────────────────────── */}
         <div className="w-[260px] flex-shrink-0 bg-[#f5f5f5] rounded-2xl p-5 flex flex-col justify-between h-full">
           <div className="overflow-y-auto flex-1 pr-1" style={{ scrollbarWidth: "thin" }}>
-            <h3 className="text-lg font-bold font-outfit mb-5 text-gray-900">Filter</h3>
+            <h3 className="text-lg font-bold font-outfit mb-5 text-[#3F3F42]">Filter</h3>
 
             <div className="mb-5">
               <h4 className="text-[11px] font-bold text-gray-500 mb-3 tracking-widest uppercase">Country</h4>
@@ -376,9 +376,9 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
                       }}
                       className={`relative px-3 py-1 rounded-full text-xs font-medium border font-outfit transition-all ${isActive
                         ? (isLocked
-                          ? "bg-black text-white border-black shadow-md"
-                          : "bg-gray-200 text-gray-800 border-gray-400")
-                        : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-200 hover:text-gray-800 hover:border-gray-400"
+                          ? "bg-[#3F3F42] text-white border-black shadow-md"
+                          : "bg-gray-200 text-[#3F3F42] border-gray-400")
+                        : "bg-transparent text-gray-600 border-gray-300 hover:bg-gray-200 hover:text-[#3F3F42] hover:border-gray-400"
                         }`}
                     >
                       {c.name}
@@ -397,7 +397,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
                   <button
                     key={cat._id}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border font-outfit transition-all text-left ${i === 0
-                      ? "bg-black text-white border-black"
+                      ? "bg-[#3F3F42] text-white border-black"
                       : "bg-transparent text-gray-600 border-gray-300 hover:border-gray-500"
                       }`}
                   >
@@ -410,7 +410,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
 
           <Link
             href={activeCountry ? `/trips?country=${activeCountry._id}` : "/trips"}
-            className="mt-4 block w-full bg-black text-white rounded-xl py-3 text-sm font-semibold text-center hover:bg-gray-800 transition-colors"
+            className="mt-4 block w-full bg-[#3F3F42] text-white rounded-xl py-3 text-sm font-semibold text-center hover:bg-[#3F3F42] transition-colors"
           >
             See All Trips
           </Link>
@@ -420,7 +420,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
         <div className="flex-1 flex flex-col gap-4 min-w-0 h-full">
           {/* Map header */}
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold font-outfit text-gray-900">
+            <h3 className="text-lg font-bold font-outfit text-[#3F3F42]">
               {activeCountry ? `Explore ${activeCountry.name}` : "World Map"}
             </h3>
             {loading && (
@@ -473,10 +473,10 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold font-outfit text-gray-900">
+                <h3 className="text-base font-bold font-outfit text-[#3F3F42]">
                   {activeCountry ? `Trips in ${activeCountry.name}` : "Popular Trips"}
                 </h3>
-                <span className="bg-gray-800 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                <span className="bg-[#3F3F42] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                   {tours.length}
                 </span>
               </div>
@@ -540,7 +540,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
 
         {/* ── Right Panel: About + Gallery ────────────────────────────────────── */}
         <div className="w-[260px] flex-shrink-0 bg-[#f5f5f5] rounded-2xl p-5 flex flex-col h-full">
-          <h3 className="text-lg font-bold font-outfit mb-2 text-gray-900">
+          <h3 className="text-lg font-bold font-outfit mb-2 text-[#3F3F42]">
             {activeCountry ? `About ${activeCountry.name}` : "About"}
           </h3>
           <div 
@@ -571,7 +571,7 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
           {activeCountry && (
             <Link
               href={`/trips?country=${activeCountry._id}`}
-              className="mt-4 block w-full border border-black text-black rounded-xl py-2.5 text-xs font-semibold text-center hover:bg-black hover:text-white transition-colors"
+              className="mt-4 block w-full border border-black text-[#3F3F42] rounded-xl py-2.5 text-xs font-semibold text-center hover:bg-[#3F3F42] hover:text-white transition-colors"
             >
               View {activeCountry.name} Trips →
             </Link>

@@ -219,14 +219,14 @@ export default function EditPhysicalRatingPage() {
                                 <Icons.Back className="w-5 h-5" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Edit Physical Rating</h1>
+                                <h1 className="text-xl font-bold text-[#3F3F42]">Edit Physical Rating</h1>
                                 <p className="text-sm text-gray-500">Update details for {physicalRating.name}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition shadow-lg"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] disabled:opacity-50 transition shadow-lg"
                         >
                             {saving ? (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -247,7 +247,7 @@ export default function EditPhysicalRatingPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Physical Rating Name</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Physical Rating Name</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -257,7 +257,7 @@ export default function EditPhysicalRatingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Level (1-5)</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Level (1-5)</label>
                                 <select
                                     value={level}
                                     onChange={(e) => setLevel(Number(e.target.value))}
@@ -281,7 +281,7 @@ export default function EditPhysicalRatingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
                                 <input
                                     type="text"
                                     value={shortDescription}
@@ -295,7 +295,7 @@ export default function EditPhysicalRatingPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Brand Color</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="color"
@@ -314,7 +314,7 @@ export default function EditPhysicalRatingPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Icon URL (optional)</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Icon URL (optional)</label>
                                 <input
                                     type="text"
                                     value={icon}
@@ -330,9 +330,9 @@ export default function EditPhysicalRatingPage() {
                                     id="isActive"
                                     checked={isActive}
                                     onChange={(e) => setIsActive(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                    className="w-4 h-4 rounded border-gray-300 text-[#3F3F42] focus:ring-black"
                                 />
-                                <label htmlFor="isActive" className="text-sm text-gray-700">Active (visible in tour creation)</label>
+                                <label htmlFor="isActive" className="text-sm text-[#3F3F42]">Active (visible in tour creation)</label>
                             </div>
                         </div>
                     </div>
@@ -341,7 +341,7 @@ export default function EditPhysicalRatingPage() {
                 {/* Editor Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Detailed Description</h2>
+                        <h2 className="text-lg font-semibold text-[#3F3F42]">Detailed Description</h2>
                         {/* Simple Toolbar */}
                         <div className="flex bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
                             <ToolbarButton
@@ -400,7 +400,7 @@ function ToolbarButton({ onClick, isActive, label, icon, bold, italic }: any) {
         <button
             onClick={onClick}
             className={`p-2 min-w-[32px] rounded-md transition text-sm font-medium flex items-center justify-center
-                ${isActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-100'}
+                ${isActive ? 'bg-[#3F3F42] text-white' : 'text-gray-600 hover:bg-gray-100'}
                 ${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}
             `}
         >

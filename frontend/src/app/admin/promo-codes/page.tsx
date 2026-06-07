@@ -335,14 +335,14 @@ export default function PromoCodesPage() {
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Promo Codes</h1>
+                    <h1 className="text-2xl font-bold text-[#3F3F42]">Promo Codes</h1>
                     <p className="text-gray-500 mt-1">
                         Manage promotional codes for tours ({promoCodes.length} total)
                     </p>
                 </div>
                 <button
                     onClick={openCreateModal}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition shadow-lg"
+                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] transition shadow-lg"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -380,7 +380,7 @@ export default function PromoCodesPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">No promo codes found</h3>
+                    <h3 className="text-lg font-medium text-[#3F3F42] mb-1">No promo codes found</h3>
                     <p className="text-gray-500">Create your first promo code to get started</p>
                 </div>
             ) : (
@@ -404,13 +404,13 @@ export default function PromoCodesPage() {
                                     <tr key={promo._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-black text-white font-bold text-xs shadow-md">
+                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#3F3F42] text-white font-bold text-xs shadow-md">
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <span className="font-mono font-bold text-gray-900 text-sm tracking-wider">
+                                                    <span className="font-mono font-bold text-[#3F3F42] text-sm tracking-wider">
                                                         {promo.code}
                                                     </span>
                                                     {promo.description && (
@@ -433,7 +433,7 @@ export default function PromoCodesPage() {
                                                 <div className="flex-1 max-w-[80px]">
                                                     <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                                         <div
-                                                            className="h-full bg-black rounded-full transition-all"
+                                                            className="h-full bg-[#3F3F42] rounded-full transition-all"
                                                             style={{
                                                                 width: `${Math.min((promo.usedCount / promo.maxUsers) * 100, 100)}%`,
                                                             }}
@@ -446,7 +446,7 @@ export default function PromoCodesPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-700">
+                                            <div className="text-sm text-[#3F3F42]">
                                                 <div>{new Date(promo.startDate).toLocaleDateString()}</div>
                                                 <div className="text-xs text-gray-400">
                                                     to {new Date(promo.endDate).toLocaleDateString()}
@@ -522,10 +522,10 @@ export default function PromoCodesPage() {
 
             {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-[#3F3F42]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-2xl">
-                            <h2 className="text-xl font-semibold text-gray-900">
+                            <h2 className="text-xl font-semibold text-[#3F3F42]">
                                 {editingPromo ? "Edit Promo Code" : "Create New Promo Code"}
                             </h2>
                             <button
@@ -544,7 +544,7 @@ export default function PromoCodesPage() {
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             {/* Code */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                     Promo Code <span className="text-red-500">*</span>
                                 </label>
                                 <input
@@ -563,7 +563,7 @@ export default function PromoCodesPage() {
 
                             {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                     Description
                                 </label>
                                 <input
@@ -579,7 +579,7 @@ export default function PromoCodesPage() {
                             {/* Discount Type & Value */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                         Discount Type <span className="text-red-500">*</span>
                                     </label>
                                     <select
@@ -597,7 +597,7 @@ export default function PromoCodesPage() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                         Discount Value <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -622,7 +622,7 @@ export default function PromoCodesPage() {
                             {/* Max Users & Duration */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                         Max Users <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -637,7 +637,7 @@ export default function PromoCodesPage() {
                                     <p className="text-xs text-gray-400 mt-1">Maximum number of times this code can be used</p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                         Duration (days) <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -656,7 +656,7 @@ export default function PromoCodesPage() {
                             {/* Max Discount Amount & Min Order Value */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                         Min Order Value ($)
                                     </label>
                                     <input
@@ -671,7 +671,7 @@ export default function PromoCodesPage() {
                                 </div>
                                 {formData.discountType === "percentage" && (
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                             Max Discount Amount ($)
                                         </label>
                                         <input
@@ -690,7 +690,7 @@ export default function PromoCodesPage() {
 
                             {/* Travel Styles (optional) */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                     Travel Styles <span className="text-gray-400 text-xs font-normal">(leave empty for all)</span>
                                 </label>
                                 <div className="flex flex-wrap gap-2">
@@ -700,8 +700,8 @@ export default function PromoCodesPage() {
                                             key={style._id}
                                             onClick={() => toggleTravelStyle(style.name)}
                                             className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${formData.travelStyles.includes(style.name)
-                                                ? "bg-black text-white border-black"
-                                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
+                                                ? "bg-[#3F3F42] text-white border-black"
+                                                : "bg-white text-[#3F3F42] border-gray-200 hover:border-gray-400"
                                                 }`}
                                         >
                                             {style.name}
@@ -715,7 +715,7 @@ export default function PromoCodesPage() {
 
                             {/* Countries (optional) */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                                     Countries <span className="text-gray-400 text-xs font-normal">(leave empty for all tours)</span>
                                 </label>
                                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 border border-gray-100 rounded-xl p-3 bg-gray-50/30">
@@ -736,7 +736,7 @@ export default function PromoCodesPage() {
                                                         <div className="flex items-center gap-3">
                                                             <div 
                                                                 className={`w-5 h-5 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                                                                    isFullySelected ? "bg-black border-black" : "bg-white border-gray-300"
+                                                                    isFullySelected ? "bg-[#3F3F42] border-black" : "bg-white border-gray-300"
                                                                 }`}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -751,7 +751,7 @@ export default function PromoCodesPage() {
                                                                     <div className="w-2.5 h-0.5 bg-gray-400 rounded" />
                                                                 ) : null}
                                                             </div>
-                                                            <span className="font-semibold text-gray-800 text-sm">{continent.name}</span>
+                                                            <span className="font-semibold text-[#3F3F42] text-sm">{continent.name}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">
@@ -774,14 +774,14 @@ export default function PromoCodesPage() {
                                                                         onClick={() => toggleCountry(country._id)}
                                                                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
                                                                             isSelected
-                                                                                ? "bg-black text-white border-black shadow-sm"
-                                                                                : "bg-white text-gray-700 border-gray-200 hover:border-gray-300"
+                                                                                ? "bg-[#3F3F42] text-white border-black shadow-sm"
+                                                                                : "bg-white text-[#3F3F42] border-gray-200 hover:border-gray-300"
                                                                         }`}
                                                                     >
                                                                         <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
                                                                             isSelected ? "bg-white border-white" : "border-gray-200"
                                                                         }`}>
-                                                                            {isSelected && <div className="w-1.5 h-1.5 bg-black rounded-sm" />}
+                                                                            {isSelected && <div className="w-1.5 h-1.5 bg-[#3F3F42] rounded-sm" />}
                                                                         </div>
                                                                         <span className="truncate">{country.name}</span>
                                                                     </button>
@@ -804,7 +804,7 @@ export default function PromoCodesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? "bg-black" : "bg-gray-200"
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? "bg-[#3F3F42]" : "bg-gray-200"
                                         }`}
                                 >
                                     <span
@@ -812,7 +812,7 @@ export default function PromoCodesPage() {
                                             }`}
                                     />
                                 </button>
-                                <span className="text-sm font-medium text-gray-700">
+                                <span className="text-sm font-medium text-[#3F3F42]">
                                     {formData.isActive ? "Active" : "Inactive"}
                                 </span>
                             </div>
@@ -825,14 +825,14 @@ export default function PromoCodesPage() {
                                         setIsModalOpen(false);
                                         resetForm();
                                     }}
-                                    className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
+                                    className="flex-1 px-4 py-3 border border-gray-200 text-[#3F3F42] rounded-xl hover:bg-gray-50 transition font-medium"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
-                                    className="flex-1 px-4 py-3 bg-black text-white rounded-xl hover:bg-gray-800 disabled:opacity-50 transition font-medium"
+                                    className="flex-1 px-4 py-3 bg-[#3F3F42] text-white rounded-xl hover:bg-[#3F3F42] disabled:opacity-50 transition font-medium"
                                 >
                                     {creating
                                         ? "Saving..."

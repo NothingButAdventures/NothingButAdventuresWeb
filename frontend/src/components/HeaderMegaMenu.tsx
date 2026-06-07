@@ -10,7 +10,19 @@ import {
   Star,
 } from "lucide-react";
 
-type MenuType = "adventures" | "destinations";
+type MenuType = "adventures" | "destinations" | "interests" | "why-us" | "deals";
+
+interface Interest {
+  _id: string;
+  name: string;
+  slug?: string;
+  url?: string;
+  image?: string;
+  description?: string;
+  shortDescription?: string;
+  color?: string;
+  isActive?: boolean;
+}
 
 interface TravelStyle {
   _id: string;
@@ -33,6 +45,7 @@ interface Country {
   _id: string;
   name: string;
   slug: string;
+  createdAt?: string;
   shortDescription?: string;
   image?: string;
   statistics?: {
@@ -172,6 +185,104 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   const [continentTours, setContinentTours] = useState<Tour[]>([]);
   const [continentToursById, setContinentToursById] = useState<Record<string, Tour[]>>({});
 
+  // ── Interests state ──
+  const [interests, setInterests] = useState<Interest[]>([]);
+  const [selectedInterestIndex, setSelectedInterestIndex] = useState(0);
+  const [selectedInterestTours, setSelectedInterestTours] = useState<Tour[]>([]);
+  const [interestToursById, setInterestToursById] = useState<Record<string, Tour[]>>({});
+  const [interestLoading, setInterestLoading] = useState(false);
+
+  // Hovered state for "All" buttons
+  const [adventuresHoveredAll, setAdventuresHoveredAll] = useState(false);
+  const [interestsHoveredAll, setInterestsHoveredAll] = useState(false);
+  const [destinationsHoveredAll, setDestinationsHoveredAll] = useState(false);
+
+  // Reset hovered states when active menu changes
+  useEffect(() => {
+    setAdventuresHoveredAll(false);
+    setInterestsHoveredAll(false);
+    setDestinationsHoveredAll(false);
+  }, [activeMenu]);
+
+  // ── Load Interests ──
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadInterests = async () => {
+      setInterestLoading(true);
+
+      try {
+        const response = await fetch(`${api.baseURL}${api.endpoints.interests.getAll}`);
+        const data = await response.json();
+        const interestList: Interest[] = data?.data?.interests || [];
+
+        if (cancelled) return;
+
+        const activeInterests = interestList.filter((i) => i.isActive !== false);
+        const sortedInterests = [...activeInterests].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setInterests(sortedInterests);
+
+        if (sortedInterests.length === 0) {
+          setSelectedInterestIndex(0);
+          setInterestToursById({});
+          setSelectedInterestTours([]);
+          return;
+        }
+
+        const toursByIdEntries = await Promise.all(
+          sortedInterests.map(async (interest) => {
+            const interestName = interest.name?.trim();
+            if (!interestName) {
+              return [interest._id, []] as const;
+            }
+
+            const toursResponse = await fetch(
+              `${api.baseURL}${api.endpoints.tours.getAll}?interests=${encodeURIComponent(interestName)}&limit=10&sort=-ratingsAverage,-ratingsQuantity`
+            );
+            const toursData = await toursResponse.json();
+
+            return [interest._id, toursData?.data?.tours || []] as const;
+          })
+        );
+
+        const toursById = Object.fromEntries(toursByIdEntries);
+
+        if (cancelled) return;
+
+        setInterestToursById(toursById);
+        setSelectedInterestTours(toursById[sortedInterests[0]._id] || []);
+      } catch (error) {
+        console.error("Failed to load interest mega menu:", error);
+        if (!cancelled) {
+          setInterests([]);
+          setInterestToursById({});
+          setSelectedInterestTours([]);
+        }
+      } finally {
+        if (!cancelled) setInterestLoading(false);
+      }
+    };
+
+    loadInterests();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const selectedInterest = interests[selectedInterestIndex];
+
+    if (!selectedInterest) {
+      setSelectedInterestTours([]);
+      return;
+    }
+
+    setSelectedInterestTours(interestToursById[selectedInterest._id] || []);
+  }, [selectedInterestIndex, interestToursById, interests]);
+
   // ── Load Adventures ──
   useEffect(() => {
     let cancelled = false;
@@ -189,9 +300,12 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
         if (cancelled) return;
 
-        setTravelStyles(travelStylesList);
+        const sortedStyles = [...travelStylesList].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setTravelStyles(sortedStyles);
 
-        if (travelStylesList.length === 0) {
+        if (sortedStyles.length === 0) {
           setSelectedStyleIndex(0);
           setStyleToursById({});
           setSelectedStyleTours([]);
@@ -199,7 +313,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
         }
 
         const toursByIdEntries = await Promise.all(
-          travelStylesList.map(async (style) => {
+          sortedStyles.map(async (style) => {
             const styleName = style.name?.trim();
             if (!styleName) {
               return [style._id, []] as const;
@@ -219,7 +333,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
         if (cancelled) return;
 
         setStyleToursById(toursById);
-        setSelectedStyleTours(toursById[travelStylesList[0]._id] || []);
+        setSelectedStyleTours(toursById[sortedStyles[0]._id] || []);
       } catch (error) {
         console.error("Failed to load adventure mega menu:", error);
         if (!cancelled) {
@@ -255,6 +369,23 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
     let cancelled = false;
 
     const loadDestinations = async () => {
+      // Try to load from cache first
+      const cachedContinents = localStorage.getItem("nba-megamenu-continents");
+      const cachedTours = localStorage.getItem("nba-megamenu-tours");
+      if (cachedContinents && cachedTours) {
+        try {
+          const parsedContinents = JSON.parse(cachedContinents);
+          const parsedTours = JSON.parse(cachedTours);
+          setContinents(parsedContinents);
+          setContinentToursById(parsedTours);
+          if (parsedContinents.length > 0) {
+            setContinentTours(parsedTours[parsedContinents[0]._id] || []);
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+
       setDestinationLoading(true);
 
       try {
@@ -270,84 +401,90 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
 
         const continentList: Continent[] =
           continentsData?.data?.continents || [];
-        setContinents(continentList);
+        const sortedContinents = [...continentList].sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+        setContinents(sortedContinents);
         setPopularCountries(countriesData?.data?.countries || []);
 
-          // Preload data for all continents
-          const results = await Promise.all(
-            continentList.map(async (continent) => {
-              try {
-                // 1. Fetch countries for this continent
-                const countriesRes = await fetch(`${api.baseURL}/countries/continent/${continent.slug || continent.name.toLowerCase().replace(/ /g, '-')}`);
-                const countriesData = await countriesRes.json();
-                const continentCountries: Country[] = countriesData?.data?.countries || countriesData?.data || [];
-                
-                // 2. Fetch tours for the first few countries
-                let tours: Tour[] = [];
-                const countryIds = continentCountries.slice(0, 3).map(c => c._id);
-                
-                if (countryIds.length > 0) {
-                  // Try to get tours for the first country
-                  const res = await fetch(`${api.baseURL}/tours/country/${countryIds[0]}`);
-                  const d = await res.json();
-                  tours = d?.data?.tours || [];
+        // Preload data for all continents
+        const results = await Promise.all(
+          sortedContinents.map(async (continent) => {
+            try {
+              // 1. Fetch countries for this continent
+              const countriesRes = await fetch(`${api.baseURL}/countries/continent/${continent.slug || continent.name.toLowerCase().replace(/ /g, '-')}`);
+              const countriesData = await countriesRes.json();
+              const continentCountries: Country[] = countriesData?.data?.countries || countriesData?.data || [];
 
-                  // If first country has no tours, try second
-                  if (tours.length === 0 && countryIds[1]) {
-                    const res2 = await fetch(`${api.baseURL}/tours/country/${countryIds[1]}`);
-                    const d2 = await res2.json();
-                    tours = d2?.data?.tours || [];
-                  }
+              // 2. Fetch tours for the first few countries
+              let tours: Tour[] = [];
+              const countryIds = continentCountries.slice(0, 3).map(c => c._id);
+
+              if (countryIds.length > 0) {
+                // Try to get tours for the first country
+                const res = await fetch(`${api.baseURL}/tours/country/${countryIds[0]}`);
+                const d = await res.json();
+                tours = d?.data?.tours || [];
+
+                // If first country has no tours, try second
+                if (tours.length === 0 && countryIds[1]) {
+                  const res2 = await fetch(`${api.baseURL}/tours/country/${countryIds[1]}`);
+                  const d2 = await res2.json();
+                  tours = d2?.data?.tours || [];
                 }
-
-                // Fallback: if still no tours, fetch global featured
-                if (tours.length === 0) {
-                  const response = await fetch(
-                    `${api.baseURL}${api.endpoints.tours.search}?limit=2&sort=-ratingsAverage,-ratingsQuantity`
-                  );
-                  const data = await response.json();
-                  tours = data?.data?.tours || [];
-                }
-
-                // Preload tour images
-                tours.forEach(t => {
-                  const imgUrl = getTourImage(t);
-                  if (imgUrl) {
-                    const img = new Image();
-                    img.src = imgUrl;
-                  }
-                });
-
-                // Return both the updated continent and its tours
-                return { 
-                  continent: { ...continent, countries: continentCountries }, 
-                  tours,
-                  id: continent._id 
-                };
-              } catch (err) {
-                console.error(`Error preloading for ${continent.name}:`, err);
-                return { continent, tours: [], id: continent._id };
               }
-            })
-          );
 
-          if (!cancelled) {
-            const newContinents = results.map(r => r.continent);
-            const newToursById = Object.fromEntries(results.map(r => [r.id, r.tours]));
-            
-            setContinents(newContinents);
-            setContinentToursById(newToursById);
-            
-            if (newContinents.length > 0) {
-              setContinentTours(newToursById[newContinents[0]._id] || []);
+              // Fallback: if still no tours, fetch global featured
+              if (tours.length === 0) {
+                const response = await fetch(
+                  `${api.baseURL}${api.endpoints.tours.search}?limit=2&sort=-ratingsAverage,-ratingsQuantity`
+                );
+                const data = await response.json();
+                tours = data?.data?.tours || [];
+              }
+
+              // Preload tour images
+              tours.forEach(t => {
+                const imgUrl = getTourImage(t);
+                if (imgUrl) {
+                  const img = new Image();
+                  img.src = imgUrl;
+                }
+              });
+
+              // Return both the updated continent and its tours
+              return {
+                continent: { ...continent, countries: continentCountries },
+                tours,
+                id: continent._id
+              };
+            } catch (err) {
+              console.error(`Error preloading for ${continent.name}:`, err);
+              return { continent, tours: [], id: continent._id };
             }
-          }
+          })
+        );
 
-        if (continentList.length === 0) {
+        if (!cancelled) {
+          const newContinents = results.map(r => r.continent);
+          const newToursById = Object.fromEntries(results.map(r => [r.id, r.tours]));
+
+          setContinents(newContinents);
+          setContinentToursById(newToursById);
+
+          localStorage.setItem("nba-megamenu-continents", JSON.stringify(newContinents));
+          localStorage.setItem("nba-megamenu-tours", JSON.stringify(newToursById));
+
+          if (newContinents.length > 0) {
+            setContinentTours(newToursById[newContinents[0]._id] || []);
+          }
+        }
+
+        if (sortedContinents.length === 0) {
           setSelectedContinentIndex(0);
         } else {
           setSelectedContinentIndex((currentIndex) =>
-            Math.min(currentIndex, continentList.length - 1)
+            Math.min(currentIndex, sortedContinents.length - 1)
           );
         }
       } catch (error) {
@@ -392,8 +529,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
     selectedStyle?.sections?.intro?.bullets
       ?.filter(Boolean)
       .slice(0, 2)
-      .join(" ") ||
-    "Discover immersive experiences, local encounters, and handpicked trips that match this travel style.";
+      .join(" ") || "";
 
   const selectedStyleCountries = useMemo(() => {
     const countries = new Map<string, { label: string; href: string }>();
@@ -420,6 +556,45 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   const bestsellingTours = selectedStyleTours.slice(0, 4);
   const bestsellingTourSlots = Array.from({ length: 4 }, (_, index) =>
     bestsellingTours[index] || null
+  );
+
+  // ── Derived data for Interests ──
+  const selectedInterest = interests[selectedInterestIndex] || interests[0];
+  const interestHeading = selectedInterest ? selectedInterest.name : "Interests";
+  const interestHeroImage =
+    selectedInterest?.image && selectedInterest.image.trim() !== ""
+      ? selectedInterest.image
+      : fallbackAdventureImage;
+  const interestCopy =
+    stripHtml(selectedInterest?.shortDescription) ||
+    stripHtml(selectedInterest?.description);
+
+
+  const selectedInterestCountries = useMemo(() => {
+    const countries = new Map<string, { label: string; href: string }>();
+
+    selectedInterestTours.forEach((tour) => {
+      const country = typeof tour.country === "object" ? tour.country : null;
+      const countryName = country?.name?.trim() || "";
+      const countrySlug = country?.slug?.trim() || "";
+      if (!countryName) return;
+
+      if (!countries.has(countryName)) {
+        countries.set(countryName, {
+          label: countryName,
+          href: countrySlug
+            ? `/destinations/${getContinentSlug(countryName)}/${countrySlug}`
+            : "/destinations",
+        });
+      }
+    });
+
+    return Array.from(countries.values()).slice(0, 8);
+  }, [selectedInterestTours]);
+
+  const bestsellingInterestTours = selectedInterestTours.slice(0, 4);
+  const bestsellingInterestTourSlots = Array.from({ length: 4 }, (_, index) =>
+    bestsellingInterestTours[index] || null
   );
 
   // ── Derived data for Destinations ──
@@ -451,7 +626,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
     destinationCountries[index] || null
   );
 
-  if (!activeMenu) {
+  if (!activeMenu || activeMenu === "why-us" || activeMenu === "deals") {
     return null;
   }
 
@@ -486,12 +661,15 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                 ) : (
                   <>
                     {travelStyles.map((style, index) => {
-                      const isActive = index === selectedStyleIndex;
+                      const isActive = index === selectedStyleIndex && !adventuresHoveredAll;
                       return (
                         <Link
                           key={style._id}
                           href={style.url?.trim() || (style.slug ? `/travel-styles/${style.slug}` : "/travel-styles")}
-                          onMouseEnter={() => setSelectedStyleIndex(index)}
+                          onMouseEnter={() => {
+                            setSelectedStyleIndex(index);
+                            setAdventuresHoveredAll(false);
+                          }}
                           className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
                             ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                             : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -503,9 +681,14 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                     })}
                     <Link
                       href="/travel-styles"
-                      className="cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                      onMouseEnter={() => setAdventuresHoveredAll(true)}
+                      onMouseLeave={() => setAdventuresHoveredAll(false)}
+                      className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${adventuresHoveredAll
+                        ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
+                        : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                        }`}
                     >
-                      All travel styles
+                      All Travel Styles
                     </Link>
                   </>
                 )}
@@ -525,9 +708,11 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                   {styleCopy ||
                     "A carefully curated mix of uncommon experiences, insider access, cultural contact, and all the must-sees and must-dos."}
                 </p>
-                <p className="mt-3 text-[14px] leading-[1.7] text-[#3F3F42]">
-                  {styleSecondaryCopy}
-                </p>
+                {styleSecondaryCopy && (
+                  <p className="mt-3 text-[14px] leading-[1.7] text-[#3F3F42]">
+                    {styleSecondaryCopy}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -542,9 +727,8 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                     key={style._id}
                     src={style.image && style.image.trim() !== "" ? style.image : fallbackAdventureImage}
                     alt={style.name}
-                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${
-                      idx === selectedStyleIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
-                    } hover:scale-110`}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${idx === selectedStyleIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                      } hover:scale-110`}
                   />
                 ))
               ) : (
@@ -603,7 +787,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                     Bestselling tours in{" "}
                     {selectedStyle?.name || "this style"}
                   </h3>
-                  <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#111] px-2 text-[12px] font-semibold text-white">
+                  <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#3F3F42] px-2 text-[12px] font-semibold text-white">
                     {bestsellingTours.length}
                   </span>
                 </div>
@@ -665,6 +849,218 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
               </div>
             </div>
           </div>
+        ) : activeMenu === "interests" ? (
+          /* ═══════════════ INTERESTS ═══════════════ */
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: "240px 1fr 1fr 300px",
+              gridTemplateRows: "1fr auto",
+              height: "calc(90vh - 72px)",
+            }}
+          >
+            {/* Col 1 – Tour Categories (spans both rows) */}
+            <div
+              className="overflow-y-auto rounded-2xl bg-white p-5"
+              style={{ gridColumn: "1", gridRow: "1 / 3" }}
+            >
+              <div className="flex flex-col gap-2">
+                {interestLoading && interests.length === 0 ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4, 5].map((item) => (
+                      <div
+                        key={item}
+                        className="h-10 animate-pulse rounded-full bg-[#e8e8e4]"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {interests.map((interest, index) => {
+                      const isActive = index === selectedInterestIndex && !interestsHoveredAll;
+                      return (
+                        <Link
+                          key={interest._id}
+                          href={`/search?interests=${encodeURIComponent(interest.name || "")}`}
+                          onMouseEnter={() => {
+                            setSelectedInterestIndex(index);
+                            setInterestsHoveredAll(false);
+                          }}
+                          className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
+                            ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
+                            : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                            }`}
+                        >
+                          {interest.name}
+                        </Link>
+                      );
+                    })}
+                    <Link
+                      href="/trips"
+                      onMouseEnter={() => setInterestsHoveredAll(true)}
+                      onMouseLeave={() => setInterestsHoveredAll(false)}
+                      className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${interestsHoveredAll
+                        ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
+                        : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                        }`}
+                    >
+                      All Tours
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Col 2, Row 1 – Description */}
+            <div
+              className="flex flex-col overflow-y-auto rounded-2xl bg-white p-6 h-fit max-h-full"
+              style={{ gridColumn: "2", gridRow: "1" }}
+            >
+              <div>
+                <h2 className="text-[26px] font-bold leading-tight tracking-[-0.02em] text-[#3F3F42]">
+                  {interestHeading}
+                </h2>
+                <p className="mt-4 text-[14px] leading-[1.7] text-[#3F3F42]">
+                  {interestCopy ||
+                    "Discover unique trips organized around this special interest."}
+                </p>
+
+              </div>
+            </div>
+
+            {/* Col 3, Row 1 – Hero Image */}
+            <div
+              className="relative overflow-hidden rounded-2xl bg-[#e5e5e1]"
+              style={{ gridColumn: "3", gridRow: "1" }}
+            >
+              {interests.length > 0 ? (
+                interests.map((interest, idx) => (
+                  <img
+                    key={interest._id}
+                    src={interest.image && interest.image.trim() !== "" ? interest.image : fallbackAdventureImage}
+                    alt={interest.name}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${idx === selectedInterestIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                      } hover:scale-110`}
+                  />
+                ))
+              ) : (
+                <img
+                  src={fallbackAdventureImage}
+                  alt="Interest travel style"
+                  className="h-full w-full object-cover"
+                />
+              )}
+            </div>
+
+            {/* Col 4 – Popular Regions (spans both rows) */}
+            <div
+              className="overflow-y-auto rounded-2xl bg-white p-5"
+              style={{ gridColumn: "4", gridRow: "1 / 3" }}
+            >
+              <h3 className="text-[18px] font-bold tracking-[-0.01em] text-[#3F3F42]">
+                Popular Regions
+              </h3>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {selectedInterestCountries.length > 0 ? (
+                  selectedInterestCountries.map((country) => (
+                    <Link
+                      key={country.label}
+                      href={country.href}
+                      className="inline-flex items-center rounded-full border border-[#c5c5c0] bg-transparent px-3.5 py-1.5 text-[13px] font-medium text-[#3F3F42] transition-all hover:border-[#3F3F42] hover:bg-white hover:text-[#3F3F42]"
+                    >
+                      {country.label}
+                    </Link>
+                  ))
+                ) : interestLoading ? (
+                  <div className="space-y-2 w-full">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="h-8 animate-pulse rounded-full bg-[#e8e8e4]"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[13px] text-[#3F3F42]">
+                    Countries will appear once tours are available.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Col 2-3, Row 2 – Bestselling Tours */}
+            <div
+              className="rounded-2xl bg-white px-5 py-4"
+              style={{ gridColumn: "2 / 4", gridRow: "2" }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-[17px] font-bold tracking-[-0.01em] text-[#3F3F42]">
+                    Bestselling tours in{" "}
+                    {selectedInterest?.name || "this interest"}
+                  </h3>
+                  <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#3F3F42] px-2 text-[12px] font-semibold text-white">
+                    {bestsellingInterestTours.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {interestLoading && selectedInterestTours.length === 0
+                  ? [1, 2, 3, 4].map((item) => (
+                    <div
+                      key={item}
+                      className="h-[94px] animate-pulse rounded-xl border border-[#ecece8] bg-[#efefec]"
+                    />
+                  ))
+                  : bestsellingInterestTourSlots.map((tour, index) =>
+                    tour ? (
+                      <Link
+                        key={tour._id}
+                        href={getTourHref(tour)}
+                        className="group flex h-[94px] flex-col justify-between rounded-xl bg-white px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="line-clamp-1 text-[16px] font-semibold tracking-[-0.01em] text-[#3F3F42]">
+                            {tour.name}
+                          </h4>
+                          <span className="shrink-0 rounded-full bg-[#8f8f8c] px-2.5 py-0.5 text-[11px] font-medium text-white">
+                            Bestseller
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-4 text-[13px] text-[#3F3F42]">
+                          {Number(tour.duration?.days) > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" />
+                              {tour.duration?.days} Days
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 truncate">
+                            <MapPin className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate">{getTourLocation(tour)}</span>
+                          </span>
+                          {Number(tour.ratingsAverage) > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5" />
+                              {tour.ratingsAverage}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-[11px] text-[#3F3F42]">
+                          {formatTourDate(tour.startDates?.[0]?.startDate)}
+                        </p>
+                      </Link>
+                    ) : (
+                      <div
+                        key={`interest-tour-slot-empty-${index}`}
+                        aria-hidden="true"
+                        className="h-[94px]"
+                      />
+                    )
+                  )}
+              </div>
+            </div>
+          </div>
         ) : activeMenu === "destinations" ? (
           /* ═══════════════ DESTINATIONS ═══════════════ */
           <div
@@ -693,12 +1089,15 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                 ) : (
                   <>
                     {continents.map((continent, index) => {
-                      const isActive = index === selectedContinentIndex;
+                      const isActive = index === selectedContinentIndex && !destinationsHoveredAll;
                       return (
                         <Link
                           key={continent._id}
                           href={continent.slug ? `/destinations/${continent.slug}` : "/destinations"}
-                          onMouseEnter={() => setSelectedContinentIndex(index)}
+                          onMouseEnter={() => {
+                            setSelectedContinentIndex(index);
+                            setDestinationsHoveredAll(false);
+                          }}
                           className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
                             ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                             : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -710,9 +1109,14 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                     })}
                     <Link
                       href="/destinations"
-                      className="cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                      onMouseEnter={() => setDestinationsHoveredAll(true)}
+                      onMouseLeave={() => setDestinationsHoveredAll(false)}
+                      className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${destinationsHoveredAll
+                        ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
+                        : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
+                        }`}
                     >
-                      All destinations
+                      All Destinations
                     </Link>
                   </>
                 )}
@@ -745,9 +1149,8 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                     key={continent._id}
                     src={continent.image && continent.image.trim() !== "" ? continent.image : fallbackDestinationImage}
                     alt={continent.name}
-                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${
-                      idx === selectedContinentIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
-                    } hover:scale-110`}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ${idx === selectedContinentIndex ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
+                      } hover:scale-110`}
                   />
                 ))
               ) : (
@@ -791,10 +1194,10 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                             alt={tour.name}
                             className="h-28 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                          <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-medium text-[#555]">
+                          <span className="absolute right-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-medium text-[#3F3F42]">
                             Save 10%
                           </span>
-                          <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-medium text-[#555]">
+                          <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-medium text-[#3F3F42]">
                             {typeof tour.travelStyle === "object"
                               ? tour.travelStyle?.name
                               : "Classic"}
@@ -822,7 +1225,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                           <p className="text-[11px] text-[#aaa]">
                             {formatTourDate(tour.startDates?.[0]?.startDate)}
                           </p>
-                          <span className="inline-flex items-center rounded-full bg-[#111] px-3.5 py-1.5 text-[11px] font-semibold text-white">
+                          <span className="inline-flex items-center rounded-full bg-[#3F3F42] px-3.5 py-1.5 text-[11px] font-semibold text-white">
                             View Trip
                           </span>
                         </div>
@@ -861,8 +1264,8 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                         <span className="mt-1 rounded-full bg-[#ef4343] px-2 py-0.5 text-[9px] font-semibold text-white">
                           Bestseller
                         </span>
-                      ) : Number(country.statistics?.totalTours) > 0 ? (
-                        <span className="mt-1 rounded-full bg-[#777] px-2 py-0.5 text-[9px] font-semibold text-white">
+                      ) : country.createdAt && (new Date().getTime() - new Date(country.createdAt).getTime() <= 60 * 24 * 60 * 60 * 1000) ? (
+                        <span className="mt-1 rounded-full bg-[#412A6B] px-2 py-0.5 text-[9px] font-semibold text-white">
                           New
                         </span>
                       ) : null}
@@ -884,7 +1287,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       ? `/destinations/${selectedContinent.slug}`
                       : "/destinations"
                   }
-                  className="inline-flex items-center gap-2 rounded-full bg-[#111] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:bg-black hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2.5 text-[13px] font-semibold text-white transition-all hover:bg-[#3F3F42] hover:shadow-md"
                 >
                   View all {selectedContinent?.name || "Destinations"}
                 </Link>
@@ -894,7 +1297,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       ? `/destinations/${selectedContinent.slug}`
                       : "/destinations"
                   }
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#111] bg-[#111] text-white transition-all hover:bg-black"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#111] bg-[#3F3F42] text-white transition-all hover:bg-[#3F3F42]"
                 >
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>

@@ -45,7 +45,7 @@ export default function AdminDashboard() {
       {/* Page Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="px-8 py-6">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-[#3F3F42]">Dashboard</h1>
           <p className="text-gray-500 text-sm mt-1">Welcome to the admin panel</p>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
               </div>
               <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">Active</span>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalTours}</h3>
+            <h3 className="text-2xl font-bold text-[#3F3F42] mb-1">{stats.totalTours}</h3>
             <p className="text-gray-500 text-sm">Total Tours</p>
           </div>
 
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
               </div>
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Users</span>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalUsers || "—"}</h3>
+            <h3 className="text-2xl font-bold text-[#3F3F42] mb-1">{stats.totalUsers || "—"}</h3>
             <p className="text-gray-500 text-sm">Total Users</p>
           </div>
 
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
               </div>
               <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-full">Pending</span>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalBookings || "—"}</h3>
+            <h3 className="text-2xl font-bold text-[#3F3F42] mb-1">{stats.totalBookings || "—"}</h3>
             <p className="text-gray-500 text-sm">Total Bookings</p>
           </div>
 
@@ -106,14 +106,14 @@ export default function AdminDashboard() {
               </div>
               <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">Revenue</span>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">${stats.totalRevenue || "—"}</h3>
+            <h3 className="text-2xl font-bold text-[#3F3F42] mb-1">${stats.totalRevenue || "—"}</h3>
             <p className="text-gray-500 text-sm">Total Revenue</p>
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <Link
               href="/admin/tours-management/create"
@@ -126,7 +126,7 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Create New Tour</h3>
+                  <h3 className="font-semibold text-[#3F3F42]">Create New Tour</h3>
                   <p className="text-gray-500 text-sm">Add a new tour package</p>
                 </div>
               </div>
@@ -143,7 +143,7 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Manage Tours</h3>
+                  <h3 className="font-semibold text-[#3F3F42]">Manage Tours</h3>
                   <p className="text-gray-500 text-sm">View and edit tours</p>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">View Bookings</h3>
+                  <h3 className="font-semibold text-[#3F3F42]">View Bookings</h3>
                   <p className="text-gray-500 text-sm">Track reservations</p>
                 </div>
               </div>
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
           {/* Recent Bookings */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Recent Bookings</h2>
+              <h2 className="font-semibold text-[#3F3F42]">Recent Bookings</h2>
               <Link href="/admin/bookings" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                 View All →
               </Link>
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
                       <span className="text-blue-600 font-medium text-sm">JD</span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">Sample Booking {i}</p>
+                      <p className="font-medium text-[#3F3F42] text-sm">Sample Booking {i}</p>
                       <p className="text-gray-500 text-xs">Everest Base Camp Trek</p>
                     </div>
                   </div>
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
           {/* Recent Tours */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-gray-900">Popular Tours</h2>
+              <h2 className="font-semibold text-[#3F3F42]">Popular Tours</h2>
               <Link href="/admin/tours-management" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                 View All →
               </Link>
@@ -210,11 +210,11 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 bg-gray-200 rounded-lg"></div>
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">Tour Package {i}</p>
+                      <p className="font-medium text-[#3F3F42] text-sm">Tour Package {i}</p>
                       <p className="text-gray-500 text-xs">12 bookings this month</p>
                     </div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">$1,299</span>
+                  <span className="text-sm font-semibold text-[#3F3F42]">$1,299</span>
                 </div>
               ))}
             </div>

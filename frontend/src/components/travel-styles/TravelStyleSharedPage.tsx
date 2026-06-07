@@ -48,13 +48,13 @@ export default function TravelStyleSharedPage({ config = defaultStyleConfig }: T
       <div className="w-full rounded-[10px] bg-white px-4 pb-6 pt-4 md:px-8 md:pb-8 md:pt-5">
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
-            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
+            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#3F3F42] md:text-[58px]">
               Travel Styles
             </h1>
-            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3f3f3f]">
+            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3F3F42]">
               Immersive travel is about experiencing a destination through the eyes of a local. It is eating at family restaurants, learning traditions and crafts, and sleeping in authentic accommodations that tell stories.
             </p>
-            <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#2f2f2f]">
+            <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#3F3F42]">
               <li>18-to-30-somethings</li>
               <li>Go-Active</li>
               <li>Local Living</li>
@@ -62,7 +62,7 @@ export default function TravelStyleSharedPage({ config = defaultStyleConfig }: T
             </ul>
             <a
               href="/trips"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#101010] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F3F42]"
             >
               View all Tours
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[11px] leading-none">↗</span>
@@ -96,7 +96,7 @@ export default function TravelStyleSharedPage({ config = defaultStyleConfig }: T
         <TravelStyleGallerySection />
         <ReviewsSection
           title="See how your trip uplifts communities"
-          pillClasses="bg-[#DEECFF] text-[#5e6678]"
+          pillClasses="bg-[#DEECFF] text-[#3F3F42]"
           btnClasses="bg-[#42c46e] hover:bg-[#33b55e]"
           btnText="Book This Trip"
         />

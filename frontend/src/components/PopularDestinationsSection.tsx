@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
 
 const CONTINENT_MAP: Record<string, string> = {
@@ -24,6 +24,7 @@ type Country = {
     shortDescription?: string;
     image?: string;
     continent?: string | { _id: string; slug: string; name: string };
+    statistics?: { totalTours?: number; popularityScore?: number };
 };
 
 type PopularDestinationsSectionProps = {
@@ -34,6 +35,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
     const fallbackImage = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=3506&auto=format&fit=crop";
 
     const [selectedCountries, setSelectedCountries] = React.useState<Country[]>([]);
+    const scrollRef = useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
         if (countries.length === 0) return;
@@ -50,19 +52,30 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
 
         const continentSlugs = Object.keys(continentGroups);
         
-        // Shuffle and pick up to 4 unique continents
-        const shuffledContinents = [...continentSlugs].sort(() => Math.random() - 0.5);
-        const selectedContinents = shuffledContinents.slice(0, 4);
-
-        // For each selected continent, pick a random country
-        const chosenCountries = selectedContinents.map(slug => {
+        // Pick all continents, and for each find the country with the most tours
+        const chosenCountries = continentSlugs.map(slug => {
             const group = continentGroups[slug];
-            const randomIndex = Math.floor(Math.random() * group.length);
-            return group[randomIndex];
+            // Sort by totalTours descending, or popularityScore if totalTours is missing
+            group.sort((a, b) => {
+                const aScore = a.statistics?.totalTours || a.statistics?.popularityScore || 0;
+                const bScore = b.statistics?.totalTours || b.statistics?.popularityScore || 0;
+                return bScore - aScore;
+            });
+            return group[0];
         });
 
         setSelectedCountries(chosenCountries);
     }, [countries]);
+
+    const scroll = (direction: "left" | "right") => {
+        if (scrollRef.current) {
+            const scrollAmount = scrollRef.current.clientWidth * 0.8; 
+            scrollRef.current.scrollBy({
+                left: direction === "left" ? -scrollAmount : scrollAmount,
+                behavior: "smooth"
+            });
+        }
+    };
 
     return (
         <section className="mx-auto mt-24 mb-16">
@@ -71,7 +84,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
                     Views
                 </div>
-                <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-gray-900 tracking-tight mb-4">
+                <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight mb-4">
                     Popular Destinations
                 </h2>
                 <p className="text-[17px] md:text-[18px] text-gray-500 font-medium leading-[1.6]">
@@ -79,49 +92,76 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 </p>
             </div>
 
-            {/* Destination Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {selectedCountries.map((country, index) => {
-                    // Resolve the continent slug dynamically from the backend data or local map fallback
-                    const continentSlug = 
-                        (typeof country.continent === "object" && country.continent?.slug) || 
-                        getContinentSlug(country.name);
-                    const linkHref = `/destinations/${continentSlug}/${country.slug}`;
+            {/* Destination Carousel */}
+            <div className="relative group/carousel">
+                {/* Navigation Buttons */}
+                <button
+                    onClick={() => scroll("left")}
+                    className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 z-30 hover:scale-105 shadow-lg"
+                    aria-label="Scroll left"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
 
-                    return (
-                        <Link
-                            key={country._id || country.slug}
-                            href={linkHref}
-                            className="relative w-full aspect-[4/5] md:aspect-[4/5] rounded-[20px] overflow-hidden block group cursor-pointer shadow-sm"
-                        >
-                            <img
-                                src={country.image || fallbackImage}
-                                alt={country.name}
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
-                            />
+                <button
+                    onClick={() => scroll("right")}
+                    className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 z-30 hover:scale-105 shadow-lg"
+                    aria-label="Scroll right"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
 
-                            {/* Dark Overlay for Text Readability */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none z-10"></div>
+                {/* Carousel Container */}
+                <div 
+                    ref={scrollRef}
+                    className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-2"
+                >
+                    {selectedCountries.map((country, index) => {
+                        // Resolve the continent slug dynamically
+                        const continentSlug = 
+                            (typeof country.continent === "object" && country.continent?.slug) || 
+                            getContinentSlug(country.name);
+                        const linkHref = `/destinations/${continentSlug}/${country.slug}`;
 
-                            {/* Coming Soon Badge (applied to the 4th item to balance the Figma mockup design) */}
-                            {index === 3 && (
-                                <div className="absolute top-4 left-4 bg-[#FF5A36] text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full z-20 tracking-wide uppercase shadow-sm">
-                                    Coming Soon
+                        return (
+                            <Link
+                                key={country._id || country.slug}
+                                href={linkHref}
+                                className="relative w-[85vw] sm:w-[calc(50%-12px)] md:w-[calc(33.333%-16px)] lg:w-[calc(25%-18px)] flex-shrink-0 aspect-[4/5] rounded-[20px] overflow-hidden block group cursor-pointer shadow-sm snap-start"
+                            >
+                                <img
+                                    src={country.image || fallbackImage}
+                                    alt={country.name}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
+                                />
+
+                                {/* Dark Overlay for Text Readability */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none z-10"></div>
+
+                                {/* Coming Soon Badge */}
+                                {index === 3 && (
+                                    <div className="absolute top-4 left-4 bg-[#FF5A36] text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full z-20 tracking-wide uppercase shadow-sm">
+                                        Coming Soon
+                                    </div>
+                                )}
+
+                                {/* Content */}
+                                <div className="absolute bottom-6 left-6 right-6 z-20">
+                                    <h3 className="text-white text-[24px] font-bold leading-tight mb-1">
+                                        {country.name}
+                                    </h3>
+                                    <p className="text-white/80 text-[14.5px] font-medium">
+                                        {country.shortDescription || "Palaces, forts & deserts"}
+                                    </p>
                                 </div>
-                            )}
-
-                            {/* Content */}
-                            <div className="absolute bottom-6 left-6 right-6 z-20">
-                                <h3 className="text-white text-[24px] font-bold leading-tight mb-1">
-                                    {country.name}
-                                </h3>
-                                <p className="text-white/80 text-[14.5px] font-medium">
-                                    {country.shortDescription || "Palaces, forts & deserts"}
-                                </p>
-                            </div>
-                        </Link>
-                    );
-                })}
+                            </Link>
+                        );
+                    })}
+                </div>
             </div>
         </section>
     );

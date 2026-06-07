@@ -1,5 +1,5 @@
-// const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
-const API_BASE_URL = "http://localhost:3001/api/v1";
+const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
+// const API_BASE_URL = "http://localhost:3001/api/v1";
 
 export const api = {
   baseURL: API_BASE_URL,
@@ -129,6 +129,11 @@ export const api = {
     physicalRatings: {
       getAll: "/physical-ratings",
       getById: (id: string) => `/physical-ratings/${id}`,
+    },
+    discounts: {
+      getAll: "/discounts",
+      getActive: "/discounts/active",
+      getById: (id: string) => `/discounts/${id}`,
     },
   },
 };

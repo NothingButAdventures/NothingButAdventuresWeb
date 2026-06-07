@@ -458,14 +458,14 @@ export default function BookingsManagementPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Bookings Management</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Bookings Management</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage users, tours, departures and guest reservations
                         </p>
                     </div>
                     <Link
                         href="/admin"
-                        className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2"
+                        className="bg-white hover:bg-gray-50 text-[#3F3F42] border border-gray-200 font-medium py-2.5 px-4 rounded-lg transition flex items-center gap-2"
                     >
                         <X className="w-4 h-4" />
                         Close
@@ -480,7 +480,7 @@ export default function BookingsManagementPage() {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             activeView === "users"
                                 ? "bg-blue-600 text-white"
-                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                : "text-gray-600 hover:text-[#3F3F42] hover:bg-gray-50"
                         }`}
                     >
                         Users View
@@ -490,7 +490,7 @@ export default function BookingsManagementPage() {
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                             activeView === "tours"
                                 ? "bg-blue-600 text-white"
-                                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                : "text-gray-600 hover:text-[#3F3F42] hover:bg-gray-50"
                         }`}
                     >
                         Tours View
@@ -517,7 +517,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersStatusFilter}
                             onChange={(e) => setUsersStatusFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Booking Status</option>
                             <option value="confirmed">Confirmed</option>
@@ -529,7 +529,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersPaymentFilter}
                             onChange={(e) => setUsersPaymentFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Payment Status</option>
                             <option value="paid">Paid</option>
@@ -541,7 +541,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersTravelersFilter}
                             onChange={(e) => setUsersTravelersFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Group Sizes</option>
                             <option value="solo">Solo (1)</option>
@@ -552,7 +552,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersMethodFilter}
                             onChange={(e) => setUsersMethodFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Payment Methods</option>
                             {paymentMethodOptions.map((method) => (
@@ -565,7 +565,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersAmountFilter}
                             onChange={(e) => setUsersAmountFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Amount Bands</option>
                             <option value="budget">Under $1000</option>
@@ -576,7 +576,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersDepartureWindowFilter}
                             onChange={(e) => setUsersDepartureWindowFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Departure Windows</option>
                             <option value="upcoming-30">Departing in 30 days</option>
@@ -588,7 +588,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={usersNationalityFilter}
                             onChange={(e) => setUsersNationalityFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Nationalities</option>
                             {nationalityOptions.map((nationality) => (
@@ -608,7 +608,7 @@ export default function BookingsManagementPage() {
                                 setUsersDepartureWindowFilter("all");
                                 setUsersNationalityFilter("all");
                             }}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] hover:bg-gray-50 transition"
                         >
                             Reset Filters
                         </button>
@@ -618,7 +618,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={toursDestinationFilter}
                             onChange={(e) => setToursDestinationFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Destinations</option>
                             {destinationOptions.map((destination) => (
@@ -631,7 +631,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={toursAvailabilityFilter}
                             onChange={(e) => setToursAvailabilityFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Availability</option>
                             <option value="available">Has Available Spots</option>
@@ -642,7 +642,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={toursPriceFilter}
                             onChange={(e) => setToursPriceFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Prices</option>
                             <option value="low">Under $1000</option>
@@ -653,7 +653,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={toursDurationFilter}
                             onChange={(e) => setToursDurationFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Durations</option>
                             <option value="short">Short (1-5 days)</option>
@@ -664,7 +664,7 @@ export default function BookingsManagementPage() {
                         <select
                             value={toursDeparturesFilter}
                             onChange={(e) => setToursDeparturesFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Departure Depth</option>
                             <option value="none">No Active Departures</option>
@@ -681,7 +681,7 @@ export default function BookingsManagementPage() {
                                 setToursDurationFilter("all");
                                 setToursDeparturesFilter("all");
                             }}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] hover:bg-gray-50 transition"
                         >
                             Reset Filters
                         </button>
@@ -692,7 +692,7 @@ export default function BookingsManagementPage() {
                     filteredUsersBookings.length === 0 ? (
                         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
                             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">No bookings found</h3>
+                            <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">No bookings found</h3>
                             <p className="text-gray-500">Try adjusting your search query.</p>
                         </div>
                     ) : (
@@ -715,13 +715,13 @@ export default function BookingsManagementPage() {
                                     <tbody className="bg-white divide-y divide-gray-100">
                                         {paginatedUsersBookings.map((booking) => (
                                             <tr key={booking._id} className="hover:bg-gray-50 transition-colors">
-                                                <td className="px-6 py-4 text-sm text-gray-900">{booking.user?.name || "N/A"}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-700">{booking.user?.email || "N/A"}</td>
+                                                <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.user?.name || "N/A"}</td>
+                                                <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.user?.email || "N/A"}</td>
                                                 <td className="px-6 py-4 text-xs font-medium text-gray-600">#{booking.bookingReference}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-700">{booking.tour?.name || "N/A"}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-700">{formatDate(booking.startDate)}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-700">{booking.numberOfTravelers}</td>
-                                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">${booking.price?.totalPrice ?? 0}</td>
+                                                <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.tour?.name || "N/A"}</td>
+                                                <td className="px-6 py-4 text-sm text-[#3F3F42]">{formatDate(booking.startDate)}</td>
+                                                <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.numberOfTravelers}</td>
+                                                <td className="px-6 py-4 text-sm font-semibold text-[#3F3F42]">${booking.price?.totalPrice ?? 0}</td>
                                                 <td className="px-6 py-4">
                                                     <span
                                                         className={`px-2.5 py-1 text-xs font-medium rounded-full ${
@@ -755,7 +755,7 @@ export default function BookingsManagementPage() {
                                     <button
                                         onClick={() => setUsersPage((prev) => Math.max(1, prev - 1))}
                                         disabled={safeUsersPage === 1}
-                                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Prev
                                     </button>
@@ -765,7 +765,7 @@ export default function BookingsManagementPage() {
                                     <button
                                         onClick={() => setUsersPage((prev) => Math.min(usersTotalPages, prev + 1))}
                                         disabled={safeUsersPage === usersTotalPages}
-                                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Next
                                     </button>
@@ -776,7 +776,7 @@ export default function BookingsManagementPage() {
                 ) : filteredTours.length === 0 ? (
                     <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
                         <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No tours found</h3>
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">No tours found</h3>
                         <p className="text-gray-500">Try adjusting your search query.</p>
                     </div>
                 ) : (
@@ -806,24 +806,24 @@ export default function BookingsManagementPage() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900">{tour.name}</div>
+                                                        <div className="text-sm font-medium text-[#3F3F42]">{tour.name}</div>
                                                         <p className="text-xs text-gray-500">{tour.tourCode}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3F3F42]">
                                                 {tour.country?.name || "Global"}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3F3F42]">
                                                 {tour.startDates.length}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-[#3F3F42]">
                                                 ${tour.price.amount}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-right">
                                                 <button
                                                     onClick={() => handleTourClick(tour)}
-                                                    className="px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                                                    className="px-3 py-2 text-xs font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors"
                                                 >
                                                     View Departures
                                                 </button>
@@ -841,7 +841,7 @@ export default function BookingsManagementPage() {
                                 <button
                                     onClick={() => setToursPage((prev) => Math.max(1, prev - 1))}
                                     disabled={safeToursPage === 1}
-                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Prev
                                 </button>
@@ -851,7 +851,7 @@ export default function BookingsManagementPage() {
                                 <button
                                     onClick={() => setToursPage((prev) => Math.min(toursTotalPages, prev + 1))}
                                     disabled={safeToursPage === toursTotalPages}
-                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Next
                                 </button>
@@ -864,12 +864,12 @@ export default function BookingsManagementPage() {
             {/* Modal 1: Dates (Check Availability Style) */}
             {isDatesModalOpen && selectedTour && (
                 <div className="fixed inset-0 z-40 flex items-center justify-center p-6">
-                    <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={() => setIsDatesModalOpen(false)}></div>
+                    <div className="absolute inset-0 bg-[#3F3F42]/30 backdrop-blur-[2px]" onClick={() => setIsDatesModalOpen(false)}></div>
                     <div className="relative bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in duration-300">
                         {/* Header */}
                         <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/40">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 truncate max-w-xl">{selectedTour.name}</h2>
+                                <h2 className="text-2xl font-bold text-[#3F3F42] truncate max-w-xl">{selectedTour.name}</h2>
                                 <p className="text-gray-500 text-sm mt-1">Select a departure date to manage guest bookings and hold spaces</p>
                             </div>
                             <button onClick={() => setIsDatesModalOpen(false)} className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors">
@@ -897,7 +897,7 @@ export default function BookingsManagementPage() {
                                                 <tr key={idx} className="hover:bg-gray-50 transition-colors">
                                                     <td className="px-6 py-4">
                                                         <div className="flex flex-col">
-                                                            <span className="text-sm font-medium text-gray-900">
+                                                            <span className="text-sm font-medium text-[#3F3F42]">
                                                                 {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                                                             </span>
                                                             <span className="text-xs text-gray-500 mt-1">
@@ -909,11 +909,11 @@ export default function BookingsManagementPage() {
                                                         {isSoldOut ? (
                                                             <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-red-50 text-red-700">Sold Out</span>
                                                         ) : (
-                                                            <span className="text-sm text-gray-700">{date.availableSpots} remaining</span>
+                                                            <span className="text-sm text-[#3F3F42]">{date.availableSpots} remaining</span>
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm font-semibold text-gray-900">${selectedTour.price.amount}</div>
+                                                        <div className="text-sm font-semibold text-[#3F3F42]">${selectedTour.price.amount}</div>
                                                         {date.discount && <div className="text-xs text-green-600 mt-1">Discount active</div>}
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
@@ -955,7 +955,7 @@ export default function BookingsManagementPage() {
                                         {bookingsTableType}
                                     </span>
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900">{formatDate(selectedDate)}</h2>
+                                <h2 className="text-2xl font-bold text-[#3F3F42]">{formatDate(selectedDate)}</h2>
                                 <p className="text-gray-500 text-sm mt-1">{selectedTour?.name}</p>
                             </div>
                             <button onClick={() => setIsBookingsModalOpen(false)} className="p-2.5 hover:bg-gray-100 rounded-lg transition-colors mt-1">
@@ -993,11 +993,11 @@ export default function BookingsManagementPage() {
                                             <tbody className="bg-white divide-y divide-gray-100">
                                                 {bookings.map((booking) => (
                                                     <tr key={booking._id} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="px-6 py-4 text-sm text-gray-900">{booking.user.name}</td>
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.user.name}</td>
                                                         <td className="px-6 py-4 text-xs font-medium text-gray-600">#{booking.bookingReference}</td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700">{booking.numberOfTravelers}</td>
-                                                        <td className="px-6 py-4 text-sm font-semibold text-gray-900">${booking.price.totalPrice}</td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700 capitalize">{booking.payment.status}</td>
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">{booking.numberOfTravelers}</td>
+                                                        <td className="px-6 py-4 text-sm font-semibold text-[#3F3F42]">${booking.price.totalPrice}</td>
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42] capitalize">{booking.payment.status}</td>
                                                         <td className="px-6 py-4">
                                                             <span
                                                                 className={`px-2.5 py-1 text-xs font-medium rounded-full ${
@@ -1045,23 +1045,23 @@ export default function BookingsManagementPage() {
                                             <tbody className="bg-white divide-y divide-gray-100">
                                                 {holds.map((hold) => (
                                                     <tr key={hold._id} className="hover:bg-gray-50 transition-colors">
-                                                        <td className="px-6 py-4 text-sm text-gray-900">{hold.user.name}</td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700">{hold.user.email}</td>
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">{hold.user.name}</td>
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">{hold.user.email}</td>
                                                         <td className="px-6 py-4">
                                                             <span
                                                                 className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                                                                     hold.status === "active"
                                                                         ? "bg-orange-50 text-orange-700"
-                                                                        : "bg-gray-100 text-gray-700"
+                                                                        : "bg-gray-100 text-[#3F3F42]"
                                                                 }`}
                                                             >
                                                                 {hold.status}
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">
                                                             {new Date(hold.expiresAt).toLocaleString()}
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-700">
+                                                        <td className="px-6 py-4 text-sm text-[#3F3F42]">
                                                             {new Date(hold.startDate).toLocaleDateString()}
                                                         </td>
                                                     </tr>

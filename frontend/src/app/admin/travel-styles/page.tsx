@@ -142,7 +142,7 @@ export default function TravelStylesPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Travel Styles</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Travel Styles</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage travel styles for your tours ({travelStyles.length} total)
                         </p>
@@ -203,7 +203,7 @@ export default function TravelStylesPage() {
                                 d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
                             />
                         </svg>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">
                             {searchQuery ? "No travel styles found" : "No travel styles yet"}
                         </h3>
                         <p className="text-gray-500 mb-6">
@@ -259,7 +259,7 @@ export default function TravelStylesPage() {
                                                 <div>
                                                     <Link
                                                         href={`/admin/travel-styles/${style._id}`}
-                                                        className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
+                                                        className="text-sm font-medium text-[#3F3F42] hover:text-blue-600 transition-colors"
                                                     >
                                                         {style.name}
                                                     </Link>
@@ -328,17 +328,17 @@ export default function TravelStylesPage() {
 
             {/* Add Travel Style Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-900">Add Travel Style</h2>
+                            <h2 className="text-lg font-bold text-[#3F3F42]">Add Travel Style</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <form onSubmit={handleCreateStyle} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
                                 <input
                                     type="text"
                                     value={newShortDescription}
@@ -348,7 +348,7 @@ export default function TravelStylesPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Brand Color</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="color"
@@ -366,7 +366,7 @@ export default function TravelStylesPage() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">URL</label>
                                 <input
                                     type="text"
                                     value={newUrl}
@@ -376,7 +376,7 @@ export default function TravelStylesPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Travel Style Name <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Travel Style Name <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     required
@@ -390,7 +390,7 @@ export default function TravelStylesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>

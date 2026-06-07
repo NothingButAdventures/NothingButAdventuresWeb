@@ -384,7 +384,7 @@ export default function LocationPage() {
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Destination Management</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Destination Management</h1>
                         <p className="text-gray-500 text-sm mt-1">Manage continents and countries for your tours ({continents.length} continents)</p>
                     </div>
                     <button
@@ -405,7 +405,7 @@ export default function LocationPage() {
                             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Icons.Globe className="w-8 h-8" />
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">No continents found</h3>
+                            <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">No continents found</h3>
                             <p className="text-gray-500 mb-8 max-w-sm mx-auto">Start by adding a continent to begin organizing your tour destinations.</p>
                             <button
                                 onClick={() => setIsContinentModalOpen(true)}
@@ -437,7 +437,7 @@ export default function LocationPage() {
                                             )}
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                                            <h3 className="text-sm font-medium text-[#3F3F42] flex items-center gap-2">
                                                 {continent.name}
                                                 <span className="text-xs font-normal text-gray-500">
                                                     ({continent.countries?.length || 0} countries)
@@ -524,7 +524,7 @@ export default function LocationPage() {
                                                                 </div>
                                                                 <div className="min-w-0">
                                                                     <div className="flex items-center gap-2 flex-wrap">
-                                                                        <h5 className="font-semibold text-gray-900 truncate">{country.name}</h5>
+                                                                        <h5 className="font-semibold text-[#3F3F42] truncate">{country.name}</h5>
                                                                         <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                                                                             {country.code}
                                                                         </span>
@@ -583,7 +583,7 @@ export default function LocationPage() {
                                                                                 className="flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
                                                                             >
                                                                                 <div className="min-w-0">
-                                                                                    <p className="font-semibold text-gray-900 truncate">{destination.name}</p>
+                                                                                    <p className="font-semibold text-[#3F3F42] truncate">{destination.name}</p>
                                                                                     <p className="text-sm text-gray-500 mt-1">
                                                                                         {destination.description || "No description added yet."}
                                                                                     </p>
@@ -657,10 +657,10 @@ export default function LocationPage() {
 
             {/* Add / Edit Destination Modal */}
             {isDestinationModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 bg-gray-50/95 backdrop-blur z-10">
-                            <h2 className="text-lg font-bold text-gray-900">
+                            <h2 className="text-lg font-bold text-[#3F3F42]">
                                 {editingDestinationId ? "Edit Destination" : "Add Destination"}
                             </h2>
                             <button onClick={closeDestinationModal} className="text-gray-400 hover:text-gray-600 transition-colors">
@@ -669,7 +669,7 @@ export default function LocationPage() {
                         </div>
                         <form onSubmit={handleSaveDestination} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Destination / City Name</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Destination / City Name</label>
                                 <input
                                     type="text"
                                     required
@@ -680,7 +680,7 @@ export default function LocationPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Description</label>
                                 <textarea
                                     value={newDestinationData.description}
                                     onChange={(e) => setNewDestinationData({ ...newDestinationData, description: e.target.value })}
@@ -692,7 +692,7 @@ export default function LocationPage() {
                                 <button
                                     type="button"
                                     onClick={closeDestinationModal}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>
@@ -710,17 +710,17 @@ export default function LocationPage() {
 
             {/* Add Continent Modal */}
             {isContinentModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-900">Add New Continent</h2>
+                            <h2 className="text-lg font-bold text-[#3F3F42]">Add New Continent</h2>
                             <button onClick={() => setIsContinentModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <form onSubmit={handleCreateContinent} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Continent Name</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Continent Name</label>
                                 <input
                                     type="text"
                                     required
@@ -734,7 +734,7 @@ export default function LocationPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsContinentModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>
@@ -752,10 +752,10 @@ export default function LocationPage() {
 
             {/* Add Country Modal */}
             {isCountryModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 bg-gray-50/95 backdrop-blur z-10">
-                            <h2 className="text-lg font-bold text-gray-900">Add Country</h2>
+                            <h2 className="text-lg font-bold text-[#3F3F42]">Add Country</h2>
                             <button onClick={() => setIsCountryModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
@@ -763,7 +763,7 @@ export default function LocationPage() {
                         <form onSubmit={handleCreateCountry} className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country Name <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">Country Name <span className="text-red-500">*</span></label>
                                     <input
                                         type="text"
                                         required
@@ -774,7 +774,7 @@ export default function LocationPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country Code (2 chars)</label>
+                                    <label className="block text-sm font-medium text-[#3F3F42] mb-1">Country Code (2 chars)</label>
                                     <input
                                         type="text"
                                         maxLength={2}
@@ -787,7 +787,7 @@ export default function LocationPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
                                 <input
                                     type="text"
                                     maxLength={200}
@@ -799,7 +799,7 @@ export default function LocationPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Full Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Full Description</label>
                                 <textarea
                                     value={newCountryData.description}
                                     onChange={(e) => setNewCountryData({ ...newCountryData, description: e.target.value })}
@@ -848,7 +848,7 @@ export default function LocationPage() {
                                 <button
                                     type="button"
                                     onClick={() => setIsCountryModalOpen(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
+                                    className="px-4 py-2 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm"
                                 >
                                     Cancel
                                 </button>

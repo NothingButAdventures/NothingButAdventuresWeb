@@ -233,14 +233,14 @@ export default function EditDiscountPage() {
                                 <Icons.Back className="w-5 h-5" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-gray-900">Edit Discount</h1>
+                                <h1 className="text-xl font-bold text-[#3F3F42]">Edit Discount</h1>
                                 <p className="text-sm text-gray-500">Update details for {discount.name}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 transition shadow-lg"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] disabled:opacity-50 transition shadow-lg"
                         >
                             {saving ? (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -261,7 +261,7 @@ export default function EditDiscountPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Discount Name</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Discount Name</label>
                                 <input
                                     type="text"
                                     value={name}
@@ -272,7 +272,7 @@ export default function EditDiscountPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Percentage</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Percentage</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -288,7 +288,7 @@ export default function EditDiscountPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
                                 <input
                                     type="text"
                                     value={shortDescription}
@@ -300,7 +300,7 @@ export default function EditDiscountPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Brand Color</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="color"
@@ -324,15 +324,15 @@ export default function EditDiscountPage() {
                                     id="isActive"
                                     checked={isActive}
                                     onChange={(e) => setIsActive(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-black focus:ring-black"
+                                    className="w-4 h-4 rounded border-gray-300 text-[#3F3F42] focus:ring-black"
                                 />
-                                <label htmlFor="isActive" className="text-sm text-gray-700">Active (visible in tour discount options)</label>
+                                <label htmlFor="isActive" className="text-sm text-[#3F3F42]">Active (visible in tour discount options)</label>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Icon URL (optional)</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Icon URL (optional)</label>
                                 <input
                                     type="text"
                                     value={icon}
@@ -343,7 +343,7 @@ export default function EditDiscountPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Valid From (optional)</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Valid From (optional)</label>
                                 <input
                                     type="date"
                                     value={validFrom}
@@ -353,7 +353,7 @@ export default function EditDiscountPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until (optional)</label>
+                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Valid Until (optional)</label>
                                 <input
                                     type="date"
                                     value={validUntil}
@@ -375,7 +375,7 @@ export default function EditDiscountPage() {
                         {image ? (
                             <div className="relative w-full max-w-lg aspect-video rounded-lg overflow-hidden shadow-md group">
                                 <img src={image} alt="Cover" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
+                                <div className="absolute inset-0 bg-[#3F3F42]/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-medium transition-opacity">
                                     Change Image
                                 </div>
                             </div>
@@ -393,7 +393,7 @@ export default function EditDiscountPage() {
                 {/* Editor Card */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-gray-900">Terms & Conditions</h2>
+                        <h2 className="text-lg font-semibold text-[#3F3F42]">Terms & Conditions</h2>
                         {/* Simple Toolbar */}
                         <div className="flex bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
                             <ToolbarButton
@@ -460,7 +460,7 @@ function ToolbarButton({ onClick, isActive, label, icon, bold, italic }: any) {
         <button
             onClick={onClick}
             className={`p-2 min-w-[32px] rounded-md transition text-sm font-medium flex items-center justify-center
-                ${isActive ? 'bg-black text-white' : 'text-gray-600 hover:bg-gray-100'}
+                ${isActive ? 'bg-[#3F3F42] text-white' : 'text-gray-600 hover:bg-gray-100'}
                 ${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}
             `}
         >

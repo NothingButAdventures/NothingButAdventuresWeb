@@ -406,7 +406,7 @@ export default function ProfilePage() {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Not logged in</h2>
+                    <h2 className="text-xl font-semibold text-[#3F3F42] mb-2">Not logged in</h2>
                     <Link href="/auth/login" className="text-blue-600 hover:underline">
                         Sign in to view your profile
                     </Link>
@@ -432,7 +432,7 @@ export default function ProfilePage() {
                                     </div>
                                 )}
                             </div>
-                            <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <label className="absolute inset-0 flex items-center justify-center bg-[#3F3F42]/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                                 {uploadingAvatar ? (
                                     <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                                 ) : (
@@ -488,7 +488,7 @@ export default function ProfilePage() {
                                 onClick={() => setActiveTab(tab)}
                                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors capitalize whitespace-nowrap ${activeTab === tab
                                     ? "border-blue-600 text-blue-600"
-                                    : "border-transparent text-gray-500 hover:text-gray-700"
+                                    : "border-transparent text-gray-500 hover:text-[#3F3F42]"
                                     }`}
                             >
                                 {tab === "nba club" ? "NBA Club" : tab}
@@ -506,7 +506,7 @@ export default function ProfilePage() {
                         {/* Profile Info Card */}
                         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+                                <h2 className="text-lg font-semibold text-[#3F3F42]">Personal Information</h2>
                                 <button
                                     onClick={() => setIsEditing(!isEditing)}
                                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -518,7 +518,7 @@ export default function ProfilePage() {
                             {isEditing ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">Full Name</label>
                                         <input
                                             type="text"
                                             value={editForm.name}
@@ -527,7 +527,7 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">Phone</label>
                                         <input
                                             type="tel"
                                             value={editForm.phone}
@@ -537,7 +537,7 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">Date of Birth</label>
                                         <input
                                             type="date"
                                             value={editForm.dateOfBirth}
@@ -546,7 +546,7 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">Nationality</label>
                                         <input
                                             type="text"
                                             value={editForm.nationality}
@@ -576,11 +576,11 @@ export default function ProfilePage() {
                         {/* Quick Stats Card */}
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4">Travel Stats</h2>
+                                <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">Travel Stats</h2>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-600">Total Trips</span>
-                                        <span className="font-semibold text-gray-900">{bookings.filter(b => b.status === "completed").length}</span>
+                                        <span className="font-semibold text-[#3F3F42]">{bookings.filter(b => b.status === "completed").length}</span>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-600">Upcoming</span>
@@ -588,7 +588,7 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-600">Reviews Written</span>
-                                        <span className="font-semibold text-gray-900">{reviews.length}</span>
+                                        <span className="font-semibold text-[#3F3F42]">{reviews.length}</span>
                                     </div>
                                 </div>
                             </div>
@@ -597,7 +597,7 @@ export default function ProfilePage() {
                             {bookings.length > 0 && (
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-lg font-semibold text-gray-900">Latest Booking</h2>
+                                        <h2 className="text-lg font-semibold text-[#3F3F42]">Latest Booking</h2>
                                         <button onClick={() => setActiveTab("bookings")} className="text-sm text-blue-600 hover:underline">View all</button>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -613,7 +613,7 @@ export default function ProfilePage() {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-medium text-gray-900 truncate">{bookings[0].tour.name}</h3>
+                                            <h3 className="font-medium text-[#3F3F42] truncate">{bookings[0].tour.name}</h3>
                                             <p className="text-sm text-gray-500">{formatDate(bookings[0].startDate)}</p>
                                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block mt-1 ${bookings[0].status === "confirmed" ? "bg-green-100 text-green-700" :
                                                 bookings[0].status === "pending" ? "bg-yellow-100 text-yellow-700" :
@@ -635,7 +635,7 @@ export default function ProfilePage() {
                 {activeTab === "bookings" && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-semibold text-gray-900">My Bookings</h2>
+                            <h2 className="text-lg font-semibold text-[#3F3F42]">My Bookings</h2>
                             <p className="text-sm text-gray-500 mt-1">{bookings.length} total bookings</p>
                         </div>
                         {bookings.length === 0 ? (
@@ -643,7 +643,7 @@ export default function ProfilePage() {
                                 <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <h3 className="font-medium text-gray-900 mb-1">No bookings yet</h3>
+                                <h3 className="font-medium text-[#3F3F42] mb-1">No bookings yet</h3>
                                 <p className="text-gray-500 mb-4">Start exploring our amazing trips!</p>
                                 <Link href="/trips" className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
                                     Explore Trips
@@ -672,7 +672,7 @@ export default function ProfilePage() {
                                             <div className="flex-1">
                                                 <div className="flex items-start justify-between">
                                                     <div>
-                                                        <Link href={`/trips/${booking.tour.slug}/${booking.tour.tourCode}`} className="font-semibold text-gray-900 hover:text-blue-600 transition-colors">
+                                                        <Link href={`/trips/${booking.tour.slug}/${booking.tour.tourCode}`} className="font-semibold text-[#3F3F42] hover:text-blue-600 transition-colors">
                                                             {booking.tour.name}
                                                         </Link>
                                                         <p className="text-sm text-gray-500 mt-1">
@@ -695,7 +695,7 @@ export default function ProfilePage() {
                                                         </svg>
                                                         {formatDate(booking.startDate)}
                                                     </span>
-                                                    <span className="font-semibold text-gray-900">
+                                                    <span className="font-semibold text-[#3F3F42]">
                                                         {booking.price.currency} {booking.price.totalPrice.toLocaleString()}
                                                     </span>
                                                 </div>
@@ -712,13 +712,13 @@ export default function ProfilePage() {
                 {activeTab === "hold spaces" && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-semibold text-gray-900">Hold Spaces</h2>
+                            <h2 className="text-lg font-semibold text-[#3F3F42]">Hold Spaces</h2>
                             <p className="text-sm text-gray-500 mt-1">{holdSpaces.filter(h => h.status === 'active').length} active holds</p>
                         </div>
                         {holdSpaces.length === 0 ? (
                             <div className="p-12 text-center">
                                 <div className="text-5xl mb-4">🔒</div>
-                                <h3 className="font-medium text-gray-900 mb-1">No held spaces</h3>
+                                <h3 className="font-medium text-[#3F3F42] mb-1">No held spaces</h3>
                                 <p className="text-gray-500">Hold a trip date for 48 hours without payment!</p>
                                 <button
                                     onClick={() => router.push('/search')}
@@ -757,7 +757,7 @@ export default function ProfilePage() {
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div>
-                                                            <h3 className="font-semibold text-gray-900 text-sm truncate">
+                                                            <h3 className="font-semibold text-[#3F3F42] text-sm truncate">
                                                                 {hold.tour?.name || 'Tour'}
                                                             </h3>
                                                             <p className="text-xs text-gray-500 mt-0.5">
@@ -795,7 +795,7 @@ export default function ProfilePage() {
                                                     <div className="flex items-center gap-3 mt-3">
                                                         <span className="text-xs text-gray-500">Ref: {hold.holdReference}</span>
                                                         <span className="text-xs text-gray-400">•</span>
-                                                        <span className="text-xs font-semibold text-gray-700">
+                                                        <span className="text-xs font-semibold text-[#3F3F42]">
                                                             ${hold.priceAtHold?.amount?.toLocaleString() || '—'} / person
                                                         </span>
                                                     </div>
@@ -828,7 +828,7 @@ export default function ProfilePage() {
                                                                     }
                                                                 }}
                                                                 disabled={releasingHold === hold._id}
-                                                                className="px-4 py-1.5 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
+                                                                className="px-4 py-1.5 bg-white border border-gray-300 text-[#3F3F42] text-xs font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
                                                             >
                                                                 {releasingHold === hold._id ? 'Releasing...' : 'Release Hold'}
                                                             </button>
@@ -848,7 +848,7 @@ export default function ProfilePage() {
                 {activeTab === "wishlist" && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="p-6 border-b border-gray-100">
-                            <h2 className="text-lg font-semibold text-gray-900">My Wishlist</h2>
+                            <h2 className="text-lg font-semibold text-[#3F3F42]">My Wishlist</h2>
                             <p className="text-sm text-gray-500 mt-1">{wishlist.length} saved tours</p>
                         </div>
                         {wishlist.length === 0 ? (
@@ -866,7 +866,7 @@ export default function ProfilePage() {
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                                     />
                                 </svg>
-                                <h3 className="font-medium text-gray-900 mb-1">Your wishlist is empty</h3>
+                                <h3 className="font-medium text-[#3F3F42] mb-1">Your wishlist is empty</h3>
                                 <p className="text-gray-500 mb-4">Start exploring our tours to find your dream adventure!</p>
                                 <Link
                                     href="/tours"
@@ -927,7 +927,7 @@ export default function ProfilePage() {
                                                     </div>
 
                                                     {/* Tour Name */}
-                                                    <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                                                    <h3 className="text-base font-bold text-[#3F3F42] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
                                                         {tour.name}
                                                     </h3>
 
@@ -936,7 +936,7 @@ export default function ProfilePage() {
 
                                                     {/* Price Section */}
                                                     <div className="flex items-baseline gap-1.5 mb-3">
-                                                        <span className="text-lg font-bold text-gray-900">
+                                                        <span className="text-lg font-bold text-[#3F3F42]">
                                                             ${Math.round(discountedPrice)}
                                                         </span>
                                                         <span className="text-xs text-gray-500">per person</span>
@@ -962,7 +962,7 @@ export default function ProfilePage() {
                     activeTab === "reviews" && (
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                             <div className="p-6 border-b border-gray-100">
-                                <h2 className="text-lg font-semibold text-gray-900">My Reviews</h2>
+                                <h2 className="text-lg font-semibold text-[#3F3F42]">My Reviews</h2>
                                 <p className="text-sm text-gray-500 mt-1">{reviews.length} reviews written</p>
                             </div>
                             {reviews.length === 0 ? (
@@ -970,7 +970,7 @@ export default function ProfilePage() {
                                     <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                                     </svg>
-                                    <h3 className="font-medium text-gray-900 mb-1">No reviews yet</h3>
+                                    <h3 className="font-medium text-[#3F3F42] mb-1">No reviews yet</h3>
                                     <p className="text-gray-500">Complete a tour to leave a review!</p>
                                 </div>
                             ) : (
@@ -978,7 +978,7 @@ export default function ProfilePage() {
                                     {reviews.map((review) => (
                                         <div key={review._id} className="p-6">
                                             <div className="flex items-start justify-between mb-3">
-                                                <Link href={`/trips/${review.tour.slug}/${review.tour.tourCode}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                                                <Link href={`/trips/${review.tour.slug}/${review.tour.tourCode}`} className="font-medium text-[#3F3F42] hover:text-blue-600 transition-colors">
                                                     {review.tour.name}
                                                 </Link>
                                                 <div className="flex items-center gap-1">
@@ -1066,7 +1066,7 @@ export default function ProfilePage() {
                                                 </div>
 
                                                 {/* Progress Bar */}
-                                                <div className="h-4 bg-gray-700/50 rounded-full overflow-hidden mb-2 border border-white/10">
+                                                <div className="h-4 bg-[#3F3F42]/50 rounded-full overflow-hidden mb-2 border border-white/10">
                                                     <div
                                                         className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-amber-500 transition-all duration-1000 ease-out relative"
                                                         style={{ width: `${Math.min(100, Math.max(0, nextLevel ? ((completedTours / nextLevel.min) * 100) : 100))}%` }}
@@ -1092,7 +1092,7 @@ export default function ProfilePage() {
                                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                         <span className="text-6xl">🥈</span>
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Silver Traveler</h3>
+                                    <h3 className="text-lg font-bold text-[#3F3F42] mb-1">Silver Traveler</h3>
                                     <p className="text-sm text-blue-600 font-semibold mb-4">4-9 Tours</p>
                                     <ul className="space-y-3">
                                         <li className="flex items-center text-sm text-gray-600">
@@ -1111,7 +1111,7 @@ export default function ProfilePage() {
                                         <span className="text-6xl">🥇</span>
                                     </div>
                                     <div className="absolute -top-3 -right-3 bg-amber-500 text-white text-[10px] font-bold px-3 py-1 rotate-12 shadow-sm">POPULAR</div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-1">Gold Explorer</h3>
+                                    <h3 className="text-lg font-bold text-[#3F3F42] mb-1">Gold Explorer</h3>
                                     <p className="text-sm text-amber-600 font-semibold mb-4">10-14 Tours</p>
                                     <ul className="space-y-3">
                                         <li className="flex items-center text-sm text-gray-600">
@@ -1129,7 +1129,7 @@ export default function ProfilePage() {
                                     </ul>
                                 </div>
 
-                                <div className="bg-gray-900 text-white rounded-2xl p-6 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
+                                <div className="bg-[#3F3F42] text-white rounded-2xl p-6 shadow-sm relative overflow-hidden group hover:-translate-y-1 transition-transform">
                                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                         <span className="text-6xl">💎</span>
                                     </div>
@@ -1188,17 +1188,17 @@ export default function ProfilePage() {
                     activeTab === "settings" && (
                         <div className="max-w-2xl">
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                                <h2 className="text-lg font-semibold text-gray-900 mb-4">Account Settings</h2>
+                                <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">Account Settings</h2>
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between py-3 border-b border-gray-100">
                                         <div>
-                                            <h3 className="font-medium text-gray-900">Email Address</h3>
+                                            <h3 className="font-medium text-[#3F3F42]">Email Address</h3>
                                             <p className="text-sm text-gray-500">{user.email}</p>
                                         </div>
                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Verified</span>
                                     </div>
                                     <div className="py-3">
-                                        <h3 className="font-medium text-gray-900 mb-4">Change Password</h3>
+                                        <h3 className="font-medium text-[#3F3F42] mb-4">Change Password</h3>
                                         <div className="space-y-3">
                                             <input
                                                 type="password"
@@ -1224,7 +1224,7 @@ export default function ProfilePage() {
                                             <button
                                                 onClick={handlePasswordChange}
                                                 disabled={changingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
-                                                className="w-full bg-gray-900 hover:bg-black text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                                                className="w-full bg-[#3F3F42] hover:bg-[#3F3F42] text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                                             >
                                                 {changingPassword ? "Updating..." : "Update Password"}
                                             </button>
@@ -1262,7 +1262,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center py-2">
             <span className="text-sm text-gray-500 w-32 flex-shrink-0">{label}</span>
-            <span className="text-gray-900 font-medium">{value}</span>
+            <span className="text-[#3F3F42] font-medium">{value}</span>
         </div>
     );
 }

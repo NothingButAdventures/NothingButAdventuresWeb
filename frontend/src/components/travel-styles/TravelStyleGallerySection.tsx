@@ -11,8 +11,8 @@ function Tile({ src, alt, className }: { src: string; alt: string; className: st
 export default function TravelStyleGallerySection() {
   return (
     <section className="mt-16 md:mt-20">
-      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">5 Reasons</span>
-      <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">Why Local Living Adv.</h2>
+      <span className="inline-flex rounded-full bg-[#e9ecf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">5 Reasons</span>
+      <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">Why Local Living Adv.</h2>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:hidden">
         <div className="relative col-span-2 h-[270px] overflow-hidden rounded-[14px]">

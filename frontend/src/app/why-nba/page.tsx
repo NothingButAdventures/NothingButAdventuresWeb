@@ -9,10 +9,10 @@ export default function WhyNBAPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             {/* Left Column */}
             <div className="flex flex-col items-start">
-              <span className="bg-[#EAEAEA] text-gray-700 text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
+              <span className="bg-[#EAEAEA] text-[#3F3F42] text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
                 Popular Tours
               </span>
-              <h1 className="text-[44px] md:text-[56px] lg:text-[64px] font-medium leading-[1.15] text-[#111]">
+              <h1 className="text-[44px] md:text-[56px] lg:text-[64px] font-medium leading-[1.15] text-[#3F3F42]">
                 About our community
                 <br />
                 Travel the World
@@ -24,7 +24,7 @@ export default function WhyNBAPage() {
             {/* Right Column (Text Box) */}
             <div className="flex flex-col items-start lg:pt-16 w-full">
               <div className="bg-[#F6F9FD] rounded-2xl p-8 flex flex-col w-full mb-6">
-                <div className="text-[17px] leading-[1.6] text-[#4A4A4A]">
+                <div className="text-[17px] leading-[1.6] text-[#3F3F42]">
                   Changing the world through travel: that's been our goal since
                   1990. Sure, call us dreamers (wouldn't be the first time), but that
                   idea has been at the heart of everything we've ever done and has
@@ -32,10 +32,10 @@ export default function WhyNBAPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button className="bg-[#111] hover:bg-black text-white px-7 py-3 rounded-full text-[15px] font-medium transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white px-7 py-3 rounded-full text-[15px] font-medium transition-colors">
                   Read More
                 </button>
-                <button className="bg-[#111] hover:bg-black text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">
+                <button className="bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-12 h-12 rounded-full flex items-center justify-center transition-colors">
                   <ArrowUpRight className="w-5 h-5" />
                 </button>
               </div>
@@ -55,16 +55,16 @@ export default function WhyNBAPage() {
           <div className="mt-24 md:mt-32 grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 items-start">
             {/* First Column (Text) */}
             <div className="flex flex-col items-start">
-              <span className="bg-[#EAEAEA] text-gray-700 text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
+              <span className="bg-[#EAEAEA] text-[#3F3F42] text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
                 Popular Tours
               </span>
-              <h2 className="text-[40px] md:text-[48px] font-medium leading-[1.2] text-[#111] mb-6">
+              <h2 className="text-[40px] md:text-[48px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
                 H1 heading
               </h2>
-              <p className="text-[18px] text-[#333] mb-8 leading-[1.5]">
+              <p className="text-[18px] text-[#3F3F42] mb-8 leading-[1.5]">
                 Changing the world through travel: that's been our goal.
               </p>
-              <div className="bg-[#F6F9FD] rounded-2xl p-6 md:p-8 text-[#4A4A4A] text-[15px] leading-[1.6]">
+              <div className="bg-[#F6F9FD] rounded-2xl p-6 md:p-8 text-[#3F3F42] text-[15px] leading-[1.6]">
                 Changing the world through travel: that's been our
                 goal.Changing the world through travel: that's been our
                 goal.Changing the world at's been our through travel: that's
@@ -85,7 +85,7 @@ export default function WhyNBAPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="text-[#333] text-[15px] pl-2 font-medium">
+              <p className="text-[#3F3F42] text-[15px] pl-2 font-medium">
                 Changing the world through travel
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function WhyNBAPage() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="text-[#333] text-[15px] pl-2 font-medium">
+              <p className="text-[#3F3F42] text-[15px] pl-2 font-medium">
                 Changing the world through travel
               </p>
             </div>
@@ -111,13 +111,13 @@ export default function WhyNBAPage() {
       <div className="w-full bg-[#F6F9FD] py-20 md:py-32 px-4 md:px-8 mt-24">
         {/* Header */}
         <div className="flex flex-col items-start mb-16 md:mb-24 max-w-4xl mx-auto md:mx-0">
-          <span className="bg-[#EAEAEA] text-gray-700 text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
+          <span className="bg-[#EAEAEA] text-[#3F3F42] text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
             Popular Tours
           </span>
-          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.2] text-[#111] mb-6">
+          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
             What Makes us Different
           </h2>
-          <p className="text-[18px] text-[#333] leading-[1.6]">
+          <p className="text-[18px] text-[#3F3F42] leading-[1.6]">
             Changing the world through travel: that's been our goal since 1990.Changing the world through travel:
           </p>
         </div>
@@ -155,10 +155,10 @@ export default function WhyNBAPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[28px] md:text-[32px] font-medium text-[#111] leading-[1.3]">
+                  <h3 className="text-[28px] md:text-[32px] font-medium text-[#3F3F42] leading-[1.3]">
                     {feature.title}
                   </h3>
-                  <p className="text-[16px] text-[#4A4A4A] leading-[1.6]">
+                  <p className="text-[16px] text-[#3F3F42] leading-[1.6]">
                     {feature.description}
                   </p>
                 </div>
@@ -197,10 +197,10 @@ export default function WhyNBAPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-4">
-                  <h3 className="text-[28px] md:text-[32px] font-medium text-[#111] leading-[1.3]">
+                  <h3 className="text-[28px] md:text-[32px] font-medium text-[#3F3F42] leading-[1.3]">
                     {feature.title}
                   </h3>
-                  <p className="text-[16px] text-[#4A4A4A] leading-[1.6]">
+                  <p className="text-[16px] text-[#3F3F42] leading-[1.6]">
                     {feature.description}
                   </p>
                 </div>
@@ -214,13 +214,13 @@ export default function WhyNBAPage() {
       <div className="w-full bg-white py-20 md:py-32 px-4 md:px-8">
         {/* Header */}
         <div className="flex flex-col items-start mb-12 max-w-4xl mx-auto md:mx-0">
-          <span className="bg-[#EAEAEA] text-gray-700 text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
+          <span className="bg-[#EAEAEA] text-[#3F3F42] text-[14px] px-5 py-2 rounded-full mb-8 font-medium">
             Popular Tours
           </span>
-          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.2] text-[#111] mb-6">
+          <h2 className="text-[40px] md:text-[56px] font-medium leading-[1.2] text-[#3F3F42] mb-6">
             Good Karma
           </h2>
-          <p className="text-[18px] text-[#333] leading-[1.6]">
+          <p className="text-[18px] text-[#3F3F42] leading-[1.6]">
             Changing the world through travel: that's been our goal since 1990.Changing the world through travel:
           </p>
         </div>
@@ -233,9 +233,9 @@ export default function WhyNBAPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           {[1, 2, 3].map((item) => (
             <div key={item} className="bg-[#F8F9FA] rounded-2xl p-8 md:p-10 flex flex-col items-start gap-4">
-              <Sprout className="w-16 h-16 text-[#111] mb-2" strokeWidth={1} />
-              <h3 className="text-[20px] font-semibold text-[#111]">Tree Plantation</h3>
-              <p className="text-[15px] text-[#4A4A4A] leading-[1.6]">
+              <Sprout className="w-16 h-16 text-[#3F3F42] mb-2" strokeWidth={1} />
+              <h3 className="text-[20px] font-semibold text-[#3F3F42]">Tree Plantation</h3>
+              <p className="text-[15px] text-[#3F3F42] leading-[1.6]">
                 Tree plantation restores ecosystems, improves air quality, combats climate change, supports biodiversity, conserves water, enriches soil, and builds a healthier future.Tree plantation restores ecosystems, improves air quality, combats climate change, supports biodiversity, conserves water, enriches soil, and builds a healthier future.
               </p>
             </div>
@@ -249,7 +249,7 @@ export default function WhyNBAPage() {
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2000&auto=format&fit=crop')" }}
       >
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/40 z-0"></div>
+        <div className="absolute inset-0 bg-[#3F3F42]/40 z-0"></div>
 
         {/* Content Container */}
         <div className="relative z-10 w-full max-w-7xl mx-auto h-full px-4 md:px-8 py-30 md:py-40 flex flex-col">
@@ -293,10 +293,10 @@ export default function WhyNBAPage() {
 
             {/* Buttons */}
             <div className="flex justify-end items-center gap-3 mt-4 md:mt-8">
-              <button className="bg-white hover:bg-gray-100 text-black px-7 py-3 rounded-full text-[15px] font-medium transition-colors shadow-sm">
+              <button className="bg-white hover:bg-gray-100 text-[#3F3F42] px-7 py-3 rounded-full text-[15px] font-medium transition-colors shadow-sm">
                 View all Tours
               </button>
-              <button className="bg-white hover:bg-gray-100 text-black w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-sm">
+              <button className="bg-white hover:bg-gray-100 text-[#3F3F42] w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-sm">
                 <ArrowUpRight className="w-5 h-5" />
               </button>
             </div>

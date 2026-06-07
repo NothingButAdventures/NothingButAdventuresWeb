@@ -289,7 +289,7 @@ export default function UsersPage() {
             <div className="bg-white border-b border-gray-200">
                 <div className="px-8 py-6 flex items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Users Management</h1>
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">Users Management</h1>
                         <p className="text-gray-500 text-sm mt-1">
                             Manage roles, status, and verification for all platform users
                         </p>
@@ -297,7 +297,7 @@ export default function UsersPage() {
                     <button
                         onClick={() => void loadData(true)}
                         disabled={refreshing}
-                        className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-lg transition inline-flex items-center gap-2 disabled:opacity-60"
+                        className="bg-white border border-gray-200 hover:bg-gray-50 text-[#3F3F42] font-medium py-2.5 px-4 rounded-lg transition inline-flex items-center gap-2 disabled:opacity-60"
                     >
                         <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
                         Refresh
@@ -323,7 +323,7 @@ export default function UsersPage() {
                         <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
                             <ShieldCheck className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+                        <p className="text-2xl font-bold text-[#3F3F42]">{users.length}</p>
                         <p className="text-sm text-gray-500 mt-1">Total users</p>
                     </div>
 
@@ -331,7 +331,7 @@ export default function UsersPage() {
                         <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
                             <UserCheck className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{activeUsersCount}</p>
+                        <p className="text-2xl font-bold text-[#3F3F42]">{activeUsersCount}</p>
                         <p className="text-sm text-gray-500 mt-1">Active users</p>
                     </div>
 
@@ -339,7 +339,7 @@ export default function UsersPage() {
                         <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
                             <ShieldCheck className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{verifiedUsersCount}</p>
+                        <p className="text-2xl font-bold text-[#3F3F42]">{verifiedUsersCount}</p>
                         <p className="text-sm text-gray-500 mt-1">Email verified</p>
                     </div>
 
@@ -347,7 +347,7 @@ export default function UsersPage() {
                         <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mb-3">
                             <UserX className="w-5 h-5" />
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{users.length - activeUsersCount}</p>
+                        <p className="text-2xl font-bold text-[#3F3F42]">{users.length - activeUsersCount}</p>
                         <p className="text-sm text-gray-500 mt-1">Inactive users</p>
                     </div>
                 </div>
@@ -368,7 +368,7 @@ export default function UsersPage() {
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Roles</option>
                             {roleOptions.map((role) => (
@@ -381,7 +381,7 @@ export default function UsersPage() {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Status</option>
                             <option value="active">Active</option>
@@ -391,7 +391,7 @@ export default function UsersPage() {
                         <select
                             value={verificationFilter}
                             onChange={(e) => setVerificationFilter(e.target.value)}
-                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                            className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
                         >
                             <option value="all">All Verification</option>
                             <option value="verified">Verified</option>
@@ -404,7 +404,7 @@ export default function UsersPage() {
                             <div className="w-14 h-14 rounded-full bg-gray-100 mx-auto mb-4 flex items-center justify-center">
                                 <Search className="w-6 h-6 text-gray-400" />
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900">No users found</h3>
+                            <h3 className="text-lg font-semibold text-[#3F3F42]">No users found</h3>
                             <p className="text-sm text-gray-500 mt-1">Adjust your filters or search query.</p>
                         </div>
                     ) : (
@@ -434,7 +434,7 @@ export default function UsersPage() {
                                                         onClick={() => setSelectedUser(user)}
                                                         className="text-left group"
                                                     >
-                                                        <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                        <p className="text-sm font-semibold text-[#3F3F42] group-hover:text-blue-600 transition-colors">
                                                             {user.name}
                                                         </p>
                                                         <p className="text-xs text-gray-500">{user.email}</p>
@@ -447,7 +447,7 @@ export default function UsersPage() {
                                                         onChange={(e) =>
                                                             void handleRoleUpdate(user._id, e.target.value as UserRole)
                                                         }
-                                                        className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:opacity-70"
+                                                        className="px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-[#3F3F42] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 disabled:opacity-70"
                                                     >
                                                         {roleOptions.map((role) => (
                                                             <option key={role.value} value={role.value}>
@@ -457,7 +457,7 @@ export default function UsersPage() {
                                                     </select>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm text-gray-700">{user.phone || "-"}</p>
+                                                    <p className="text-sm text-[#3F3F42]">{user.phone || "-"}</p>
                                                     <p className="text-xs text-gray-500">{user.nationality || "Unknown"}</p>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -482,7 +482,7 @@ export default function UsersPage() {
                                                         {isActive ? "Active" : "Inactive"}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#3F3F42]">
                                                     {new Date(user.createdAt).toLocaleDateString("en-US", {
                                                         month: "short",
                                                         day: "numeric",
@@ -493,7 +493,7 @@ export default function UsersPage() {
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             onClick={() => setSelectedUser(user)}
-                                                            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition"
+                                                            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-[#3F3F42] hover:bg-gray-50 transition"
                                                         >
                                                             View
                                                         </button>
@@ -530,7 +530,7 @@ export default function UsersPage() {
                             <button
                                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                                 disabled={safePage === 1}
-                                className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 bg-white text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50"
                             >
                                 Prev
                             </button>
@@ -540,7 +540,7 @@ export default function UsersPage() {
                             <button
                                 onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                                 disabled={safePage === totalPages}
-                                className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 bg-white text-[#3F3F42] hover:bg-gray-50 disabled:opacity-50"
                             >
                                 Next
                             </button>
@@ -550,31 +550,31 @@ export default function UsersPage() {
 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
                     <div className="bg-white rounded-xl border border-gray-200 p-6 xl:col-span-2">
-                        <h2 className="text-base font-semibold text-gray-900 mb-4">Role Distribution</h2>
+                        <h2 className="text-base font-semibold text-[#3F3F42] mb-4">Role Distribution</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {roleOptions.map((role) => (
                                 <div key={role.value} className="rounded-lg border border-gray-100 bg-gray-50 p-4">
                                     <p className="text-xs uppercase tracking-wider text-gray-500">{role.label}</p>
-                                    <p className="text-xl font-bold text-gray-900 mt-1">{roleCounts[role.value] || 0}</p>
+                                    <p className="text-xl font-bold text-[#3F3F42] mt-1">{roleCounts[role.value] || 0}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
 
                     <div className="bg-white rounded-xl border border-gray-200 p-6">
-                        <h2 className="text-base font-semibold text-gray-900 mb-4">Global Activity</h2>
+                        <h2 className="text-base font-semibold text-[#3F3F42] mb-4">Global Activity</h2>
                         <div className="space-y-3 text-sm">
                             <div className="flex items-center justify-between">
                                 <span className="text-gray-500">Total bookings</span>
-                                <span className="font-semibold text-gray-900">{stats?.totalBookings ?? 0}</span>
+                                <span className="font-semibold text-[#3F3F42]">{stats?.totalBookings ?? 0}</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-gray-500">Total reviews</span>
-                                <span className="font-semibold text-gray-900">{stats?.totalReviews ?? 0}</span>
+                                <span className="font-semibold text-[#3F3F42]">{stats?.totalReviews ?? 0}</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-gray-500">Backend total users</span>
-                                <span className="font-semibold text-gray-900">{stats?.totalUsers ?? users.length}</span>
+                                <span className="font-semibold text-[#3F3F42]">{stats?.totalUsers ?? users.length}</span>
                             </div>
                         </div>
                     </div>
@@ -582,16 +582,16 @@ export default function UsersPage() {
             </div>
 
             {selectedUser && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-end md:items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 bg-[#3F3F42]/40 flex items-end md:items-center justify-center p-4">
                     <div className="w-full max-w-lg bg-white rounded-2xl border border-gray-200 shadow-xl overflow-hidden">
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-semibold text-gray-900">User Details</h3>
+                                <h3 className="text-lg font-semibold text-[#3F3F42]">User Details</h3>
                                 <p className="text-xs text-gray-500">{selectedUser._id}</p>
                             </div>
                             <button
                                 onClick={() => setSelectedUser(null)}
-                                className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                                className="w-8 h-8 rounded-lg border border-gray-200 text-gray-500 hover:text-[#3F3F42] hover:bg-gray-50"
                             >
                                 x
                             </button>
@@ -599,20 +599,20 @@ export default function UsersPage() {
                         <div className="p-6 space-y-4">
                             <div>
                                 <p className="text-xs uppercase text-gray-500">Name</p>
-                                <p className="text-sm font-medium text-gray-900">{selectedUser.name}</p>
+                                <p className="text-sm font-medium text-[#3F3F42]">{selectedUser.name}</p>
                             </div>
                             <div>
                                 <p className="text-xs uppercase text-gray-500">Email</p>
-                                <p className="text-sm font-medium text-gray-900">{selectedUser.email}</p>
+                                <p className="text-sm font-medium text-[#3F3F42]">{selectedUser.email}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Role</p>
-                                    <p className="text-sm font-medium text-gray-900 capitalize">{selectedUser.role}</p>
+                                    <p className="text-sm font-medium text-[#3F3F42] capitalize">{selectedUser.role}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Status</p>
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <p className="text-sm font-medium text-[#3F3F42]">
                                         {selectedUser.isActive !== false ? "Active" : "Inactive"}
                                     </p>
                                 </div>
@@ -620,23 +620,23 @@ export default function UsersPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Phone</p>
-                                    <p className="text-sm font-medium text-gray-900">{selectedUser.phone || "-"}</p>
+                                    <p className="text-sm font-medium text-[#3F3F42]">{selectedUser.phone || "-"}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Nationality</p>
-                                    <p className="text-sm font-medium text-gray-900">{selectedUser.nationality || "-"}</p>
+                                    <p className="text-sm font-medium text-[#3F3F42]">{selectedUser.nationality || "-"}</p>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Email Verified</p>
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <p className="text-sm font-medium text-[#3F3F42]">
                                         {selectedUser.isEmailVerified ? "Yes" : "No"}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs uppercase text-gray-500">Wallet Balance</p>
-                                    <p className="text-sm font-medium text-gray-900">
+                                    <p className="text-sm font-medium text-[#3F3F42]">
                                         ${selectedUser.walletBalance ?? 0}
                                     </p>
                                 </div>

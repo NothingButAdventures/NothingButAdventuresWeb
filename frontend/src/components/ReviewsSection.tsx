@@ -57,10 +57,10 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
                 <div>
                     <h4 className="font-semibold text-[15px] text-gray-500 mb-0.5">{review.name}</h4>
                     <div className="flex items-center gap-2">
-                        <span className="font-bold text-[15px] text-black">{review.rating}</span>
+                        <span className="font-bold text-[15px] text-[#3F3F42]">{review.rating}</span>
                         <div className="flex gap-1">
                             {[1, 2, 3, 4, 5].map((star) => (
-                                <svg key={star} className="w-3.5 h-3.5 text-black" fill="currentColor" viewBox="0 0 20 20">
+                                <svg key={star} className="w-3.5 h-3.5 text-[#3F3F42]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                             ))}
@@ -68,7 +68,7 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
                     </div>
                 </div>
             </div>
-            <p className="text-[16px] font-medium text-black leading-[1.4]">
+            <p className="text-[16px] font-medium text-[#3F3F42] leading-[1.4]">
                 {review.review}
             </p>
         </div>
@@ -78,9 +78,9 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
 export default function ReviewsSection({
     title = "What travellers say about our tours",
     pillClasses = "bg-[#DEECFF] text-gray-500",
-    btnClasses = "bg-[#111] hover:bg-black",
+    btnClasses = "bg-[#3F3F42] hover:bg-[#3F3F42]",
     btnText = "Plan Your Trip",
-    titleClassName = "text-[32px] md:text-[40px] font-medium leading-tight text-gray-900",
+    titleClassName = "text-[32px] md:text-[40px] font-medium leading-tight text-[#3F3F42]",
 }: {
     title?: string;
     pillClasses?: string;
@@ -100,7 +100,7 @@ export default function ReviewsSection({
                     </h2>
                 </div>
                 <div className="max-w-[320px] text-right mt-6 md:mt-0">
-                    <p className="text-[15px] font-medium text-black leading-[1.4]">
+                    <p className="text-[15px] font-medium text-[#3F3F42] leading-[1.4]">
                         Enjoy journey we organise is built on trust, safety and unforgettable views
                     </p>
                 </div>
@@ -110,17 +110,17 @@ export default function ReviewsSection({
                 {/* Left Card: CTA */}
                 <div className="bg-[#f4f5f6] rounded-[24px] p-8 md:p-10 flex flex-col justify-between h-full min-h-[300px]">
                     <div className="flex items-center gap-4">
-                        <div className="flex items-baseline font-medium text-black">
+                        <div className="flex items-baseline font-medium text-[#3F3F42]">
                             <span className="text-[56px] leading-none tracking-tight">4.9</span>
                             <span className="text-[24px] text-gray-400">/5</span>
                         </div>
-                        <p className="text-[16px] font-medium text-black leading-tight max-w-[140px]">
+                        <p className="text-[16px] font-medium text-[#3F3F42] leading-tight max-w-[140px]">
                             Based on 280+ verified travlers
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-[20px] text-black font-medium leading-tight mb-6 max-w-[220px]">
+                        <p className="text-[20px] text-[#3F3F42] font-medium leading-tight mb-6 max-w-[220px]">
                             Ready to plan your own journey? Let's get started!
                         </p>
                         <div className="flex items-center gap-3 group">

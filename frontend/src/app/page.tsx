@@ -23,6 +23,20 @@ async function getFeaturedTours() {
   }
 }
 
+async function getContinents() {
+  try {
+    const res = await fetch(`${api.baseURL}${api.endpoints.continents.getAll}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) throw new Error("Failed to fetch continents");
+    const data = await res.json();
+    return data?.data?.continents || [];
+  } catch (error) {
+    console.error("Error fetching continents:", error);
+    return [];
+  }
+}
+
 async function getCountries() {
   try {
     const res = await fetch(
@@ -53,14 +67,26 @@ async function getBlogs() {
 
 export default async function Home() {
   const tours = await getFeaturedTours();
-  const countries = await getCountries();
+  const rawCountries = await getCountries();
+  const continents = await getContinents();
   const blogs = await getBlogs();
+
+  // Map country continent IDs to actual continent objects
+  const countries = rawCountries.map((country: any) => {
+    if (typeof country.continent === "string") {
+      const foundContinent = continents.find((c: any) => c._id === country.continent || c.id === country.continent);
+      if (foundContinent) {
+        return { ...country, continent: foundContinent };
+      }
+    }
+    return country;
+  });
 
   return (
     <main className="w-full mx-auto mt-2 font-sans">
       <div className="px-4 md:px-6">
         <div
-          className="relative w-full h-[calc(100vh)] min-h-[800px] md:min-h-[850px] rounded-[16px] mx-auto overflow-hidden bg-[#0d1b13] group"
+          className="relative w-full h-[calc(100vh)] min-h-[800px] md:min-h-[850px] rounded-[16px] mx-auto overflow-hidden bg-[#3F3F42] group"
         >
           {/* Background Image with Overlay */}
           <div
@@ -71,7 +97,7 @@ export default async function Home() {
               backgroundPosition: "center",
             }}
           ></div>
-          <div className="absolute inset-0 bg-black/30 z-10 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[#3F3F42]/30 z-10 pointer-events-none"></div>
 
           {/* Main Content */}
           <div className="relative z-20 h-full flex flex-col justify-center px-8 md:px-24">
@@ -86,9 +112,9 @@ export default async function Home() {
                 <input
                   type="text"
                   placeholder="Search Plans"
-                  className="w-full bg-transparent border-none outline-none text-gray-900 placeholder:text-gray-800 px-6 text-xl"
+                  className="w-full bg-transparent border-none outline-none text-[#3F3F42] placeholder:text-[#3F3F42] px-6 text-xl"
                 />
-                <button className="flex items-center justify-center w-12 h-12 mr-2 bg-transparent text-gray-900 shrink-0">
+                <button className="flex items-center justify-center w-12 h-12 mr-2 bg-transparent text-[#3F3F42] shrink-0">
                   <svg
                     className="w-6 h-6"
                     fill="none"
@@ -128,7 +154,7 @@ export default async function Home() {
 
       <section className="py-20 bg-white">
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-6xl md:text-[68px] font-medium text-black max-w-full leading-tight tracking-tight">
+          <h2 className="text-6xl md:text-[68px] font-medium text-[#3F3F42] max-w-full leading-tight tracking-tight">
             Small Group Adventures Changing<br />the way you see life and Yourself
           </h2>
 
@@ -138,7 +164,7 @@ export default async function Home() {
               <div className="mb-6 flex justify-center">
                 <img src="/ns-1.svg" className="w-[96px] h-[96px] object-contain" alt="1000s of experiences" />
               </div>
-              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
                 1000s of experiences,<br />over 100 countries
               </p>
             </div>
@@ -148,7 +174,7 @@ export default async function Home() {
               <div className="mb-6 flex justify-center">
                 <img src="/ns-2.svg" className="w-[96px] h-[96px] object-contain" alt="Shared adventures" />
               </div>
-              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
                 Shared adventures with<br />like-minded people
               </p>
             </div>
@@ -156,9 +182,9 @@ export default async function Home() {
             {/* Feature 3 */}
             <div className="flex flex-col items-center text-center md:pl-12 pt-8 md:pt-0">
               <div className="mb-6 flex justify-center">
-                <img src="/ns-3.svg" className="w-[96px] h-[96px] object-contain" alt="Creating positive change" />
+                <img src="/sss3.svg" className="w-[96px] h-[96px] object-contain" alt="Creating positive change" />
               </div>
-              <p className="text-black font-semibold text-[15px] leading-snug max-w-[280px]">
+              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
                 Creating positive change around the<br />place you visit
               </p>
             </div>

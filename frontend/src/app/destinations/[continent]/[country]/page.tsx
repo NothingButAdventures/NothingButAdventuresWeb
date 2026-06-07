@@ -93,6 +93,7 @@ interface TourCardLike {
   travelStyle?: string;
   rating?: number;
   tags?: string[];
+  interests?: string[];
   serviceLevel?: string;
   physicalRating?: {
     level: number;
@@ -251,6 +252,7 @@ function normalizeTourForCard(tour: any, index: number, countryName: string): To
     travelStyle: styleValue,
     rating: Number(tour?.ratingsAverage ?? tour?.rating ?? 4.8),
     tags: Array.isArray(tour?.tags) ? tour.tags.filter(Boolean) : [],
+    interests: Array.isArray(tour?.interests) ? tour.interests.filter(Boolean) : [],
     serviceLevel: typeof tour?.serviceLevel === "string" ? tour.serviceLevel : "",
     physicalRating: {
       level: Number(tour?.physicalRating?.level ?? 0),
@@ -512,32 +514,32 @@ export default async function CountryDestinationsPage({
     <main className="min-h-screen w-full bg-white pb-24">
       <div className="w-full px-4 py-8 md:px-8 md:py-10 lg:px-12 xl:px-16">
         {/* Breadcrumbs */}
-        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#4B5563]">
-          <Link href="/" className="hover:text-black transition-colors">
+        <nav className="mb-6 flex items-center space-x-2 text-sm text-[#3F3F42]">
+          <Link href="/" className="hover:text-[#3F3F42] transition-colors">
             Home
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <Link href="/destinations" className="hover:text-black transition-colors">
+          <Link href="/destinations" className="hover:text-[#3F3F42] transition-colors">
             Destinations
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <Link href={`/destinations/${continent}`} className="hover:text-black transition-colors capitalize">
+          <Link href={`/destinations/${continent}`} className="hover:text-[#3F3F42] transition-colors capitalize">
             {continent}
           </Link>
           <span className="text-[#9CA3AF]">/</span>
-          <span className="text-[#1F2937] font-medium">{countryName}</span>
+          <span className="text-[#3F3F42] font-medium">{countryName}</span>
         </nav>
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)] lg:items-start xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.4fr)]">
           <div className="rounded-2xl bg-[#ededed] p-7 md:p-10">
-            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#171717] md:text-[58px]">
+            <h1 className="text-balance text-[42px] font-semibold leading-[0.95] tracking-[-0.02em] text-[#3F3F42] md:text-[58px]">
               {countryName}
             </h1>
-            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3f3f3f]">
+            <p className="mt-8 max-w-[38ch] text-[18px] leading-[1.5] text-[#3F3F42]">
               {heroDescription}
             </p>
             {heroBullets.length > 0 && (
-              <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#2f2f2f]">
+              <ul className="mt-3 list-disc pl-6 text-[16px] leading-[1.5] text-[#3F3F42]">
                 {heroBullets.map((name) => (
                   <li key={name}>{name}</li>
                 ))}
@@ -545,7 +547,7 @@ export default async function CountryDestinationsPage({
             )}
             <Link
               href="/trips"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#101010] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#3F3F42] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#3F3F42]"
             >
               View all Tours
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/40 text-[11px] leading-none">↗</span>
@@ -558,10 +560,10 @@ export default async function CountryDestinationsPage({
         </section>
 
         <section className="mt-14 md:mt-16">
-          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">Popular tours</span>
+          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">Popular tours</span>
 
           <div className="mt-3">
-            <h2 className="text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">See {countryName} in your way</h2>
+            <h2 className="text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">See {countryName} in your way</h2>
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -572,7 +574,7 @@ export default async function CountryDestinationsPage({
                 </div>
               ))
             ) : (
-              <div className="col-span-full rounded-[12px] border border-[#d9dee8] bg-white px-5 py-8 text-[16px] text-[#5e6678]">
+              <div className="col-span-full rounded-[12px] border border-[#d9dee8] bg-white px-5 py-8 text-[16px] text-[#3F3F42]">
                 No tours found for this country yet.
               </div>
             )}
@@ -580,11 +582,11 @@ export default async function CountryDestinationsPage({
         </section>
 
         <section className="mt-14 md:mt-16">
-          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">Popular Activities</span>
+          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">Popular Activities</span>
 
-          <p className="mt-3 text-[20px] font-medium text-[#121b2f] md:text-[36px]">Things to do and see</p>
+          <p className="mt-3 text-[20px] font-medium text-[#3F3F42] md:text-[36px]">Things to do and see</p>
 
-          <h2 className="mt-2 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+          <h2 className="mt-2 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">
             Experiences that define {countryName}
           </h2>
 
@@ -604,23 +606,23 @@ export default async function CountryDestinationsPage({
                   <div key={activity._id} className="overflow-hidden rounded-[14px] border border-[#e0e4eb] bg-white">
                     <div className="grid grid-cols-1 md:grid-cols-2 md:items-stretch">
                       <div className="p-6 md:p-8 lg:p-10">
-                        <h3 className="text-[38px] font-semibold leading-tight text-[#121b2f] md:text-[44px]">{activity.title}</h3>
+                        <h3 className="text-[38px] font-semibold leading-tight text-[#3F3F42] md:text-[44px]">{activity.title}</h3>
 
-                        <p className="mt-4 max-w-[64ch] text-[13px] leading-[1.45] text-[#4f586b] md:text-[14px]">
+                        <p className="mt-4 max-w-[64ch] text-[13px] leading-[1.45] text-[#3F3F42] md:text-[14px]">
                           {storyDescription}
                         </p>
 
                         <div className="mt-6 flex items-center gap-3">
                           <Link
                             href="/trips"
-                            className="rounded-full bg-[#0f1117] px-6 py-3 text-[16px] font-semibold text-white transition hover:bg-black"
+                            className="rounded-full bg-[#3F3F42] px-6 py-3 text-[16px] font-semibold text-white transition hover:bg-[#3F3F42]"
                           >
                             Read Story
                           </Link>
                           <Link
                             href="/trips"
                             aria-label="Read story"
-                            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f1117] text-white transition hover:bg-black"
+                            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#3F3F42] text-white transition hover:bg-[#3F3F42]"
                           >
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 19L19 5M19 5v10M19 5H9" />
@@ -645,21 +647,21 @@ export default async function CountryDestinationsPage({
               <div className="overflow-hidden rounded-[14px] border border-[#e0e4eb] bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 md:items-stretch">
                   <div className="p-6 md:p-8 lg:p-10">
-                    <h3 className="text-[38px] font-semibold leading-tight text-[#121b2f] md:text-[44px]">Chatting with chai</h3>
+                    <h3 className="text-[38px] font-semibold leading-tight text-[#3F3F42] md:text-[44px]">Chatting with chai</h3>
 
-                    <p className="mt-4 max-w-[64ch] text-[13px] leading-[1.45] text-[#4f586b] md:text-[14px]">
+                    <p className="mt-4 max-w-[64ch] text-[13px] leading-[1.45] text-[#3F3F42] md:text-[14px]">
                       Immersive travel is about experiencing a destination through the eys of a Local. It&apos;s eating at Family restaurants,
                       Learning traditions crafts, and sleeping in authentic accommodations that tells stories. It&apos;s eating at Family
                       restaurants, Learning traditions crafts, and sleeping in authentic accommodations that tells stories.
                     </p>
 
                     <div className="mt-6 flex items-center gap-3">
-                      <button className="rounded-full bg-[#0f1117] px-6 py-3 text-[16px] font-semibold text-white transition hover:bg-black">
+                      <button className="rounded-full bg-[#3F3F42] px-6 py-3 text-[16px] font-semibold text-white transition hover:bg-[#3F3F42]">
                         Read Story
                       </button>
                       <button
                         aria-label="Read story"
-                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f1117] text-white transition hover:bg-black"
+                        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#3F3F42] text-white transition hover:bg-[#3F3F42]"
                       >
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M5 19L19 5M19 5v10M19 5H9" />
@@ -688,57 +690,31 @@ export default async function CountryDestinationsPage({
               About
             </span>
 
-            <h3 className="mt-5 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+            <h3 className="mt-5 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">
               {country.bestTime?.title?.trim() || "Best Time to Travel"}
             </h3>
 
-            <p className="mt-4 text-[16px] leading-[1.4] text-[#4e5564] md:text-[22px]">
+            <p className="mt-4 text-[16px] leading-[1.4] text-[#3F3F42] md:text-[22px]">
               {country.bestTime?.subtitle?.trim() || country.bestTimeInsights?.mostPopularTime?.trim() || `Best seasons to visit ${countryName}`}
             </p>
 
             <div className="mt-14 grid grid-cols-1 gap-x-12 gap-y-12 md:grid-cols-2 xl:grid-cols-4">
               {bestTimeItems.map((item, index) => (
                 <div key={`${item.title}-${index}`}>
-                  <div className="mb-8 h-20 w-20 text-[#101114]">
-                    {index === 0 && (
-                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M2.5 7.5h9l1.3 7.6H5.4L2.5 7.5Z" />
-                        <circle cx="8.2" cy="18.2" r="1.8" strokeWidth={1.6} />
-                        <circle cx="14.4" cy="18.2" r="1.8" strokeWidth={1.6} />
-                        <circle cx="18" cy="12" r="4.1" strokeWidth={1.6} />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M18 9.7V12l1.5 1.1" />
-                      </svg>
-                    )}
-                    {index === 1 && (
-                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M7.7 13.8c0-2.8 2.3-5.1 5.1-5.1 2.6 0 4.7 1.9 5 4.3 1.2.3 2.1 1.4 2.1 2.7 0 1.6-1.3 2.9-2.9 2.9H7.4c-1.9 0-3.4-1.5-3.4-3.4 0-1.6 1.1-3 2.6-3.3.3-2.1 2.1-3.8 4.3-3.8" />
-                        <circle cx="11.8" cy="6" r="2" strokeWidth={1.6} />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M6.2 14.9v-1.2M9 14.9v-1.2M11.8 14.9v-1.2" />
-                      </svg>
-                    )}
-                    {index === 2 && (
-                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="9" cy="10" r="4.5" strokeWidth={1.6} />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M9 3.5v1.8M9 14.7v1.8M2.6 10h1.8M13.6 10h1.8M4.7 5.7l1.3 1.3M12 13l1.3 1.3M4.7 14.3l1.3-1.3" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M13.8 17.8h-4a2.8 2.8 0 0 1 0-5.7c.4 0 .8.1 1.1.2a3.5 3.5 0 0 1 6.7 1.3 2.2 2.2 0 1 1 0 4.2h-3.8" />
-                      </svg>
-                    )}
-                    {index === 3 && (
-                      <svg className="h-full w-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 7.6h18" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m3.5 7.6 3.2 2.7V7.6m3.2 0 3.2 2.7V7.6m3.2 0 3.2 2.7V7.6" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="M3 14.5h18" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.6} d="m3.5 14.5 3.2 2.7v-2.7m3.2 0 3.2 2.7v-2.7m3.2 0 3.2 2.7v-2.7" />
-                      </svg>
-                    )}
+                  <div className="mb-8 h-[120px] w-[120px] text-[#3F3F42]">
+                    <img
+                      src={`/td${index + 1}.svg`}
+                      className="h-full w-full object-contain"
+                      alt={item.title}
+                    />
                   </div>
 
-                  <p className="text-[27px] font-semibold leading-[1.08] tracking-[-0.01em] text-[#0f1730] md:text-[32px]">
+                  <p className="text-[27px] font-semibold leading-[1.08] tracking-[-0.01em] text-[#3F3F42] md:text-[32px]">
                     {item.title}
                   </p>
 
                   {item.description && (
-                    <p className="mt-3 text-[13px] leading-[1.45] text-[#545d6d] md:text-[15px]">{item.description}</p>
+                    <p className="mt-3 text-[13px] leading-[1.45] text-[#3F3F42] md:text-[15px]">{item.description}</p>
                   )}
                 </div>
               ))}
@@ -749,11 +725,11 @@ export default async function CountryDestinationsPage({
         <CountryTravelStoriesToursSection countryName={countryName} tours={tours} />
 
         <section className="mt-14 md:mt-16">
-          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">
+          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">
             {countryName} Tour
           </span>
 
-          <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+          <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">
             {countryName} Travel Stories
           </h2>
 
@@ -775,7 +751,7 @@ export default async function CountryDestinationsPage({
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/18" />
+                <div className="absolute inset-0 bg-[#3F3F42]/18" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <button
                     type="button"
@@ -794,16 +770,16 @@ export default async function CountryDestinationsPage({
 
         <ReviewsSection
           title={`What to Expect in ${countryName}`}
-          pillClasses="bg-[#DEECFF] text-[#5e6678]"
+          pillClasses="bg-[#DEECFF] text-[#3F3F42]"
           btnClasses="bg-[#42c46e] hover:bg-[#33b55e]"
           btnText="Book This Trip"
-          titleClassName="text-[40px] md:text-[56px] font-semibold leading-tight text-[#121b2f]"
+          titleClassName="text-[40px] md:text-[56px] font-semibold leading-tight text-[#3F3F42]"
         />
 
         <section className="mt-14 md:mt-16">
-          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">5 Reasons</span>
+          <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">5 Reasons</span>
 
-          <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+          <h2 className="mt-3 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">
             {countryName} Travel Stories
           </h2>
 
@@ -824,7 +800,7 @@ export default async function CountryDestinationsPage({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10" />
 
                 <div className="absolute top-6 right-6 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg transition-transform group-hover/card:scale-110">
-                  <svg className="h-5 w-5 text-black transition-transform duration-300 group-hover/card:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-5 w-5 text-[#3F3F42] transition-transform duration-300 group-hover/card:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19L19 5M19 5v10M19 5H9" />
                   </svg>
                 </div>
@@ -851,11 +827,11 @@ export default async function CountryDestinationsPage({
         <section className="mt-14 md:mt-16">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <span className="inline-flex rounded-full bg-[#0f1e38] px-4 py-1 text-[12px] font-medium text-white">Destinations</span>
-              <h2 className="mt-4 text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">Destinations you might also like</h2>
+              <span className="inline-flex rounded-full bg-[#3F3F42] px-4 py-1 text-[12px] font-medium text-white">Destinations</span>
+              <h2 className="mt-4 text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">Destinations you might also like</h2>
             </div>
 
-            <div className="hidden h-14 w-14 items-center justify-center rounded-[18px] bg-[#0a84e3] text-[28px] font-semibold text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)] md:flex">
+            <div className="hidden h-14 w-14 items-center justify-center rounded-[18px] bg-[#3F3F42] text-[28px] font-semibold text-white shadow-[0_6px_18px_rgba(0,0,0,0.18)] md:flex">
               {countryName.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -875,13 +851,13 @@ export default async function CountryDestinationsPage({
                     </div>
 
                     <div className="px-5 py-4">
-                      <h3 className="text-[36px] font-semibold leading-tight text-[#121b2f] md:text-[38px]">{item.name}</h3>
-                      <p className="mt-2 text-[16px] leading-[1.45] text-[#5f6778] md:text-[18px]">
+                      <h3 className="text-[36px] font-semibold leading-tight text-[#3F3F42] md:text-[38px]">{item.name}</h3>
+                      <p className="mt-2 text-[16px] leading-[1.45] text-[#3F3F42] md:text-[18px]">
                         40+ successful planed trips40+ successful planed trips40+ successful planed trips
                       </p>
                       <Link
                         href={item.slug ? `/destinations/${continent}/${item.slug}` : `/destinations/${continent}/${encodeURIComponent(item.name.toLowerCase())}`}
-                        className="mt-3 inline-block text-[18px] font-medium text-[#121b2f] hover:text-black/70"
+                        className="mt-3 inline-block text-[18px] font-medium text-[#3F3F42] hover:text-[#3F3F42]/70"
                       >
                         Learn More about {item.name}
                       </Link>
@@ -890,7 +866,7 @@ export default async function CountryDestinationsPage({
                 );
               })
             ) : (
-              <div className="col-span-full rounded-[14px] border border-[#d9dee8] bg-white px-5 py-8 text-[16px] text-[#5e6678]">
+              <div className="col-span-full rounded-[14px] border border-[#d9dee8] bg-white px-5 py-8 text-[16px] text-[#3F3F42]">
                 No similar destinations found in this continent.
               </div>
             )}

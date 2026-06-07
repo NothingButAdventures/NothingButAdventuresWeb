@@ -77,7 +77,7 @@ export default function WishlistPage() {
             {/* Header Section */}
             <div className="bg-gray-50 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">My Wishlist</h1>
+                    <h1 className="text-4xl font-bold text-[#3F3F42] mb-4">My Wishlist</h1>
                     <p className="text-xl text-gray-600">
                         Keep track of your dream adventures.
                     </p>
@@ -142,13 +142,13 @@ export default function WishlistPage() {
                                             <div className="p-6 flex-1 flex flex-col">
                                                 {/* Duration Badge */}
                                                 <div className="mb-3">
-                                                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                    <span className="text-xs font-bold text-[#3F3F42] uppercase tracking-wider">
                                                         {tour.duration.days} Day Trip
                                                     </span>
                                                 </div>
 
                                                 {/* Tour Name */}
-                                                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                                                <h3 className="text-lg font-bold text-[#3F3F42] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
                                                     {tour.name}
                                                 </h3>
 
@@ -157,7 +157,7 @@ export default function WishlistPage() {
 
                                                 {/* Price Section */}
                                                 <div className="flex items-baseline gap-2 mb-4">
-                                                    <span className="text-3xl font-bold text-gray-900">
+                                                    <span className="text-3xl font-bold text-[#3F3F42]">
                                                         ${Math.round(discountedPrice)}
                                                     </span>
                                                     <span className="text-sm text-gray-600">per person</span>
@@ -189,7 +189,7 @@ export default function WishlistPage() {
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                             />
                         </svg>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-xl font-semibold text-[#3F3F42] mb-2">
                             Your wishlist is empty
                         </h3>
                         <p className="text-gray-500 mb-6">

@@ -151,14 +151,14 @@ export default async function AllToursCategoriesSection() {
 
   return (
     <section className="mt-14 border-t border-[#eceff3] pt-10 md:mt-16 md:pt-12">
-      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">5 Reasons</span>
+      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">5 Reasons</span>
 
       <div className="mt-3 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <h2 className="text-[40px] font-semibold leading-tight text-[#121b2f] md:text-[56px]">
+        <h2 className="text-[40px] font-semibold leading-tight text-[#3F3F42] md:text-[56px]">
           All Tours in this Categories
         </h2>
 
-        <a href="/trips" className="text-[16px] font-semibold text-[#121b2f] underline underline-offset-4">
+        <a href="/trips" className="text-[16px] font-semibold text-[#3F3F42] underline underline-offset-4">
           View All Trips
         </a>
       </div>
@@ -170,8 +170,8 @@ export default async function AllToursCategoriesSection() {
             type="button"
             className={`rounded-full border px-4 py-1.5 text-[13px] font-medium transition ${
               index === 1
-                ? "border-[#111b31] bg-[#111b31] text-white"
-                : "border-[#cfd4dd] bg-white text-[#3f4759] hover:border-[#111b31]"
+                ? "border-[#111b31] bg-[#3F3F42] text-white"
+                : "border-[#cfd4dd] bg-white text-[#3F3F42] hover:border-[#111b31]"
             }`}
           >
             {filter}
@@ -190,7 +190,7 @@ export default async function AllToursCategoriesSection() {
         <button
           type="button"
           aria-label="Next trips"
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#464d5b] text-white"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#3F3F42] text-white"
         >
           <ArrowRight />
         </button>

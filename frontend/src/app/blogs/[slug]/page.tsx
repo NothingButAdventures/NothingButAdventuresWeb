@@ -289,7 +289,7 @@ export default function BlogPostPage({
                             />
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
+                    <h1 className="text-2xl font-bold text-[#3F3F42] mb-4">
                         {error || "Blog post not found"}
                     </h1>
                     <Link
@@ -317,7 +317,7 @@ export default function BlogPostPage({
                             Blog
                         </Link>
                         <span className="text-gray-400">/</span>
-                        <span className="text-gray-900 font-medium truncate max-w-[200px]">
+                        <span className="text-[#3F3F42] font-medium truncate max-w-[200px]">
                             {blog.title}
                         </span>
                     </nav>
@@ -340,7 +340,7 @@ export default function BlogPostPage({
                         </span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+                    <h1 className="text-4xl md:text-5xl font-bold text-[#3F3F42] leading-tight mb-6">
                         {blog.title}
                     </h1>
 
@@ -358,7 +358,7 @@ export default function BlogPostPage({
                                 )}
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-900">
+                                <p className="font-semibold text-[#3F3F42]">
                                     {blog.author.name}
                                 </p>
                                 <p className="text-sm text-gray-500">
@@ -436,20 +436,20 @@ export default function BlogPostPage({
 
                 {/* Article Content */}
                 <div
-                    className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-img:rounded-xl"
+                    className="prose prose-lg max-w-none prose-headings:text-[#3F3F42] prose-p:text-[#3F3F42] prose-a:text-blue-600 prose-img:rounded-xl"
                     dangerouslySetInnerHTML={{ __html: decodeHTML(blog.content) }}
                 />
 
                 {/* Tags */}
                 {blog.tags.length > 0 && (
                     <div className="mt-12 pt-8 border-t border-gray-200">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4">Tags</h3>
+                        <h3 className="text-sm font-semibold text-[#3F3F42] mb-4">Tags</h3>
                         <div className="flex flex-wrap gap-2">
                             {blog.tags.map((tag) => (
                                 <Link
                                     key={tag}
                                     href={`/blogs?tag=${encodeURIComponent(tag)}`}
-                                    className="bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
+                                    className="bg-gray-100 hover:bg-blue-100 text-[#3F3F42] hover:text-blue-700 px-4 py-2 rounded-full text-sm font-medium transition-colors"
                                 >
                                     {tag}
                                 </Link>
@@ -461,7 +461,7 @@ export default function BlogPostPage({
                 {/* Related Countries */}
                 {blog.relatedCountries && blog.relatedCountries.length > 0 && (
                     <div className="mt-8 pt-8 border-t border-gray-200">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                        <h3 className="text-sm font-semibold text-[#3F3F42] mb-4">
                             Destinations Mentioned
                         </h3>
                         <div className="flex flex-wrap gap-2">
@@ -481,7 +481,7 @@ export default function BlogPostPage({
                 {/* Related Tours */}
                 {blog.relatedTours && blog.relatedTours.length > 0 && (
                     <div className="mt-8 pt-8 border-t border-gray-200">
-                        <h3 className="text-lg font-bold text-gray-900 mb-6">
+                        <h3 className="text-lg font-bold text-[#3F3F42] mb-6">
                             Explore Related Trips
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -520,7 +520,7 @@ export default function BlogPostPage({
                                             )}
                                         </div>
                                         <div className="flex flex-col justify-center">
-                                            <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                            <h4 className="font-semibold text-[#3F3F42] group-hover:text-blue-600 transition-colors line-clamp-2">
                                                 {tour.name}
                                             </h4>
                                             <p className="text-lg font-bold text-blue-600 mt-1">
@@ -554,7 +554,7 @@ export default function BlogPostPage({
                         </div>
                         <div>
                             <p className="text-sm text-gray-500 mb-1">Written by</p>
-                            <h3 className="text-xl font-bold text-gray-900">
+                            <h3 className="text-xl font-bold text-[#3F3F42]">
                                 {blog.author.name}
                             </h3>
                             <p className="text-gray-600 mt-2">
@@ -570,7 +570,7 @@ export default function BlogPostPage({
             {relatedBlogs.length > 0 && (
                 <section className="bg-gray-50 py-16">
                     <div className="max-w-7xl mx-auto px-4">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-8">
+                        <h2 className="text-2xl font-bold text-[#3F3F42] mb-8">
                             More in {blog.category}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -584,7 +584,7 @@ export default function BlogPostPage({
                                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                             />
                                         </div>
-                                        <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                                        <h3 className="font-bold text-lg text-[#3F3F42] group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
                                             {related.title}
                                         </h3>
                                         <p className="text-sm text-gray-500">

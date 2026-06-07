@@ -1101,7 +1101,7 @@ export default function EditTourPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-[#3F3F42]">
             Edit Tour
           </h1>
           <p className="text-sm text-gray-600 mt-1">
@@ -1111,14 +1111,14 @@ export default function EditTourPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Basic Information
             </h2>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-[#3F3F42] mb-2">
                     Tour Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1133,7 +1133,7 @@ export default function EditTourPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Itinerary Map Image
                   </label>
                   <p className="text-xs text-gray-500 mb-2">
@@ -1195,7 +1195,7 @@ export default function EditTourPage() {
 
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Description
                   </label>
                   <textarea
@@ -1203,13 +1203,13 @@ export default function EditTourPage() {
                     value={formData.description}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="Detailed description"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Description Image
                   </label>
                   <p className="text-xs text-gray-500 mb-2">
@@ -1269,15 +1269,15 @@ export default function EditTourPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Destination <span className="text-red-500">*</span>
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowDestinationPopup(true)}
-                    className="w-full text-left px-3 py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white flex items-center justify-between shadow-sm hover:border-gray-400 transition"
+                    className="w-full text-left px-3 py-2.5 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white flex items-center justify-between shadow-sm hover:border-gray-400 transition"
                   >
-                    <span className={formData.country ? "text-gray-900 font-medium" : "text-gray-400"}>
+                    <span className={formData.country ? "text-[#3F3F42] font-medium" : "text-gray-400"}>
                       {formData.country
                         ? countries.find((c) => c._id === formData.country || c.id === formData.country)?.name || "Select destination"
                         : "Select destination"}
@@ -1290,7 +1290,7 @@ export default function EditTourPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Max Group Size
                   </label>
                   <input
@@ -1300,13 +1300,13 @@ export default function EditTourPage() {
                     onChange={handleChange}
                     min="1"
                     max="50"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="12"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Duration (Days)
                   </label>
                   <input
@@ -1315,7 +1315,7 @@ export default function EditTourPage() {
                     value={formData.durationDays}
                     onChange={handleChange}
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="7"
                   />
                 </div>
@@ -1323,7 +1323,7 @@ export default function EditTourPage() {
 
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Physical Rating{" "} <span className="text-red-500">*</span>
 
                   </label>
@@ -1332,7 +1332,7 @@ export default function EditTourPage() {
                     name="physicalRatingLevel"
                     value={formData.physicalRatingLevel}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   >
                     <option value="">Select physical rating...</option>
                     {physicalRatings.map((rating) => (
@@ -1344,7 +1344,7 @@ export default function EditTourPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Travel Style <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1352,7 +1352,7 @@ export default function EditTourPage() {
                     name="travelStyle"
                     value={formData.travelStyle}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   >
                     <option value="">Select travel style...</option>
                     {travelStyles.map((style) => (
@@ -1364,7 +1364,7 @@ export default function EditTourPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Trip Type <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1372,7 +1372,7 @@ export default function EditTourPage() {
                     name="tripType"
                     value={formData.tripType}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   >
                     <option value="">Select trip type...</option>
                     {tripTypes.map((type) => (
@@ -1384,7 +1384,7 @@ export default function EditTourPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-sm font-semibold text-[#3F3F42] mb-1">
                     Interests
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
@@ -1422,7 +1422,7 @@ export default function EditTourPage() {
                       }
                       e.target.value = "";
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white"
                   >
                     <option value="">Add interest...</option>
                     {interestsOptions
@@ -1438,7 +1438,7 @@ export default function EditTourPage() {
                 {formData.country && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                         Start City
                       </label>
                       <input
@@ -1447,13 +1447,13 @@ export default function EditTourPage() {
                         value={formData.startCity}
                         onClick={() => setShowCityPopup('start')}
                         readOnly
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 cursor-pointer"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] cursor-pointer"
                         placeholder="Select Start City"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                         End City
                       </label>
                       <input
@@ -1462,7 +1462,7 @@ export default function EditTourPage() {
                         value={formData.endCity}
                         onClick={() => setShowCityPopup('end')}
                         readOnly
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 cursor-pointer"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] cursor-pointer"
                         placeholder="Select End City"
                       />
                     </div>
@@ -1472,7 +1472,7 @@ export default function EditTourPage() {
 
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Tour Highlights (one per line)
                   </label>
                   <textarea
@@ -1480,7 +1480,7 @@ export default function EditTourPage() {
                     value={formData.highlights}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="Reach Everest Base Camp&#10;Sunrise from Kala Patthar"
                   />
                 </div>
@@ -1488,7 +1488,7 @@ export default function EditTourPage() {
 
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Transportation
                   </label>
                   <textarea
@@ -1496,13 +1496,13 @@ export default function EditTourPage() {
                     value={formData.transportation}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="Train, local bus, private vehicle, auto-rickshaw, small riverboat, plane."
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Staff &amp; Experts
                   </label>
                   <textarea
@@ -1510,7 +1510,7 @@ export default function EditTourPage() {
                     value={formData.staffExperts}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     placeholder="CEO (Chief Experience Officer) throughout, local guides."
                   />
                 </div>
@@ -1520,7 +1520,7 @@ export default function EditTourPage() {
 
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                     Age Requirements
                   </label>
                   <div className="flex items-center gap-3">
@@ -1531,7 +1531,7 @@ export default function EditTourPage() {
                         value={formData.ageMin}
                         onChange={handleChange}
                         min="0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                         placeholder="Min"
                       />
                     </div>
@@ -1543,7 +1543,7 @@ export default function EditTourPage() {
                         value={formData.ageMax}
                         onChange={handleChange}
                         min="0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                         placeholder="Max"
                       />
                     </div>
@@ -1551,7 +1551,7 @@ export default function EditTourPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-2">
                     Wifi Availability
                   </label>
                   <div className="flex items-center gap-6 mt-1">
@@ -1563,7 +1563,7 @@ export default function EditTourPage() {
                         onChange={() => setFormData({ ...formData, wifiAvailable: true })}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm text-gray-700 font-medium">Yes</span>
+                      <span className="ml-2 text-sm text-[#3F3F42] font-medium">Yes</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -1573,7 +1573,7 @@ export default function EditTourPage() {
                         onChange={() => setFormData({ ...formData, wifiAvailable: false })}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
-                      <span className="ml-2 text-sm text-gray-700 font-medium">No</span>
+                      <span className="ml-2 text-sm text-[#3F3F42] font-medium">No</span>
                     </label>
                   </div>
                 </div>
@@ -1590,7 +1590,7 @@ export default function EditTourPage() {
                       onChange={handleChange}
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
-                    <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="isFeatured" className="text-sm font-medium text-[#3F3F42]">
                       Featured Tour
                     </label>
                   </div>
@@ -1606,7 +1606,7 @@ export default function EditTourPage() {
                       onChange={(e) => setFormData(prev => ({ ...prev, ownRoomAvailable: e.target.checked }))}
                       className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                     />
-                    <label htmlFor="ownRoomAvailable" className="text-sm font-medium text-gray-700">
+                    <label htmlFor="ownRoomAvailable" className="text-sm font-medium text-[#3F3F42]">
                       Own Room (Solo Supplement) Available
                     </label>
                   </div>
@@ -1617,7 +1617,7 @@ export default function EditTourPage() {
 
           {/* Images Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Tour Images
             </h2>
 
@@ -1693,14 +1693,14 @@ export default function EditTourPage() {
                         updateImageCaption(index, e.target.value)
                       }
                       placeholder="Caption"
-                      className="w-full px-2 py-1 border border-gray-200 rounded text-sm mb-1 text-gray-900"
+                      className="w-full px-2 py-1 border border-gray-200 rounded text-sm mb-1 text-[#3F3F42]"
                     />
                     <button
                       type="button"
                       onClick={() => setImageAsPrimary(index)}
                       className={`w-full py-1 rounded text-xs transition ${img.isPrimary
                         ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-gray-100 text-[#3F3F42] hover:bg-gray-200"
                         }`}
                     >
                       {img.isPrimary ? "Primary" : "Set Primary"}
@@ -1719,12 +1719,12 @@ export default function EditTourPage() {
 
           {/* Pricing Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Pricing
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                   Base Price <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -1735,20 +1735,20 @@ export default function EditTourPage() {
                   onChange={handleChange}
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   placeholder="1299.00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                   Currency
                 </label>
                 <select
                   name="priceCurrency"
                   value={formData.priceCurrency}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
@@ -1760,14 +1760,14 @@ export default function EditTourPage() {
 
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                   Booking Type
                 </label>
                 <select
                   name="bookingType"
                   value={formData.bookingType}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                 >
                   <option value="Percentage">Percentage</option>
                   <option value="Amount">Amount</option>
@@ -1775,7 +1775,7 @@ export default function EditTourPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                   {formData.bookingType === "Percentage" ? "Booking Percentage %" : "Booking Amount"}
                 </label>
                 <input
@@ -1785,7 +1785,7 @@ export default function EditTourPage() {
                   onChange={handleChange}
                   min="0"
                   max={formData.bookingType === "Percentage" ? "100" : undefined}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   placeholder={formData.bookingType === "Percentage" ? "20" : "500"}
                 />
               </div>
@@ -1795,12 +1795,12 @@ export default function EditTourPage() {
 
           {/* Add-ons Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Add-ons
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                   Add your own room price
                 </label>
                 <input
@@ -1809,7 +1809,7 @@ export default function EditTourPage() {
                   value={formData.ownRoomPrice}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   placeholder="0"
                 />
               </div>
@@ -1820,13 +1820,13 @@ export default function EditTourPage() {
           {formData.country && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-[#3F3F42]">
                   Itinerary
                 </h2>
                 <button
                   type="button"
                   onClick={addItineraryDay}
-                  className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition"
+                  className="bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition"
                 >
                   + Add Day
                 </button>
@@ -1839,7 +1839,7 @@ export default function EditTourPage() {
                     className="border border-gray-200 rounded-lg p-6 bg-gray-50"
                   >
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-[#3F3F42]">
                         Day {day.day}
                       </h3>
                       <button
@@ -1886,7 +1886,7 @@ export default function EditTourPage() {
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                           Day Description <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -1896,12 +1896,12 @@ export default function EditTourPage() {
                           }
                           placeholder="Day description"
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-[#3F3F42] mb-1">
                           Important Note (Optional)
                         </label>
                         <textarea
@@ -1911,7 +1911,7 @@ export default function EditTourPage() {
                           }
                           placeholder="Important note (Optional)"
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white"
                         />
                       </div>
                     </div>
@@ -1920,7 +1920,7 @@ export default function EditTourPage() {
                     {(day.title ? day.title.split(",").filter(t => t.trim()).length : 0) > 0 && (
                       <div className="mb-6">
                         <div className="flex justify-between items-center mb-3">
-                          <h4 className="text-md font-semibold text-gray-800">
+                          <h4 className="text-md font-semibold text-[#3F3F42]">
                             Activities
                           </h4>
                         </div>
@@ -1932,7 +1932,7 @@ export default function EditTourPage() {
                               className="bg-white p-4 rounded border border-gray-200"
                             >
                               <div className="flex justify-between items-start mb-3">
-                                <h5 className="text-sm font-semibold text-gray-800">
+                                <h5 className="text-sm font-semibold text-[#3F3F42]">
                                   {activity.title || activity.name || `Activity #${actIndex + 1}`}
                                 </h5>
                                 <button
@@ -1956,7 +1956,7 @@ export default function EditTourPage() {
                                   }}
                                   className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
                                 >
-                                  <span className="text-sm text-gray-700">
+                                  <span className="text-sm text-[#3F3F42]">
                                     {activity.title || activity.name || "Select activity..."}
                                   </span>
                                   <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1972,7 +1972,7 @@ export default function EditTourPage() {
                         <button
                           type="button"
                           onClick={() => addActivity(dayIndex)}
-                          className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+                          className="w-full bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition mt-4"
                         >
                           + Add Activity
                         </button>
@@ -1982,7 +1982,7 @@ export default function EditTourPage() {
                     {/* Optional Activities Section */}
                     <div className="mb-6">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-md font-semibold text-gray-800">
+                        <h4 className="text-md font-semibold text-[#3F3F42]">
                           Optional Activities
                         </h4>
                       </div>
@@ -1994,7 +1994,7 @@ export default function EditTourPage() {
                             className="bg-white p-4 rounded border border-gray-200"
                           >
                             <div className="flex justify-between items-start mb-3">
-                              <h5 className="text-sm font-semibold text-gray-800">
+                              <h5 className="text-sm font-semibold text-[#3F3F42]">
                                 {optActivity.title || optActivity.name || `Optional Activity #${optIndex + 1}`}
                               </h5>
                               <button
@@ -2018,7 +2018,7 @@ export default function EditTourPage() {
                                 }}
                                 className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
                               >
-                                <span className="text-sm text-gray-700">
+                                <span className="text-sm text-[#3F3F42]">
                                   {optActivity.title || optActivity.name || "Select activity..."}
                                 </span>
                                 <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2034,7 +2034,7 @@ export default function EditTourPage() {
                       <button
                         type="button"
                         onClick={() => addOptionalActivity(dayIndex)}
-                        className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+                        className="w-full bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition mt-4"
                       >
                         + Add Optional Activity
                       </button>
@@ -2043,7 +2043,7 @@ export default function EditTourPage() {
                     {/* Accommodation Section */}
                     <div className="mb-4">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-md font-semibold text-gray-800">
+                        <h4 className="text-md font-semibold text-[#3F3F42]">
                           Accommodation
                         </h4>
                       </div>
@@ -2055,7 +2055,7 @@ export default function EditTourPage() {
                             className="bg-white p-4 rounded border border-gray-200"
                           >
                             <div className="flex justify-between items-start mb-3">
-                              <h5 className="text-sm font-medium text-gray-700">
+                              <h5 className="text-sm font-medium text-[#3F3F42]">
                                 Accommodation
                               </h5>
                             </div>
@@ -2101,7 +2101,7 @@ export default function EditTourPage() {
 
                     {/* Meals Section */}
                     <div className="mb-4">
-                      <h4 className="text-md font-semibold text-gray-800 mb-3">
+                      <h4 className="text-md font-semibold text-[#3F3F42] mb-3">
                         Meals
                       </h4>
                       <div className="flex flex-wrap gap-2">
@@ -2123,7 +2123,7 @@ export default function EditTourPage() {
                               }}
                               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
                                 ? "bg-blue-600 text-white border-blue-600"
-                                : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                                : "bg-gray-50 text-[#3F3F42] border-gray-200 hover:bg-gray-100"
                                 }`}
                             >
                               {meal}
@@ -2145,7 +2145,7 @@ export default function EditTourPage() {
               <button
                 type="button"
                 onClick={addItineraryDay}
-                className="w-full bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition mt-4"
+                className="w-full bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition mt-4"
               >
                 + Add Day
               </button>
@@ -2155,13 +2155,13 @@ export default function EditTourPage() {
           {/* Available Dates Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-[#3F3F42]">
                 Available Dates
               </h2>
               <button
                 type="button"
                 onClick={addAvailableDate}
-                className="bg-gray-900 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-800 transition"
+                className="bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition"
               >
                 + Add Date
               </button>
@@ -2174,7 +2174,7 @@ export default function EditTourPage() {
                   className="border border-gray-200 rounded-md p-4"
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-sm font-semibold text-gray-900">
+                    <h3 className="text-sm font-semibold text-[#3F3F42]">
                       Date Range #{index + 1}
                     </h3>
                     <button
@@ -2195,7 +2195,7 @@ export default function EditTourPage() {
                       }
                       max={ad.endDate || undefined}
                       placeholder="Start Date"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     />
                     <input
                       type="date"
@@ -2205,7 +2205,7 @@ export default function EditTourPage() {
                       }
                       min={ad.startDate || undefined}
                       placeholder="End Date"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-gray-900"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                     />
 
                     <select
@@ -2213,7 +2213,7 @@ export default function EditTourPage() {
                       onChange={(e) =>
                         updateAvailableDate(index, "discount", e.target.value)
                       }
-                      className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-1 focus:ring-green-600 focus:border-green-600 text-gray-900 bg-white"
+                      className="w-full px-3 py-2 border border-green-300 rounded-md text-sm focus:ring-1 focus:ring-green-600 focus:border-green-600 text-[#3F3F42] bg-white"
                     >
                       <option value="">No Discount</option>
                       {discounts.filter(d => d.isActive).map((d) => (
@@ -2239,7 +2239,7 @@ export default function EditTourPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 bg-[#3F3F42] hover:bg-[#3F3F42] text-white font-semibold py-3 px-6 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>
@@ -2253,17 +2253,17 @@ export default function EditTourPage() {
             <button
               type="button"
               onClick={() => router.push("/admin/tours-management")}
-              className="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-50 transition"
+              className="px-6 py-3 border border-gray-300 text-[#3F3F42] font-semibold rounded-md hover:bg-gray-50 transition"
             >
               Cancel
             </button>
           </div>
 
           {showCityPopup && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-gray-900">Select {showCityPopup === 'start' ? 'Start' : 'End'} City</h3>
+                  <h3 className="font-bold text-[#3F3F42]">Select {showCityPopup === 'start' ? 'Start' : 'End'} City</h3>
                   <button
                     type="button"
                     onClick={() => setShowCityPopup(null)}
@@ -2278,7 +2278,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search locations..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
                     value={locationSearch}
                     onChange={(e) => setLocationSearch(e.target.value)}
                     autoFocus
@@ -2309,7 +2309,7 @@ export default function EditTourPage() {
                             </svg>
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900 group-hover:text-blue-600">{d.name}</p>
+                            <p className="font-medium text-[#3F3F42] group-hover:text-blue-600">{d.name}</p>
                           </div>
                         </button>
                       ))}
@@ -2335,10 +2335,10 @@ export default function EditTourPage() {
           )}
 
           {showLocationPopup && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-gray-900">Select Location</h3>
+                  <h3 className="font-bold text-[#3F3F42]">Select Location</h3>
                   <button
                     type="button"
                     onClick={() => setShowLocationPopup(null)}
@@ -2353,7 +2353,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search locations..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
                     value={locationSearch}
                     onChange={(e) => setLocationSearch(e.target.value)}
                     autoFocus
@@ -2384,7 +2384,7 @@ export default function EditTourPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                           </div>
-                          <span className="font-medium text-gray-700">{d.name}</span>
+                          <span className="font-medium text-[#3F3F42]">{d.name}</span>
                         </button>
                       ))}
                     {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
@@ -2409,10 +2409,10 @@ export default function EditTourPage() {
           )}
 
           {showActivityPopup && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="font-bold text-gray-900">Select Activity</h3>
+                  <h3 className="font-bold text-[#3F3F42]">Select Activity</h3>
                   <button
                     type="button"
                     onClick={() => setShowActivityPopup(null)}
@@ -2427,7 +2427,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search activities..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-gray-900"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
                     value={activitySearch}
                     onChange={(e) => setActivitySearchInput(e.target.value)}
                     autoFocus
@@ -2473,7 +2473,7 @@ export default function EditTourPage() {
                             </svg>
                           </div>
                           <div>
-                            <span className="font-medium text-gray-700 block text-sm">{opt.title}</span>
+                            <span className="font-medium text-[#3F3F42] block text-sm">{opt.title}</span>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-xs text-gray-500 font-medium">{opt.location}</span>
                               <span className="text-xs text-gray-300">•</span>
@@ -2505,7 +2505,7 @@ export default function EditTourPage() {
                     <button
                       type="button"
                       onClick={() => setShowCreateActivityModal(true)}
-                      className="w-full text-center px-4 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition"
+                      className="w-full text-center px-4 py-2.5 bg-[#3F3F42] text-white rounded-lg text-sm font-medium hover:bg-[#3F3F42] transition"
                     >
                       + Create New Activity
                     </button>
@@ -2555,10 +2555,10 @@ export default function EditTourPage() {
 
       {/* Destination Selection Popup Modal */}
       {showDestinationPopup && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 flex flex-col max-h-[85vh]">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-lg font-bold text-gray-900">Select Destination</h2>
+              <h2 className="text-lg font-bold text-[#3F3F42]">Select Destination</h2>
               <button 
                 type="button"
                 onClick={() => setShowDestinationPopup(false)} 
@@ -2589,7 +2589,7 @@ export default function EditTourPage() {
                       <button
                         type="button"
                         onClick={() => setExpandedContinent(isExpanded ? null : id)}
-                        className="w-full px-5 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left font-medium text-gray-900"
+                        className="w-full px-5 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left font-medium text-[#3F3F42]"
                       >
                         <span>{continent.name}</span>
                         <div className="flex items-center gap-3">
@@ -2628,7 +2628,7 @@ export default function EditTourPage() {
                                   className={`px-4 py-2.5 rounded-lg border text-sm font-medium text-left transition-all ${
                                     isSelected
                                       ? "bg-blue-50 border-blue-500 text-blue-700 shadow-sm"
-                                      : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50/30"
+                                      : "bg-white border-gray-200 text-[#3F3F42] hover:border-blue-300 hover:bg-blue-50/30"
                                   }`}
                                 >
                                   {country.name}

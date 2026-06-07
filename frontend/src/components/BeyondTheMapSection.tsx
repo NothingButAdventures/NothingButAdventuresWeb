@@ -42,12 +42,12 @@ export default function BeyondTheMapSection({ blogs = [] }: BeyondTheMapSectionP
                     <div className="inline-block px-5 py-2 bg-[#DEECFF] text-gray-500 rounded-full text-[14px] font-semibold tracking-wide mb-6">
                         Blogs
                     </div>
-                    <h2 className="text-[48px] md:text-[56px] font-medium leading-[1.1] text-black">
+                    <h2 className="text-[48px] md:text-[56px] font-medium leading-[1.1] text-[#3F3F42]">
                         Beyond the Map
                     </h2>
                 </div>
                 <div className="md:pb-2">
-                    <p className="text-[17px] font-medium text-gray-800">
+                    <p className="text-[17px] font-medium text-[#3F3F42]">
                         For those who choose the long way.
                     </p>
                 </div>
@@ -99,7 +99,7 @@ export default function BeyondTheMapSection({ blogs = [] }: BeyondTheMapSectionP
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[16px] font-bold text-gray-900 leading-tight">Nothing But Adventures</span>
+                                <span className="text-[16px] font-bold text-[#3F3F42] leading-tight">Nothing But Adventures</span>
                                 <span className="text-[13px] text-gray-500 leading-tight">@nothingbadv</span>
                             </div>
                         </div>
@@ -108,11 +108,11 @@ export default function BeyondTheMapSection({ blogs = [] }: BeyondTheMapSectionP
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-6">
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[15px] font-bold text-gray-900 leading-none">300</span>
+                                    <span className="text-[15px] font-bold text-[#3F3F42] leading-none">300</span>
                                     <span className="text-[11px] text-gray-500 mt-1">Posts</span>
                                 </div>
                                 <div className="flex flex-col items-center">
-                                    <span className="text-[15px] font-bold text-gray-900 leading-none">88.7K</span>
+                                    <span className="text-[15px] font-bold text-[#3F3F42] leading-none">88.7K</span>
                                     <span className="text-[11px] text-gray-500 mt-1">Followers</span>
                                 </div>
                             </div>

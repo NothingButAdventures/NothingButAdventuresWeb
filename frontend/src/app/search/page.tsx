@@ -34,6 +34,7 @@ interface Tour {
     };
     startDates: any[];
     travelStyle: string;
+    interests?: string[];
     physicalRating: {
         level: number;
     };
@@ -79,6 +80,7 @@ function SearchContent() {
     const query = searchParams.get("s") || "";
     const selectedCountries = searchParams.get("destinations")?.split(",").filter(Boolean) || [];
     const selectedStyles = searchParams.get("styles")?.split(",").filter(Boolean) || [];
+    const selectedInterests = searchParams.get("interests")?.split(",").filter(Boolean) || [];
     const selectedDurations = searchParams.get("durations")?.split(",").filter(Boolean) || [];
     const selectedCollections = searchParams.get("collections")?.split(",").filter(Boolean) || [];
     const selectedDates = searchParams.get("dates")?.split(",").filter(Boolean) || [];
@@ -90,8 +92,16 @@ function SearchContent() {
     const [tours, setTours] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
     const [availableTags, setAvailableTags] = useState<string[]>([]);
+    const [availableInterests, setAvailableInterests] = useState<string[]>([]);
     const [availableDates, setAvailableDates] = useState<string[]>([]);
     const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+    const [discountsList, setDiscountsList] = useState<{ name: string; percentage: number }[]>([]);
+
+    const discountsOptions = [
+        "Any Discount",
+        ...discountsList.map(d => d.name),
+        ...selectedDiscounts.filter(val => val !== "Any Discount" && !discountsList.some(d => d.name === val))
+    ];
 
     // Initial load
     useEffect(() => {
@@ -112,9 +122,12 @@ function SearchContent() {
                 const tourData = data.data.tours || data.data;
                 setTours(tourData);
 
-                // Extract unique tags and dates
+                // Extract unique tags, interests and dates
                 const tags = Array.from(new Set(tourData.flatMap((t: Tour) => t.tags || []))).sort() as string[];
                 setAvailableTags(tags);
+
+                const interests = Array.from(new Set(tourData.flatMap((t: Tour) => t.interests || []))).sort() as string[];
+                setAvailableInterests(interests);
 
                 const dates = Array.from(new Set(tourData.flatMap((t: Tour) => t.startDates?.map((d: any) => {
                     const date = new Date(d.startDate);
@@ -123,6 +136,19 @@ function SearchContent() {
                     return new Date(a).getTime() - new Date(b).getTime();
                 }) as string[];
                 setAvailableDates(dates);
+            }
+
+            // Fetch active discounts
+            try {
+                const discountsRes = await fetch(`${api.baseURL}/discounts/active`);
+                if (discountsRes.ok) {
+                    const discountsData = await discountsRes.json();
+                    if (discountsData.status === "success") {
+                        setDiscountsList(discountsData.data.discounts || []);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch active discounts:", err);
             }
         } catch (error) {
             console.error("Failed to fetch tours:", error);
@@ -152,6 +178,7 @@ function SearchContent() {
         const params = new URLSearchParams(searchParams.toString());
         params.delete("destinations");
         params.delete("styles");
+        params.delete("interests");
         params.delete("durations");
         params.delete("collections");
         params.delete("dates");
@@ -192,6 +219,11 @@ function SearchContent() {
             if (!selectedStyles.includes(tour.travelStyle)) return false;
         }
 
+        // Interests Check
+        if (selectedInterests.length > 0) {
+            if (!tour.interests || !selectedInterests.some(interest => tour.interests?.includes(interest))) return false;
+        }
+
         // Duration Check
         if (selectedDurations.length > 0) {
             if (!isDurationMatch(tour.duration.days, selectedDurations)) return false;
@@ -229,14 +261,28 @@ function SearchContent() {
 
         // Discount Check
         if (selectedDiscounts.length > 0) {
-            const discount = tour.price.discountPercent || 0;
-            const matchesDiscount = selectedDiscounts.some(range => {
-                if (range === "Any Discount") return discount > 0;
-                if (range.includes("20%")) return discount >= 20;
-                if (range.includes("30%")) return discount >= 30;
-                if (range.includes("40%")) return discount >= 40;
-                if (range.includes("50%")) return discount >= 50;
-                return false;
+            const tourDiscountPercent = tour.price.discountPercent || 0;
+            const matchesDiscount = selectedDiscounts.some(selectedName => {
+                if (selectedName === "Any Discount") {
+                    return tourDiscountPercent > 0 || tour.startDates?.some((d: any) => d.discount);
+                }
+                
+                // Find matching active discount object from database
+                const dbDiscount = discountsList.find(d => d.name === selectedName);
+                if (dbDiscount) {
+                    const matchesGlobal = tourDiscountPercent >= dbDiscount.percentage;
+                    const matchesDate = tour.startDates?.some((d: any) => d.discount === dbDiscount.name);
+                    return matchesGlobal || matchesDate;
+                }
+                
+                // Fallback to old hardcoded ranges
+                if (selectedName.includes("20%")) return tourDiscountPercent >= 20;
+                if (selectedName.includes("30%")) return tourDiscountPercent >= 30;
+                if (selectedName.includes("40%")) return tourDiscountPercent >= 40;
+                if (selectedName.includes("50%")) return tourDiscountPercent >= 50;
+                
+                // Fallback to check if name matches date.discount directly
+                return tour.startDates?.some((d: any) => d.discount === selectedName);
             });
             if (!matchesDiscount) return false;
         }
@@ -277,7 +323,7 @@ function SearchContent() {
             <div className="relative">
                 <button
                     onClick={() => setActiveFilter(activeFilter === label ? null : label)}
-                    className={`flex items-center space-x-2 px-4 py-2 bg-white border ${activeFilter === label || selected.length > 0 ? 'border-blue-600 ring-1 ring-blue-600' : 'border-gray-200 hover:border-gray-300'} rounded-lg text-sm font-medium text-gray-700 transition-colors`}
+                    className={`flex items-center space-x-2 px-4 py-2 bg-white border ${activeFilter === label || selected.length > 0 ? 'border-blue-600 ring-1 ring-blue-600' : 'border-gray-200 hover:border-gray-300'} rounded-lg text-sm font-medium text-[#3F3F42] transition-colors`}
                 >
                     <span>{label} {selected.length > 0 && `(${selected.length})`}</span>
                     <svg className={`w-4 h-4 transition-transform ${activeFilter === label ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,7 +341,7 @@ function SearchContent() {
                                         <div key={continent}>
                                             <button
                                                 onClick={() => setOpenContinent(openContinent === continent ? null : continent)}
-                                                className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 text-left font-medium text-gray-900"
+                                                className="w-full flex items-center justify-between px-4 py-2 hover:bg-gray-50 text-left font-medium text-[#3F3F42]"
                                             >
                                                 <span>{continent}</span>
                                                 <svg className={`w-4 h-4 transition-transform ${openContinent === continent ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +359,7 @@ function SearchContent() {
                                                                 onChange={() => handleFilterChange(country, selected, paramKey)}
                                                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                                             />
-                                                            <span className="ml-3 text-sm text-gray-700">{country}</span>
+                                                            <span className="ml-3 text-sm text-[#3F3F42]">{country}</span>
                                                         </label>
                                                     ))}
                                                 </div>
@@ -332,7 +378,7 @@ function SearchContent() {
                                                 onChange={() => handleFilterChange(option, selected, paramKey)}
                                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                             />
-                                            <span className="ml-3 text-sm text-gray-700">{option}</span>
+                                            <span className="ml-3 text-sm text-[#3F3F42]">{option}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -341,7 +387,7 @@ function SearchContent() {
                         <div className="p-3 border-t border-gray-100 flex justify-between">
                             <button
                                 onClick={() => updateUrl(paramKey, [])}
-                                className="text-xs font-medium text-gray-500 hover:text-gray-900"
+                                className="text-xs font-medium text-gray-500 hover:text-[#3F3F42]"
                             >
                                 Clear
                             </button>
@@ -368,9 +414,9 @@ function SearchContent() {
                         <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
-                        <span className="text-gray-900 font-medium">Search results</span>
+                        <span className="text-[#3F3F42] font-medium">Search results</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-bold text-[#3F3F42]">
                         {filteredTours.length} trips <span className="font-normal text-gray-500">found</span>
                     </h1>
                 </div>
@@ -386,6 +432,12 @@ function SearchContent() {
                             data={DESTINATIONS_DATA}
                             selected={selectedCountries}
                             paramKey="destinations"
+                        />
+                        <FilterDropdown
+                            label="Interests"
+                            data={availableInterests}
+                            selected={selectedInterests}
+                            paramKey="interests"
                         />
                         <FilterDropdown
                             label="Travel Style"
@@ -420,7 +472,7 @@ function SearchContent() {
                         />
                         <FilterDropdown
                             label="Discount"
-                            data={DISCOUNTS}
+                            data={discountsOptions}
                             selected={selectedDiscounts}
                             paramKey="discounts"
                         />
@@ -456,12 +508,12 @@ function SearchContent() {
             <div className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <p className="text-gray-600">
-                        Showing <span className="font-bold text-gray-900">1-{filteredTours.length}</span> of <span className="font-bold text-gray-900">{filteredTours.length}</span> trips:
+                        Showing <span className="font-bold text-[#3F3F42]">1-{filteredTours.length}</span> of <span className="font-bold text-[#3F3F42]">{filteredTours.length}</span> trips:
                     </p>
 
                     <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-500">Sort by:</span>
-                        <select className="border-none bg-transparent text-sm font-bold text-gray-900 focus:ring-0 cursor-pointer">
+                        <select className="border-none bg-transparent text-sm font-bold text-[#3F3F42] focus:ring-0 cursor-pointer">
                             <option>Relevance</option>
                             <option>Price: Low to High</option>
                             <option>Price: High to Low</option>
@@ -536,13 +588,13 @@ function SearchContent() {
                                         <div className="p-6 flex-1 flex flex-col">
                                             {/* Duration Badge */}
                                             <div className="mb-3">
-                                                <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                <span className="text-xs font-bold text-[#3F3F42] uppercase tracking-wider">
                                                     {tour.duration.days} Day Tour
                                                 </span>
                                             </div>
 
                                             {/* Tour Name */}
-                                            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                                            <h3 className="text-lg font-bold text-[#3F3F42] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
                                                 {tour.name}
                                             </h3>
 
@@ -551,7 +603,7 @@ function SearchContent() {
 
                                             {/* Price Section */}
                                             <div className="flex items-baseline gap-2 mb-4">
-                                                <span className="text-3xl font-bold text-gray-900">
+                                                <span className="text-3xl font-bold text-[#3F3F42]">
                                                     ${Math.round(discountedPrice)}
                                                 </span>
                                                 <span className="text-sm text-gray-600">per person</span>
@@ -585,7 +637,7 @@ function SearchContent() {
                                     />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            <h3 className="text-xl font-bold text-[#3F3F42] mb-2">
                                 No trips found for "{query}"
                             </h3>
                             <p className="text-gray-500 mb-6">

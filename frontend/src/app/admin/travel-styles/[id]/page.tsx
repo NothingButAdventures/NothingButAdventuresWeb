@@ -102,17 +102,17 @@ export default function EditTravelStylePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin/travel-styles"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-[#3F3F42]"
             >
               Back
             </Link>
-            <h1 className="text-xl font-semibold text-gray-900">Edit Travel Style</h1>
+            <h1 className="text-xl font-semibold text-[#3F3F42]">Edit Travel Style</h1>
           </div>
           <button
             form="travel-style-form"
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-800 disabled:opacity-50"
+            className="rounded-lg bg-[#3F3F42] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#3F3F42] disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -126,7 +126,7 @@ export default function EditTravelStylePage() {
           className="space-y-5 rounded-xl border border-gray-200 bg-white p-6"
         >
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Travel Style Name</label>
+            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Travel Style Name</label>
             <input
               type="text"
               value={name}
@@ -138,7 +138,7 @@ export default function EditTravelStylePage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Short Description</label>
+            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Short Description</label>
             <input
               type="text"
               value={shortDescription}
@@ -149,7 +149,7 @@ export default function EditTravelStylePage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Brand Color</label>
+            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Brand Color</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -168,7 +168,7 @@ export default function EditTravelStylePage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">URL</label>
+            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">URL</label>
             <input
               type="text"
               value={url}

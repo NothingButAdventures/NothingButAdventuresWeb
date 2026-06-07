@@ -199,12 +199,12 @@ export default function EditActivityPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Activity</h1>
+          <h1 className="text-2xl font-bold text-[#3F3F42]">Edit Activity</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Title</label>
             <input
               type="text"
               required
@@ -215,7 +215,7 @@ export default function EditActivityPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Description</label>
             <textarea
               required
               rows={4}
@@ -227,7 +227,7 @@ export default function EditActivityPage() {
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Destination</label>
+              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Destination</label>
               <select
                 required
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
@@ -243,7 +243,7 @@ export default function EditActivityPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Travel Styles</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Travel Styles</label>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -258,7 +258,7 @@ export default function EditActivityPage() {
                 className={`px-4 py-2 rounded-full text-sm font-bold transition-colors border ${
                   formData.travelStyles.length === travelStyles.length && travelStyles.length > 0
                     ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-200"
+                    : "bg-gray-100 text-[#3F3F42] border-gray-300 hover:bg-gray-200"
                 }`}
               >
                 {formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "Deselect All" : "Select All"}
@@ -278,7 +278,7 @@ export default function EditActivityPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
                     formData.travelStyles.includes(s._id)
                       ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                      : "bg-gray-50 text-[#3F3F42] border-gray-200 hover:bg-gray-100"
                   }`}
                 >
                   {s.name}
@@ -292,7 +292,7 @@ export default function EditActivityPage() {
 
           {formData.destination && (
             <div className="relative">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Location</label>
               <input
                 type="text"
                 readOnly
@@ -303,10 +303,10 @@ export default function EditActivityPage() {
               />
               
               {showLocationPopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
                   <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                     <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="font-bold text-gray-900">Select Location</h3>
+                      <h3 className="font-bold text-[#3F3F42]">Select Location</h3>
                       <button 
                         type="button"
                         onClick={() => setShowLocationPopup(false)}
@@ -347,7 +347,7 @@ export default function EditActivityPage() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                               </div>
-                              <span className="font-medium text-gray-700">{d.name}</span>
+                              <span className="font-medium text-[#3F3F42]">{d.name}</span>
                             </button>
                           ))}
                         {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
@@ -374,7 +374,7 @@ export default function EditActivityPage() {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Physical Rating (Optional)</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Physical Rating (Optional)</label>
             <select
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
               value={formData.physicalRating}
@@ -395,12 +395,12 @@ export default function EditActivityPage() {
               checked={formData.isFree}
               onChange={(e) => setFormData({ ...formData, isFree: e.target.checked, price: e.target.checked ? "0" : formData.price })}
             />
-            <label htmlFor="isFree" className="text-sm font-semibold text-gray-700">This is a free activity</label>
+            <label htmlFor="isFree" className="text-sm font-semibold text-[#3F3F42]">This is a free activity</label>
           </div>
 
           {!formData.isFree && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Price</label>
+              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Price</label>
               <input
                 type="number"
                 min="0"
@@ -415,7 +415,7 @@ export default function EditActivityPage() {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Duration (in hrs)</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Duration (in hrs)</label>
             <input
               type="text"
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
@@ -426,7 +426,7 @@ export default function EditActivityPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
+            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Cover Image</label>
             <div 
               onClick={() => setShowImagePicker(true)}
               className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden group min-h-[140px] items-center"
@@ -434,7 +434,7 @@ export default function EditActivityPage() {
               {formData.coverImage ? (
                 <div className="absolute inset-0">
                   <img src={formData.coverImage} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-[#3F3F42]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-white text-sm font-medium">Select/Upload Image</span>
                   </div>
                 </div>

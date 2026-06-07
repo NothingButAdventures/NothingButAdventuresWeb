@@ -80,7 +80,7 @@ export default function TripsPage() {
       {/* Tours Section */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-[#3F3F42] mb-2">
             Available Trips
           </h2>
           <p className="text-gray-600">
@@ -111,7 +111,7 @@ export default function TripsPage() {
                   d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.137 0-4.146.832-5.636 2.172M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-[#3F3F42] mb-2">
                 No trips found
               </h3>
               <p className="text-gray-500">

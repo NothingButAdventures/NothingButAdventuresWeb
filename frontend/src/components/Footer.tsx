@@ -12,7 +12,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-[#161616] text-white w-full">
+    <footer className="bg-[#242239] text-white w-full">
       <div className="w-full px-6 md:px-12 lg:px-20 py-16">
         <div className="flex flex-col lg:flex-row justify-between gap-12 lg:gap-24 mb-16">
 
@@ -23,16 +23,16 @@ export default function Footer() {
               Curating authentic Indian experiences for discerning travelers since 2015.
             </p>
             <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white hover:bg-[#333] transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-[#3F3F42] flex items-center justify-center text-white hover:bg-[#3F3F42] transition-colors">
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M14.82 8.18v-1.6c0-1.14.86-1.55 1.74-1.55H18V1.56s-1.3-.23-2.52-.23c-2.58 0-4.22 1.57-4.22 4.4v2.45H8.76v3.66h2.5v9.54h3.56v-9.54h3.04l.46-3.66h-3.5z" /></svg>
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white hover:bg-[#333] transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-[#3F3F42] flex items-center justify-center text-white hover:bg-[#3F3F42] transition-colors">
                 <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" /></svg>
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white hover:bg-[#333] transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-[#3F3F42] flex items-center justify-center text-white hover:bg-[#3F3F42] transition-colors">
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>
               </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-[#2a2a2a] flex items-center justify-center text-white hover:bg-[#333] transition-colors">
+              <a href="#" className="w-10 h-10 rounded-full bg-[#3F3F42] flex items-center justify-center text-white hover:bg-[#3F3F42] transition-colors">
                 <svg className="w-[18px] h-[18px]" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg>
               </a>
             </div>

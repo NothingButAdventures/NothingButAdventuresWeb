@@ -54,13 +54,13 @@ export default function MeetLocalGuidesSection() {
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 mb-12">
                 <div className="flex flex-wrap gap-3 max-w-[600px]">
                     {tags.map((tag, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-[#f4f5f6] text-[#1a1a1a] px-4 py-2 rounded-full font-medium text-[13px] border border-transparent shadow-sm">
-                            <span className="text-[#5b6360]">{tag.icon}</span>
+                        <div key={idx} className="flex items-center gap-2 bg-[#f4f5f6] text-[#3F3F42] px-4 py-2 rounded-full font-medium text-[13px] border border-transparent shadow-sm">
+                            <span className="text-[#3F3F42]">{tag.icon}</span>
                             {tag.label}
                         </div>
                     ))}
                 </div>
-                <h2 className="text-[48px] md:text-[64px] font-medium leading-[1.1] text-black">
+                <h2 className="text-[48px] md:text-[64px] font-medium leading-[1.1] text-[#3F3F42]">
                     Meet Your Local Guides
                 </h2>
             </div>
@@ -81,10 +81,10 @@ export default function MeetLocalGuidesSection() {
 
                     {/* Text Content */}
                     <div className="flex-1 p-8 md:p-10 flex flex-col justify-center bg-[#fafafc]">
-                        <h3 className="text-[28px] md:text-[32px] font-semibold text-black leading-[1.2] mb-6">
+                        <h3 className="text-[28px] md:text-[32px] font-semibold text-[#3F3F42] leading-[1.2] mb-6">
                             Step inside a journey guided by passion and experience
                         </h3>
-                        <p className="text-[17px] text-[#1a1a1a] font-medium leading-[1.6] mb-10">
+                        <p className="text-[17px] text-[#3F3F42] font-medium leading-[1.6] mb-10">
                             Each tour is led by people who know every dune, story, and sunrise of AlUla guides who turn every route into a journey worth remembering.
                         </p>
 
@@ -119,10 +119,10 @@ export default function MeetLocalGuidesSection() {
                         <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6 shadow-sm">
                             400+ Local Guides
                         </div>
-                        <p className="text-[20px] md:text-[22px] font-medium text-black leading-[1.5] mb-6 relative">
+                        <p className="text-[20px] md:text-[22px] font-medium text-[#3F3F42] leading-[1.5] mb-6 relative">
                             "Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable."
                         </p>
-                        <div className="text-[#5b6360] font-medium text-[15px]">
+                        <div className="text-[#3F3F42] font-medium text-[15px]">
                             — Amir , Founder & Lead Guide
                         </div>
                     </div>

@@ -88,7 +88,7 @@ export default function DashboardPage() {
         {/* Greeting Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-12">
           <div className="md:col-span-2">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-4xl font-bold text-[#3F3F42] mb-2">
               {greeting}, {user?.name || "Traveler"}
             </h1>
             <p className="text-gray-600 mb-4">
@@ -144,14 +144,14 @@ export default function DashboardPage() {
 
             {/* Tour Status Card */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              <h3 className="text-sm font-semibold text-[#3F3F42] mb-4">
                 Tour Status
               </h3>
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                   <span className="text-2xl">🎈</span>
                 </div>
-                <p className="text-gray-700 font-medium mb-2">
+                <p className="text-[#3F3F42] font-medium mb-2">
                   Nothing to do here - yet
                 </p>
                 <p className="text-sm text-gray-500">
@@ -167,10 +167,10 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-cyan-400 to-blue-300 rounded-lg overflow-hidden mb-16">
           <div className="grid grid-cols-2 items-center">
             <div className="p-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#3F3F42] mb-4">
                 Ready to find your next adventure?
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-[#3F3F42] mb-6">
                 We specialize in helping you see the world's most inaccessible
                 and beautiful locations
               </p>
@@ -193,7 +193,7 @@ export default function DashboardPage() {
 
         {/* Our top picks Section */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold text-[#3F3F42] mb-2">
             Our top picks
           </h2>
           <p className="text-gray-600 mb-8">
@@ -239,13 +239,13 @@ export default function DashboardPage() {
                       <div className="p-6 flex-1 flex flex-col">
                         {/* Duration Badge */}
                         <div className="mb-3">
-                          <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-[#3F3F42] uppercase tracking-wider">
                             {tour.country.name} Tour
                           </span>
                         </div>
 
                         {/* Tour Name */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                        <h3 className="text-lg font-bold text-[#3F3F42] mb-4 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
                           {tour.name}
                         </h3>
 
@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
                         {/* Price Section */}
                         <div className="flex items-baseline gap-2 mb-4">
-                          <span className="text-3xl font-bold text-gray-900">
+                          <span className="text-3xl font-bold text-[#3F3F42]">
                             ${tour.price.amount}
                           </span>
                           <span className="text-sm text-gray-600">
@@ -285,10 +285,10 @@ export default function DashboardPage() {
         <div className="bg-gradient-to-r from-cyan-100 to-blue-100 rounded-lg overflow-hidden py-12 px-8 mb-16">
           <div className="grid grid-cols-2 items-center gap-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-[#3F3F42] mb-4">
                 Build your wishlist
               </h2>
-              <p className="text-gray-700 mb-6">
+              <p className="text-[#3F3F42] mb-6">
                 The features that we are adding might be the biggest game
                 changer for your wishlist and get closer to making your travel
                 dream a reality

@@ -23,9 +23,9 @@ export default function CountryFaqSection({
 
   return (
     <section className="mt-14 md:mt-16">
-      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#5e6678]">{title}</span>
+      <span className="inline-flex rounded-full bg-[#e8ebf0] px-4 py-1 text-[12px] font-medium text-[#3F3F42]">{title}</span>
 
-      <h2 className="mt-4 max-w-[920px] text-[24px] font-medium leading-tight text-[#121b2f] sm:text-[26px] md:text-[28px] lg:text-[30px] lg:whitespace-nowrap">
+      <h2 className="mt-4 max-w-[920px] text-[24px] font-medium leading-tight text-[#3F3F42] sm:text-[26px] md:text-[28px] lg:text-[30px] lg:whitespace-nowrap">
         {subtitle}
       </h2>
 
@@ -42,9 +42,9 @@ export default function CountryFaqSection({
                 aria-expanded={isOpen}
                 aria-controls={`country-faq-${index}`}
               >
-                <span className="text-[18px] font-medium leading-tight text-[#121b2f] md:text-[22px]">{item.question}</span>
+                <span className="text-[18px] font-medium leading-tight text-[#3F3F42] md:text-[22px]">{item.question}</span>
                 <svg
-                  className={`h-5 w-5 shrink-0 text-[#121b2f] transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}
+                  className={`h-5 w-5 shrink-0 text-[#3F3F42] transition-transform ${isOpen ? "rotate-180" : "rotate-0"}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -54,7 +54,7 @@ export default function CountryFaqSection({
               </button>
 
               {isOpen && item.answer && (
-                <p id={`country-faq-${index}`} className="pt-3 text-[15px] leading-[1.5] text-[#4b5568] md:text-[17px]">
+                <p id={`country-faq-${index}`} className="pt-3 text-[15px] leading-[1.5] text-[#3F3F42] md:text-[17px]">
                   {item.answer}
                 </p>
               )}
