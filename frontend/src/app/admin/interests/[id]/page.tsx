@@ -23,8 +23,6 @@ export default function EditInterestPage() {
 
   const [name, setName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
-  const [color, setColor] = useState("#3B82F6");
-  const [url, setUrl] = useState("");
 
   useEffect(() => {
     if (id) {
@@ -41,8 +39,6 @@ export default function EditInterestPage() {
         const interest: Interest = data.data.interest;
         setName(interest.name || "");
         setShortDescription(interest.shortDescription || "");
-        setColor(interest.color || "#3B82F6");
-        setUrl(interest.url || "");
       }
     } catch (error) {
       console.error("Error fetching interest:", error);
@@ -72,8 +68,6 @@ export default function EditInterestPage() {
         body: JSON.stringify({
           name: name.trim(),
           shortDescription: shortDescription.trim(),
-          color: color.trim() || "#3B82F6",
-          url: url.trim(),
         })
       });
 
@@ -147,37 +141,6 @@ export default function EditInterestPage() {
               className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
               placeholder="Short text for cards"
             />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Brand Color</label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="h-11 w-12 cursor-pointer rounded-md border border-gray-200"
-              />
-              <input
-                type="text"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 uppercase outline-none transition focus:border-black"
-                placeholder="#3B82F6"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">URL</label>
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
-              placeholder="/interests/wildlife"
-            />
-            <p className="mt-1 text-xs text-gray-500">This URL will be used when referencing the interest.</p>
           </div>
         </form>
       </div>

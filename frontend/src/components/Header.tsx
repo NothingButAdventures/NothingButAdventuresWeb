@@ -97,7 +97,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center space-x-3">
-              <img src="/logo.png" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain" />
+              <img src="/logo.svg" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain" />
               <div className="flex flex-col leading-none logo-text">
                 <span className="text-[18px] font-bold tracking-widest mt-0.5 flex items-center">
                   NOTHING
@@ -125,18 +125,6 @@ export default function Header() {
               </button>
               <button
                 type="button"
-                onMouseEnter={() => handleMenuEnter("interests")}
-                onClick={() => {
-                  setActiveMenu("interests");
-                }}
-                aria-expanded={activeMenu === "interests"}
-                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "interests" ? "bg-white text-[#412A6B]  font-semibold" : "hover:text-[#3F3F42]"
-                  }`}
-              >
-                <span>Explore by Interest</span>
-              </button>
-              <button
-                type="button"
                 onMouseEnter={() => handleMenuEnter("adventures")}
                 onClick={() => {
                   setActiveMenu("adventures");
@@ -146,6 +134,18 @@ export default function Header() {
                   }`}
               >
                 <span>Adventures</span>
+              </button>
+              <button
+                type="button"
+                onMouseEnter={() => handleMenuEnter("interests")}
+                onClick={() => {
+                  setActiveMenu("interests");
+                }}
+                aria-expanded={activeMenu === "interests"}
+                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "interests" ? "bg-white text-[#412A6B]  font-semibold" : "hover:text-[#3F3F42]"
+                  }`}
+              >
+                <span>Explore by Interest</span>
               </button>
               <button
                 type="button"
@@ -304,8 +304,8 @@ export default function Header() {
               <Link href="/trips" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Trips</Link>
               <Link href="/blogs" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Blog</Link>
               <Link href="/destinations" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Destinations</Link>
-              <Link href="/trips" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Explore by Interest</Link>
               <Link href="/travel-styles" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Adventures</Link>
+              <Link href="/trips" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Explore by Interest</Link>
 
               {user ? (
                 <>

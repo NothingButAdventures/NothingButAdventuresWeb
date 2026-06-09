@@ -25,8 +25,6 @@ export default function InterestsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newInterestName, setNewInterestName] = useState("");
     const [newShortDescription, setNewShortDescription] = useState("");
-    const [newColor, setNewColor] = useState("#3B82F6");
-    const [newUrl, setNewUrl] = useState("");
     const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
     useEffect(() => {
@@ -60,16 +58,12 @@ export default function InterestsPage() {
                 body: JSON.stringify({
                     name: newInterestName,
                     shortDescription: newShortDescription,
-                    color: newColor,
-                    url: newUrl,
                 })
             });
             const data = await res.json();
             if (data.status === "success") {
                 setNewInterestName("");
                 setNewShortDescription("");
-                setNewColor("#3B82F6");
-                setNewUrl("");
                 setIsModalOpen(false);
                 fetchInterests();
             } else {
@@ -362,34 +356,6 @@ export default function InterestsPage() {
                                      onChange={(e) => setNewShortDescription(e.target.value)}
                                      className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
                                      placeholder="Brief summary for cards"
-                                 />
-                             </div>
-                             <div>
-                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
-                                 <div className="flex items-center gap-3">
-                                     <input
-                                         type="color"
-                                         value={newColor}
-                                         onChange={(e) => setNewColor(e.target.value)}
-                                         className="h-10 w-12 rounded-md border border-gray-200 cursor-pointer"
-                                     />
-                                     <input
-                                         type="text"
-                                         value={newColor}
-                                         onChange={(e) => setNewColor(e.target.value)}
-                                         className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition uppercase"
-                                         placeholder="#3B82F6"
-                                     />
-                                 </div>
-                             </div>
-                             <div>
-                                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">URL</label>
-                                 <input
-                                     type="text"
-                                     value={newUrl}
-                                     onChange={(e) => setNewUrl(e.target.value)}
-                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition"
-                                     placeholder="/interests/wildlife"
                                  />
                              </div>
                              <div className="flex justify-end gap-3 pt-4 border-t border-gray-50">
