@@ -61,7 +61,8 @@ const getTour = catchAsync(async (req, res, next) => {
       },
     })
     .populate("itinerary.activities")
-    .populate("itinerary.optionalActivities");
+    .populate("itinerary.optionalActivities")
+    .populate("plantingLocation");
 
   if (!tour) {
     return next(new AppError("No tour found with that ID", 404));

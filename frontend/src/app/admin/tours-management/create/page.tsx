@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { uploadTourImage } from "@/lib/firebase";
 import { Toaster, toast } from "react-hot-toast";
@@ -135,6 +136,7 @@ export default function CreateTourPage() {
 
   // Destinations for the selected country
   const [destinations, setDestinations] = useState<any[]>([]);
+  const [plantingLocations, setPlantingLocations] = useState<any[]>([]);
   const [showLocationPopup, setShowLocationPopup] = useState<{ dayIndex: number } | null>(null);
   const [showCityPopup, setShowCityPopup] = useState<'start' | 'end' | null>(null);
   const [showActivityPopup, setShowActivityPopup] = useState<{ dayIndex: number; activityIndex: number; isOptional: boolean } | null>(null);
@@ -218,6 +220,8 @@ export default function CreateTourPage() {
     isFeatured: false,
     isActive: true,
     wifiAvailable: false,
+    plantingLocation: "",
+    treesPlanted: "0",
   });
 
   useEffect(() => {
@@ -320,6 +324,18 @@ export default function CreateTourPage() {
     }
   };
 
+  const fetchPlantingLocations = async (countryId: string) => {
+    try {
+      const response = await fetch(`${api.baseURL}/planting-locations?country=${countryId}`);
+      const data = await response.json();
+      if (data.status === "success") {
+        setPlantingLocations(data.data.plantingLocations || []);
+      }
+    } catch (error) {
+      console.error("Error fetching planting locations:", error);
+    }
+  };
+
   const handleAddLocation = async () => {
     if (!locationSearch.trim() || !formData.country) return;
     setAddingLocation(true);
@@ -379,8 +395,10 @@ export default function CreateTourPage() {
   useEffect(() => {
     if (formData.country) {
       fetchDestinations(formData.country);
+      fetchPlantingLocations(formData.country);
     } else {
       setDestinations([]);
+      setPlantingLocations([]);
     }
   }, [formData.country]);
 
@@ -943,6 +961,8 @@ export default function CreateTourPage() {
         wifiAvailable: formData.wifiAvailable,
         isFeatured: formData.isFeatured,
         isActive: formData.isActive,
+        plantingLocation: formData.plantingLocation || undefined,
+        treesPlanted: parseInt(formData.treesPlanted) || 0,
       };
 
       const response = await fetch(`${api.baseURL}/tours`, {
@@ -1952,6 +1972,59 @@ export default function CreateTourPage() {
               </div>
             </div>
           </div>
+
+          {/* Tree Planting Section */}
+          {formData.country && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+              <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+                Tree Planting Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
+                    Planting Location
+                  </label>
+                  {plantingLocations.length > 0 ? (
+                    <select
+                      name="plantingLocation"
+                      value={formData.plantingLocation}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white"
+                    >
+                      <option value="">-- Select Planting Location --</option>
+                      {plantingLocations.map((pl) => (
+                        <option key={pl._id} value={pl._id}>
+                          {pl.locationName} ({pl.plantSpecies?.join(", ")})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                      No planting locations registered for this country. Manage them in{" "}
+                      <Link href="/admin/planting-locations" className="underline font-semibold hover:text-amber-950">
+                        Planting Locations
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#3F3F42] mb-1">
+                    Number of Trees Planted (after completion)
+                  </label>
+                  <input
+                    type="number"
+                    name="treesPlanted"
+                    value={formData.treesPlanted}
+                    onChange={handleChange}
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Itinerary Section */}
           {formData.country && (

@@ -1,6 +1,98 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { api } from "@/lib/api";
+
+interface User {
+  name: string;
+  email: string;
+  role: string;
+}
+
+interface Tour {
+  _id: string;
+  name: string;
+  slug: string;
+  treesPlanted?: number;
+  plantingLocation?: {
+    locationName: string;
+    slug?: string;
+    plantSpecies: string[];
+    country?: {
+      name: string;
+    };
+  };
+}
+
+interface Booking {
+  _id: string;
+  tour: Tour;
+  numberOfTravelers: number;
+  status: string;
+  startDate: string;
+}
 
 export default function TreePlantingPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuthAndFetchBookings();
+  }, []);
+
+  const checkAuthAndFetchBookings = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+      
+      // Fetch user info
+      const resUser = await fetch(`${api.baseURL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resUser.ok) {
+        const dataUser = await resUser.json();
+        setUser(dataUser.data.user);
+      }
+
+      // Fetch bookings (will deeply populate tour planting location and country)
+      const resBookings = await fetch(`${api.baseURL}/users/my-bookings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resBookings.ok) {
+        const dataBookings = await resBookings.json();
+        setBookings(dataBookings.data.bookings || []);
+      }
+    } catch (err) {
+      console.error("Error loading user bookings info:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const completedBookings = bookings.filter((b) => b.status === "completed" && b.tour);
+  const pendingOrConfirmedBookings = bookings.filter(
+    (b) => (b.status === "confirmed" || b.status === "pending") && b.tour
+  );
+
+  const totalTreesPlanted = completedBookings.reduce(
+    (acc, b) => acc + (b.numberOfTravelers * (b.tour?.treesPlanted || 0)),
+    0
+  );
+  
+  const treesBeingPlanted = pendingOrConfirmedBookings.reduce(
+    (acc, b) => acc + (b.numberOfTravelers * (b.tour?.treesPlanted || 0)),
+    0
+  );
+
   return (
     <main className="min-h-screen w-full bg-white pt-2 pb-24 font-sans">
       {/* Title Section with Standard Layout Padding */}
@@ -55,7 +147,7 @@ export default function TreePlantingPage() {
               {/* Stat 1 */}
               <div className="flex flex-col pr-4 border-r border-white/20">
                 <span className="text-3xl md:text-5xl font-semibold mb-2">40</span>
-                <span className="text-[11px] md:text-sm text-white/70 font-medium leading-tight">Places you can't mis out</span>
+                <span className="text-[11px] md:text-sm text-white/70 font-medium leading-tight">Places you can't miss out</span>
               </div>
               {/* Stat 2 */}
               <div className="flex flex-col px-2 md:px-4 border-r border-white/20">
@@ -201,45 +293,45 @@ export default function TreePlantingPage() {
             {/* Title & Description */}
             <div className="lg:col-span-7 text-left">
               <span className="inline-block bg-[#eef1f6] text-[#3F3F42] text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                Popular Tours
+                Our Global Tree-nitiative
               </span>
               <h2 className="text-3xl md:text-[44px] font-bold text-[#3F3F42] tracking-tight leading-tight mb-4">
                 Our global tree-nitiative
               </h2>
               <p className="text-sm md:text-[15px] text-gray-600 font-normal leading-relaxed max-w-2xl">
-                From little extras to big “no way” moments, here’s what From little extras to big “no way” moments, here’s what From little extras to big “no way” moments, here’s what From little extras to big “no way” moments, here’s what
+                Every adventure you take with us directly contributes to reforestation. Follow your impact and see where your trees are being planted.
               </p>
             </div>
 
             {/* Stat Cards */}
             <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
               {/* Stat Card 1 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-6  flex flex-col items-start text-left">
+              <div className="bg-[#F8FAFD] rounded-[20px] p-6 flex flex-col items-start text-left">
                 <div className="w-10 h-10 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42] mb-4">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 </div>
                 <h3 className="text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                  110 Trees Planted
+                  {loading ? "..." : isAuthenticated ? `${totalTreesPlanted} Trees` : "—"} Planted
                 </h3>
                 <p className="text-gray-500 text-xs leading-relaxed">
-                  You’ve done some pretty amazing things out there.
+                  {isAuthenticated ? "Through your completed adventures." : "Log in to view your tree count."}
                 </p>
               </div>
 
               {/* Stat Card 2 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-6  flex flex-col items-start text-left">
+              <div className="bg-[#F8FAFD] rounded-[20px] p-6 flex flex-col items-start text-left">
                 <div className="w-10 h-10 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42] mb-4">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 </div>
                 <h3 className="text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                  12 Being Planted today
+                  {loading ? "..." : isAuthenticated ? `${treesBeingPlanted} Trees` : "—"} Being Planted
                 </h3>
                 <p className="text-gray-500 text-xs leading-relaxed">
-                  You’ve done some pretty amazing things out there.
+                  {isAuthenticated ? "From your upcoming scheduled trips." : "Log in to see pending trees."}
                 </p>
               </div>
             </div>
@@ -248,74 +340,86 @@ export default function TreePlantingPage() {
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
             {/* Left Column: Stacked Cards */}
-            <div className="lg:col-span-5 flex flex-col gap-5 justify-between">
-              {/* Card 1 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-5 flex items-start gap-5 transition-shadow duration-300">
-                <div className="w-12 h-12 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42]">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                </div>
-                <div className="flex flex-col text-left">
-                  <h3 className="text-base md:text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                    And the award goes to...
-                  </h3>
-                  <p className="text-gray-500 text-xs md:text-[13px] leading-relaxed">
-                    You’ve done some pretty amazing things out there.
+            <div className="lg:col-span-5 flex flex-col justify-center gap-5">
+              {loading ? (
+                <div className="text-center py-12 text-gray-400">Loading planting details...</div>
+              ) : !isAuthenticated ? (
+                <div className="bg-[#F8FAFD] rounded-[20px] p-8 flex flex-col items-center justify-center text-center h-full border border-dashed border-gray-200">
+                  <span className="text-4xl mb-4">🌳</span>
+                  <h3 className="text-lg font-bold text-[#3F3F42] mb-2">Track Your Adventure Trees</h3>
+                  <p className="text-gray-500 text-sm max-w-sm mb-6 leading-relaxed">
+                    Log in to your account to view custom locations and plant species for the trees planted on your behalf.
                   </p>
+                  <Link
+                    href="/auth/login"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition text-sm shadow-sm"
+                  >
+                    Log In / Sign Up
+                  </Link>
                 </div>
-              </div>
+              ) : completedBookings.length === 0 ? (
+                <div className="bg-[#F8FAFD] rounded-[20px] p-8 flex flex-col items-center justify-center text-center h-full border border-dashed border-gray-200">
+                  <span className="text-4xl mb-4">🌱</span>
+                  <h3 className="text-lg font-bold text-[#3F3F42] mb-2">No completed trips yet</h3>
+                  <p className="text-gray-500 text-sm max-w-sm mb-6 leading-relaxed">
+                    Book an adventure, complete the journey, and we'll plant trees in designated reforestation regions on your behalf!
+                  </p>
+                  <Link
+                    href="/trips"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition text-sm shadow-sm"
+                  >
+                    Browse Adventures
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-[550px] overflow-y-auto pr-2">
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-widest pl-1 mb-2">
+                    Your Reforestation Registry
+                  </h4>
+                  {completedBookings.map((booking) => {
+                    const pl = booking.tour?.plantingLocation;
+                    const countryName = typeof pl?.country === "object" ? pl.country.name : "";
+                    const locationLabel = pl?.locationName
+                      ? `${pl.locationName}${countryName ? `, ${countryName}` : ""}`
+                      : "Designated Reforestation Zone";
+                    const treesCount = booking.numberOfTravelers * (booking.tour?.treesPlanted || 0);
 
-              {/* Card 2 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-5 flex items-start gap-5  transition-shadow duration-300">
-                <div className="w-12 h-12 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42]">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
+                    return (
+                      <div
+                        key={booking._id}
+                        className="bg-[#F8FAFD] rounded-[20px] p-5 flex items-start gap-5 hover:shadow-md transition-shadow duration-300 border border-gray-100"
+                      >
+                        <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0 border border-green-100 font-bold text-sm">
+                          +{treesCount}
+                        </div>
+                        <div className="flex flex-col text-left min-w-0 flex-1">
+                          <h3 className="text-base font-bold text-[#3F3F42] leading-tight truncate">
+                            {booking.tour?.name || "Completed Adventure"}
+                          </h3>
+                          <p className="text-gray-600 text-xs mt-1">
+                            Planting Site:{" "}
+                            {pl?.slug ? (
+                              <Link href={`/tree-planting/${pl.slug}`} className="font-semibold text-emerald-600 hover:text-emerald-800 underline transition-colors">
+                                {locationLabel}
+                              </Link>
+                            ) : (
+                              <span className="font-semibold text-gray-800">{locationLabel}</span>
+                            )}
+                          </p>
+                          {pl?.plantSpecies && pl.plantSpecies.length > 0 && (
+                            <p className="text-gray-500 text-[11px] mt-1 leading-normal truncate">
+                              Species: {pl.plantSpecies.join(", ")}
+                            </p>
+                          )}
+                          <p className="text-gray-400 text-[10px] mt-2">
+                            Completed on {new Date(booking.startDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className="flex flex-col text-left">
-                  <h3 className="text-base md:text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                    And the award goes to...
-                  </h3>
-                  <p className="text-gray-500 text-xs md:text-[13px] leading-relaxed">
-                    You’ve done some pretty amazing things out there.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 3 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-5 flex items-start gap-5  transition-shadow duration-300">
-                <div className="w-12 h-12 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42]">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                </div>
-                <div className="flex flex-col text-left">
-                  <h3 className="text-base md:text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                    And the award goes to...
-                  </h3>
-                  <p className="text-gray-500 text-xs md:text-[13px] leading-relaxed">
-                    You’ve done some pretty amazing things out there.
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 4 */}
-              <div className="bg-[#F8FAFD] rounded-[20px] p-5 flex items-start gap-5 transition-shadow duration-300">
-                <div className="w-12 h-12 rounded-full bg-[#eef1f6] flex items-center justify-center shrink-0 text-[#3F3F42]">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                  </svg>
-                </div>
-                <div className="flex flex-col text-left">
-                  <h3 className="text-base md:text-[17px] font-bold text-[#3F3F42] mb-1 leading-tight">
-                    And the award goes to...
-                  </h3>
-                  <p className="text-gray-500 text-xs md:text-[13px] leading-relaxed">
-                    You’ve done some pretty amazing things out there.
-                  </p>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Right Column: Image */}

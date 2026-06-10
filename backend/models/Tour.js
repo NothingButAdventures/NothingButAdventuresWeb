@@ -373,6 +373,14 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    plantingLocation: {
+      type: mongoose.Schema.ObjectId,
+      ref: "PlantingLocation",
+    },
+    treesPlanted: {
+      type: Number,
+      default: 0,
+    },
     seo: {
       metaTitle: String,
       metaDescription: String,

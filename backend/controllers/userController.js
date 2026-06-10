@@ -70,8 +70,19 @@ const getMyBookings = catchAsync(async (req, res, next) => {
     .paginate();
 
   const bookings = await features.query
-    .populate('tour', 'name slug images price duration location')
-    .populate('user', 'name email');
+    .populate({
+      path: "tour",
+      select: "name slug images price duration location plantingLocation treesPlanted",
+      populate: {
+        path: "plantingLocation",
+        select: "locationName plantSpecies country",
+        populate: {
+          path: "country",
+          select: "name",
+        },
+      },
+    })
+    .populate("user", "name email");
 
   const total = await Booking.countDocuments({ user: req.user.id });
 
