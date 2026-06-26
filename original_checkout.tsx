@@ -204,9 +204,10 @@ export default function CheckoutPage() {
     });
 
     // Payment Simulation State
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isBooking, setIsBooking] = useState(false);
     const [bookingError, setBookingError] = useState("");
-    const [paymentOption, setPaymentOption] = useState<"full" | "deposit" | "installments">("full");
+    const [paymentOption, setPaymentOption] = useState<"full" | "deposit">("full");
 
     useEffect(() => {
         if (slug) {
@@ -409,9 +410,6 @@ export default function CheckoutPage() {
     }, [calculateTotalPrice, tour]);
 
     const payNowAmount = useMemo(() => {
-        if (paymentOption === "installments") {
-            return Math.round(calculateTotalPrice * 0.25);
-        }
         return paymentOption === "deposit" && isDepositAvailable ? depositAmount : calculateTotalPrice;
     }, [paymentOption, isDepositAvailable, depositAmount, calculateTotalPrice]);
 
@@ -603,6 +601,17 @@ export default function CheckoutPage() {
     };
 
     const handleSubmitBooking = async () => {
+        // Open the payment simulation modal
+        setShowPaymentModal(true);
+        setBookingError("");
+    };
+
+    const handlePaymentSimulation = async (success: boolean) => {
+        if (!success) {
+            setBookingError("Payment declined. Please try again.");
+            return;
+        }
+
         setIsBooking(true);
         setBookingError("");
 
@@ -611,6 +620,8 @@ export default function CheckoutPage() {
             if (!token) {
                 setBookingError("Please log in to complete your booking");
                 setIsBooking(false);
+                // Optionally redirect to login
+                // router.push("/auth/login?redirect=...");
                 return;
             }
 
@@ -667,8 +678,14 @@ export default function CheckoutPage() {
                 },
                 payment: {
                     method: 'credit_card',
-                    status: 'pending',
-                    transactions: []
+                    status: paymentOption === 'deposit' && isDepositAvailable ? 'partially_paid' : 'paid',
+                    transactions: [{
+                        transactionId: `sim_${Date.now()}`,
+                        amount: payNowAmount,
+                        currency: 'USD',
+                        status: 'completed',
+                        paymentDate: new Date()
+                    }]
                 }
             };
 
@@ -687,8 +704,9 @@ export default function CheckoutPage() {
                 throw new Error(data.message || "Booking failed");
             }
 
-            // Redirect to real payment page
-            router.push(`/payment/${data.data.booking._id}?payNowAmount=${payNowAmount}&paymentOption=${paymentOption}`);
+            // Success
+            alert("Booking Successful! Redirecting to dashboard...");
+            router.push("/dashboard");
 
         } catch (err: any) {
             console.error("Booking error:", err);
@@ -1699,44 +1717,6 @@ export default function CheckoutPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                {/* Pay in Parts Option */}
-                                                <div
-                                                    className={`border rounded-xl p-4 transition-all ${!isDepositAvailable
-                                                        ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-75'
-                                                        : paymentOption === 'installments'
-                                                            ? 'border-purple-600 bg-purple-50 ring-1 ring-purple-600 cursor-pointer'
-                                                            : 'border-gray-300 hover:border-gray-400 cursor-pointer'
-                                                        }`}
-                                                    onClick={() => isDepositAvailable && setPaymentOption('installments')}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${!isDepositAvailable ? 'border-gray-300 bg-gray-100' :
-                                                            paymentOption === 'installments' ? 'border-purple-600' : 'border-gray-400'
-                                                            }`}>
-                                                            {paymentOption === 'installments' && isDepositAvailable && <div className="w-2.5 h-2.5 rounded-full bg-purple-600" />}
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center justify-between">
-                                                                <span className={`font-semibold ${!isDepositAvailable ? 'text-gray-500' : 'text-[#3F3F42]'}`}>
-                                                                    Pay in Parts (Monthly)
-                                                                </span>
-                                                                <span className={`font-bold ${!isDepositAvailable ? 'text-gray-500' : 'text-[#3F3F42]'}`}>
-                                                                    {formatPrice(Math.round(calculateTotalPrice * 0.25))}
-                                                                </span>
-                                                            </div>
-                                                            {isDepositAvailable ? (
-                                                                <p className="text-sm text-gray-500 mt-1">
-                                                                    Pay 25% upfront now and auto-pay the rest in monthly installments.
-                                                                </p>
-                                                            ) : (
-                                                                <p className="text-sm text-red-500 mt-1">
-                                                                    Installments are only available for trips booked at least 3 months in advance.
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </>
@@ -1978,7 +1958,90 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
+            {/* Payment Simulation Modal */}
+            {showPaymentModal && (
+                <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                    <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        {/* Background overlay */}
+                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => !isBooking && setShowPaymentModal(false)}></div>
 
+                        {/* Modal panel */}
+                        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                        <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl relative z-50 sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div className="sm:flex sm:items-start">
+                                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <span className="text-green-600 text-lg">💳</span>
+                                    </div>
+                                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                        <h3 className="text-lg leading-6 font-medium text-[#3F3F42]" id="modal-title">
+                                            Payment Simulation
+                                        </h3>
+                                        <div className="mt-2">
+                                            <p className="text-sm text-gray-500 mb-4">
+                                                Since this is a demo, please choose an outcome for the payment process.
+                                            </p>
+
+                                            {bookingError && (
+                                                <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4 text-sm">
+                                                    {bookingError}
+                                                </div>
+                                            )}
+
+                                            <div className="bg-gray-50 p-4 rounded-md mb-4">
+                                                <div className="flex justify-between text-sm mb-2">
+                                                    <span className="text-gray-600">Total Booking Value:</span>
+                                                    <span className="font-semibold">{formatPrice(calculateTotalPrice)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-lg mb-2 font-bold text-[#3F3F42] border-t border-gray-200 pt-2">
+                                                    <span>Pay Now:</span>
+                                                    <span>{formatPrice(payNowAmount)}</span>
+                                                </div>
+                                                {paymentOption === 'deposit' && isDepositAvailable && (
+                                                    <div className="flex justify-between text-sm text-gray-500">
+                                                        <span>Due Later:</span>
+                                                        <span>{formatPrice(calculateTotalPrice - payNowAmount)}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex justify-between text-sm mt-3 pt-2 border-t border-gray-200">
+                                                    <span className="text-gray-600">Card:</span>
+                                                    <span className="font-mono">**** **** **** 4242</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => handlePaymentSimulation(true)}
+                                    disabled={isBooking}
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isBooking ? "Processing..." : "Simulate Success"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handlePaymentSimulation(false)}
+                                    disabled={isBooking}
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Simulate Failure
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPaymentModal(false)}
+                                    disabled={isBooking}
+                                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#3F3F42] hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -9,6 +9,7 @@ import TourDetailLoading from "./loading";
 import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Plus } from "@phosphor-icons/react";
 import ReviewsSection from "@/components/ReviewsSection";
 import PopularToursSection from "@/components/PopularToursSection";
+import BeforeYouBookSection from "@/components/BeforeYouBookSection";
 
 interface Tour {
   _id: string;
@@ -125,6 +126,12 @@ interface Tour {
     metaTitle?: string;
     metaDescription?: string;
     keywords?: string[];
+  };
+  beforeYouBook?: {
+    isTourForMe?: string;
+    visaInformation?: string;
+    accommodation?: string;
+    joiningPoint?: string;
   };
 }
 
@@ -638,23 +645,23 @@ export default function TourDetailPage() {
             <Link href="/" className="hover:text-[#3F3F42] transition-colors">
               Home
             </Link>
-            <span className="text-[#9CA3AF]">/</span>
+            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             <Link href="/destinations" className="hover:text-[#3F3F42] transition-colors">
               Destinations
             </Link>
             {tour.country?.continent && (
               <>
-                <span className="text-[#9CA3AF]">/</span>
+                <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-[#3F3F42] transition-colors capitalize">
                   {tour.country.continent.slug}
                 </Link>
               </>
             )}
-            <span className="text-[#9CA3AF]">/</span>
+            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-[#3F3F42] transition-colors">
               {tour.country.name}
             </Link>
-            <span className="text-[#9CA3AF]">/</span>
+            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             <span className="text-[#3F3F42] font-medium">{tour.name}</span>
           </nav>
 
@@ -1768,27 +1775,7 @@ export default function TourDetailPage() {
                       </div>
                     </div>
 
-                    {/* Interests */}
-                    {tour.interests && tour.interests.length > 0 && (
-                      <div className="flex gap-4 mt-6">
-                        <div className="mt-1 shrink-0">
-                          <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-                            <line x1="7" y1="7" x2="7.01" y2="7" strokeWidth="2" strokeLinecap="round" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Interests</h3>
-                          <div className="flex flex-wrap gap-2">
-                            {tour.interests.map((interest, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-blue-50 rounded-full text-xs font-semibold text-blue-700 border border-blue-100">
-                                {interest}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
+
 
 
                   </div>
@@ -1969,6 +1956,11 @@ export default function TourDetailPage() {
 
 
 
+
+      {/* Before You Book Section */}
+      {activeTab === "overview" && tour.beforeYouBook && (
+        <BeforeYouBookSection data={tour.beforeYouBook} />
+      )}
 
       {/* Check Availability Section - Only visible in Overview tab */}
       {activeTab === "overview" && (
@@ -2321,14 +2313,19 @@ export default function TourDetailPage() {
               {/* Actions */}
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <button
+                  onClick={() => setShowHoldModal(true)}
+                  className="flex-1 md:flex-none bg-gray-200 hover:bg-gray-300 text-[#3F3F42] font-bold py-3 px-6 rounded transition-colors whitespace-nowrap"
+                >
+                  Hold Space
+                </button>
+                <button
                   onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout`)}
                   className="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-colors whitespace-nowrap"
                 >
                   Book Now
                 </button>
-                <button className="flex-1 md:flex-none border border-gray-300 hover:bg-gray-50 text-[#3F3F42] font-semibold py-3 px-4 rounded transition-colors whitespace-nowrap flex items-center justify-center gap-2">
-                  <span className="text-xl">♡</span>
-                  <span className="hidden sm:inline">Save to wish list</span>
+                <button className="w-[48px] h-[48px] shrink-0 border border-gray-300 hover:bg-gray-50 text-[#3F3F42] rounded flex items-center justify-center transition-colors">
+                  <span className="text-xl leading-none pt-0.5">♡</span>
                 </button>
               </div>
             </div>

@@ -239,6 +239,48 @@ const bookingSchema = new mongoose.Schema(
         default: "pending",
       },
     },
+    installmentPlan: {
+      isActive: {
+        type: Boolean,
+        default: false,
+      },
+      subscriptionId: String, // PayPal subscription ID
+      planId: String, // PayPal plan ID
+      totalAmount: Number,
+      upfrontAmount: Number,
+      remainingAmount: Number,
+      numberOfInstallments: Number,
+      installmentAmount: Number,
+      deadline: Date, // tourDate - 90 days
+      schedule: [
+        {
+          installmentNumber: {
+            type: Number,
+            required: true,
+          },
+          amount: {
+            type: Number,
+            required: true,
+          },
+          dueDate: {
+            type: Date,
+            required: true,
+          },
+          type: {
+            type: String,
+            enum: ["upfront", "installment"],
+            required: true,
+          },
+          status: {
+            type: String,
+            enum: ["pending", "paid", "failed", "overdue"],
+            default: "pending",
+          },
+          transactionId: String,
+          paidAt: Date,
+        },
+      ],
+    },
     documents: [
       {
         type: {

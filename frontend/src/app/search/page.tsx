@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import QuickViewModal from "@/components/QuickViewModal";
+import TourCard from "@/components/TourCard";
 
 interface Tour {
     _id: string;
@@ -88,6 +89,8 @@ function SearchContent() {
     const selectedDiscounts = searchParams.get("discounts")?.split(",").filter(Boolean) || [];
     const selectedPhysical = searchParams.get("physical")?.split(",").filter(Boolean) || [];
     const selectedService = searchParams.get("service")?.split(",").filter(Boolean) || [];
+    const fromDeals = searchParams.get("fromDeals") === "true";
+    const dealPercentage = searchParams.get("percentage") || "";
 
     const [tours, setTours] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
@@ -103,13 +106,100 @@ function SearchContent() {
         ...selectedDiscounts.filter(val => val !== "Any Discount" && !discountsList.some(d => d.name === val))
     ];
 
+    const [continents, setContinents] = useState<any[]>([]);
+    const [selectedContinentSlug, setSelectedContinentSlug] = useState<string>("all");
+    const [continentCountries, setContinentCountries] = useState<string[]>([]);
+    const [fetchingContinentCountries, setFetchingContinentCountries] = useState(false);
+
+    // Active state for dropdowns (UI only)
+    const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+    // Carousel state
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(true);
+
+    const checkScrollLimits = () => {
+        if (scrollContainerRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+            setCanScrollLeft(scrollLeft > 5);
+            setCanScrollRight(scrollWidth - scrollLeft - clientWidth > 5);
+        }
+    };
+
+    useEffect(() => {
+        const container = scrollContainerRef.current;
+        if (container) {
+            checkScrollLimits();
+            container.addEventListener("scroll", checkScrollLimits);
+            window.addEventListener("resize", checkScrollLimits);
+            return () => {
+                container.removeEventListener("scroll", checkScrollLimits);
+                window.removeEventListener("resize", checkScrollLimits);
+            };
+        }
+    }, [tours, selectedContinentSlug, activeFilter]); // Re-check when results change
+
+    const scrollNext = () => {
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const firstChild = container.firstElementChild as HTMLElement;
+            if (firstChild) {
+                const gap = parseFloat(window.getComputedStyle(container).gap) || 24;
+                const scrollAmount = firstChild.clientWidth + gap;
+                container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+            }
+        }
+    };
+
+    const scrollPrev = () => {
+        if (scrollContainerRef.current) {
+            const container = scrollContainerRef.current;
+            const firstChild = container.firstElementChild as HTMLElement;
+            if (firstChild) {
+                const gap = parseFloat(window.getComputedStyle(container).gap) || 24;
+                const scrollAmount = firstChild.clientWidth + gap;
+                container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+            }
+        }
+    };
+
+    // Fetch continents if fromDeals
+    useEffect(() => {
+        if (fromDeals) {
+            fetch(`${api.baseURL}${api.endpoints.continents.getAll}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        setContinents([{ name: "All", slug: "all" }, ...(data.data.continents || [])]);
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+    }, [fromDeals]);
+
+    // Fetch countries for selected continent
+    useEffect(() => {
+        if (selectedContinentSlug !== "all") {
+            setFetchingContinentCountries(true);
+            fetch(`${api.baseURL}/countries/continent/${selectedContinentSlug}`)
+                .then(res => res.json())
+                .then(data => {
+                    const countries = data?.data?.countries || data?.data || [];
+                    setContinentCountries(countries.map((c: any) => c.name));
+                })
+                .catch(err => console.error(err))
+                .finally(() => setFetchingContinentCountries(false));
+        } else {
+            setContinentCountries([]);
+            setFetchingContinentCountries(false);
+        }
+    }, [selectedContinentSlug]);
+
     // Initial load
     useEffect(() => {
         fetchTours();
     }, []);
-
-    // Active state for dropdowns (UI only)
-    const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
     const fetchTours = async () => {
         try {
@@ -210,8 +300,14 @@ function SearchContent() {
         }
 
         // Destinations Check
-        if (selectedCountries.length > 0) {
+        if (selectedCountries.length > 0 && !fromDeals) {
             if (!selectedCountries.includes(tour.country.name)) return false;
+        }
+
+        // Continent Check (Deals Mega Menu)
+        if (fromDeals && selectedContinentSlug !== "all") {
+            if (fetchingContinentCountries) return false; // hide until loaded
+            if (!continentCountries.includes(tour.country.name)) return false;
         }
 
         // Travel Style Check
@@ -266,7 +362,7 @@ function SearchContent() {
                 if (selectedName === "Any Discount") {
                     return tourDiscountPercent > 0 || tour.startDates?.some((d: any) => d.discount);
                 }
-                
+
                 // Find matching active discount object from database
                 const dbDiscount = discountsList.find(d => d.name === selectedName);
                 if (dbDiscount) {
@@ -274,13 +370,13 @@ function SearchContent() {
                     const matchesDate = tour.startDates?.some((d: any) => d.discount === dbDiscount.name);
                     return matchesGlobal || matchesDate;
                 }
-                
+
                 // Fallback to old hardcoded ranges
                 if (selectedName.includes("20%")) return tourDiscountPercent >= 20;
                 if (selectedName.includes("30%")) return tourDiscountPercent >= 30;
                 if (selectedName.includes("40%")) return tourDiscountPercent >= 40;
                 if (selectedName.includes("50%")) return tourDiscountPercent >= 50;
-                
+
                 // Fallback to check if name matches date.discount directly
                 return tour.startDates?.some((d: any) => d.discount === selectedName);
             });
@@ -408,104 +504,136 @@ function SearchContent() {
         <div className="min-h-screen bg-gray-50">
             {/* Breadcrumb & Header */}
             <div className="bg-white border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-4 py-4">
-                    <div className="flex items-center text-sm text-gray-500 mb-4">
+                <div className="w-full mx-auto px-4 md:px-6 py-6 md:py-8">
+                    <div className="flex items-center text-sm text-gray-500 mb-6">
                         <Link href="/" className="hover:text-blue-600">Home</Link>
-                        <svg className="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="text-[#3F3F42] font-medium">Search results</span>
+                        <svg className="w-4 h-4 mx-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        <span className="text-[#3F3F42] font-medium">
+                            {fromDeals && selectedDiscounts.length > 0
+                                ? `Discount : ${selectedDiscounts[0]} and ${dealPercentage}%`
+                                : "Search results"}
+                        </span>
                     </div>
-                    <h1 className="text-2xl font-bold text-[#3F3F42]">
-                        {filteredTours.length} trips <span className="font-normal text-gray-500">found</span>
-                    </h1>
+
+                    {fromDeals && selectedDiscounts.length > 0 ? (
+                        <div className="mb-2">
+                            <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4 mb-2">
+                                <h1 className="text-5xl md:text-[64px] font-bold text-[#3F3F42] tracking-tight leading-none">
+                                    {dealPercentage}% <span className="text-3xl md:text-[40px] text-[#3F3F42]/80">OFF</span>
+                                </h1>
+                                <h2 className="text-2xl md:text-3xl font-medium text-[#3F3F42] md:border-l-2 md:border-gray-200 md:pl-4">
+                                    {selectedDiscounts[0]}
+                                </h2>
+                            </div>
+                            <p className="text-gray-500 mt-4 text-lg">
+                                {filteredTours.length} qualifying trips found
+                            </p>
+                        </div>
+                    ) : (
+                        <h1 className="text-2xl font-bold text-[#3F3F42]">
+                            {filteredTours.length} trips <span className="font-normal text-gray-500">found</span>
+                        </h1>
+                    )}
                 </div>
             </div>
 
             {/* Filters Bar */}
             <div className="bg-white border-b border-gray-200 sticky top-[72px] z-30">
-                <div className="max-w-7xl mx-auto px-4 py-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <FilterDropdown
-                            label="Destinations"
-                            type="nested"
-                            data={DESTINATIONS_DATA}
-                            selected={selectedCountries}
-                            paramKey="destinations"
-                        />
-                        <FilterDropdown
-                            label="Interests"
-                            data={availableInterests}
-                            selected={selectedInterests}
-                            paramKey="interests"
-                        />
-                        <FilterDropdown
-                            label="Travel Style"
-                            data={TRAVEL_STYLES}
-                            selected={selectedStyles}
-                            paramKey="styles"
-                        />
-                        <FilterDropdown
-                            label="Duration"
-                            data={DURATIONS}
-                            selected={selectedDurations}
-                            paramKey="durations"
-                        />
+                <div className="w-full mx-auto px-4 md:px-6 py-3">
+                    {fromDeals ? (
+                        <div className="flex flex-wrap items-center gap-3">
+                            {continents.map(continent => (
+                                <button
+                                    key={continent.slug}
+                                    onClick={() => setSelectedContinentSlug(continent.slug)}
+                                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${selectedContinentSlug === continent.slug ? 'bg-[#3F3F42] text-white shadow-md' : 'bg-[#f0f2f5] text-[#3F3F42] hover:bg-[#e4e6e9]'}`}
+                                >
+                                    {continent.name}
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap items-center gap-3">
+                            <FilterDropdown
+                                label="Destinations"
+                                type="nested"
+                                data={DESTINATIONS_DATA}
+                                selected={selectedCountries}
+                                paramKey="destinations"
+                            />
+                            <FilterDropdown
+                                label="Interests"
+                                data={availableInterests}
+                                selected={selectedInterests}
+                                paramKey="interests"
+                            />
+                            <FilterDropdown
+                                label="Travel Style"
+                                data={TRAVEL_STYLES}
+                                selected={selectedStyles}
+                                paramKey="styles"
+                            />
+                            <FilterDropdown
+                                label="Duration"
+                                data={DURATIONS}
+                                selected={selectedDurations}
+                                paramKey="durations"
+                            />
+                            <FilterDropdown
+                                label="Collections"
+                                data={availableTags}
+                                selected={selectedCollections}
+                                paramKey="collections"
+                            />
+                            <FilterDropdown
+                                label="Dates"
+                                data={availableDates}
+                                selected={selectedDates}
+                                paramKey="dates"
+                            />
+                            <FilterDropdown
+                                label="Price"
+                                data={PRICES}
+                                selected={selectedPrices}
+                                paramKey="prices"
+                            />
+                            <FilterDropdown
+                                label="Discount"
+                                data={discountsOptions}
+                                selected={selectedDiscounts}
+                                paramKey="discounts"
+                            />
+                            <FilterDropdown
+                                label="Physical Rating"
+                                data={PHYSICAL_RATINGS}
+                                selected={selectedPhysical}
+                                paramKey="physical"
+                            />
+                            <FilterDropdown
+                                label="Service Level"
+                                data={SERVICE_LEVELS}
+                                selected={selectedService}
+                                paramKey="service"
+                            />
 
-                        <FilterDropdown
-                            label="Collections"
-                            data={availableTags}
-                            selected={selectedCollections}
-                            paramKey="collections"
-                        />
-                        <FilterDropdown
-                            label="Dates"
-                            data={availableDates}
-                            selected={selectedDates}
-                            paramKey="dates"
-                        />
-                        <FilterDropdown
-                            label="Price"
-                            data={PRICES}
-                            selected={selectedPrices}
-                            paramKey="prices"
-                        />
-                        <FilterDropdown
-                            label="Discount"
-                            data={discountsOptions}
-                            selected={selectedDiscounts}
-                            paramKey="discounts"
-                        />
-                        <FilterDropdown
-                            label="Physical Rating"
-                            data={PHYSICAL_RATINGS}
-                            selected={selectedPhysical}
-                            paramKey="physical"
-                        />
-                        <FilterDropdown
-                            label="Service Level"
-                            data={SERVICE_LEVELS}
-                            selected={selectedService}
-                            paramKey="service"
-                        />
+                            <div className="h-6 w-px bg-gray-200 mx-2"></div>
 
-                        <div className="h-6 w-px bg-gray-200 mx-2"></div>
-
-                        <button
-                            onClick={clearAllFilters}
-                            className="flex items-center space-x-2 text-sm font-medium text-blue-600 hover:text-blue-700"
-                        >
-                            <span>Clear all filters</span>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+                            <button
+                                onClick={clearAllFilters}
+                                className="flex items-center space-x-2 text-sm font-medium text-blue-600 hover:text-blue-700"
+                            >
+                                <span>Clear all filters</span>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Results Section */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="w-full mx-auto px-4 md:px-6 py-8">
                 <div className="flex justify-between items-center mb-6">
                     <p className="text-gray-600">
                         Showing <span className="font-bold text-[#3F3F42]">1-{filteredTours.length}</span> of <span className="font-bold text-[#3F3F42]">{filteredTours.length}</span> trips:
@@ -528,96 +656,74 @@ function SearchContent() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                     </div>
                 ) : filteredTours.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {filteredTours.map((tour) => {
-                            const primaryImage =
-                                tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
-                            const discountedPrice =
-                                tour.price.discountPercent > 0
-                                    ? tour.price.amount * (1 - tour.price.discountPercent / 100)
-                                    : tour.price.amount;
+                    <div className="relative group">
+                        <style dangerouslySetInnerHTML={{
+                            __html: `
+                            .hide-scroll::-webkit-scrollbar {
+                                display: none;
+                            }
+                            .hide-scroll {
+                                -ms-overflow-style: none; /* IE and Edge */
+                                scrollbar-width: none; /* Firefox */
+                            }
+                        `}} />
 
-                            return (
-                                <Link href={`/trips/${tour.slug}/${tour.tourCode}`} key={tour._id}>
-                                    <div className="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform h-full flex flex-col">
-                                        {/* Image Container */}
-                                        <div className="relative w-full h-64 overflow-hidden bg-gray-100 group-hover:opacity-95 transition-opacity">
-                                            {primaryImage?.url ? (
-                                                <img
-                                                    src={primaryImage.url}
-                                                    alt={primaryImage.caption || tour.name}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                                                    <svg
-                                                        className="w-16 h-16 text-gray-400"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={1}
-                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                            )}
+                        {/* Left Arrow Button */}
+                        <button
+                            onClick={scrollPrev}
+                            className={`hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-30 bg-[#b3b3b3] hover:bg-[#999] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${canScrollLeft ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
+                                }`}
+                            aria-label="Previous tours"
+                        >
+                            <svg className="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
 
-                                            {/* Quick View Button */}
-                                            <div className="absolute bottom-4 left-4 z-20">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        setSelectedTour(tour);
-                                                    }}
-                                                    className="flex items-center space-x-2 bg-white text-[#432360] px-4 py-2 rounded-lg shadow-lg hover:bg-gray-50 transition-colors font-bold text-sm"
-                                                >
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                                    </svg>
-                                                    <span>Quick View</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                        {/* Right Arrow Button */}
+                        <button
+                            onClick={scrollNext}
+                            className={`hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-30 bg-[#3F3F42] hover:bg-[#3F3F42] text-white w-12 h-12 rounded-full items-center justify-center cursor-pointer transition-all duration-200 ${canScrollRight ? "opacity-0 group-hover:opacity-100" : "opacity-0 pointer-events-none"
+                                }`}
+                            aria-label="Next tours"
+                        >
+                            <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
 
-                                        {/* Content */}
-                                        <div className="p-6 flex-1 flex flex-col">
-                                            {/* Duration Badge */}
-                                            <div className="mb-3">
-                                                <span className="text-xs font-bold text-[#3F3F42] uppercase tracking-wider">
-                                                    {tour.duration.days} Day Tour
-                                                </span>
-                                            </div>
+                        <div
+                            ref={scrollContainerRef}
+                            className="flex gap-4 md:gap-6 overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
+                        >
+                            {filteredTours.map((tour) => (
+                                <div key={tour._id} className="w-[calc((100%-16px)/1.3)] md:w-[calc((100%-72px)/3.6)] snap-start shrink-0">
+                                    <TourCard tour={tour} />
+                                </div>
+                            ))}
+                        </div>
 
-                                            {/* Tour Name */}
-                                            <h3 className="text-lg font-bold text-[#3F3F42] mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-                                                {tour.name}
-                                            </h3>
-
-                                            {/* Spacing for push to bottom */}
-                                            <div className="flex-1"></div>
-
-                                            {/* Price Section */}
-                                            <div className="flex items-baseline gap-2 mb-4">
-                                                <span className="text-3xl font-bold text-[#3F3F42]">
-                                                    ${Math.round(discountedPrice)}
-                                                </span>
-                                                <span className="text-sm text-gray-600">per person</span>
-                                            </div>
-
-                                            {/* CTA Button */}
-                                            <button className="w-full bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-2 px-4 rounded-lg transition-all duration-200">
-                                                View itinerary
-                                            </button>
-                                        </div>
-                                    </div>
-                                </Link>
-                            );
-                        })}
+                        {/* Mobile view buttons */}
+                        <div className="mt-8 flex items-center justify-center gap-4 md:hidden">
+                            <button
+                                onClick={scrollPrev}
+                                className="bg-[#b3b3b3] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                                aria-label="Previous tours"
+                            >
+                                <svg className="w-5 h-5 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={scrollNext}
+                                className="bg-[#3F3F42] text-white w-10 h-10 rounded-full flex items-center justify-center"
+                                aria-label="Next tours"
+                            >
+                                <svg className="w-5 h-5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-24 bg-white rounded-2xl border border-gray-100">

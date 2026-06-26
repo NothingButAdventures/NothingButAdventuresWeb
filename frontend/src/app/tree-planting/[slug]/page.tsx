@@ -91,7 +91,7 @@ export default function PlantingLocationDetailPage({
       if (data.status === "success") {
         const pl = data.data.plantingLocation;
         setLocation(pl);
-        
+
         // Update document title
         if (typeof window !== "undefined") {
           document.title = `${pl.locationName} - Reforestation Site | Nothing But Adventures`;
@@ -199,11 +199,11 @@ export default function PlantingLocationDetailPage({
             <Link href="/" className="hover:text-emerald-700 font-medium transition-colors">
               Home
             </Link>
-            <span>/</span>
+            <svg className="w-4 h-4 mx-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             <Link href="/tree-planting" className="hover:text-emerald-700 font-medium transition-colors">
               Tree Planting
             </Link>
-            <span>/</span>
+            <svg className="w-4 h-4 mx-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             <span className="text-gray-800 font-semibold truncate max-w-[200px]">
               {location.locationName}
             </span>
@@ -213,7 +213,7 @@ export default function PlantingLocationDetailPage({
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 mt-8">
-        
+
         {/* Title and Top Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
@@ -236,7 +236,7 @@ export default function PlantingLocationDetailPage({
 
         {/* Hero Gallery Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Column: Interactive Carousel */}
           <div className="lg:col-span-8 flex flex-col gap-4">
             <div className="relative aspect-[16/10] md:aspect-[16/9] bg-[#1E2922] rounded-3xl overflow-hidden shadow-lg border border-gray-150/50 group/carousel">
@@ -249,7 +249,7 @@ export default function PlantingLocationDetailPage({
                       alt={`${location.locationName} Gallery ${activeImageIndex + 1}`}
                       className="w-full h-full object-cover transition-opacity duration-500"
                     />
-                    
+
                     {/* Shadow overlays */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
                   </div>
@@ -301,11 +301,10 @@ export default function PlantingLocationDetailPage({
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`relative w-24 aspect-[16/10] rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
-                      idx === activeImageIndex
-                        ? "border-emerald-600 scale-[1.03] shadow-md"
-                        : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
+                    className={`relative w-24 aspect-[16/10] rounded-xl overflow-hidden border-2 shrink-0 transition-all ${idx === activeImageIndex
+                      ? "border-emerald-600 scale-[1.03] shadow-md"
+                      : "border-transparent opacity-60 hover:opacity-100"
+                      }`}
                   >
                     <img src={url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -316,7 +315,7 @@ export default function PlantingLocationDetailPage({
 
           {/* Right Column: Key Details & Summary Cards */}
           <div className="lg:col-span-4 space-y-6">
-            
+
             {/* Thriving Species List */}
             <div className="bg-white rounded-3xl p-6 border border-gray-200/80 shadow-sm">
               <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">

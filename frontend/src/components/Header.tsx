@@ -27,6 +27,49 @@ export default function Header() {
   const [activeMenu, setActiveMenu] = useState<"adventures" | "interests" | "destinations" | "why-us" | "deals" | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Scroll reveal state
+  const [show, setShow] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const openedAtTopRef = useRef(false);
+
+  useEffect(() => {
+    if (activeMenu) {
+      if (window.scrollY < 50) {
+        openedAtTopRef.current = true;
+      }
+    } else {
+      openedAtTopRef.current = false;
+    }
+  }, [activeMenu]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Close dropdowns if scrolling
+      if (Math.abs(currentScrollY - lastScrollY) > 20 && isUserMenuOpen) {
+        setIsUserMenuOpen(false);
+      }
+
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down
+        if (activeMenu && openedAtTopRef.current) {
+          // Do nothing, let it stay open and scroll with the page naturally.
+        } else {
+          setShow(false);
+          setActiveMenu(null); // Also close mega menus when hiding header
+        }
+      } else {
+        // Scrolling up
+        setShow(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, isUserMenuOpen, activeMenu]);
+
   const handleMenuEnter = (menu: "adventures" | "interests" | "destinations" | "why-us" | "deals") => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -87,18 +130,27 @@ export default function Header() {
     return null;
   }
 
+  const isMenuOpenAtTop = activeMenu && openedAtTopRef.current;
+
   return (
-    <header 
-      onMouseLeave={() => setActiveMenu(null)}
-      className={`relative sticky top-0 z-50 font-outfit px-4 md:px-8 transition-colors duration-200 ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}
+    <header
+      onMouseLeave={() => {
+        setActiveMenu(null);
+        if (openedAtTopRef.current && window.scrollY > 100) {
+          setShow(false);
+        }
+      }}
+      className={`relative z-50 font-outfit px-4 md:px-8 transition-all duration-300 transform ${isMenuOpenAtTop ? "" : "sticky top-0"
+        } ${show ? "translate-y-0" : "-translate-y-full shadow-none"
+        } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white shadow-sm"}`}
     >
       <div className="mx-auto">
         <div className="flex justify-between items-center md:grid md:grid-cols-[1fr_auto_1fr] py-4">
           {/* Logo */}
           <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center space-x-3">
-              <img src="/logo.svg" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain" />
-              <div className="flex flex-col leading-none logo-text">
+              <img src="/logo.svg" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain transition-all duration-300" />
+              <div className="flex flex-col leading-none logo-text transition-colors duration-300">
                 <span className="text-[18px] font-bold tracking-widest mt-0.5 flex items-center">
                   NOTHING
                   <span className="lowercase font-normal ml-1" style={{ fontFamily: '"Brush Script MT", "League Script", "Dancing Script", cursive', fontSize: '24px', letterSpacing: 'normal', transform: 'translateY(-2px)' }}>but</span>
@@ -118,7 +170,7 @@ export default function Header() {
                   setActiveMenu("destinations");
                 }}
                 aria-expanded={activeMenu === "destinations"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "destinations" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "destinations" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Destinations</span>
@@ -130,7 +182,7 @@ export default function Header() {
                   setActiveMenu("adventures");
                 }}
                 aria-expanded={activeMenu === "adventures"}
-                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "adventures" ? "bg-white text-[#412A6B]  font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "adventures" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Adventures</span>
@@ -142,7 +194,7 @@ export default function Header() {
                   setActiveMenu("interests");
                 }}
                 aria-expanded={activeMenu === "interests"}
-                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "interests" ? "bg-white text-[#412A6B]  font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "interests" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Explore by Interest</span>
@@ -154,7 +206,7 @@ export default function Header() {
                   setActiveMenu("deals");
                 }}
                 aria-expanded={activeMenu === "deals"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "deals" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "deals" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Deals</span>
@@ -166,7 +218,7 @@ export default function Header() {
                   setActiveMenu("why-us");
                 }}
                 aria-expanded={activeMenu === "why-us"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer ${activeMenu === "why-us" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "why-us" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Why Us</span>
@@ -179,7 +231,12 @@ export default function Header() {
             {activeMenu ? (
               <button
                 type="button"
-                onClick={() => setActiveMenu(null)}
+                onClick={() => {
+                  setActiveMenu(null);
+                  if (openedAtTopRef.current && window.scrollY > 100) {
+                    setShow(false);
+                  }
+                }}
                 className="w-10 h-10 rounded-full bg-[#412A6B] text-white flex items-center justify-center transition-all hover:bg-[#3F3F42] cursor-pointer"
                 aria-label="Close megamenu"
               >
@@ -336,7 +393,7 @@ export default function Header() {
       >
         <WhyUsMegaMenu isHovered={activeMenu === "why-us"} />
         <DealsMegaMenu isHovered={activeMenu === "deals"} />
-        <HeaderMegaMenu activeMenu={activeMenu} />
+        <HeaderMegaMenu activeMenu={activeMenu} closeMenu={() => setActiveMenu(null)} />
       </div>
 
     </header>

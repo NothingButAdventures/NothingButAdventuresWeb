@@ -184,9 +184,9 @@ export default function BlogPostPage({
                     <div className="max-w-4xl mx-auto px-4 py-4">
                         <div className="flex items-center gap-2">
                             <div className="h-4 bg-gray-200 rounded w-12 animate-pulse"></div>
-                            <span className="text-gray-300">/</span>
+                            <svg className="w-4 h-4 mx-1 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             <div className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
-                            <span className="text-gray-300">/</span>
+                            <svg className="w-4 h-4 mx-1 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                             <div className="h-4 bg-gray-200 rounded w-40 animate-pulse"></div>
                         </div>
                     </div>
@@ -312,11 +312,11 @@ export default function BlogPostPage({
                         <Link href="/" className="text-gray-500 hover:text-blue-600">
                             Home
                         </Link>
-                        <span className="text-gray-400">/</span>
+                        <svg className="w-4 h-4 mx-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         <Link href="/blogs" className="text-gray-500 hover:text-blue-600">
                             Blog
                         </Link>
-                        <span className="text-gray-400">/</span>
+                        <svg className="w-4 h-4 mx-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         <span className="text-[#3F3F42] font-medium truncate max-w-[200px]">
                             {blog.title}
                         </span>

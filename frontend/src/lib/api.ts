@@ -8,6 +8,7 @@ export const api = {
   endpoints: {
     auth: {
       login: "/auth/login",
+      google: "/auth/google",
       register: "/auth/register",
       logout: "/auth/logout",
       me: "/auth/me",
@@ -125,6 +126,12 @@ export const api = {
       create: "/activities",
       update: (id: string) => `/activities/${id}`,
       delete: (id: string) => `/activities/${id}`,
+    },
+    installments: {
+      createPlan: "/installments/create-plan",
+      activate: "/installments/activate",
+      sync: (bookingId: string) => `/installments/${bookingId}/sync`,
+      preview: "/installments/preview",
     },
     physicalRatings: {
       getAll: "/physical-ratings",

@@ -33,6 +33,7 @@ const queryRoutes = require("./routes/queryRoutes");
 const promoCodeRoutes = require("./routes/promoCodeRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const plantingLocationRoutes = require("./routes/plantingLocationRoutes");
+const installmentRoutes = require("./routes/installmentRoutes");
 
 
 // Load environment variables
@@ -135,6 +136,7 @@ app.use("/api/v1/queries", queryRoutes);
 app.use("/api/v1/promo-codes", promoCodeRoutes);
 app.use("/api/v1/activities", activityRoutes);
 app.use("/api/v1/planting-locations", plantingLocationRoutes);
+app.use("/api/v1/installments", installmentRoutes);
 
 
 // Handle undefined routes
@@ -153,6 +155,15 @@ if (require.main === module) {
       `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
     );
     console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+    // Start installment deadline checker (runs every 6 hours)
+    const { checkInstallmentDeadlines } = require("./controllers/installmentController");
+    const SIX_HOURS = 6 * 60 * 60 * 1000;
+    // Run once on startup (after 30 seconds to let DB connect)
+    setTimeout(() => checkInstallmentDeadlines().catch(console.error), 30000);
+    // Then every 6 hours
+    setInterval(() => checkInstallmentDeadlines().catch(console.error), SIX_HOURS);
+    console.log("⏰ Installment deadline checker scheduled (every 6 hours)");
   });
 
   process.on("unhandledRejection", (err, promise) => {

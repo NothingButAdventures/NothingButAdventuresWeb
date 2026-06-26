@@ -272,6 +272,89 @@ const getBookingStats = catchAsync(async (req, res, next) => {
   });
 });
 
+const capturePayPalPayment = catchAsync(async (req, res, next) => {
+  const { orderId, paymentOption } = req.body;
+  const bookingId = req.params.id;
+
+  if (!orderId) {
+    return next(new AppError('Please provide a PayPal order ID', 400));
+  }
+
+  const booking = await Booking.findById(bookingId);
+  if (!booking) {
+    return next(new AppError('No booking found with that ID', 404));
+  }
+
+  if (req.user.role !== 'admin' && booking.user.toString() !== req.user.id) {
+    return next(new AppError('You are not authorized to update this booking', 403));
+  }
+
+  // 1. Authorize with PayPal
+  const authString = Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_SECRET}`).toString('base64');
+  const authResponse = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${authString}`,
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!authResponse.ok) {
+    console.error("PayPal Auth Error", await authResponse.text());
+    return next(new AppError('Failed to authenticate with PayPal', 500));
+  }
+
+  const authData = await authResponse.json();
+  const accessToken = authData.access_token;
+
+  // 2. Capture the order
+  const captureResponse = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  const captureData = await captureResponse.json();
+
+  if (!captureResponse.ok || captureData.status !== 'COMPLETED') {
+    console.error("PayPal Capture Error", captureData);
+    return next(new AppError('Payment capture failed', 400));
+  }
+
+  // 3. Update booking status
+  const captureItem = captureData.purchase_units[0].payments.captures[0];
+  const capturedAmount = parseFloat(captureItem.amount.value);
+
+  booking.payment = {
+    method: 'paypal',
+    status: paymentOption === 'deposit' ? 'partially_paid' : 'paid',
+    transactions: [
+      ...(booking.payment.transactions || []),
+      {
+        transactionId: captureItem.id,
+        amount: capturedAmount,
+        currency: captureItem.amount.currency_code,
+        status: 'completed',
+        paymentDate: new Date(),
+        gateway: 'paypal',
+        gatewayResponse: captureData,
+      },
+    ],
+  };
+
+  await booking.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      booking,
+    },
+  });
+});
+
 module.exports = {
   getAllBookings,
   getBooking,
@@ -280,4 +363,5 @@ module.exports = {
   cancelBooking,
   confirmBooking,
   getBookingStats,
+  capturePayPalPayment,
 };

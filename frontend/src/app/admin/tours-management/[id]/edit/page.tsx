@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { uploadTourImage } from "@/lib/firebase";
 import ImagePickerModal from "@/components/ImagePickerModal";
 import CreateActivityModal from "@/components/CreateActivityModal";
+import BeforeYouBookEditor from "@/components/admin/BeforeYouBookEditor";
 
 interface Country {
   _id: string;
@@ -190,6 +191,21 @@ export default function EditTourPage() {
 
   // Available Dates
   const [availableDates, setAvailableDates] = useState<AvailableDate[]>([]);
+
+  // Before You Book
+  const [beforeYouBook, setBeforeYouBook] = useState<any>({
+    isTourForMe: "",
+    visaInformation: "",
+    accommodation: "",
+    joiningPoint: "",
+  });
+  const [beforeYouBookTab, setBeforeYouBookTab] = useState(0);
+  const beforeYouBookTabs = [
+    { key: "isTourForMe" as const, label: "Is the tour for me" },
+    { key: "visaInformation" as const, label: "Visa Information" },
+    { key: "accommodation" as const, label: "Accommodation" },
+    { key: "joiningPoint" as const, label: "Joining Point" },
+  ];
 
   const [formData, setFormData] = useState({
     name: "",
@@ -421,6 +437,16 @@ export default function EditTourPage() {
               discount: sd.discount || "",
             })),
           );
+        }
+
+        // Load beforeYouBook data
+        if (tour.beforeYouBook) {
+          setBeforeYouBook({
+            isTourForMe: tour.beforeYouBook.isTourForMe || "",
+            visaInformation: tour.beforeYouBook.visaInformation || "",
+            accommodation: tour.beforeYouBook.accommodation || "",
+            joiningPoint: tour.beforeYouBook.joiningPoint || "",
+          });
         }
       }
     } catch (error) {
@@ -1081,6 +1107,12 @@ export default function EditTourPage() {
         isActive: formData.isActive,
         plantingLocation: formData.plantingLocation || undefined,
         treesPlanted: parseInt(formData.treesPlanted) || 0,
+        beforeYouBook: {
+          isTourForMe: beforeYouBook.isTourForMe || undefined,
+          visaInformation: beforeYouBook.visaInformation || undefined,
+          accommodation: beforeYouBook.accommodation || undefined,
+          joiningPoint: beforeYouBook.joiningPoint || undefined,
+        },
       };
 
       const response = await fetch(`${api.baseURL}/tours/${tourId}`, {
@@ -2226,6 +2258,42 @@ export default function EditTourPage() {
               </button>
             </div>
           )}
+
+          {/* Before You Book Section */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-semibold text-[#3F3F42] mb-1">
+              Before You Book
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">Add content for each tab. Use &quot;Normal Text&quot; for paragraphs (left column) and &quot;List Item&quot; for checklist items (right column) on the frontend.</p>
+
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 mb-4">
+              {beforeYouBookTabs.map((tab, index) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setBeforeYouBookTab(index)}
+                  className={`flex-1 text-center px-3 py-2.5 text-sm font-medium transition-all cursor-pointer border-b-2 ${
+                    beforeYouBookTab === index
+                      ? "border-[#3F3F42] text-[#3F3F42]"
+                      : "border-transparent text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Block Editor */}
+            <BeforeYouBookEditor
+              key={beforeYouBookTabs[beforeYouBookTab].key}
+              value={beforeYouBook[beforeYouBookTabs[beforeYouBookTab].key]}
+              onChange={(data) => {
+                const key = beforeYouBookTabs[beforeYouBookTab].key;
+                setBeforeYouBook((prev: any) => ({ ...prev, [key]: data }));
+              }}
+            />
+          </div>
 
           {/* Available Dates Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">

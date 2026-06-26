@@ -70,10 +70,14 @@ const getAllCountries = catchAsync(async (req, res, next) => {
 });
 
 const getCountry = catchAsync(async (req, res, next) => {
-  const country = await Country.findOne({
-    $or: [{ _id: req.params.id }, { slug: req.params.id }],
-    isActive: true,
-  }).populate({
+  const query = { isActive: true };
+  if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+    query.$or = [{ _id: req.params.id }, { slug: req.params.id }];
+  } else {
+    query.slug = req.params.id;
+  }
+
+  const country = await Country.findOne(query).populate({
     path: 'tours',
     match: { isActive: true },
     select: 'name slug summary price ratingsAverage ratingsQuantity duration images',

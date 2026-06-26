@@ -236,6 +236,68 @@ const getMe = catchAsync(async (req, res, next) => {
   });
 });
 
+const googleLogin = catchAsync(async (req, res, next) => {
+  const { code, redirectUri } = req.body;
+
+  if (!code) {
+    return next(new AppError("Please provide an authorization code", 400));
+  }
+
+  const { OAuth2Client } = require("google-auth-library");
+  const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri || "http://localhost:3000/auth/callback"
+  );
+
+  let payload;
+  try {
+    // Exchange authorization code for tokens
+    const { tokens } = await client.getToken(code);
+
+    // Verify the id_token
+    const ticket = await client.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch (error) {
+    return next(new AppError("Invalid or expired authorization code", 401));
+  }
+
+  const { email, name, picture } = payload;
+
+  if (!email) {
+    return next(new AppError("Email not provided by Google", 400));
+  }
+
+  // Check if user exists
+  let user = await User.findOne({ email }).select("+isActive");
+
+  if (!user) {
+    // Create user if they don't exist
+    const randomPassword = crypto.randomBytes(32).toString("hex");
+    user = await User.create({
+      name: name || "Google User",
+      email,
+      password: randomPassword,
+      passwordConfirm: randomPassword,
+      role: "user",
+      isEmailVerified: true,
+    });
+  } else if (!user.isActive) {
+    return next(
+      new AppError(
+        "Your account has been deactivated. Please contact support.",
+        401,
+      ),
+    );
+  }
+
+  // Send token
+  createSendToken(user, 200, res);
+});
+
 module.exports = {
   register,
   login,
@@ -246,4 +308,5 @@ module.exports = {
   verifyEmail,
   resendVerificationEmail,
   getMe,
+  googleLogin,
 };

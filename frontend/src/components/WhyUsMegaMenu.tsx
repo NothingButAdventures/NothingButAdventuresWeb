@@ -10,7 +10,7 @@ export default function WhyUsMegaMenu({ isHovered }: WhyUsMegaMenuProps) {
   if (!isHovered) return null;
 
   return (
-    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-4 pb-6 pt-4 md:px-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)] border-b border-black/5">
+    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-4 pb-6 pt-4 md:px-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
       <div className="mx-auto w-full max-w-[1600px]">
         <div
           className="grid gap-4"

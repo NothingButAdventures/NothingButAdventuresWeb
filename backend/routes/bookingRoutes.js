@@ -7,6 +7,7 @@ const {
   cancelBooking,
   confirmBooking,
   getBookingStats,
+  capturePayPalPayment,
 } = require('../controllers/bookingController');
 const { protect, restrictTo } = require('../middleware/auth');
 
@@ -19,6 +20,7 @@ router.use(protect);
 router.post('/', createBooking);
 router.get('/:id', getBooking);
 router.patch('/:id', updateBooking);
+router.post('/:id/capture-paypal', capturePayPalPayment);
 router.patch('/:id/cancel', cancelBooking);
 
 // Admin only routes

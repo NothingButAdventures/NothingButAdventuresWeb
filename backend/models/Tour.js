@@ -344,6 +344,12 @@ const tourSchema = new mongoose.Schema(
       visa: String,
       insurance: String,
     },
+    beforeYouBook: {
+      isTourForMe: { type: mongoose.Schema.Types.Mixed },
+      visaInformation: { type: mongoose.Schema.Types.Mixed },
+      accommodation: { type: mongoose.Schema.Types.Mixed },
+      joiningPoint: { type: mongoose.Schema.Types.Mixed }
+    },
     tags: [String],
     whatsIncluded: {
       type: String,

@@ -9,6 +9,7 @@ const {
   verifyEmail,
   resendVerificationEmail,
   getMe,
+  googleLogin,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
@@ -17,6 +18,7 @@ const router = express.Router();
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/google', googleLogin);
 router.post('/logout', logout);
 router.post('/forgot-password', forgotPassword);
 router.patch('/reset-password/:token', resetPassword);

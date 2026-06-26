@@ -1,4 +1,5 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
 import {
     getStorage,
     ref,
@@ -25,6 +26,7 @@ const firebaseConfig = {
 // Singleton pattern – avoid re-initializing on hot reloads
 let app: FirebaseApp;
 let storage: FirebaseStorage;
+let auth: Auth;
 
 if (!getApps().length) {
     app = initializeApp(firebaseConfig);
@@ -33,8 +35,9 @@ if (!getApps().length) {
 }
 
 storage = getStorage(app);
+auth = getAuth(app);
 
-export { storage };
+export { storage, auth, GoogleAuthProvider };
 
 // ─────────────────────────────────────────────
 // Core upload helper

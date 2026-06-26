@@ -36,6 +36,29 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
 
     const [selectedCountries, setSelectedCountries] = React.useState<Country[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+    const [canScrollRight, setCanScrollRight] = React.useState(true);
+
+    const checkScrollLimits = () => {
+        if (scrollRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+            setCanScrollLeft(scrollLeft > 15);
+            setCanScrollRight(scrollWidth - scrollLeft - clientWidth > 15);
+        }
+    };
+
+    React.useEffect(() => {
+        const container = scrollRef.current;
+        if (container) {
+            checkScrollLimits();
+            container.addEventListener("scroll", checkScrollLimits);
+            window.addEventListener("resize", checkScrollLimits);
+            return () => {
+                container.removeEventListener("scroll", checkScrollLimits);
+                window.removeEventListener("resize", checkScrollLimits);
+            };
+        }
+    }, [selectedCountries]);
 
     React.useEffect(() => {
         if (countries.length === 0) return;
@@ -97,7 +120,9 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 {/* Navigation Buttons */}
                 <button
                     onClick={() => scroll("left")}
-                    className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 z-30 hover:scale-105 shadow-lg"
+                    className={`absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-lg ${
+                        canScrollLeft ? "opacity-0 group-hover/carousel:opacity-100" : "hidden"
+                    }`}
                     aria-label="Scroll left"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +132,9 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
 
                 <button
                     onClick={() => scroll("right")}
-                    className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 z-30 hover:scale-105 shadow-lg"
+                    className={`absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-[#3F3F42] text-white rounded-full flex items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-lg ${
+                        canScrollRight ? "opacity-0 group-hover/carousel:opacity-100" : "hidden"
+                    }`}
                     aria-label="Scroll right"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

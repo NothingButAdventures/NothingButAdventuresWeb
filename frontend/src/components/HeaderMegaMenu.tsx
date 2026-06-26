@@ -87,6 +87,7 @@ interface Tour {
 
 type HeaderMegaMenuProps = {
   activeMenu: MenuType | null;
+  closeMenu?: () => void;
 };
 
 const fallbackAdventureImage =
@@ -169,7 +170,7 @@ function getContinentSlug(countryName: string): string {
   return CONTINENT_MAP[countryName.trim().toLowerCase()] || "asia";
 }
 
-export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
+export default function HeaderMegaMenu({ activeMenu, closeMenu }: HeaderMegaMenuProps) {
   // ── Adventures state ──
   const [travelStyles, setTravelStyles] = useState<TravelStyle[]>([]);
   const [selectedStyleIndex, setSelectedStyleIndex] = useState(0);
@@ -631,7 +632,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
   }
 
   return (
-    <div className="absolute left-0 top-full z-50 w-full bg-[#f3f8ff] px-4 pb-5 pt-3 md:px-8 shadow-[0_20px_60px_rgba(0,0,0,0.08)]  border-black/5">
+    <div className="absolute left-0 top-full z-50 w-full bg-[#f3f8ff] px-4 pb-5 pt-3 md:px-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
       <div className="mx-auto w-full max-w-[1600px]">
         {activeMenu === "adventures" ? (
           /* ═══════════════ ADVENTURES ═══════════════ */
@@ -670,6 +671,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                             setSelectedStyleIndex(index);
                             setAdventuresHoveredAll(false);
                           }}
+                          onClick={closeMenu}
                           className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
                             ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                             : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -683,6 +685,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       href="/travel-styles"
                       onMouseEnter={() => setAdventuresHoveredAll(true)}
                       onMouseLeave={() => setAdventuresHoveredAll(false)}
+                      onClick={closeMenu}
                       className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${adventuresHoveredAll
                         ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                         : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -886,6 +889,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                             setSelectedInterestIndex(index);
                             setInterestsHoveredAll(false);
                           }}
+                          onClick={closeMenu}
                           className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
                             ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                             : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -899,6 +903,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                       href="/trips"
                       onMouseEnter={() => setInterestsHoveredAll(true)}
                       onMouseLeave={() => setInterestsHoveredAll(false)}
+                      onClick={closeMenu}
                       className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${interestsHoveredAll
                         ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                         : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"
@@ -1098,6 +1103,7 @@ export default function HeaderMegaMenu({ activeMenu }: HeaderMegaMenuProps) {
                             setSelectedContinentIndex(index);
                             setDestinationsHoveredAll(false);
                           }}
+                          onClick={closeMenu}
                           className={`cursor-pointer rounded-full border px-4 py-2 text-[14px] font-medium transition-all duration-200 text-center block ${isActive
                             ? "border-[#3F3F42] bg-[#3F3F42] text-white shadow-sm"
                             : "border-[#c5c5c0] bg-transparent text-[#3F3F42] hover:border-[#3F3F42] hover:bg-[#3F3F42] hover:text-white"

@@ -695,8 +695,13 @@ export default function ProfilePage() {
                                                         </svg>
                                                         {formatDate(booking.startDate)}
                                                     </span>
-                                                    <span className="font-semibold text-[#3F3F42]">
+                                                    <span className="font-semibold text-[#3F3F42] flex items-center gap-2">
                                                         {booking.price.currency} {booking.price.totalPrice.toLocaleString()}
+                                                        {booking.installmentPlan?.isActive && (
+                                                            <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200">
+                                                                EMI ACTIVE
+                                                            </span>
+                                                        )}
                                                     </span>
                                                 </div>
                                             </div>

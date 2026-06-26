@@ -27,6 +27,25 @@ interface BookingDetails {
             paymentDate: string;
         }>;
     };
+    installmentPlan?: {
+        isActive: boolean;
+        subscriptionId?: string;
+        totalAmount: number;
+        upfrontAmount: number;
+        remainingAmount: number;
+        numberOfInstallments: number;
+        installmentAmount: number;
+        deadline: string;
+        schedule: Array<{
+            installmentNumber: number;
+            amount: number;
+            dueDate: string;
+            type: string;
+            status: string;
+            paidAt?: string;
+            transactionId?: string;
+        }>;
+    };
     travelers: Array<{
         firstName: string;
         lastName: string;
@@ -76,10 +95,37 @@ interface BookingDetailsModalProps {
     onClose: () => void;
 }
 
-export default function BookingDetailsModal({ booking, onClose }: BookingDetailsModalProps) {
+export default function BookingDetailsModal({ booking: initialBooking, onClose }: BookingDetailsModalProps) {
     const router = useRouter();
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+    const [booking, setBooking] = useState(initialBooking);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    // Sync installment status from PayPal on mount
+    useEffect(() => {
+        if (booking.installmentPlan?.isActive && booking.installmentPlan?.subscriptionId) {
+            syncInstallmentStatus();
+        }
+    }, []);
+
+    const syncInstallmentStatus = async () => {
+        setIsSyncing(true);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${api.baseURL}/installments/${booking._id}/sync`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json();
+            if (res.ok && data.data?.booking) {
+                setBooking(data.data.booking);
+            }
+        } catch (err) {
+            console.error("Failed to sync installment status:", err);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     // Lock body scroll when modal is open
     useEffect(() => {
@@ -428,6 +474,121 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Installment Plan Section */}
+                        {booking.installmentPlan && booking.installmentPlan.schedule && booking.installmentPlan.schedule.length > 0 && (
+                            <div className="mt-8">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="text-lg font-bold text-[#3F3F42]">Installment Plan</h3>
+                                    {booking.installmentPlan.isActive && (
+                                        <button
+                                            onClick={syncInstallmentStatus}
+                                            disabled={isSyncing}
+                                            className="text-xs bg-purple-100 hover:bg-purple-200 text-purple-700 font-medium py-1 px-3 rounded-full transition disabled:opacity-50"
+                                        >
+                                            {isSyncing ? "Syncing..." : "🔄 Refresh Status"}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Progress bar */}
+                                {(() => {
+                                    const paidCount = booking.installmentPlan.schedule.filter((s: any) => s.status === 'paid').length;
+                                    const totalCount = booking.installmentPlan.schedule.length;
+                                    const progressPercent = Math.round((paidCount / totalCount) * 100);
+                                    const totalPaid = booking.installmentPlan.schedule
+                                        .filter((s: any) => s.status === 'paid')
+                                        .reduce((sum: number, s: any) => sum + s.amount, 0);
+
+                                    return (
+                                        <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                                            <div className="flex justify-between text-sm mb-2">
+                                                <span className="text-gray-600">
+                                                    {paidCount}/{totalCount} payments completed
+                                                </span>
+                                                <span className="font-semibold text-[#3F3F42]">
+                                                    {progressPercent}%
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full transition-all duration-500"
+                                                    style={{
+                                                        width: `${progressPercent}%`,
+                                                        background: progressPercent === 100
+                                                            ? 'linear-gradient(90deg, #059669, #10b981)'
+                                                            : 'linear-gradient(90deg, #7c3aed, #4f46e5)',
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between text-xs mt-2">
+                                                <span className="text-green-600 font-medium">
+                                                    Paid: ${(totalPaid || 0).toLocaleString()}
+                                                </span>
+                                                <span className="text-gray-500">
+                                                    Remaining: ${(booking.installmentPlan.totalAmount - totalPaid).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Schedule table */}
+                                <div className="bg-gray-50 rounded-xl overflow-hidden">
+                                    <div className="grid grid-cols-4 gap-2 px-4 py-3 bg-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                        <span>Payment</span>
+                                        <span>Amount</span>
+                                        <span>Due Date</span>
+                                        <span>Status</span>
+                                    </div>
+                                    {booking.installmentPlan.schedule.map((entry: any, idx: number) => (
+                                        <div
+                                            key={idx}
+                                            className={`grid grid-cols-4 gap-2 px-4 py-3 text-sm border-b border-gray-100 last:border-b-0 ${entry.status === 'paid' ? 'bg-green-50/50' : ''}`}
+                                        >
+                                            <span className="text-[#3F3F42] font-medium">
+                                                {entry.type === 'upfront' ? '💰 Upfront' : `#${entry.installmentNumber}`}
+                                            </span>
+                                            <span className="text-[#3F3F42] font-semibold">
+                                                ${entry.amount.toLocaleString()}
+                                            </span>
+                                            <span className="text-gray-600 text-xs">
+                                                {new Date(entry.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </span>
+                                            <span>
+                                                {entry.status === 'paid' ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                                        ✅ Paid
+                                                    </span>
+                                                ) : entry.status === 'failed' ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                        ❌ Failed
+                                                    </span>
+                                                ) : entry.status === 'overdue' ? (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                                                        ⚠️ Overdue
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                                        ⏳ Pending
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Deadline notice */}
+                                {booking.installmentPlan.isActive && (
+                                    <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                        <p className="text-xs text-amber-800">
+                                            ⚠️ All payments must be completed by <strong>{new Date(booking.installmentPlan.deadline).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong> (90 days before tour).
+                                            Failure to complete will result in booking cancellation and the paid amount being credited to your wallet.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

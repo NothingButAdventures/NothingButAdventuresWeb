@@ -17,13 +17,13 @@ const cardsData = [
     },
     {
         id: 3,
-        icon: "/dd3.svg",
+        icon: "/dd4.svg",
         title: "They are called Adventure Captains",
         description: "Our Adventure Captains are more than guides — they're local insiders, problem-solvers, storytellers, and hype crew rolled into one unforgettable experience."
     },
     {
         id: 4,
-        icon: "/dd4.svg",
+        icon: "/hjhj.png",
         title: "Immersive experiences are how we roll",
         description: "No sidelines, nothing but adventures here. Cook, craft, climb, and dive yourself fully in the heartbeat of local culture."
     },
