@@ -67,6 +67,10 @@ interface Booking {
             count: number;
         };
     };
+    installmentPlan?: {
+        isActive: boolean;
+        [key: string]: any;
+    };
     tour: {
         _id: string;
         name: string;
@@ -1254,7 +1258,7 @@ export default function ProfilePage() {
             {
                 selectedBooking && (
                     <BookingDetailsModal
-                        booking={selectedBooking}
+                        booking={selectedBooking as any}
                         onClose={() => setSelectedBooking(null)}
                     />
                 )

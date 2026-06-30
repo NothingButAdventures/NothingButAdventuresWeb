@@ -13,7 +13,8 @@
 const calculateInstallmentPlan = (
   totalAmount,
   tourStartDate,
-  currency = "USD"
+  currency = "USD",
+  bookingPercentage = 20
 ) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -38,7 +39,7 @@ const calculateInstallmentPlan = (
   const numberOfInstallments = Math.min(Math.max(availableMonths, 2), 12);
 
   // Calculate installment amount (floor to avoid overcharging)
-  const rawRemaining = totalAmount * 0.75;
+  const rawRemaining = totalAmount * (1 - bookingPercentage / 100);
   const installmentAmount =
     Math.floor((rawRemaining / numberOfInstallments) * 100) / 100;
 

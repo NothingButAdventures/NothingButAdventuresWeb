@@ -96,7 +96,7 @@ const ensurePayPalProduct = async (accessToken) => {
 const createInstallmentPlan = catchAsync(async (req, res, next) => {
   const { bookingId } = req.body;
 
-  const booking = await Booking.findById(bookingId).populate("tour", "name");
+  const booking = await Booking.findById(bookingId).populate("tour", "name price");
   if (!booking) return next(new AppError("Booking not found", 404));
 
   if (
@@ -130,7 +130,8 @@ const createInstallmentPlan = catchAsync(async (req, res, next) => {
   const plan = calculateInstallmentPlan(
     booking.price.totalPrice,
     booking.startDate,
-    booking.price.currency
+    booking.price.currency,
+    booking.tour?.price?.bookingPercentage || 20
   );
 
   if (!plan) {
@@ -688,7 +689,8 @@ const getInstallmentPreview = catchAsync(async (req, res) => {
   const plan = calculateInstallmentPlan(
     parseFloat(totalAmount),
     tourStartDate,
-    currency || "USD"
+    currency || "USD",
+    req.query.bookingPercentage ? parseFloat(req.query.bookingPercentage) : 20
   );
 
   res.status(200).json({

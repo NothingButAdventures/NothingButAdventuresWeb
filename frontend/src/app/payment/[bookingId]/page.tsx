@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import Link from "next/link";
-import { CheckCircle, ShieldCheck, ArrowLeft } from "@phosphor-icons/react";
+import { CheckCircle, ShieldCheck, ArrowLeft, Coins, HourglassHigh, XCircle, Warning } from "@phosphor-icons/react";
 
 interface Booking {
     _id: string;
@@ -14,6 +14,9 @@ interface Booking {
         _id: string;
         name: string;
         slug: string;
+        price?: {
+            bookingPercentage?: number;
+        };
     };
     startDate: string;
     numberOfTravelers: number;
@@ -355,8 +358,12 @@ export default function PaymentPage() {
                                         key={idx}
                                         className={`grid grid-cols-4 gap-2 px-4 py-3 text-sm border-b border-gray-100 last:border-b-0 ${entry.status === 'paid' ? 'bg-green-50/50' : ''}`}
                                     >
-                                        <span className="text-[#3F3F42] font-medium truncate">
-                                            {entry.type === 'upfront' ? '💰 Upfront' : `#${entry.installmentNumber}`}
+                                        <span className="text-[#3F3F42] font-medium truncate flex items-center gap-1.5">
+                                            {entry.type === 'upfront' ? (
+                                                <><Coins size={16} weight="fill" className="text-yellow-500" /> Upfront</>
+                                            ) : (
+                                                `#${entry.installmentNumber}`
+                                            )}
                                         </span>
                                         <span className="text-[#3F3F42] font-semibold">
                                             {formatPrice(entry.amount)}
@@ -366,20 +373,20 @@ export default function PaymentPage() {
                                         </span>
                                         <span>
                                             {entry.status === 'paid' ? (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
-                                                    ✅ Paid
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                                    <CheckCircle size={12} weight="bold" /> Paid
                                                 </span>
                                             ) : entry.status === 'failed' ? (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                                    ❌ Failed
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                                    <XCircle size={12} weight="bold" /> Failed
                                                 </span>
                                             ) : entry.status === 'overdue' ? (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
-                                                    ⚠️ Overdue
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                                                    <Warning size={12} weight="bold" /> Overdue
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
-                                                    ⏳ Pending
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">
+                                                    <HourglassHigh size={12} weight="bold" /> Pending
                                                 </span>
                                             )}
                                         </span>
@@ -393,7 +400,7 @@ export default function PaymentPage() {
                             <ul className="text-xs text-purple-700 space-y-1.5">
                                 <li className="flex items-start gap-2">
                                     <span className="mt-0.5">1️⃣</span>
-                                    <span>{formatPrice(payNowAmount)} (25%) charged immediately as setup fee</span>
+                                    <span>{formatPrice(payNowAmount)} ({booking.tour?.price?.bookingPercentage || 20}%) charged immediately as setup fee</span>
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <span className="mt-0.5">2️⃣</span>
@@ -561,7 +568,7 @@ export default function PaymentPage() {
                                     {isInstallment && booking.installmentPlan && (
                                         <>
                                             <div className="flex justify-between text-gray-600">
-                                                <span>Upfront (25%)</span>
+                                                <span>Upfront ({booking.tour?.price?.bookingPercentage || 20}%)</span>
                                                 <span>{formatPrice(booking.installmentPlan.upfrontAmount)}</span>
                                             </div>
                                             <div className="flex justify-between text-gray-600">
