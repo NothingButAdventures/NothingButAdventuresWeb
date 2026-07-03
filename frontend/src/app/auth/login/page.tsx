@@ -16,11 +16,19 @@ export default function LoginPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  const getCallbackUrl = () => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("callbackUrl") || "/dashboard";
+    }
+    return "/dashboard";
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      router.push("/dashboard");
+      router.push(getCallbackUrl());
     }
   }, [router]);
 
@@ -48,7 +56,7 @@ export default function LoginPage() {
       }
 
       localStorage.setItem("token", data.token);
-      router.push("/dashboard");
+      router.push(getCallbackUrl());
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -57,6 +65,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
+    const callbackUrl = getCallbackUrl();
     const params = new URLSearchParams({
       client_id: GOOGLE_CLIENT_ID || "",
       redirect_uri: GOOGLE_REDIRECT_URI,
@@ -64,6 +73,7 @@ export default function LoginPage() {
       scope: "openid email profile",
       access_type: "offline",
       prompt: "consent",
+      state: callbackUrl,
     });
     window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };

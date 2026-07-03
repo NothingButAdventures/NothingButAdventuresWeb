@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useSearchParams, useRouter } from "next/navigation";
+import { useParams, useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
@@ -134,6 +134,7 @@ export default function CheckoutPage() {
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const pathname = usePathname();
     const slug = params.slug as string;
     const tourCode = params.tourCode as string;
 
@@ -142,7 +143,30 @@ export default function CheckoutPage() {
 
     const [tour, setTour] = useState<Tour | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            setIsLoggedIn(true);
+            fetch(`${api.baseURL}${api.endpoints.auth.me}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.data.user) {
+                    const firstName = data.data.user.name.split(' ')[0] || data.data.user.name;
+                    setPrimaryTraveller(prev => ({
+                        ...prev,
+                        firstName: firstName,
+                        email: data.data.user.email || prev.email
+                    }));
+                }
+            })
+            .catch(() => {});
+        }
+    }, []);
     const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
 
     // Promo code state
@@ -191,6 +215,18 @@ export default function CheckoutPage() {
         nationality: "British",
     });
     const [otherTravellers, setOtherTravellers] = useState<Traveller[]>([]);
+    useEffect(() => {
+        const stateDataStr = searchParams.get("stateData");
+        if (stateDataStr) {
+            try {
+                const decoded = atob(stateDataStr);
+                const parsed = JSON.parse(decoded);
+                if (parsed.adultCount) setAdultCount(parsed.adultCount);
+                if (parsed.primaryTraveller) setPrimaryTraveller(parsed.primaryTraveller);
+                if (parsed.otherTravellers) setOtherTravellers(parsed.otherTravellers);
+            } catch (e) {}
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         setOtherTravellers(prev => {
@@ -225,6 +261,7 @@ export default function CheckoutPage() {
     const [selectedActivities, setSelectedActivities] = useState<SelectedActivity[]>([]);
     const [expandedDays, setExpandedDays] = useState<number[]>([]);
     const [openActivityDropdown, setOpenActivityDropdown] = useState<string | null>(null);
+    const [openRoomDropdown, setOpenRoomDropdown] = useState(false);
 
     // Step 4: Accommodation & Travel Extras
     const [accommodationUpgrade, setAccommodationUpgrade] = useState<AccommodationUpgrade | null>(null);
@@ -235,6 +272,7 @@ export default function CheckoutPage() {
     const [isBooking, setIsBooking] = useState(false);
     const [bookingError, setBookingError] = useState("");
     const [paymentOption, setPaymentOption] = useState<"full" | "deposit" | "installments">("full");
+    const [activeStep4TravellerIndex, setActiveStep4TravellerIndex] = useState(0);
 
     useEffect(() => {
         if (slug) {
@@ -438,11 +476,27 @@ export default function CheckoutPage() {
         return differenceInDays >= 90;
     }, [selectedDate]);
 
+    // Base tour price (discounted per person × adults) WITHOUT extras
+    const baseTourPrice = useMemo(() => {
+        if (!tour) return 0;
+        let basePrice = tour.price.amount;
+        const dateDiscount = getDiscountPercentage(selectedDate?.discount);
+        const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
+        if (bestDiscount > 0) {
+            basePrice = tour.price.amount * (1 - bestDiscount / 100);
+        } else if (selectedDate?.price?.amount) {
+            basePrice = selectedDate.price.amount;
+        } else if (tour.price.discountPercent > 0) {
+            basePrice = basePrice * (1 - tour.price.discountPercent / 100);
+        }
+        return Math.round(basePrice * adultCount);
+    }, [tour, selectedDate, adultCount, promoData]);
+
     const depositAmount = useMemo(() => {
         if (!tour) return 0;
         const percentage = tour.price.bookingPercentage || 20;
-        return Math.round(calculateTotalPrice * (percentage / 100));
-    }, [calculateTotalPrice, tour]);
+        return Math.round(baseTourPrice * (percentage / 100));
+    }, [baseTourPrice, tour]);
 
     const finalPaymentDate = useMemo(() => {
         if (!selectedDate) return new Date();
@@ -468,7 +522,8 @@ export default function CheckoutPage() {
         const numberOfInstallments = Math.min(Math.max(availableMonths, 2), 12);
 
         const bookingPercentage = tour?.price?.bookingPercentage || 20;
-        const rawRemaining = calculateTotalPrice * (1 - bookingPercentage / 100);
+        // Remaining = total price minus the deposit (deposit is only on base tour price)
+        const rawRemaining = calculateTotalPrice - Math.round(baseTourPrice * (bookingPercentage / 100));
         const installmentAmount = Math.floor((rawRemaining / numberOfInstallments) * 100) / 100;
         const totalFromInstallments = Math.round(installmentAmount * numberOfInstallments * 100) / 100;
         const upfrontAmount = Math.round((calculateTotalPrice - totalFromInstallments) * 100) / 100;
@@ -492,7 +547,7 @@ export default function CheckoutPage() {
             installmentAmount,
             schedule
         };
-    }, [selectedDate, isDepositAvailable, calculateTotalPrice, finalPaymentDate, tour]);
+    }, [selectedDate, isDepositAvailable, calculateTotalPrice, baseTourPrice, finalPaymentDate, tour]);
 
     const payNowAmount = useMemo(() => {
         if (paymentOption === "installments" && installmentPlan) {
@@ -735,7 +790,7 @@ export default function CheckoutPage() {
             case 1:
                 const isPrimaryValid = !!(primaryTraveller.title && primaryTraveller.firstName && primaryTraveller.lastName);
                 const areOthersValid = otherTravellers.every(t => !!(t.title && t.firstName && t.lastName));
-                return isPrimaryValid && areOthersValid;
+                return isLoggedIn && isPrimaryValid && areOthersValid;
             case 2:
                 return selectedDateId !== null;
             case 3:
@@ -942,14 +997,49 @@ export default function CheckoutPage() {
                             })}
                         </div>
                         {/* Step 1: Who's Travelling */}
-                        {currentStep >= 1 && (
+                        {currentStep >= 1 && currentStep !== 4 && (
                             <div className="space-y-4">
                                 {currentStep === 1 && (
-                                    <div className="flex items-center justify-between px-1 mb-4">
-                                        <div className="flex flex-col">
-                                            <h2 className="text-[42px] font-medium text-[#2C3238] mb-1 leading-tight">Passenger Details</h2>
+                                    <>
+                                        {!isLoggedIn && (
+                                            <div className="bg-purple-50 rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-purple-100">
+                                                <div>
+                                                    <h3 className="text-[#2C3238] font-semibold text-[18px]">Already have an account?</h3>
+                                                    <p className="text-gray-600 text-[15px] mt-1">Log in for a faster checkout experience.</p>
+                                                </div>
+                                                <div className="flex gap-3 w-full md:w-auto">
+                                                    {(() => {
+                                                        const dataStr = JSON.stringify({ adultCount, primaryTraveller, otherTravellers });
+                                                        const encodedData = typeof window !== 'undefined' ? btoa(dataStr) : '';
+                                                        const newSearchParams = new URLSearchParams(searchParams.toString());
+                                                        newSearchParams.set("stateData", encodedData);
+                                                        const cbUrl = encodeURIComponent(pathname + '?' + newSearchParams.toString());
+                                                        return (
+                                                            <>
+                                                                <Link 
+                                                                    href={`/auth/login?callbackUrl=${cbUrl}`}
+                                                                    className="px-6 py-2.5 border border-[#6A38C2] text-[#6A38C2] font-medium rounded-lg hover:bg-purple-100 transition w-full md:w-auto text-center"
+                                                                >
+                                                                    Login
+                                                                </Link>
+                                                                <Link 
+                                                                    href={`/auth/register?callbackUrl=${cbUrl}`}
+                                                                    className="px-6 py-2.5 bg-[#6A38C2] text-white font-medium rounded-lg hover:bg-purple-900 transition w-full md:w-auto text-center"
+                                                                >
+                                                                    Sign up
+                                                                </Link>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex items-center justify-between px-1 mb-4">
+                                            <div className="flex flex-col">
+                                                <h2 className="text-[42px] font-medium text-[#2C3238] mb-1 leading-tight">Who is Travelling?</h2>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </>
                                 )}
                                 <div className={`bg-white rounded-xl shadow-sm border p-6`}>
                                     {currentStep === 1 ? (
@@ -1023,7 +1113,8 @@ export default function CheckoutPage() {
                                                                             type="text"
                                                                             value={traveller.firstName}
                                                                             onChange={(e) => updateField('firstName', e.target.value)}
-                                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[17px]"
+                                                                            disabled={isPrimary && isLoggedIn}
+                                                                            className={`w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[17px] ${isPrimary && isLoggedIn ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
                                                                         />
                                                                     </div>
                                                                     <div>
@@ -1291,7 +1382,7 @@ export default function CheckoutPage() {
                                                 <div className="mb-8">
                                                     <h3 className="text-[42px] font-medium text-[#2C3238] mb-6 leading-tight">Room Selection</h3>
 
-                                                    <div className="border border-gray-200 rounded-xl overflow-hidden">
+                                                    <div className="border border-gray-200 rounded-xl overflow-visible">
                                                         <div className="px-5 py-4 text-[16px] font-medium text-gray-600">
                                                             <span className="text-[#6A38C2] font-semibold">All travellers</span> have been assigned to a room.
                                                         </div>
@@ -1323,29 +1414,119 @@ export default function CheckoutPage() {
                                                             </label>
 
                                                             {/* My Own Room Option */}
-                                                            <label className={`flex items-start justify-between p-4 rounded-lg border-2 cursor-pointer transition ${accommodationUpgrade?.participants?.length === adultCount ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-center gap-2 mb-2">
-                                                                        <div className="font-bold text-[#2C3238] text-[17px]">My Own Room - Private Single</div>
-                                                                        <span className="bg-[#2C3238] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">Private</span>
+                                                            <div className={`p-4 rounded-lg border-2 transition ${(accommodationUpgrade?.participants?.length ?? 0) > 0 ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white"}`}>
+                                                                <div className="flex items-start justify-between">
+                                                                    <div className="flex-1">
+                                                                        <div className="flex items-center gap-2 mb-2">
+                                                                            <div className="font-bold text-[#2C3238] text-[17px]">My Own Room - Private Single</div>
+                                                                            <span className="bg-[#2C3238] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">Private</span>
+                                                                        </div>
+                                                                        <p className="text-[14px] text-gray-600 mb-4 max-w-xl">
+                                                                            Private room for single occupancy.
+                                                                        </p>
+                                                                        <div>
+                                                                            <span className="bg-orange-500 text-white text-[12px] font-bold px-3 py-1 rounded-full">Low Availability</span>
+                                                                        </div>
                                                                     </div>
-                                                                    <p className="text-[14px] text-gray-600 mb-4 max-w-xl">
-                                                                        Private room for single occupancy.
-                                                                    </p>
-                                                                    <div>
-                                                                        <span className="bg-orange-500 text-white text-[12px] font-bold px-3 py-1 rounded-full">Low Availability</span>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-start gap-4">
                                                                     <div className="text-right">
                                                                         <div className="font-bold text-[#2C3238] text-[19px]">${((tour.price?.amount || 0) + (tour.price?.ownRoomPrice || 0)).toLocaleString()}.00 <span className="text-[14px] text-gray-500 font-medium">Per Person</span></div>
                                                                     </div>
-                                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${accommodationUpgrade?.participants?.length === adultCount ? "border-[#6A38C2]" : "border-gray-300"}`}>
-                                                                        {accommodationUpgrade?.participants?.length === adultCount && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
-                                                                    </div>
                                                                 </div>
-                                                                <input type="radio" name="room" className="hidden" checked={accommodationUpgrade?.participants?.length === adultCount} onChange={() => setAccommodationUpgrade({ name: "My Own Room", description: "", price: tour.price?.ownRoomPrice || 0, currency: "USD", count: adultCount, participants: Array.from({ length: adultCount }, (_, i) => i) })} />
-                                                            </label>
+
+                                                                {/* Traveller Dropdown Selector */}
+                                                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                                                    <div className="flex items-start gap-3">
+                                                                        <div className="relative flex-1 max-w-[320px]">
+                                                                            <button
+                                                                                onClick={() => setOpenRoomDropdown(!openRoomDropdown)}
+                                                                                className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-4 py-2.5 text-[15px] text-gray-700 bg-white hover:bg-gray-50"
+                                                                            >
+                                                                                <span>Select travellers for own room</span>
+                                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${openRoomDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
+                                                                            </button>
+
+                                                                            {openRoomDropdown && (
+                                                                                <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] z-20 overflow-hidden">
+                                                                                    <div className="max-h-48 overflow-y-auto">
+                                                                                        {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
+                                                                                            const isSelected = accommodationUpgrade?.participants?.includes(idx) || false;
+                                                                                            const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
+                                                                                            return (
+                                                                                                <label key={idx} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer">
+                                                                                                    <span className="text-[15px] text-[#2C3238]">{name}</span>
+                                                                                                    <input
+                                                                                                        type="checkbox"
+                                                                                                        checked={isSelected}
+                                                                                                        onChange={(e) => {
+                                                                                                            const currentParticipants = accommodationUpgrade?.participants || [];
+                                                                                                            let newParticipants: number[];
+                                                                                                            if (e.target.checked) {
+                                                                                                                newParticipants = [...currentParticipants, idx];
+                                                                                                            } else {
+                                                                                                                newParticipants = currentParticipants.filter(p => p !== idx);
+                                                                                                            }
+                                                                                                            if (newParticipants.length === 0) {
+                                                                                                                setAccommodationUpgrade({ name: "Twin", description: "", price: 0, currency: "USD", count: 0, participants: [] });
+                                                                                                            } else {
+                                                                                                                setAccommodationUpgrade({
+                                                                                                                    name: "My Own Room",
+                                                                                                                    description: "",
+                                                                                                                    price: tour.price?.ownRoomPrice || 0,
+                                                                                                                    currency: "USD",
+                                                                                                                    count: newParticipants.length,
+                                                                                                                    participants: newParticipants
+                                                                                                                });
+                                                                                                            }
+                                                                                                        }}
+                                                                                                        className="w-5 h-5 rounded border-gray-300 text-[#6A38C2] focus:ring-[#6A38C2] cursor-pointer"
+                                                                                                    />
+                                                                                                </label>
+                                                                                            );
+                                                                                        })}
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Clear / Select All buttons */}
+                                                                        <button
+                                                                            onClick={() => setAccommodationUpgrade({ name: "Twin", description: "", price: 0, currency: "USD", count: 0, participants: [] })}
+                                                                            className="px-5 py-2.5 border border-gray-400 rounded-full text-[13px] font-bold text-[#2C3238] hover:bg-gray-50 transition whitespace-nowrap"
+                                                                        >
+                                                                            Clear
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => setAccommodationUpgrade({
+                                                                                name: "My Own Room",
+                                                                                description: "",
+                                                                                price: tour.price?.ownRoomPrice || 0,
+                                                                                currency: "USD",
+                                                                                count: adultCount,
+                                                                                participants: Array.from({ length: adultCount }, (_, i) => i)
+                                                                            })}
+                                                                            className="px-5 py-2.5 bg-[#2C3238] text-white rounded-full text-[13px] font-bold hover:bg-black transition whitespace-nowrap"
+                                                                        >
+                                                                            Select all
+                                                                        </button>
+                                                                    </div>
+
+                                                                    {/* Display selected names */}
+                                                                    {(accommodationUpgrade?.participants?.length ?? 0) > 0 && (
+                                                                        <div className="mt-3 flex flex-wrap gap-2">
+                                                                            {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
+                                                                                if (!accommodationUpgrade?.participants?.includes(idx)) return null;
+                                                                                const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
+                                                                                return (
+                                                                                    <div key={idx} className="flex items-center gap-1.5 text-[13px] text-gray-600 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6A38C2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                                                        <span>{name}</span>
+                                                                                    </div>
+                                                                                );
+                                                                            })}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1512,10 +1693,13 @@ export default function CheckoutPage() {
 
                                         </>
                                     ) : (
-                                        <div className="text-[#3F3F42]">
-                                            {selectedActivities.length} activities selected
-                                            {accommodationUpgrade && " • Room upgrade included"}
-                                        </div>
+                                        (selectedActivities.length > 0 || accommodationUpgrade) && (
+                                            <div className="text-[#3F3F42] px-6 py-4 border border-gray-200 rounded-xl shadow-sm">
+                                                {selectedActivities.length > 0 && `${selectedActivities.length} activities selected`}
+                                                {accommodationUpgrade && selectedActivities.length > 0 && " • "}
+                                                {accommodationUpgrade && "Room upgrade included"}
+                                            </div>
+                                        )
                                     )}
                                 </div>
                             </div>
@@ -1523,6 +1707,261 @@ export default function CheckoutPage() {
                         {/* Step 4: Payment Options */}
                         {currentStep >= 4 && (
                             <div className="space-y-4">
+                                {/* Full Passenger Details for Step 4 */}
+                                <div className="mb-8">
+                                    <h3 className="text-[22px] font-medium text-black mb-4">Complete Passenger Details</h3>
+                                    
+                                    <div className="border border-gray-300 rounded-xl bg-white mb-6">
+                                        {/* Top section: Cards */}
+                                        <div className="p-6 border-b border-gray-200">
+                                            <h3 className="text-[18px] font-medium text-[#2C3238] mb-4">Traveller in this booking</h3>
+                                            <div className="flex flex-wrap items-center gap-4 mb-4">
+                                                <div 
+                                                    onClick={() => setActiveStep4TravellerIndex(0)}
+                                                    className={`relative flex items-center gap-3 border rounded-xl px-4 py-3 min-w-[220px] cursor-pointer transition ${activeStep4TravellerIndex === 0 ? 'border-[#6A38C2] bg-[#F4F0FF]' : 'border-gray-200 hover:border-purple-300'}`}
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-[#3F3F42] text-white flex items-center justify-center font-bold text-base">
+                                                        {primaryTraveller.firstName?.charAt(0).toUpperCase() || "U"}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[13px] text-gray-500 font-medium">Traveller 1 ( Primary )</span>
+                                                        <span className="text-[15px] font-semibold text-black">
+                                                            {primaryTraveller.firstName || "Utsav"} {primaryTraveller.lastName || "Singh"}
+                                                        </span>
+                                                    </div>
+                                                    {!(primaryTraveller.email && primaryTraveller.phone && primaryTraveller.nationality) && (
+                                                        <span className="absolute top-2 right-2 text-orange-400 font-bold leading-none">*</span>
+                                                    )}
+                                                </div>
+                                                {otherTravellers.map((t, i) => (
+                                                    <div 
+                                                        key={i} 
+                                                        onClick={() => setActiveStep4TravellerIndex(i + 1)}
+                                                        className={`relative flex items-center gap-3 border rounded-xl px-4 py-3 min-w-[220px] cursor-pointer transition ${activeStep4TravellerIndex === i + 1 ? 'border-[#6A38C2] bg-[#F4F0FF]' : 'border-gray-200 hover:border-purple-300'}`}
+                                                    >
+                                                        <div className="w-10 h-10 rounded-full bg-teal-700 text-white flex items-center justify-center font-bold text-base">
+                                                            {t.firstName?.charAt(0).toUpperCase() || "I"}
+                                                        </div>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[13px] text-gray-500 font-medium">Traveller {i + 2}</span>
+                                                            <span className="text-[15px] font-semibold text-black">
+                                                                {t.firstName || "Ishita"} {t.lastName || "Singh"}
+                                                            </span>
+                                                        </div>
+                                                        {!(t.email && t.phone && t.nationality) && (
+                                                            <span className="absolute top-2 right-2 text-orange-400 font-bold leading-none">*</span>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <p className="text-[13px] text-gray-500">
+                                                <span className="text-orange-400 font-bold">*</span>Please provide details for all passengers to continue to payment.
+                                            </p>
+                                        </div>
+
+                                        {/* Bottom section: Form */}
+                                        <div className="p-6">
+                                            {(() => {
+                                                const renderTravellerFullForm = (traveller: Traveller, index: number, isPrimary: boolean) => {
+                                                    const updateField = (field: keyof Traveller, value: string) => {
+                                                        if (isPrimary) {
+                                                            setPrimaryTraveller(prev => ({ ...prev, [field]: value }));
+                                                        } else {
+                                                            setOtherTravellers(prev => {
+                                                                const newTravellers = [...prev];
+                                                                newTravellers[index] = { ...newTravellers[index], [field]: value };
+                                                                return newTravellers;
+                                                            });
+                                                        }
+                                                    };
+
+                                                    const updateFields = (updates: Partial<Traveller>) => {
+                                                        if (isPrimary) {
+                                                            setPrimaryTraveller(prev => ({ ...prev, ...updates }));
+                                                        } else {
+                                                            setOtherTravellers(prev => {
+                                                                const newTravellers = [...prev];
+                                                                newTravellers[index] = { ...newTravellers[index], ...updates };
+                                                                return newTravellers;
+                                                            });
+                                                        }
+                                                    };
+
+                                                    const globalIndex = isPrimary ? 0 : index + 1;
+                                                    if (globalIndex !== activeStep4TravellerIndex) return null;
+
+                                                    return (
+                                                        <div key={isPrimary ? 'primary' : index} className="mb-2">
+                                                            <div className="mb-6 flex items-center gap-2">
+                                                                <h3 className="text-[22px] font-medium text-[#3F3F42]">{isPrimary ? 'Primary Traveller' : `Traveller ${index + 2}`} <span className="text-gray-400 text-[16px] font-normal">(Names as displayed on passport)</span></h3>
+                                                            </div>
+
+                                                            {/* Row 1: Title */}
+                                                            <div className="mb-4 w-1/3 md:w-1/4 pr-2">
+                                                                <label className="block text-[15px] text-gray-600 mb-1">Title <span className="text-orange-400">*</span></label>
+                                                                <input type="text" value={traveller.title} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
+                                                            </div>
+
+                                                            {/* Row 2: Names */}
+                                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                                <div>
+                                                                    <label className="block text-[15px] text-gray-600 mb-1">First name <span className="text-orange-400">*</span></label>
+                                                                    <input type="text" value={traveller.firstName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[15px] text-gray-600 mb-1">Middle name(s)</label>
+                                                                    <input type="text" value={traveller.middleName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[15px] text-gray-600 mb-1">Last name <span className="text-orange-400">*</span></label>
+                                                                    <input type="text" value={traveller.lastName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
+                                                                </div>
+                                                            </div>
+
+                                                            {!isPrimary && (
+                                                                <div className="flex justify-end mb-4">
+                                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            className="w-5 h-5 border-gray-300 rounded text-[#6A38C2] focus:ring-[#6A38C2]"
+                                                                            onChange={(e) => {
+                                                                                if (e.target.checked) {
+                                                                                    updateFields({
+                                                                                        email: primaryTraveller.email,
+                                                                                        countryCode: primaryTraveller.countryCode,
+                                                                                        phone: primaryTraveller.phone,
+                                                                                        dobDay: primaryTraveller.dobDay,
+                                                                                        dobMonth: primaryTraveller.dobMonth,
+                                                                                        dobYear: primaryTraveller.dobYear,
+                                                                                        nationality: primaryTraveller.nationality
+                                                                                    });
+                                                                                } else {
+                                                                                    updateFields({
+                                                                                        email: '',
+                                                                                        phone: '',
+                                                                                        dobDay: '',
+                                                                                        dobMonth: '',
+                                                                                        dobYear: '',
+                                                                                        nationality: ''
+                                                                                    });
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                        <span className="text-[15px] text-gray-600">Copy Information from Primary Traveller</span>
+                                                                    </label>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Row 3: Email */}
+                                                            <div className="mb-4">
+                                                                <label className="block text-[15px] text-gray-600 mb-1">Email <span className="text-orange-400">*</span></label>
+                                                                <input
+                                                                    type="email"
+                                                                    value={traveller.email}
+                                                                    onChange={(e) => updateField('email', e.target.value)}
+                                                                    disabled={isPrimary && isLoggedIn}
+                                                                    className={`w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] ${isPrimary && isLoggedIn ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
+                                                                />
+                                                            </div>
+
+                                                            {/* Row 4: Phone Number */}
+                                                            <div className="mb-6">
+                                                                <label className="block text-[15px] text-gray-600 mb-1">Phone Number <span className="text-orange-400">*</span></label>
+                                                                <div className="flex gap-2">
+                                                                    <div className="w-1/3">
+                                                                        <select
+                                                                            value={traveller.countryCode}
+                                                                            onChange={(e) => updateField('countryCode', e.target.value)}
+                                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
+                                                                        >
+                                                                            <option value="+1 - United States">+1 - United States</option>
+                                                                            <option value="+1 - Canada">+1 - Canada</option>
+                                                                            <option value="+91 - India">+91 - India</option>
+                                                                            <option value="+44 - United Kingdom">+44 - United Kingdom</option>
+                                                                            <option value="+61 - Australia">+61 - Australia</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div className="w-2/3">
+                                                                        <input
+                                                                            type="tel"
+                                                                            value={traveller.phone}
+                                                                            onChange={(e) => updateField('phone', e.target.value)}
+                                                                            placeholder="Mobile number..."
+                                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px]"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Row 5: DOB & Nationality */}
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div>
+                                                                    <label className="block text-[15px] text-gray-600 mb-1">Date of Birth</label>
+                                                                    <input
+                                                                        type="date"
+                                                                        value={traveller.dobYear && traveller.dobMonth && traveller.dobDay ? `${traveller.dobYear}-${traveller.dobMonth.padStart(2, '0')}-${traveller.dobDay.padStart(2, '0')}` : ''}
+                                                                        onChange={(e) => {
+                                                                            const val = e.target.value;
+                                                                            if (val) {
+                                                                                const [y, m, d] = val.split('-');
+                                                                                updateFields({ dobYear: y, dobMonth: m, dobDay: d });
+                                                                            } else {
+                                                                                updateFields({ dobYear: '', dobMonth: '', dobDay: '' });
+                                                                            }
+                                                                        }}
+                                                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-[15px] text-gray-600 mb-1">Nationality <span className="text-orange-400">*</span></label>
+                                                                    <select
+                                                                        value={traveller.nationality}
+                                                                        onChange={(e) => updateField('nationality', e.target.value)}
+                                                                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
+                                                                    >
+                                                                        <option value="">Select Nationality</option>
+                                                                        <option value="American">American</option>
+                                                                        <option value="Canadian">Canadian</option>
+                                                                        <option value="Indian">Indian</option>
+                                                                        <option value="British">British</option>
+                                                                        <option value="Australian">Australian</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Navigation Buttons */}
+                                                            <div className="flex justify-end mt-8 gap-4">
+                                                                {globalIndex > 0 && (
+                                                                    <button
+                                                                        onClick={() => setActiveStep4TravellerIndex(globalIndex - 1)}
+                                                                        className="border border-gray-300 hover:bg-gray-50 text-[#3F3F42] font-medium py-2.5 px-8 rounded-lg transition"
+                                                                    >
+                                                                        Back
+                                                                    </button>
+                                                                )}
+                                                                {globalIndex < otherTravellers.length && (
+                                                                    <button
+                                                                        onClick={() => setActiveStep4TravellerIndex(globalIndex + 1)}
+                                                                        className="bg-[#6A38C2] hover:bg-purple-800 text-white font-medium py-2.5 px-8 rounded-lg transition"
+                                                                    >
+                                                                        Next Traveller
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                };
+
+                                                return (
+                                                    <>
+                                                        {renderTravellerFullForm(primaryTraveller, 0, true)}
+                                                        {otherTravellers.map((traveller, index) => renderTravellerFullForm(traveller, index, false))}
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="px-1 mb-2">
                                     <h2 className="text-[28px] font-medium text-[#2C3238] mb-1">Payment Options</h2>
                                 </div>
@@ -1530,184 +1969,7 @@ export default function CheckoutPage() {
                                     {currentStep === 4 && (
                                         <>
                                             <div className="pt-2">
-                                                {/* Full Passenger Details for Step 4 */}
-                                                <div className="mb-8">
-                                                    <h3 className="text-[22px] font-medium text-black mb-4">Complete Passenger Details</h3>
-                                                    {(() => {
-                                                        const renderTravellerFullForm = (traveller: Traveller, index: number, isPrimary: boolean) => {
-                                                            const updateField = (field: keyof Traveller, value: string) => {
-                                                                if (isPrimary) {
-                                                                    setPrimaryTraveller(prev => ({ ...prev, [field]: value }));
-                                                                } else {
-                                                                    setOtherTravellers(prev => {
-                                                                        const newTravellers = [...prev];
-                                                                        newTravellers[index] = { ...newTravellers[index], [field]: value };
-                                                                        return newTravellers;
-                                                                    });
-                                                                }
-                                                            };
 
-                                                            const updateFields = (updates: Partial<Traveller>) => {
-                                                                if (isPrimary) {
-                                                                    setPrimaryTraveller(prev => ({ ...prev, ...updates }));
-                                                                } else {
-                                                                    setOtherTravellers(prev => {
-                                                                        const newTravellers = [...prev];
-                                                                        newTravellers[index] = { ...newTravellers[index], ...updates };
-                                                                        return newTravellers;
-                                                                    });
-                                                                }
-                                                            };
-
-                                                            return (
-                                                                <div key={isPrimary ? 'primary' : index} className="border border-gray-300 rounded-xl p-6 mb-6 bg-white">
-                                                                    <div className="mb-6 flex items-center gap-2">
-                                                                        <h3 className="text-[20px] font-medium text-[#3F3F42]">{isPrimary ? 'Primary Traveller' : `Traveller ${index + 2}`}</h3>
-                                                                    </div>
-
-                                                                    {/* Row 1: Title */}
-                                                                    <div className="mb-4 w-1/3 md:w-1/4 pr-2">
-                                                                        <label className="block text-[15px] text-gray-600 mb-1">Title <span className="text-orange-400">*</span></label>
-                                                                        <input type="text" value={traveller.title} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
-                                                                    </div>
-
-                                                                    {/* Row 2: Names */}
-                                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                                                        <div>
-                                                                            <label className="block text-[15px] text-gray-600 mb-1">First name <span className="text-orange-400">*</span></label>
-                                                                            <input type="text" value={traveller.firstName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="block text-[15px] text-gray-600 mb-1">Middle name(s)</label>
-                                                                            <input type="text" value={traveller.middleName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="block text-[15px] text-gray-600 mb-1">Last name <span className="text-orange-400">*</span></label>
-                                                                            <input type="text" value={traveller.lastName} disabled className="w-full border border-gray-200 rounded-lg px-4 py-3 bg-gray-50 text-gray-500 text-[15px] cursor-not-allowed" />
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {!isPrimary && (
-                                                                        <div className="flex justify-end mb-4">
-                                                                            <label className="flex items-center gap-2 cursor-pointer">
-                                                                                <input
-                                                                                    type="checkbox"
-                                                                                    className="w-5 h-5 border-gray-300 rounded text-purple-600 focus:ring-purple-500"
-                                                                                    onChange={(e) => {
-                                                                                        if (e.target.checked) {
-                                                                                            updateFields({
-                                                                                                email: primaryTraveller.email,
-                                                                                                countryCode: primaryTraveller.countryCode,
-                                                                                                phone: primaryTraveller.phone,
-                                                                                                dobDay: primaryTraveller.dobDay,
-                                                                                                dobMonth: primaryTraveller.dobMonth,
-                                                                                                dobYear: primaryTraveller.dobYear,
-                                                                                                nationality: primaryTraveller.nationality
-                                                                                            });
-                                                                                        } else {
-                                                                                            updateFields({
-                                                                                                email: '',
-                                                                                                phone: '',
-                                                                                                dobDay: '',
-                                                                                                dobMonth: '',
-                                                                                                dobYear: '',
-                                                                                                nationality: ''
-                                                                                            });
-                                                                                        }
-                                                                                    }}
-                                                                                />
-                                                                                <span className="text-[15px] text-gray-600">Copy Information from Primary Traveller</span>
-                                                                            </label>
-                                                                        </div>
-                                                                    )}
-
-                                                                    {/* Row 3: Email */}
-                                                                    <div className="mb-4">
-                                                                        <label className="block text-[15px] text-gray-600 mb-1">Email <span className="text-orange-400">*</span></label>
-                                                                        <input
-                                                                            type="email"
-                                                                            value={traveller.email}
-                                                                            onChange={(e) => updateField('email', e.target.value)}
-                                                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px]"
-                                                                        />
-                                                                    </div>
-
-                                                                    {/* Row 4: Phone Number */}
-                                                                    <div className="mb-6">
-                                                                        <label className="block text-[15px] text-gray-600 mb-1">Phone Number <span className="text-orange-400">*</span></label>
-                                                                        <div className="flex gap-2">
-                                                                            <div className="w-1/3">
-                                                                                <select
-                                                                                    value={traveller.countryCode}
-                                                                                    onChange={(e) => updateField('countryCode', e.target.value)}
-                                                                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
-                                                                                >
-                                                                                    <option value="+1 - United States">+1 - United States</option>
-                                                                                    <option value="+1 - Canada">+1 - Canada</option>
-                                                                                    <option value="+91 - India">+91 - India</option>
-                                                                                    <option value="+44 - United Kingdom">+44 - United Kingdom</option>
-                                                                                    <option value="+61 - Australia">+61 - Australia</option>
-                                                                                </select>
-                                                                            </div>
-                                                                            <div className="w-2/3">
-                                                                                <input
-                                                                                    type="tel"
-                                                                                    value={traveller.phone}
-                                                                                    onChange={(e) => updateField('phone', e.target.value)}
-                                                                                    placeholder="Mobile number..."
-                                                                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px]"
-                                                                                />
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Row 5: DOB & Nationality */}
-                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                        <div>
-                                                                            <label className="block text-[15px] text-gray-600 mb-1">Date of Birth <span className="text-orange-400">*</span></label>
-                                                                            <input
-                                                                                type="date"
-                                                                                value={traveller.dobYear && traveller.dobMonth && traveller.dobDay ? `${traveller.dobYear}-${traveller.dobMonth.padStart(2, '0')}-${traveller.dobDay.padStart(2, '0')}` : ''}
-                                                                                onChange={(e) => {
-                                                                                    const val = e.target.value;
-                                                                                    if (val) {
-                                                                                        const [y, m, d] = val.split('-');
-                                                                                        updateFields({ dobYear: y, dobMonth: m, dobDay: d });
-                                                                                    } else {
-                                                                                        updateFields({ dobYear: '', dobMonth: '', dobDay: '' });
-                                                                                    }
-                                                                                }}
-                                                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
-                                                                            />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="block text-[15px] text-gray-600 mb-1">Nationality <span className="text-orange-400">*</span></label>
-                                                                            <select
-                                                                                value={traveller.nationality}
-                                                                                onChange={(e) => updateField('nationality', e.target.value)}
-                                                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-[15px] bg-white"
-                                                                            >
-                                                                                <option value="">Select Nationality</option>
-                                                                                <option value="American">American</option>
-                                                                                <option value="Canadian">Canadian</option>
-                                                                                <option value="Indian">Indian</option>
-                                                                                <option value="British">British</option>
-                                                                                <option value="Australian">Australian</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        };
-
-                                                        return (
-                                                            <>
-                                                                {renderTravellerFullForm(primaryTraveller, 0, true)}
-                                                                {otherTravellers.map((traveller, index) => renderTravellerFullForm(traveller, index, false))}
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </div>
 
                                                 {/* Cards Row */}
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 pt-2">
@@ -1951,7 +2213,7 @@ export default function CheckoutPage() {
                                 )}
                             </div>
 
-                            {currentStep >= 4 && accommodationUpgrade && (
+                            {currentStep >= 3 && accommodationUpgrade && (
                                 <div className="border-t border-gray-200 pt-5 mb-5 px-1">
                                     <h4 className="text-[17px] font-medium text-[#2C3238] mb-4">Room Selected</h4>
                                     <div className="flex items-start justify-between text-[14px]">
@@ -1969,7 +2231,7 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            {currentStep >= 4 && selectedActivities.length > 0 && (
+                            {currentStep >= 3 && selectedActivities.length > 0 && (
                                 <div className="border-t border-gray-200 pt-5 mb-5 px-1">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="text-[17px] font-medium text-[#2C3238]">Selected Add-Ons</h4>

@@ -12,6 +12,7 @@ export default function GoogleCallbackPage() {
   useEffect(() => {
     const code = searchParams.get("code");
     const errorParam = searchParams.get("error");
+    const state = searchParams.get("state");
 
     if (errorParam) {
       setError("Google login was cancelled.");
@@ -49,7 +50,9 @@ export default function GoogleCallbackPage() {
         }
 
         localStorage.setItem("token", data.token);
-        router.push("/dashboard");
+        
+        const redirectUrl = state ? decodeURIComponent(state) : "/dashboard";
+        router.push(redirectUrl);
       } catch (err: any) {
         setError(err.message || "Something went wrong");
         setTimeout(() => router.push("/auth/login"), 3000);
