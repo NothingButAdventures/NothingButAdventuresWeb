@@ -5,7 +5,8 @@ import { useParams, useSearchParams, useRouter, usePathname } from "next/navigat
 import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
-import { Tag, WarningCircle, X, Coins, HourglassHigh, User, CalendarBlank, Plus, CurrencyDollar, Money, CheckCircle } from "@phosphor-icons/react";
+import { Tag, WarningCircle, X, Coins, HourglassHigh, User, CalendarBlank, Plus, CurrencyDollar, Money, CheckCircle, Info, Armchair } from "@phosphor-icons/react";
+import AuthModal from "@/components/AuthModal";
 
 interface Tour {
     _id: string;
@@ -19,7 +20,9 @@ interface Tour {
         amount: number;
         currency: string;
         discountPercent: number;
+        bookingType?: "Percentage" | "Amount";
         bookingPercentage?: number;
+        bookingAmount?: number;
         ownRoomPrice?: number;
     };
     ownRoomAvailable: boolean;
@@ -145,6 +148,12 @@ export default function CheckoutPage() {
     const [loading, setLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(1);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authModalInitialView, setAuthModalInitialView] = useState<"login" | "register">("login");
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, [currentStep]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -153,18 +162,18 @@ export default function CheckoutPage() {
             fetch(`${api.baseURL}${api.endpoints.auth.me}`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success' && data.data.user) {
-                    const firstName = data.data.user.name.split(' ')[0] || data.data.user.name;
-                    setPrimaryTraveller(prev => ({
-                        ...prev,
-                        firstName: firstName,
-                        email: data.data.user.email || prev.email
-                    }));
-                }
-            })
-            .catch(() => {});
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data.user) {
+                        const firstName = data.data.user.name.split(' ')[0] || data.data.user.name;
+                        setPrimaryTraveller(prev => ({
+                            ...prev,
+                            firstName: firstName,
+                            email: data.data.user.email || prev.email
+                        }));
+                    }
+                })
+                .catch(() => { });
         }
     }, []);
     const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
@@ -224,7 +233,7 @@ export default function CheckoutPage() {
                 if (parsed.adultCount) setAdultCount(parsed.adultCount);
                 if (parsed.primaryTraveller) setPrimaryTraveller(parsed.primaryTraveller);
                 if (parsed.otherTravellers) setOtherTravellers(parsed.otherTravellers);
-            } catch (e) {}
+            } catch (e) { }
         }
     }, [searchParams]);
 
@@ -261,7 +270,11 @@ export default function CheckoutPage() {
     const [selectedActivities, setSelectedActivities] = useState<SelectedActivity[]>([]);
     const [expandedDays, setExpandedDays] = useState<number[]>([]);
     const [openActivityDropdown, setOpenActivityDropdown] = useState<string | null>(null);
+    const [expandedDescriptions, setExpandedDescriptions] = useState<string[]>([]);
+    const [tempActivityParticipants, setTempActivityParticipants] = useState<number[]>([]);
     const [openRoomDropdown, setOpenRoomDropdown] = useState(false);
+    const [tempRoomParticipants, setTempRoomParticipants] = useState<number[]>([]);
+    const [addonsExpanded, setAddonsExpanded] = useState(true);
 
     // Step 4: Accommodation & Travel Extras
     const [accommodationUpgrade, setAccommodationUpgrade] = useState<AccommodationUpgrade | null>(null);
@@ -274,22 +287,39 @@ export default function CheckoutPage() {
     const [paymentOption, setPaymentOption] = useState<"full" | "deposit" | "installments">("full");
     const [activeStep4TravellerIndex, setActiveStep4TravellerIndex] = useState(0);
 
+    const [isTravellerInfoModalOpen, setIsTravellerInfoModalOpen] = useState(false);
+    const [activeTravellerTab, setActiveTravellerTab] = useState(0);
+
     useEffect(() => {
         if (slug) {
             fetchTour();
         }
     }, [slug]);
 
-    // Pre-select date from query params
+    // Pre-select date from query params or default to nearest available
     useEffect(() => {
-        if (tour && preSelectedDateParam && !selectedDateId) {
-            const matchingDate = tour.startDates.find(
-                (d) => new Date(d.startDate).toISOString().split("T")[0] === preSelectedDateParam
-            );
-            if (matchingDate && matchingDate._id) {
-                setSelectedDateId(matchingDate._id);
+        if (tour && !selectedDateId) {
+            let dateToSelect = null;
+            if (preSelectedDateParam) {
+                dateToSelect = tour.startDates.find(
+                    (d) => new Date(d.startDate).toISOString().split("T")[0] === preSelectedDateParam
+                );
+            }
+
+            // If no matching pre-selected date, find the nearest future active date
+            if (!dateToSelect) {
+                const now = new Date();
+                const futureDates = tour.startDates.filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > now);
+                if (futureDates.length > 0) {
+                    futureDates.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+                    dateToSelect = futureDates[0];
+                }
+            }
+
+            if (dateToSelect && dateToSelect._id) {
+                setSelectedDateId(dateToSelect._id);
                 // Also set calendar month to show the selected date
-                setCalendarMonth(new Date(matchingDate.startDate));
+                setCalendarMonth(new Date(dateToSelect.startDate));
             }
         }
     }, [tour, preSelectedDateParam, selectedDateId]);
@@ -494,9 +524,15 @@ export default function CheckoutPage() {
 
     const depositAmount = useMemo(() => {
         if (!tour) return 0;
+
+        if (tour.price.bookingType === "Amount" && tour.price.bookingAmount) {
+            return tour.price.bookingAmount * adultCount;
+        }
+
         const percentage = tour.price.bookingPercentage || 20;
-        return Math.round(baseTourPrice * (percentage / 100));
-    }, [baseTourPrice, tour]);
+        const originalBasePrice = tour.price.amount * adultCount;
+        return Math.round(originalBasePrice * (percentage / 100));
+    }, [tour, adultCount]);
 
     const finalPaymentDate = useMemo(() => {
         if (!selectedDate) return new Date();
@@ -521,9 +557,8 @@ export default function CheckoutPage() {
         const availableMonths = Math.floor(daysUntilDeadline / 30);
         const numberOfInstallments = Math.min(Math.max(availableMonths, 2), 12);
 
-        const bookingPercentage = tour?.price?.bookingPercentage || 20;
-        // Remaining = total price minus the deposit (deposit is only on base tour price)
-        const rawRemaining = calculateTotalPrice - Math.round(baseTourPrice * (bookingPercentage / 100));
+        // Remaining = total price minus the deposit
+        const rawRemaining = calculateTotalPrice - depositAmount;
         const installmentAmount = Math.floor((rawRemaining / numberOfInstallments) * 100) / 100;
         const totalFromInstallments = Math.round(installmentAmount * numberOfInstallments * 100) / 100;
         const upfrontAmount = Math.round((calculateTotalPrice - totalFromInstallments) * 100) / 100;
@@ -547,7 +582,7 @@ export default function CheckoutPage() {
             installmentAmount,
             schedule
         };
-    }, [selectedDate, isDepositAvailable, calculateTotalPrice, baseTourPrice, finalPaymentDate, tour]);
+    }, [selectedDate, isDepositAvailable, calculateTotalPrice, depositAmount, finalPaymentDate, tour]);
 
     const payNowAmount = useMemo(() => {
         if (paymentOption === "installments" && installmentPlan) {
@@ -942,7 +977,7 @@ export default function CheckoutPage() {
         <div className="min-h-screen bg-gray-50 pb-20">
             {/* Header & Breadcrumbs */}
             <div className="w-full bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
+                <div className="max-w-full mx-auto px-4 md:px-12 lg:px-24 py-4 md:py-6">
                     <div className="text-[13px] text-gray-500 mb-4">
                         Home / Destinations / {tour.country?.continent?.name || "Continent"} / {tour.country?.name || "Country"} / {tour.name} / Checkout
                     </div>
@@ -954,21 +989,20 @@ export default function CheckoutPage() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="max-w-full mx-auto px-4 md:px-12 lg:px-24 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Checkout Steps */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Progress Stepper (in left column) */}
                         <div className="bg-white rounded-xl border p-6 flex items-start justify-between relative overflow-hidden">
                             {/* Background Line */}
-                            <div className="absolute left-[10%] right-[10%] top-[40px] h-[1px] bg-gray-300 z-0"></div>
+                            <div className="absolute left-[12.5%] right-[12.5%] top-[48px] h-[1px] bg-gray-300 z-0"></div>
 
                             {[
                                 { label: "Passenger Details", step: 1, icon: User },
                                 { label: "Select tour Dates", step: 2, icon: CalendarBlank },
                                 { label: "Add ons", step: 3, icon: Plus },
-                                { label: "Payment Options", step: 4, icon: CurrencyDollar },
-                                { label: "Booking Complete", step: 5, icon: Money }
+                                { label: "Payment Options", step: 4, icon: CurrencyDollar }
                             ].map((s, index) => {
                                 const isCompleted = currentStep > s.step;
                                 const isCurrent = currentStep === s.step;
@@ -977,7 +1011,7 @@ export default function CheckoutPage() {
                                 return (
                                     <div key={index} className="flex flex-col items-center relative z-10 flex-1">
                                         <div className="bg-white px-2 mb-3">
-                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center relative ${isCompleted || isCurrent ? 'bg-[#6A38C2] text-white' : 'bg-white border-2 border-[#3F3F42] text-[#3F3F42]'}`}>
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center relative text-white ${isCompleted || isCurrent ? 'bg-[#6A38C2]' : 'bg-[#2f3d44]'}`}>
                                                 <Icon size={24} weight={isCompleted || isCurrent ? "fill" : "bold"} />
                                                 {isCompleted && (
                                                     <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-[2px]">
@@ -986,10 +1020,10 @@ export default function CheckoutPage() {
                                                 )}
                                             </div>
                                         </div>
-                                        <span className={`text-sm text-center font-medium ${isCurrent ? 'text-[#6A38C2]' : 'text-[#4E4E4E]'}`}>
+                                        <span className={`text-[17px] text-center font-medium ${isCurrent ? 'text-[#6A38C2]' : 'text-[#4E4E4E]'}`}>
                                             {s.label}
                                         </span>
-                                        <span className={`text-[10px] mt-1 ${isCompleted ? 'text-[#6A38C2]' : 'text-gray-500'}`}>
+                                        <span className={`text-[13px] mt-1 ${isCompleted ? 'text-[#6A38C2]' : 'text-gray-500'}`}>
                                             {isCompleted ? 'Completed' : `Step ${s.step}`}
                                         </span>
                                     </div>
@@ -1002,37 +1036,50 @@ export default function CheckoutPage() {
                                 {currentStep === 1 && (
                                     <>
                                         {!isLoggedIn && (
-                                            <div className="bg-purple-50 rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-purple-100">
-                                                <div>
-                                                    <h3 className="text-[#2C3238] font-semibold text-[18px]">Already have an account?</h3>
-                                                    <p className="text-gray-600 text-[15px] mt-1">Log in for a faster checkout experience.</p>
+                                            <>
+                                                <div className="bg-purple-50 rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-purple-100">
+                                                    <div>
+                                                        <h3 className="text-[#2C3238] font-semibold text-[18px]">Already have an account?</h3>
+                                                        <p className="text-gray-600 text-[15px] mt-1">Log in for a faster checkout experience.</p>
+                                                    </div>
+                                                    <div className="flex gap-3 w-full md:w-auto">
+                                                        <button
+                                                            onClick={() => {
+                                                                const dataStr = JSON.stringify({ adultCount, primaryTraveller, otherTravellers });
+                                                                const encodedData = typeof window !== 'undefined' ? btoa(dataStr) : '';
+                                                                const newSearchParams = new URLSearchParams(searchParams.toString());
+                                                                newSearchParams.set("stateData", encodedData);
+                                                                window.history.replaceState(null, "", "?" + newSearchParams.toString());
+                                                                setAuthModalInitialView("login");
+                                                                setIsAuthModalOpen(true);
+                                                            }}
+                                                            className="px-6 py-2.5 border border-[#6A38C2] text-[#6A38C2] font-medium rounded-lg hover:bg-purple-100 transition w-full md:w-auto text-center"
+                                                        >
+                                                            Login
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                const dataStr = JSON.stringify({ adultCount, primaryTraveller, otherTravellers });
+                                                                const encodedData = typeof window !== 'undefined' ? btoa(dataStr) : '';
+                                                                const newSearchParams = new URLSearchParams(searchParams.toString());
+                                                                newSearchParams.set("stateData", encodedData);
+                                                                window.history.replaceState(null, "", "?" + newSearchParams.toString());
+                                                                setAuthModalInitialView("register");
+                                                                setIsAuthModalOpen(true);
+                                                            }}
+                                                            className="px-6 py-2.5 bg-[#6A38C2] text-white font-medium rounded-lg hover:bg-purple-900 transition w-full md:w-auto text-center"
+                                                        >
+                                                            Sign up
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex gap-3 w-full md:w-auto">
-                                                    {(() => {
-                                                        const dataStr = JSON.stringify({ adultCount, primaryTraveller, otherTravellers });
-                                                        const encodedData = typeof window !== 'undefined' ? btoa(dataStr) : '';
-                                                        const newSearchParams = new URLSearchParams(searchParams.toString());
-                                                        newSearchParams.set("stateData", encodedData);
-                                                        const cbUrl = encodeURIComponent(pathname + '?' + newSearchParams.toString());
-                                                        return (
-                                                            <>
-                                                                <Link 
-                                                                    href={`/auth/login?callbackUrl=${cbUrl}`}
-                                                                    className="px-6 py-2.5 border border-[#6A38C2] text-[#6A38C2] font-medium rounded-lg hover:bg-purple-100 transition w-full md:w-auto text-center"
-                                                                >
-                                                                    Login
-                                                                </Link>
-                                                                <Link 
-                                                                    href={`/auth/register?callbackUrl=${cbUrl}`}
-                                                                    className="px-6 py-2.5 bg-[#6A38C2] text-white font-medium rounded-lg hover:bg-purple-900 transition w-full md:w-auto text-center"
-                                                                >
-                                                                    Sign up
-                                                                </Link>
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
+                                                <AuthModal
+                                                    isOpen={isAuthModalOpen}
+                                                    onClose={() => setIsAuthModalOpen(false)}
+                                                    initialView={authModalInitialView}
+                                                    onSuccess={() => window.location.reload()}
+                                                />
+                                            </>
                                         )}
                                         <div className="flex items-center justify-between px-1 mb-4">
                                             <div className="flex flex-col">
@@ -1156,7 +1203,10 @@ export default function CheckoutPage() {
                                             <div className="flex flex-col gap-4 w-full">
                                                 <h3 className="text-[22px] font-medium text-black">Who Is Travelling?</h3>
                                                 <div className="flex flex-wrap items-center gap-4">
-                                                    <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 min-w-[200px]">
+                                                    <div
+                                                        onClick={() => setCurrentStep(1)}
+                                                        className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 min-w-[200px] cursor-pointer hover:bg-gray-50 transition"
+                                                    >
                                                         <div className="w-10 h-10 rounded-full bg-[#3F3F42] text-white flex items-center justify-center font-bold text-base">
                                                             {primaryTraveller.firstName?.charAt(0).toUpperCase() || "U"}
                                                         </div>
@@ -1168,7 +1218,11 @@ export default function CheckoutPage() {
                                                         </div>
                                                     </div>
                                                     {otherTravellers.map((t, i) => (
-                                                        <div key={i} className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 min-w-[200px]">
+                                                        <div
+                                                            key={i}
+                                                            onClick={() => setCurrentStep(1)}
+                                                            className="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-2 min-w-[200px] cursor-pointer hover:bg-gray-50 transition"
+                                                        >
                                                             <div className="w-10 h-10 rounded-full bg-teal-700 text-white flex items-center justify-center font-bold text-base">
                                                                 {t.firstName?.charAt(0).toUpperCase() || "I"}
                                                             </div>
@@ -1233,11 +1287,13 @@ export default function CheckoutPage() {
                                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
                                                                 </button>
 
-                                                                <div className={`border border-gray-200 rounded-full px-5 py-2 flex items-center justify-between min-w-[140px] shadow-sm cursor-pointer hover:bg-gray-50`}>
-                                                                    <span className="font-medium text-black text-[15px]">
-                                                                        {monthDate.toLocaleDateString("en-US", { month: "short" })}
+                                                                <div className="flex flex-col items-center select-none">
+                                                                    <span className="text-[12px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
+                                                                        {monthDate.getFullYear()}
                                                                     </span>
-                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><path d="m6 9 6 6 6-6" /></svg>
+                                                                    <span className="font-semibold text-black text-[18px]">
+                                                                        {monthDate.toLocaleDateString("en-US", { month: "long" })}
+                                                                    </span>
                                                                 </div>
 
                                                                 <button
@@ -1288,17 +1344,17 @@ export default function CheckoutPage() {
                                                                     const isSelected = dateStatus && selectedDateId === dateStatus._id;
 
                                                                     // Classes for the wrapper (for continuous background)
-                                                                    let wrapperClass = "relative flex items-center justify-center h-12";
+                                                                    const wrapperClass = "relative flex items-center justify-center h-12";
 
                                                                     return (
                                                                         <div key={idx} className={wrapperClass}>
                                                                             <button
                                                                                 onClick={() => dateStatus && setSelectedDateId(dateStatus._id!)}
                                                                                 disabled={!dateStatus || isPast}
-                                                                                className={`w-[40px] h-[40px] flex flex-col items-center justify-center rounded-full text-[15px] transition relative z-10 ${isSelectedStart || isSelectedEnd || isSelected
-                                                                                    ? "bg-[#2C3238] text-white font-medium shadow-md"
+                                                                                className={`w-[40px] h-[40px] flex flex-col items-center justify-center rounded-full text-[18px] transition relative z-10 ${isSelectedStart || isSelectedEnd || isSelected
+                                                                                    ? "bg-[#53319C] text-white font-medium shadow-md"
                                                                                     : isInSelectedRange
-                                                                                        ? "bg-gray-100 text-black font-medium"
+                                                                                        ? "bg-[#F4F0FF] text-[#53319C] font-medium"
                                                                                         : dateStatus && !isPast
                                                                                             ? "text-black hover:bg-gray-100 font-medium cursor-pointer"
                                                                                             : isPast
@@ -1318,42 +1374,93 @@ export default function CheckoutPage() {
                                             </div>
 
                                             {/* Available Dates List */}
-                                            <div className="border-t pt-6">
+                                            <div className="pt-6">
+                                                <div className="flex items-end justify-between mb-4">
+                                                    <h3 className="text-[20px] font-medium text-black pl-1">All Available Dates</h3>
+                                                    <span className="text-[14px] text-gray-500 pr-1">Do you want Sooner dates?</span>
+                                                </div>
                                                 <div className="space-y-4 mb-4">
                                                     {tour.startDates
                                                         .filter((d) => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date())
-                                                        .slice(0, 5)
-                                                        .map((date, idx) => (
-                                                            <div
-                                                                key={date._id || idx}
-                                                                className={`flex items-center justify-between p-4 rounded-xl transition-all ${selectedDateId === date._id
-                                                                    ? "border border-purple-300 bg-[#F4F0FF]"
-                                                                    : "border border-gray-200 bg-gray-50/50"
-                                                                    }`}
-                                                            >
-                                                                <span className="font-semibold text-black pl-2 text-[15px]">
-                                                                    {formatDate(date.startDate)} to {formatDate(date.endDate)}
-                                                                </span>
-                                                                <button
+                                                        .map((date, idx) => {
+                                                            const dateDiscount = getDiscountPercentage(date.discount);
+                                                            const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
+                                                            let priceForDate = tour.price.amount;
+                                                            if (bestDiscount > 0) {
+                                                                priceForDate = priceForDate * (1 - bestDiscount / 100);
+                                                            } else if (date.price?.amount) {
+                                                                priceForDate = date.price.amount;
+                                                            } else if (tour.price.discountPercent > 0) {
+                                                                priceForDate = priceForDate * (1 - tour.price.discountPercent / 100);
+                                                            }
+                                                            priceForDate = Math.round(priceForDate);
+
+                                                            return (
+                                                                <div
+                                                                    key={date._id || idx}
                                                                     onClick={() => {
                                                                         setSelectedDateId(date._id!);
                                                                         setCalendarMonth(new Date(date.startDate));
                                                                     }}
-                                                                    className={`px-8 py-2 rounded-lg font-medium text-sm transition ${selectedDateId === date._id
-                                                                        ? "bg-[#6A38C2] hover:bg-purple-800 text-white"
-                                                                        : "bg-[#2C3238] hover:bg-black text-white"
-                                                                        }`}
+                                                                    className={`flex items-center justify-between px-6 py-4 rounded-2xl transition-all cursor-pointer ${selectedDateId === date._id ? 'bg-[#F4F0FF] ring-2 ring-[#53319C]' : 'bg-[#F1F2F3] hover:bg-gray-200'}`}
                                                                 >
-                                                                    {selectedDateId === date._id ? "Selected" : "Select"}
-                                                                </button>
-                                                            </div>
-                                                        ))}
+                                                                    <div className="flex flex-col flex-1">
+                                                                        {bestDiscount > 0 ? (
+                                                                            <span className="text-[12px] font-medium text-[#FF4835] mb-0.5">On Sale</span>
+                                                                        ) : (
+                                                                            <span className="h-[18px] mb-0.5"></span>
+                                                                        )}
+                                                                        <span className="font-medium text-[#2C3238] text-[16px]">
+                                                                            {new Date(date.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })} to {new Date(date.endDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div className="flex flex-1 justify-center items-center mt-2">
+                                                                        <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+                                                                            <Armchair size={15} className="text-gray-400" weight="fill" />
+                                                                            <span className="text-[12px] font-medium text-gray-500">{date.availableSpots}+ Seats Available</span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="flex flex-1 justify-end items-center gap-6 mt-2">
+                                                                        <div className="flex items-baseline gap-1">
+                                                                            <span className="text-[14px] font-bold text-[#1A1F24] translate-y-[-8px]">$</span>
+                                                                            <span className="text-[34px] font-bold text-[#1A1F24] leading-none tracking-tight">{priceForDate}</span>
+                                                                            <span className="text-[10px] font-bold text-black mt-auto mb-1.5">USD/Per Person</span>
+                                                                        </div>
+
+                                                                        <div className="relative">
+                                                                            {bestDiscount > 0 && (
+                                                                                <div className="absolute -top-[30px] right-2 w-[28px] h-[40px] z-10 flex flex-col items-center justify-start pt-1 drop-shadow-sm">
+                                                                                    <svg className="absolute inset-0 w-full h-full text-gray-300" viewBox="0 0 28 40" fill="white" stroke="currentColor" strokeWidth="1">
+                                                                                        <path d="M 3 1 L 25 1 A 2 2 0 0 1 27 3 L 27 39 L 14 32 L 1 39 L 1 3 A 2 2 0 0 1 3 1 Z" strokeLinejoin="round" />
+                                                                                    </svg>
+                                                                                    <div className="relative z-20 flex flex-col items-center mt-[3px]">
+                                                                                        <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">{bestDiscount}%</span>
+                                                                                        <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">Off</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            )}
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setSelectedDateId(date._id!);
+                                                                                    setCalendarMonth(new Date(date.startDate));
+                                                                                }}
+                                                                                className={`px-8 py-3 rounded-full font-medium text-[15px] transition text-white relative z-0 ${selectedDateId === date._id ? 'bg-[#53319C] hover:bg-[#40257a]' : 'bg-[#37414A] hover:bg-black'}`}
+                                                                            >
+                                                                                {selectedDateId === date._id ? "Selected" : "Select"}
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
                                                 </div>
 
                                                 {selectedDateId && (
                                                     <button
                                                         onClick={() => setSelectedDateId(null)}
-                                                        className="text-[#6A38C2] hover:text-purple-900 font-medium text-[15px] pl-2 transition"
+                                                        className="text-[#53319C] font-medium text-[15px] pl-2 transition"
                                                     >
                                                         Clear date
                                                     </button>
@@ -1392,7 +1499,7 @@ export default function CheckoutPage() {
                                                                 <div className="flex-1">
                                                                     <div className="font-bold text-[#2C3238] text-[17px] mb-2">Twin</div>
                                                                     <p className="text-[14px] text-gray-600 mb-4 max-w-xl">
-                                                                        Twin Room, if you're a single traveller you will be paired with another traveller of the same gender.
+                                                                        Twin Room, if you&apos;re a single traveller you will be paired with another traveller of the same gender.
                                                                     </p>
                                                                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#EAE0FF] text-[#6A38C2] rounded-md text-[13px] font-semibold mb-3">
                                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
@@ -1429,103 +1536,89 @@ export default function CheckoutPage() {
                                                                         </div>
                                                                     </div>
                                                                     <div className="text-right">
-                                                                        <div className="font-bold text-[#2C3238] text-[19px]">${((tour.price?.amount || 0) + (tour.price?.ownRoomPrice || 0)).toLocaleString()}.00 <span className="text-[14px] text-gray-500 font-medium">Per Person</span></div>
+                                                                        {/* Price moved to Add to Tour row */}
                                                                     </div>
                                                                 </div>
 
-                                                                {/* Traveller Dropdown Selector */}
-                                                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                                                    <div className="flex items-start gap-3">
-                                                                        <div className="relative flex-1 max-w-[320px]">
+                                                                {!openRoomDropdown ? (
+                                                                    <div className="mt-4 flex items-end justify-between border-t border-gray-200 pt-5">
+                                                                        <div className="flex flex-col gap-2">
                                                                             <button
-                                                                                onClick={() => setOpenRoomDropdown(!openRoomDropdown)}
-                                                                                className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-4 py-2.5 text-[15px] text-gray-700 bg-white hover:bg-gray-50"
+                                                                                onClick={() => {
+                                                                                    setTempRoomParticipants(accommodationUpgrade?.participants || []);
+                                                                                    setOpenRoomDropdown(true);
+                                                                                }}
+                                                                                className="bg-[#53319C] text-white px-7 py-2.5 rounded-full font-medium text-[15px] hover:bg-[#40257a] transition shadow-sm w-fit"
                                                                             >
-                                                                                <span>Select travellers for own room</span>
-                                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${openRoomDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
+                                                                                Add to Tour
                                                                             </button>
-
-                                                                            {openRoomDropdown && (
-                                                                                <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] z-20 overflow-hidden">
-                                                                                    <div className="max-h-48 overflow-y-auto">
-                                                                                        {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
-                                                                                            const isSelected = accommodationUpgrade?.participants?.includes(idx) || false;
-                                                                                            const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
-                                                                                            return (
-                                                                                                <label key={idx} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer">
-                                                                                                    <span className="text-[15px] text-[#2C3238]">{name}</span>
-                                                                                                    <input
-                                                                                                        type="checkbox"
-                                                                                                        checked={isSelected}
-                                                                                                        onChange={(e) => {
-                                                                                                            const currentParticipants = accommodationUpgrade?.participants || [];
-                                                                                                            let newParticipants: number[];
-                                                                                                            if (e.target.checked) {
-                                                                                                                newParticipants = [...currentParticipants, idx];
-                                                                                                            } else {
-                                                                                                                newParticipants = currentParticipants.filter(p => p !== idx);
-                                                                                                            }
-                                                                                                            if (newParticipants.length === 0) {
-                                                                                                                setAccommodationUpgrade({ name: "Twin", description: "", price: 0, currency: "USD", count: 0, participants: [] });
-                                                                                                            } else {
-                                                                                                                setAccommodationUpgrade({
-                                                                                                                    name: "My Own Room",
-                                                                                                                    description: "",
-                                                                                                                    price: tour.price?.ownRoomPrice || 0,
-                                                                                                                    currency: "USD",
-                                                                                                                    count: newParticipants.length,
-                                                                                                                    participants: newParticipants
-                                                                                                                });
-                                                                                                            }
-                                                                                                        }}
-                                                                                                        className="w-5 h-5 rounded border-gray-300 text-[#6A38C2] focus:ring-[#6A38C2] cursor-pointer"
-                                                                                                    />
-                                                                                                </label>
-                                                                                            );
-                                                                                        })}
-                                                                                    </div>
+                                                                            {(accommodationUpgrade?.participants?.length ?? 0) > 0 && (
+                                                                                <div className="text-[13px] text-gray-500 font-medium px-2">
+                                                                                    {accommodationUpgrade?.participants?.map(idx => {
+                                                                                        const t = [primaryTraveller, ...otherTravellers][idx];
+                                                                                        return t?.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
+                                                                                    }).join(", ")}
                                                                                 </div>
                                                                             )}
                                                                         </div>
-
-                                                                        {/* Clear / Select All buttons */}
-                                                                        <button
-                                                                            onClick={() => setAccommodationUpgrade({ name: "Twin", description: "", price: 0, currency: "USD", count: 0, participants: [] })}
-                                                                            className="px-5 py-2.5 border border-gray-400 rounded-full text-[13px] font-bold text-[#2C3238] hover:bg-gray-50 transition whitespace-nowrap"
-                                                                        >
-                                                                            Clear
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => setAccommodationUpgrade({
-                                                                                name: "My Own Room",
-                                                                                description: "",
-                                                                                price: tour.price?.ownRoomPrice || 0,
-                                                                                currency: "USD",
-                                                                                count: adultCount,
-                                                                                participants: Array.from({ length: adultCount }, (_, i) => i)
-                                                                            })}
-                                                                            className="px-5 py-2.5 bg-[#2C3238] text-white rounded-full text-[13px] font-bold hover:bg-black transition whitespace-nowrap"
-                                                                        >
-                                                                            Select all
-                                                                        </button>
+                                                                        <div className="flex flex-col items-end">
+                                                                            <span className="font-bold text-[24px] text-black leading-none mb-1">${(tour.price?.ownRoomPrice || 0).toLocaleString()}.00</span>
+                                                                            <span className="text-[13px] text-gray-500">Per Person</span>
+                                                                        </div>
                                                                     </div>
-
-                                                                    {/* Display selected names */}
-                                                                    {(accommodationUpgrade?.participants?.length ?? 0) > 0 && (
-                                                                        <div className="mt-3 flex flex-wrap gap-2">
+                                                                ) : (
+                                                                    <div className="mt-4 flex flex-col border-t border-gray-200 pt-5">
+                                                                        <div className="text-[17px] font-medium text-black mb-4">Select Travellers :</div>
+                                                                        <div className="flex flex-wrap items-center gap-8 mb-4">
                                                                             {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
-                                                                                if (!accommodationUpgrade?.participants?.includes(idx)) return null;
+                                                                                const isSelected = tempRoomParticipants.includes(idx);
                                                                                 const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
                                                                                 return (
-                                                                                    <div key={idx} className="flex items-center gap-1.5 text-[13px] text-gray-600 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
-                                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6A38C2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                                                                        <span>{name}</span>
-                                                                                    </div>
+                                                                                    <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                                                                                        <div className={`w-[26px] h-[26px] rounded-[8px] border flex items-center justify-center transition-all ${isSelected ? 'border-gray-500 bg-white' : 'border-gray-400 bg-white group-hover:border-gray-500'}`}>
+                                                                                            {isSelected && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                                                        </div>
+                                                                                        <input
+                                                                                            type="checkbox"
+                                                                                            className="hidden"
+                                                                                            checked={isSelected}
+                                                                                            onChange={(e) => {
+                                                                                                if (e.target.checked) {
+                                                                                                    setTempRoomParticipants([...tempRoomParticipants, idx].sort());
+                                                                                                } else {
+                                                                                                    setTempRoomParticipants(tempRoomParticipants.filter(id => id !== idx));
+                                                                                                }
+                                                                                            }}
+                                                                                        />
+                                                                                        <span className="text-[16px] text-gray-500 group-hover:text-black transition-colors">{name}</span>
+                                                                                    </label>
                                                                                 );
                                                                             })}
                                                                         </div>
-                                                                    )}
-                                                                </div>
+                                                                        <div className="flex justify-end w-full">
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    if (tempRoomParticipants.length === 0) {
+                                                                                        setAccommodationUpgrade({ name: "Twin", description: "", price: 0, currency: "USD", count: 0, participants: [] });
+                                                                                    } else {
+                                                                                        setAccommodationUpgrade({
+                                                                                            name: "My Own Room",
+                                                                                            description: "",
+                                                                                            price: tour.price?.ownRoomPrice || 0,
+                                                                                            currency: "USD",
+                                                                                            count: tempRoomParticipants.length,
+                                                                                            participants: tempRoomParticipants
+                                                                                        });
+                                                                                    }
+                                                                                    setOpenRoomDropdown(false);
+                                                                                }}
+                                                                                className="bg-[#53319C] text-white px-7 py-2.5 rounded-full font-medium text-[15px] hover:bg-[#40257a] transition shadow-sm"
+                                                                            >
+                                                                                Add Travellers
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1552,129 +1645,165 @@ export default function CheckoutPage() {
                                                         </button>
                                                     </div>
 
-                                                    <div className="max-h-[750px] overflow-y-auto custom-scrollbar">
+                                                    <div id="activities-scroll-container" className="max-h-[750px] overflow-y-auto custom-scrollbar pr-2">
                                                         {tour.itinerary
                                                             .filter((day) => day.optionalActivities && day.optionalActivities.length > 0)
                                                             .map((day) => (
                                                                 <div key={day.day} className="border-b border-gray-200 last:border-b-0">
                                                                     <div className="p-6">
-                                                                        <div className="flex items-center justify-between mb-6">
-                                                                            <span className="bg-[#2C3238] text-white text-[13px] font-bold px-4 py-1.5 rounded-full tracking-wide">Day {day.day}</span>
-                                                                            <span className="bg-[#F4F0FF] text-[#6A38C2] text-[13px] font-bold px-4 py-1.5 rounded-full">{day.optionalActivities.length} Activities</span>
+                                                                        <div className="flex items-center justify-between mb-6 -ml-1">
+                                                                            <span className="bg-[#2C3238] text-white text-[14px] font-medium px-5 py-1.5 rounded-full tracking-wide">Day {day.day}</span>
+                                                                            <span className="bg-[#F4F0FF] text-[#53319C] text-[14px] font-medium px-5 py-1.5 rounded-full">{day.optionalActivities.length} Activities</span>
                                                                         </div>
 
-                                                                        <div className="flex flex-col gap-6">
+                                                                        <div className="flex flex-col">
                                                                             {day.optionalActivities.map((activity, actIdx) => {
                                                                                 const dropdownId = `${day.day}-${actIdx}`;
                                                                                 const isDropdownOpen = openActivityDropdown === dropdownId;
                                                                                 const selectedParticipants = selectedActivities.find(a => a.dayNumber === day.day && a.activityIndex === actIdx)?.participants || [];
 
+                                                                                const priceText = typeof activity.price === "number"
+                                                                                    ? (activity.price > 0 ? `$${activity.price.toLocaleString()}` : "Free")
+                                                                                    : (activity.price?.amount > 0
+                                                                                        ? `${activity.price.currency || "$"}${Number(activity.price.amount).toLocaleString()}`
+                                                                                        : "Free");
+
                                                                                 return (
-                                                                                    <div key={actIdx} className="flex flex-col gap-6">
-                                                                                        {actIdx > 0 && <div className="h-px bg-gray-200 -mx-6" />}
-                                                                                        <div className="flex">
-                                                                                            <div className="flex gap-6 pr-6 flex-1">
-                                                                                                <div className="w-[240px] h-[160px] rounded-xl bg-gray-200 flex-shrink-0 overflow-hidden relative">
-                                                                                                    {primaryImage?.url ? (
-                                                                                                        <Image src={primaryImage.url} alt={activity.name || activity.title || "Activity"} fill className="object-cover" />
-                                                                                                    ) : (
-                                                                                                        <div className="w-full h-full flex items-center justify-center text-3xl">🎯</div>
-                                                                                                    )}
-                                                                                                </div>
-                                                                                                <div className="flex-1 flex flex-col justify-between py-1">
-                                                                                                    <div>
-                                                                                                        <h4 className="font-medium text-[20px] text-[#2C3238] mb-2 leading-tight">{activity.name || activity.title}</h4>
-                                                                                                        <p className="text-[15px] text-gray-500 leading-relaxed max-w-md">
-                                                                                                            {activity.description}
-                                                                                                        </p>
-                                                                                                    </div>
-                                                                                                    <div className="mt-4">
-                                                                                                        <div className="font-bold text-[20px] text-[#2C3238]">
-                                                                                                            {typeof activity.price === "number"
-                                                                                                                ? (activity.price > 0 ? `$${activity.price.toLocaleString()}` : "Free")
-                                                                                                                : (activity.price?.amount > 0
-                                                                                                                    ? `${activity.price.currency || "$"}${Number(activity.price.amount).toLocaleString()}`
-                                                                                                                    : "Free")}
-                                                                                                        </div>
-                                                                                                        <div className="text-[14px] text-gray-500">Per Person</div>
-                                                                                                    </div>
-                                                                                                </div>
+                                                                                    <div key={actIdx} id={`activity-${day.day}-${actIdx}`} className="flex flex-col pt-8 first:pt-0 pb-8 last:pb-0">
+                                                                                        {actIdx > 0 && <div className="h-px bg-gray-200 mb-8 w-full" />}
+                                                                                        <div className="flex gap-8">
+                                                                                            <div className="w-[320px] h-[200px] rounded-[14px] bg-gray-200 flex-shrink-0 overflow-hidden relative shadow-sm border border-gray-200">
+                                                                                                {primaryImage?.url ? (
+                                                                                                    <Image src={primaryImage.url} alt={activity.name || activity.title || "Activity"} fill className="object-cover" />
+                                                                                                ) : (
+                                                                                                    <div className="w-full h-full flex items-center justify-center text-3xl">🎯</div>
+                                                                                                )}
                                                                                             </div>
-                                                                                            <div className="w-[260px] flex-shrink-0 pl-6 border-l border-gray-200 py-1 flex flex-col">
-                                                                                                <div className="relative">
-                                                                                                    <button
-                                                                                                        onClick={() => setOpenActivityDropdown(isDropdownOpen ? null : dropdownId)}
-                                                                                                        className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-4 py-2.5 text-[15px] text-gray-700 bg-white hover:bg-gray-50"
-                                                                                                    >
-                                                                                                        <span>Who is This tour for?</span>
-                                                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
-                                                                                                    </button>
 
-                                                                                                    {isDropdownOpen && (
-                                                                                                        <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-300 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.1)] z-20 overflow-hidden">
-                                                                                                            <div className="max-h-48 overflow-y-auto">
-                                                                                                                {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
-                                                                                                                    const isSelected = selectedParticipants.includes(idx);
-                                                                                                                    const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
-                                                                                                                    return (
-                                                                                                                        <label key={idx} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer">
-                                                                                                                            <span className="text-[15px] text-[#2C3238]">{name}</span>
-                                                                                                                            <input
-                                                                                                                                type="checkbox"
-                                                                                                                                checked={isSelected}
-                                                                                                                                onChange={(e) => toggleActivityParticipant(day.day, actIdx, idx, e.target.checked, activity)}
-                                                                                                                                className="w-5 h-5 rounded border-gray-300 text-[#6A38C2] focus:ring-[#6A38C2] cursor-pointer"
-                                                                                                                            />
-                                                                                                                        </label>
-                                                                                                                    );
-                                                                                                                })}
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    )}
+                                                                                            <div className="flex-1 flex flex-col justify-between py-1">
+                                                                                                <div>
+                                                                                                    <h4 className="font-medium text-[24px] text-black mb-3 leading-tight">{activity.name || activity.title}</h4>
+                                                                                                    <p className="text-[16px] text-gray-500 leading-relaxed max-w-2xl">
+                                                                                                        {expandedDescriptions.includes(dropdownId) ? activity.description : (activity.description?.length > 200 ? `${activity.description.substring(0, 200)}...` : activity.description)}
+                                                                                                        {activity.description?.length > 200 && (
+                                                                                                            <button
+                                                                                                                onClick={() => {
+                                                                                                                    if (expandedDescriptions.includes(dropdownId)) {
+                                                                                                                        setExpandedDescriptions(expandedDescriptions.filter(id => id !== dropdownId));
+                                                                                                                    } else {
+                                                                                                                        setExpandedDescriptions([...expandedDescriptions, dropdownId]);
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                className="text-gray-500 hover:text-black underline ml-1 text-[15px]"
+                                                                                                            >
+                                                                                                                {expandedDescriptions.includes(dropdownId) ? 'Read less' : 'Read more'}
+                                                                                                            </button>
+                                                                                                        )}
+                                                                                                    </p>
                                                                                                 </div>
 
-                                                                                                {/* Display selected names below */}
-                                                                                                {selectedParticipants.length > 0 && (
-                                                                                                    <div className="mt-4 flex flex-wrap gap-2">
-                                                                                                        {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
-                                                                                                            if (!selectedParticipants.includes(idx)) return null;
-                                                                                                            const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
-                                                                                                            return (
-                                                                                                                <div key={idx} className="flex items-center gap-1.5 text-[13px] text-gray-600 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
-                                                                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6A38C2" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                                                                                                    <span>{name}</span>
+                                                                                                {!isDropdownOpen ? (
+                                                                                                    <div className="mt-6 flex items-end justify-between">
+                                                                                                        <div className="flex flex-col gap-2">
+                                                                                                            <button
+                                                                                                                onClick={() => {
+                                                                                                                    setTempActivityParticipants(selectedParticipants);
+                                                                                                                    setOpenActivityDropdown(dropdownId);
+                                                                                                                }}
+                                                                                                                className="bg-[#53319C] text-white px-7 py-2.5 rounded-full font-medium text-[15px] hover:bg-[#40257a] transition shadow-sm w-fit"
+                                                                                                            >
+                                                                                                                Add to Tour
+                                                                                                            </button>
+                                                                                                            {selectedParticipants.length > 0 && (
+                                                                                                                <div className="text-[13px] text-gray-500 font-medium px-2">
+                                                                                                                    {selectedParticipants.map(idx => {
+                                                                                                                        const t = [primaryTraveller, ...otherTravellers][idx];
+                                                                                                                        return t?.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
+                                                                                                                    }).join(", ")}
                                                                                                                 </div>
-                                                                                                            );
-                                                                                                        })}
+                                                                                                            )}
+                                                                                                        </div>
+                                                                                                        <div className="flex flex-col items-end">
+                                                                                                            <span className="font-bold text-[24px] text-black leading-none mb-1">{priceText}</span>
+                                                                                                            <span className="text-[13px] text-gray-500">Per Person</span>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                ) : (
+                                                                                                    <div className="mt-6 flex flex-col">
+                                                                                                        <div className="text-[17px] font-medium text-black mb-4">Select Travellers :</div>
+                                                                                                        <div className="flex flex-wrap items-center gap-8 mb-4">
+                                                                                                            {[primaryTraveller, ...otherTravellers].slice(0, adultCount).map((traveller, idx) => {
+                                                                                                                const isSelected = tempActivityParticipants.includes(idx);
+                                                                                                                const name = traveller.firstName || `Traveller ${String.fromCharCode(65 + idx)}`;
+                                                                                                                return (
+                                                                                                                    <label key={idx} className="flex items-center gap-3 cursor-pointer group">
+                                                                                                                        <div className={`w-[26px] h-[26px] rounded-[8px] border flex items-center justify-center transition-all ${isSelected ? 'border-gray-500 bg-white' : 'border-gray-400 bg-white group-hover:border-gray-500'}`}>
+                                                                                                                            {isSelected && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                                                                                                        </div>
+                                                                                                                        <input
+                                                                                                                            type="checkbox"
+                                                                                                                            className="hidden"
+                                                                                                                            checked={isSelected}
+                                                                                                                            onChange={(e) => {
+                                                                                                                                if (e.target.checked) {
+                                                                                                                                    setTempActivityParticipants([...tempActivityParticipants, idx].sort());
+                                                                                                                                } else {
+                                                                                                                                    setTempActivityParticipants(tempActivityParticipants.filter(id => id !== idx));
+                                                                                                                                }
+                                                                                                                            }}
+                                                                                                                        />
+                                                                                                                        <span className="text-[16px] text-gray-500 group-hover:text-black transition-colors">{name}</span>
+                                                                                                                    </label>
+                                                                                                                );
+                                                                                                            })}
+                                                                                                        </div>
+                                                                                                        <div className="flex justify-end w-full">
+                                                                                                            <button
+                                                                                                                onClick={() => {
+                                                                                                                    setSelectedActivities(prev => {
+                                                                                                                        const filtered = prev.filter(a => !(a.dayNumber === day.day && a.activityIndex === actIdx));
+                                                                                                                        if (tempActivityParticipants.length > 0) {
+                                                                                                                            filtered.push({
+                                                                                                                                dayNumber: day.day,
+                                                                                                                                activityIndex: actIdx,
+                                                                                                                                name: activity.name || activity.title || "",
+                                                                                                                                count: tempActivityParticipants.length,
+                                                                                                                                participants: tempActivityParticipants,
+                                                                                                                                price: typeof activity.price === "number" ? activity.price : (activity.price?.amount || 0),
+                                                                                                                                currency: typeof activity.price === "number" ? "USD" : (activity.price?.currency || "USD")
+                                                                                                                            });
+                                                                                                                        }
+                                                                                                                        return filtered;
+                                                                                                                    });
+
+                                                                                                                    setOpenActivityDropdown(null);
+
+                                                                                                                    // Scroll carefully within the container
+                                                                                                                    let nextEl = document.getElementById(`activity-${day.day}-${actIdx + 1}`);
+                                                                                                                    if (!nextEl) {
+                                                                                                                        nextEl = document.getElementById(`activity-${day.day + 1}-0`);
+                                                                                                                    }
+                                                                                                                    if (nextEl) {
+                                                                                                                        const container = document.getElementById('activities-scroll-container');
+                                                                                                                        if (container) {
+                                                                                                                            const containerRect = container.getBoundingClientRect();
+                                                                                                                            const elRect = nextEl.getBoundingClientRect();
+                                                                                                                            container.scrollBy({
+                                                                                                                                top: elRect.top - containerRect.top - 20,
+                                                                                                                                behavior: 'smooth'
+                                                                                                                            });
+                                                                                                                        } else {
+                                                                                                                            nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }}
+                                                                                                                className="bg-[#53319C] text-white px-7 py-2.5 rounded-full font-medium text-[15px] hover:bg-[#40257a] transition shadow-sm"
+                                                                                                            >
+                                                                                                                Add Travellers
+                                                                                                            </button>
+                                                                                                        </div>
                                                                                                     </div>
                                                                                                 )}
-
-                                                                                                <div className="flex items-center justify-between mt-auto pt-4">
-                                                                                                    <button
-                                                                                                        onClick={() => {
-                                                                                                            const currentItem = selectedActivities.find(a => a.dayNumber === day.day && a.activityIndex === actIdx);
-                                                                                                            if (currentItem) {
-                                                                                                                [...Array(adultCount)].forEach((_, i) => toggleActivityParticipant(day.day, actIdx, i, false, activity));
-                                                                                                            }
-                                                                                                        }}
-                                                                                                        className="px-5 py-1.5 border border-gray-400 rounded-full text-[13px] font-bold text-[#2C3238] hover:bg-gray-50 transition"
-                                                                                                    >
-                                                                                                        Clear
-                                                                                                    </button>
-                                                                                                    <button
-                                                                                                        onClick={() => {
-                                                                                                            [...Array(adultCount)].forEach((_, i) => {
-                                                                                                                const isSelected = selectedActivities.find(a => a.dayNumber === day.day && a.activityIndex === actIdx)?.participants?.includes(i);
-                                                                                                                if (!isSelected) {
-                                                                                                                    toggleActivityParticipant(day.day, actIdx, i, true, activity);
-                                                                                                                }
-                                                                                                            });
-                                                                                                        }}
-                                                                                                        className="px-5 py-1.5 bg-[#2C3238] text-white rounded-full text-[13px] font-bold hover:bg-black transition"
-                                                                                                    >
-                                                                                                        Select all
-                                                                                                    </button>
-                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -1710,13 +1839,13 @@ export default function CheckoutPage() {
                                 {/* Full Passenger Details for Step 4 */}
                                 <div className="mb-8">
                                     <h3 className="text-[22px] font-medium text-black mb-4">Complete Passenger Details</h3>
-                                    
+
                                     <div className="border border-gray-300 rounded-xl bg-white mb-6">
                                         {/* Top section: Cards */}
                                         <div className="p-6 border-b border-gray-200">
                                             <h3 className="text-[18px] font-medium text-[#2C3238] mb-4">Traveller in this booking</h3>
                                             <div className="flex flex-wrap items-center gap-4 mb-4">
-                                                <div 
+                                                <div
                                                     onClick={() => setActiveStep4TravellerIndex(0)}
                                                     className={`relative flex items-center gap-3 border rounded-xl px-4 py-3 min-w-[220px] cursor-pointer transition ${activeStep4TravellerIndex === 0 ? 'border-[#6A38C2] bg-[#F4F0FF]' : 'border-gray-200 hover:border-purple-300'}`}
                                                 >
@@ -1734,8 +1863,8 @@ export default function CheckoutPage() {
                                                     )}
                                                 </div>
                                                 {otherTravellers.map((t, i) => (
-                                                    <div 
-                                                        key={i} 
+                                                    <div
+                                                        key={i}
                                                         onClick={() => setActiveStep4TravellerIndex(i + 1)}
                                                         className={`relative flex items-center gap-3 border rounded-xl px-4 py-3 min-w-[220px] cursor-pointer transition ${activeStep4TravellerIndex === i + 1 ? 'border-[#6A38C2] bg-[#F4F0FF]' : 'border-gray-200 hover:border-purple-300'}`}
                                                     >
@@ -1928,7 +2057,7 @@ export default function CheckoutPage() {
                                                                     </select>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             {/* Navigation Buttons */}
                                                             <div className="flex justify-end mt-8 gap-4">
                                                                 {globalIndex > 0 && (
@@ -2165,31 +2294,18 @@ export default function CheckoutPage() {
 
                             <div className="flex items-start justify-between mb-5 px-1">
                                 <h3 className="text-3xl font-medium text-[#2C3238] pr-4 leading-tight">{tour.name}</h3>
-                                <div className="text-right whitespace-nowrap pt-1 flex items-start text-[#1A1F24]">
-                                    <span className="text-xs font-bold mr-0.5 mt-2">$</span>
-                                    <span className="text-4xl font-bold tracking-tight">{formatPrice(calculateTotalPrice).replace(/[^0-9]/g, '')}</span>
-                                    <span className="text-[10px] font-bold ml-1 mt-2">USD</span>
-                                </div>
                             </div>
 
                             <div className="border-t border-gray-200 pt-5 mb-5 px-1">
-                                <div className={`flex items-center justify-between ${currentStep >= 2 ? 'mb-4' : ''}`}>
+                                <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-3 text-gray-500 text-[15px]">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                                         <span>Duration</span>
                                     </div>
                                     <span className="text-[15px] text-gray-600 font-medium">{tour.duration?.days} days</span>
                                 </div>
-                                {currentStep >= 2 && (
-                                    <div className={`flex items-center justify-between ${currentStep >= 3 ? 'mb-4' : ''}`}>
-                                        <div className="flex items-center gap-3 text-gray-500 text-[15px]">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                                            <span>Number of travellers</span>
-                                        </div>
-                                        <span className="text-[15px] text-gray-600 font-medium">{adultCount < 10 ? `0${adultCount}` : adultCount}</span>
-                                    </div>
-                                )}
-                                {currentStep >= 3 && selectedDate && (
+
+                                {currentStep >= 2 && selectedDate && (
                                     <>
                                         <div className="flex items-center justify-between mb-4">
                                             <div className="flex items-center gap-3 text-gray-500 text-[15px]">
@@ -2211,6 +2327,38 @@ export default function CheckoutPage() {
                                         </div>
                                     </>
                                 )}
+                            </div>
+
+                            <div className="border-t border-gray-200 pt-5 mb-5 px-1">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-[20px] font-medium text-[#2C3238]">Trip</h4>
+                                    <div className="relative group flex items-center">
+                                        <button
+                                            onClick={() => setIsTravellerInfoModalOpen(true)}
+                                            className="text-gray-400 hover:text-[#6A38C2] transition-colors p-1 rounded-full hover:bg-purple-50"
+                                        >
+                                            <Info size={20} />
+                                        </button>
+                                        <div className="absolute right-0 top-full mt-2 w-max px-3 py-1.5 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                                            Get all travellers info
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex items-start justify-between text-[16px] text-gray-500">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-black"></div>
+                                            <span>{adultCount} {adultCount > 1 ? "Travellers" : "Traveller"}</span>
+                                        </div>
+                                        <div>
+                                            <span>$ {baseTourPrice} USD</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between font-medium text-[#2C3238] pb-1 pt-3 mt-2">
+                                        <span className="text-[16px]">Subtotal</span>
+                                        <span className="text-[16px]">$ {baseTourPrice} USD</span>
+                                    </div>
+                                </div>
                             </div>
 
                             {currentStep >= 3 && accommodationUpgrade && (
@@ -2235,36 +2383,38 @@ export default function CheckoutPage() {
                                 <div className="border-t border-gray-200 pt-5 mb-5 px-1">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="text-[17px] font-medium text-[#2C3238]">Selected Add-Ons</h4>
-                                        <button className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                        <button onClick={() => setAddonsExpanded(!addonsExpanded)} className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center transition-transform cursor-pointer">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${addonsExpanded ? 'rotate-180' : 'rotate-0'}`}><path d="m6 9 6 6 6-6" /></svg>
                                         </button>
                                     </div>
 
-                                    <div className="bg-[#EAEBEF] rounded-xl overflow-hidden mb-4 border border-gray-200">
-                                        <div className="divide-y divide-white">
-                                            {selectedActivities.map((act, idx) => {
-                                                const activityName = tour.itinerary.find(d => d.day === act.dayNumber)?.optionalActivities?.[act.activityIndex]?.title || tour.itinerary.find(d => d.day === act.dayNumber)?.optionalActivities?.[act.activityIndex]?.name || "Activity";
-                                                return (
-                                                    <div key={idx} className="flex items-start justify-between text-[14px] p-4 bg-[#EAEBEF]">
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
-                                                            <div>
-                                                                <div className="text-[#2C3238] font-medium text-[13px] leading-tight">{activityName}</div>
-                                                                <div className="text-gray-500 text-[12px] mt-0.5">( {act.count} Travellers )</div>
+                                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${addonsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                                        <div className="bg-[#EAEBEF] rounded-xl overflow-hidden mb-4 border border-gray-200">
+                                            <div className="divide-y divide-white">
+                                                {selectedActivities.map((act, idx) => {
+                                                    const activityName = tour.itinerary.find(d => d.day === act.dayNumber)?.optionalActivities?.[act.activityIndex]?.title || tour.itinerary.find(d => d.day === act.dayNumber)?.optionalActivities?.[act.activityIndex]?.name || "Activity";
+                                                    return (
+                                                        <div key={idx} className={`flex items-start justify-between text-[14px] p-4 ${idx % 2 === 0 ? 'bg-[#EAEBEF]' : 'bg-white'}`}>
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
+                                                                <div>
+                                                                    <div className="text-[#2C3238] font-medium text-[13px] leading-tight">{activityName}</div>
+                                                                    <div className="text-gray-500 text-[12px] mt-0.5">( {act.count} Travellers )</div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
+                                                                {act.price > 0 ? `$${act.price}` : "Free"}
                                                             </div>
                                                         </div>
-                                                        <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
-                                                            {act.price > 0 ? `$${act.price}` : "Free"}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex items-center justify-between mt-5 font-medium text-[#2C3238]">
-                                        <span className="text-[16px]">Subtotal</span>
-                                        <span className="text-[16px]">+{formatPrice(selectedActivities.reduce((sum, act) => sum + act.price * act.count, 0))}</span>
+                                        <div className="flex items-center justify-between font-medium text-[#2C3238] pb-1">
+                                            <span className="text-[16px]">Subtotal</span>
+                                            <span className="text-[16px]">+{formatPrice(selectedActivities.reduce((sum, act) => sum + act.price * act.count, 0))}</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -2325,7 +2475,135 @@ export default function CheckoutPage() {
                 </div>
             </div>
 
+            {/* Traveller Info Modal */}
+            {isTravellerInfoModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-xl font-semibold text-[#2C3238]">Traveller Information & Breakdown</h2>
+                                <p className="text-sm text-gray-500 mt-1">Detailed view of what each traveller has booked</p>
+                            </div>
+                            <button onClick={() => setIsTravellerInfoModalOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                <X size={20} weight="bold" className="text-gray-500" />
+                            </button>
+                        </div>
+                        {/* Content */}
+                        <div className="flex flex-1 overflow-hidden">
+                            {/* Tabs */}
+                            <div className="w-1/3 border-r border-gray-100 overflow-y-auto bg-gray-50 p-4">
+                                {Array.from({ length: adultCount }).map((_, i) => {
+                                    const traveller = i === 0 ? primaryTraveller : otherTravellers[i - 1];
+                                    const name = (traveller?.firstName || traveller?.lastName) ? `${traveller.firstName} ${traveller.lastName}`.trim() : `Traveller ${i + 1}`;
 
+                                    return (
+                                        <button
+                                            key={i}
+                                            onClick={() => setActiveTravellerTab(i)}
+                                            className={`w-full text-left p-4 rounded-xl mb-2 transition-all ${activeTravellerTab === i ? 'bg-white shadow-sm border border-purple-200' : 'hover:bg-gray-100 text-gray-600 border border-transparent'}`}
+                                        >
+                                            <div className={`font-medium ${activeTravellerTab === i ? 'text-[#6A38C2]' : 'text-gray-700'}`}>{name}</div>
+                                            <div className="text-xs text-gray-500 mt-1">{i === 0 ? "Primary Traveller" : "Traveller"}</div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Details */}
+                            <div className="w-2/3 p-6 overflow-y-auto bg-white">
+                                {Array.from({ length: adultCount }).map((_, i) => {
+                                    if (activeTravellerTab !== i) return null;
+
+                                    const traveller = i === 0 ? primaryTraveller : otherTravellers[i - 1];
+                                    const name = (traveller?.firstName || traveller?.lastName) ? `${traveller.firstName} ${traveller.lastName}`.trim() : `Traveller ${i + 1}`;
+
+                                    const basePrice = Math.round(baseTourPrice / adultCount);
+                                    let travellerTotal = basePrice;
+
+                                    const hasAccommodation = accommodationUpgrade?.participants?.includes(i);
+                                    if (hasAccommodation && accommodationUpgrade) {
+                                        travellerTotal += accommodationUpgrade.price;
+                                    }
+
+                                    const travellerActivities = selectedActivities.filter(act => act.participants?.includes(i));
+                                    travellerTotal += travellerActivities.reduce((sum, act) => sum + act.price, 0);
+
+                                    return (
+                                        <div key={i} className="animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <h3 className="text-2xl font-medium text-[#2C3238] mb-6">{name}</h3>
+
+                                            <div className="space-y-6">
+                                                {/* Personal Info */}
+                                                <div>
+                                                    <h4 className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-3">Personal Information</h4>
+                                                    <div className="bg-[#F9FAFB] rounded-xl p-4 border border-gray-100 grid grid-cols-2 gap-y-4 gap-x-6">
+                                                        <div>
+                                                            <div className="text-xs text-gray-500 mb-1">Email</div>
+                                                            <div className="text-sm font-medium text-gray-800 break-words">{traveller?.email || "-"}</div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-xs text-gray-500 mb-1">Phone</div>
+                                                            <div className="text-sm font-medium text-gray-800">{traveller?.phone ? `${traveller.countryCode} ${traveller.phone}` : "-"}</div>
+                                                        </div>
+                                                        {/* <div>
+                                                            <div className="text-xs text-gray-500 mb-1">Date of Birth</div>
+                                                            <div className="text-sm font-medium text-gray-800">{traveller?.dobDay && traveller?.dobMonth && traveller?.dobYear ? `${traveller.dobDay}/${traveller.dobMonth}/${traveller.dobYear}` : "-"}</div>
+                                                        </div> */}
+                                                        {/* <div>
+                                                            <div className="text-xs text-gray-500 mb-1">Nationality</div>
+                                                            <div className="text-sm font-medium text-gray-800">{traveller?.nationality || "-"}</div>
+                                                        </div> */}
+                                                    </div>
+                                                </div>
+
+                                                {/* Booking Breakdown */}
+                                                <div>
+                                                    <h4 className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-3">Booking Breakdown</h4>
+                                                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                                        <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                                                            <div>
+                                                                <div className="font-medium text-gray-800">Trip Base Price</div>
+                                                                <div className="text-xs text-gray-500 mt-0.5">{tour?.name}</div>
+                                                            </div>
+                                                            <div className="font-medium text-gray-800">${basePrice}</div>
+                                                        </div>
+
+                                                        {hasAccommodation && accommodationUpgrade && (
+                                                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-[#F4F0FF]/30">
+                                                                <div>
+                                                                    <div className="font-medium text-gray-800">{accommodationUpgrade.name}</div>
+                                                                    <div className="text-xs text-[#6A38C2] mt-0.5">Accommodation Upgrade</div>
+                                                                </div>
+                                                                <div className="font-medium text-gray-800">${accommodationUpgrade.price > 0 ? accommodationUpgrade.price : 0}</div>
+                                                            </div>
+                                                        )}
+
+                                                        {travellerActivities.map((act, idx) => (
+                                                            <div key={idx} className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                                                <div>
+                                                                    <div className="font-medium text-gray-800">{act.name}</div>
+                                                                    <div className="text-xs text-gray-500 mt-0.5">Day {act.dayNumber} Activity</div>
+                                                                </div>
+                                                                <div className="font-medium text-gray-800">${act.price}</div>
+                                                            </div>
+                                                        ))}
+
+                                                        <div className="p-5 bg-gray-50 flex justify-between items-center">
+                                                            <div className="font-bold text-gray-800 text-lg">Total for {name.split(' ')[0]}</div>
+                                                            <div className="font-bold text-[#6A38C2] text-xl">${travellerTotal}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

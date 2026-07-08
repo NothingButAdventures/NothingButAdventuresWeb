@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { uploadUserAvatar } from "@/lib/firebase";
 import { api } from "@/lib/api";
@@ -147,15 +147,37 @@ const formatDate = (dateString: string) => {
     });
 };
 
+type TabType = "overview" | "bookings" | "reviews" | "hold spaces" | "settings" | "wishlist" | "nba club";
+const VALID_TABS: TabType[] = ["overview", "bookings", "reviews", "hold spaces", "settings", "wishlist", "nba club"];
+
 export default function ProfilePage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [user, setUser] = useState<User | null>(null);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [holdSpaces, setHoldSpaces] = useState<any[]>([]);
     const [wishlist, setWishlist] = useState<Tour[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<"overview" | "bookings" | "reviews" | "hold spaces" | "settings" | "wishlist" | "nba club">("overview");
+    
+    const [activeTab, setActiveTab] = useState<TabType>(() => {
+        const tabParam = searchParams.get("tab") as TabType;
+        return VALID_TABS.includes(tabParam) ? tabParam : "overview";
+    });
+
+    useEffect(() => {
+        const tabParam = searchParams.get("tab") as TabType;
+        if (VALID_TABS.includes(tabParam) && tabParam !== activeTab) {
+            setActiveTab(tabParam);
+        }
+    }, [searchParams, activeTab]);
+
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        const params = new URLSearchParams(window.location.search);
+        params.set("tab", tab);
+        window.history.replaceState(null, "", `?${params.toString()}`);
+    };
     const [releasingHold, setReleasingHold] = useState<string | null>(null);
 
     // Edit mode
@@ -489,7 +511,7 @@ export default function ProfilePage() {
                         {(["overview", "bookings", "hold spaces", "wishlist", "reviews", "nba club", "settings"] as const).map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => handleTabChange(tab)}
                                 className={`py-4 px-1 text-sm font-medium border-b-2 transition-colors capitalize whitespace-nowrap ${activeTab === tab
                                     ? "border-blue-600 text-blue-600"
                                     : "border-transparent text-gray-500 hover:text-[#3F3F42]"
@@ -602,7 +624,7 @@ export default function ProfilePage() {
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h2 className="text-lg font-semibold text-[#3F3F42]">Latest Booking</h2>
-                                        <button onClick={() => setActiveTab("bookings")} className="text-sm text-blue-600 hover:underline">View all</button>
+                                        <button onClick={() => handleTabChange("bookings")} className="text-sm text-blue-600 hover:underline">View all</button>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
@@ -1182,7 +1204,7 @@ export default function ProfilePage() {
                                                 <span className="font-semibold">Single Use Only:</span> Credits cannot be stacked. Only one credit can be applied per tour booking.
                                             </li>
                                             <li>
-                                                <span className="font-semibold">Top-Up Logic:</span> Members earn credits upon returning home from a milestone tour. If your current balance is lower than the new milestone credit, your account will be <span className="font-semibold">topped up</span> to reach the new total (e.g., $50 current + $100 top-up = $150 total). Any unused balance gets refreshed with the new credit's validity period.
+                                                <span className="font-semibold">Top-Up Logic:</span> Members earn credits upon returning home from a milestone tour. If your current balance is lower than the new milestone credit, your account will be <span className="font-semibold">topped up</span> to reach the new total (e.g., $50 current + $100 top-up = $150 total). Any unused balance gets refreshed with the new credit&apos;s validity period.
                                             </li>
                                         </ul>
                                     </div>

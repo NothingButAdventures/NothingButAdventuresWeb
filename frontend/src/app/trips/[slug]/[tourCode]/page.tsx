@@ -6,8 +6,9 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import TourDetailLoading from "./loading";
-import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Plus } from "@phosphor-icons/react";
+import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Plus, CheckCircle, Armchair } from "@phosphor-icons/react";
 import ReviewsSection from "@/components/ReviewsSection";
+import AuthModal from "@/components/AuthModal";
 import PopularToursSection from "@/components/PopularToursSection";
 import BeforeYouBookSection from "@/components/BeforeYouBookSection";
 
@@ -31,6 +32,7 @@ interface Tour {
   price: {
     amount: number;
     currency: string;
+    discountPercent?: number;
     ownRoomPrice?: number;
     bookingType?: "Percentage" | "Amount";
     bookingPercentage?: number;
@@ -111,10 +113,15 @@ interface Tour {
   travelStyle: string;
   serviceLevel: string;
   startDates: Array<{
+    _id?: string;
     startDate: string;
     endDate: string;
     availableSpots: number;
     discount: string;
+    price?: {
+      amount: number;
+      currency: string;
+    };
     isActive: boolean;
   }>;
   ageRequirement: {
@@ -207,11 +214,16 @@ export default function TourDetailPage() {
   // Hold Space state
   const [showHoldModal, setShowHoldModal] = useState(false);
   const [showHoldAuthModal, setShowHoldAuthModal] = useState(false);
-  const [holdAuthData, setHoldAuthData] = useState({ fullName: "", email: "", password: "" });
-  const [isLoginView, setIsLoginView] = useState(false);
   const [holdSelectedDate, setHoldSelectedDate] = useState<string>("");
   const [holdLoading, setHoldLoading] = useState(false);
   const [holdMessage, setHoldMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isAutoHolding, setIsAutoHolding] = useState(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      return !!(searchParams.get("action") === "holdSpace" && searchParams.get("date") && localStorage.getItem("token"));
+    }
+    return false;
+  });
 
   // Helper function to get discount percentage by name
   const getDiscountPercentage = (discountName: string | undefined): number => {
@@ -323,6 +335,21 @@ export default function TourDetailPage() {
   useEffect(() => {
     if (tour && tour.itinerary) {
       setExpandedItineraryDays(tour.itinerary.map(d => d.day));
+    }
+  }, [tour]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !tour) return;
+    const searchParams = new URLSearchParams(window.location.search);
+    const action = searchParams.get("action");
+    const date = searchParams.get("date");
+    const token = localStorage.getItem("token");
+
+    if (action === "holdSpace" && date && token) {
+      setIsAutoHolding(true);
+      setTimeout(() => {
+        handleHoldSpace(date);
+      }, 100);
     }
   }, [tour]);
 
@@ -488,50 +515,9 @@ export default function TourDetailPage() {
     }
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setHoldLoading(true);
-
-    try {
-      const endpoint = isLoginView ? api.endpoints.auth.login : api.endpoints.auth.register;
-      const payload = isLoginView
-        ? { email: holdAuthData.email, password: holdAuthData.password }
-        : {
-          name: holdAuthData.fullName,
-          email: holdAuthData.email,
-          password: holdAuthData.password,
-          passwordConfirm: holdAuthData.password,
-          role: "user"
-        };
-
-      const response = await fetch(`${api.baseURL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        setShowHoldAuthModal(false);
-        // Automatically proceed to hold space
-        setTimeout(() => {
-          handleHoldSpace();
-        }, 500);
-      } else {
-        alert(data.message || "Authentication failed");
-      }
-    } catch (error) {
-      console.error("Auth error:", error);
-      alert("Network error. Please try again.");
-    } finally {
-      setHoldLoading(false);
-    }
-  };
-
-  const handleHoldSpace = async () => {
-    if (!holdSelectedDate || !tour) return;
+  const handleHoldSpace = async (dateToHold?: string) => {
+    const targetDate = typeof dateToHold === "string" ? dateToHold : holdSelectedDate;
+    if (!targetDate || !tour) return;
 
     setHoldLoading(true);
     setHoldMessage(null);
@@ -539,8 +525,14 @@ export default function TourDetailPage() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set("action", "holdSpace");
+        currentUrl.searchParams.set("date", targetDate);
+        window.history.replaceState({}, "", currentUrl.toString());
+
         setShowHoldModal(false);
         setShowHoldAuthModal(true);
+        setHoldLoading(false);
         return;
       }
 
@@ -552,7 +544,7 @@ export default function TourDetailPage() {
         },
         body: JSON.stringify({
           tour: tour._id,
-          startDate: holdSelectedDate,
+          startDate: targetDate,
           numberOfSpots: 1,
         }),
       });
@@ -560,6 +552,13 @@ export default function TourDetailPage() {
       const data = await response.json();
 
       if (response.ok) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("action") === "holdSpace") {
+          url.searchParams.delete("action");
+          url.searchParams.delete("date");
+          window.history.replaceState({}, "", url.toString());
+        }
+
         setHoldMessage({
           type: "success",
           text: `Space held for 48 hours! Reference: ${data.data.holdSpace.holdReference}`,
@@ -568,22 +567,61 @@ export default function TourDetailPage() {
           setShowHoldModal(false);
           setHoldMessage(null);
           setHoldSelectedDate("");
-        }, 3000);
+          router.push("/profile?tab=hold spaces");
+        }, 1500);
       } else {
         setHoldMessage({
           type: "error",
           text: data.message || "Failed to hold space. Please try again.",
         });
+        if (typeof dateToHold === "string") {
+            const url = new URL(window.location.href);
+            if (url.searchParams.get("action") === "holdSpace") {
+              url.searchParams.delete("action");
+              url.searchParams.delete("date");
+              window.history.replaceState({}, "", url.toString());
+            }
+            setTimeout(() => {
+              router.push("/profile?tab=hold spaces");
+            }, 1500);
+        } else {
+            setShowHoldModal(true);
+            setHoldSelectedDate(targetDate);
+        }
       }
     } catch (error) {
       setHoldMessage({
         type: "error",
         text: "Network error. Please try again.",
       });
+      if (typeof dateToHold === "string") {
+          const url = new URL(window.location.href);
+          if (url.searchParams.get("action") === "holdSpace") {
+            url.searchParams.delete("action");
+            url.searchParams.delete("date");
+            window.history.replaceState({}, "", url.toString());
+          }
+          setTimeout(() => {
+            router.push("/profile?tab=hold spaces");
+          }, 1500);
+      } else {
+          setShowHoldModal(true);
+          setHoldSelectedDate(targetDate);
+      }
     } finally {
       setHoldLoading(false);
     }
   };
+
+  if (isAutoHolding) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white z-[100] fixed inset-0">
+        <h2 className="text-2xl font-semibold text-[#2C3238] text-center max-w-md">
+          - Your space has been held, wait for a moment..
+        </h2>
+      </div>
+    );
+  }
 
   if (loading) {
     return <TourDetailLoading />;
@@ -597,7 +635,7 @@ export default function TourDetailPage() {
             Tour not found
           </h1>
           <p className="text-gray-600">
-            The tour you're looking for doesn't exist.
+            The tour you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
       </div>
@@ -1057,7 +1095,7 @@ export default function TourDetailPage() {
                   <div className="flex-1 py-1">
                     <h3 className="text-[28px] sm:text-[32px] font-semibold text-[#3F3F42] leading-tight mb-1">Heading</h3>
                     <p className="text-[13px] text-[#3F3F42] leading-snug mb-1 max-w-lg">
-                      Help us spread love around the world for days. together with Planterra. we'll plant one tree in our name for every travel day.
+                      Help us spread love around the world for days. together with Planterra. we&apos;ll plant one tree in our name for every travel day.
                     </p>
                     <div className="text-[13px] font-medium text-[#3F3F42] mb-2">
                       Trees Planted this trip : 08
@@ -2336,19 +2374,19 @@ export default function TourDetailPage() {
       {/* Hold Space Modal */}
       {showHoldModal && (
         <div className="fixed inset-0 bg-[#3F3F42]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowHoldModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[80%] w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-5 text-white">
+            <div className="bg-white px-6 py-5 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2">
+                  <h3 className="text-lg font-bold flex items-center gap-2 text-[#3F3F42]">
                     <span>🔒</span> Hold Your Space
                   </h3>
-                  <p className="text-sm text-white/80 mt-1">Reserve your spot for 48 hours — no payment required</p>
+                  <p className="text-sm text-gray-500 mt-1">Reserve your spot for 48 hours — no payment required</p>
                 </div>
                 <button
                   onClick={() => setShowHoldModal(false)}
-                  className="text-white/80 hover:text-white text-2xl leading-none p-1"
+                  className="text-gray-400 hover:text-gray-600 text-2xl leading-none p-1"
                 >
                   ×
                 </button>
@@ -2377,43 +2415,88 @@ export default function TourDetailPage() {
 
               {/* Date Selection */}
               <div className="mb-5">
-                <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Select a departure date</label>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                <label className="block text-sm font-semibold text-[#3F3F42] mb-3">Select a departure date</label>
+                <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
                   {sortedDates
                     .filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date())
                     .map((date, idx) => {
                       const discount = getDiscountPercentage(date.discount);
                       const dateStr = new Date(date.startDate).toISOString().split("T")[0];
-                      const isSelected = holdSelectedDate === dateStr;
+                      
+                      let priceForDate = tour.price.amount;
+                      if (discount > 0) {
+                        priceForDate = priceForDate * (1 - discount / 100);
+                      } else if (date.price?.amount) {
+                        priceForDate = date.price.amount;
+                      } else if ((tour.price.discountPercent ?? 0) > 0) {
+                        priceForDate = priceForDate * (1 - (tour.price.discountPercent ?? 0) / 100);
+                      }
+                      priceForDate = Math.round(priceForDate);
+
                       return (
-                        <button
+                        <div
                           key={idx}
-                          onClick={() => setHoldSelectedDate(dateStr)}
-                          className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all text-sm ${isSelected
-                            ? "border-amber-500 bg-amber-50 shadow-sm"
-                            : "border-gray-200 hover:border-amber-300 hover:bg-amber-50/30"
-                            }`}
+                          className="flex items-center justify-between px-6 py-4 rounded-2xl transition-all bg-[#F1F2F3] border border-transparent"
                         >
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <div className="font-medium text-[#3F3F42]">
-                                {new Date(date.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                                {" — "}
-                                {new Date(date.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-0.5">
-                                {date.availableSpots} spots left
-                                {discount > 0 && (
-                                  <span className="ml-2 text-green-600 font-semibold">{discount}% off</span>
-                                )}
-                              </div>
-                            </div>
-                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-amber-500 bg-amber-500" : "border-gray-300"
-                              }`}>
-                              {isSelected && <span className="text-white text-xs">✓</span>}
+                          {/* Left: Date */}
+                          <div className="flex flex-col flex-1">
+                            {discount > 0 ? (
+                              <span className="text-[12px] font-medium text-[#FF4835] mb-0.5">On Sale</span>
+                            ) : (
+                              <span className="h-[18px] mb-0.5"></span>
+                            )}
+                            <span className="font-medium text-[#2C3238] text-[16px]">
+                              {new Date(date.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })} to {new Date(date.endDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                            </span>
+                          </div>
+
+                          {/* Middle: Seats */}
+                          <div className="flex flex-1 justify-center items-center">
+                            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
+                              <Armchair size={15} className="text-gray-400" weight="fill" />
+                              <span className="text-[12px] font-medium text-gray-500">{date.availableSpots}+ Seats Available</span>
                             </div>
                           </div>
-                        </button>
+
+                          {/* Right: Price & Button */}
+                          <div className="flex flex-1 justify-end items-center gap-6">
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-[14px] font-bold text-[#1A1F24] translate-y-[-8px]">$</span>
+                              <span className="text-[34px] font-bold text-[#1A1F24] leading-none tracking-tight">{priceForDate}</span>
+                              <span className="text-[10px] font-bold text-black mt-auto mb-1.5">USD/Per Person</span>
+                            </div>
+
+                            <div className="relative">
+                              {discount > 0 && (
+                                <div className="absolute -top-[30px] right-2 w-[28px] h-[40px] z-10 flex flex-col items-center justify-start pt-1 drop-shadow-sm">
+                                  <svg className="absolute inset-0 w-full h-full text-gray-300" viewBox="0 0 28 40" fill="white" stroke="currentColor" strokeWidth="1">
+                                    <path d="M 3 1 L 25 1 A 2 2 0 0 1 27 3 L 27 39 L 14 32 L 1 39 L 1 3 A 2 2 0 0 1 3 1 Z" strokeLinejoin="round" />
+                                  </svg>
+                                  <div className="relative z-20 flex flex-col items-center mt-[3px]">
+                                    <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">{discount}%</span>
+                                    <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">Off</span>
+                                  </div>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => {
+                                  setHoldSelectedDate(dateStr);
+                                  handleHoldSpace(dateStr);
+                                }}
+                                disabled={holdLoading}
+                                className="px-6 py-3 rounded-full font-medium text-[15px] transition text-white bg-[#37414A] hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {holdLoading && holdSelectedDate === dateStr ? (
+                                  <span className="flex items-center justify-center gap-2">
+                                    <span className="animate-spin">⏳</span> Holding...
+                                  </span>
+                                ) : (
+                                  "Hold Space"
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       );
                     })}
                 </div>
@@ -2425,7 +2508,7 @@ export default function TourDetailPage() {
               {/* Hold Info */}
               <div className="bg-gray-50 rounded-xl p-4 mb-5 text-sm">
                 <div className="flex items-start gap-2">
-                  <span className="text-amber-500 mt-0.5">⏱️</span>
+                  <span className="text-[#53319C] mt-0.5">⏱️</span>
                   <div>
                     <p className="text-[#3F3F42]">Your space will be held for <strong>48 hours</strong> from confirmation.</p>
                     <p className="text-gray-500 text-xs mt-1">No payment required. You can convert to a booking or release anytime.</p>
@@ -2444,25 +2527,12 @@ export default function TourDetailPage() {
               )}
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="flex justify-center mt-6">
                 <button
                   onClick={() => setShowHoldModal(false)}
-                  className="flex-1 py-3 px-4 border border-gray-300 text-[#3F3F42] rounded-xl font-semibold text-sm hover:bg-gray-50 transition"
+                  className="w-full max-w-xs py-3 px-4 border border-gray-300 text-[#3F3F42] rounded-xl font-semibold text-sm hover:bg-gray-50 transition"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={handleHoldSpace}
-                  disabled={!holdSelectedDate || holdLoading}
-                  className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold text-sm hover:from-amber-600 hover:to-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                >
-                  {holdLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="animate-spin">⏳</span> Holding...
-                    </span>
-                  ) : (
-                    "Confirm Hold"
-                  )}
                 </button>
               </div>
             </div>
@@ -2471,89 +2541,21 @@ export default function TourDetailPage() {
       )}
 
       {/* Hold Auth Modal */}
-      {showHoldAuthModal && (
-        <div className="fixed inset-0 bg-[#3F3F42]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowHoldAuthModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2">
-                    <span>{isLoginView ? "Sign In" : "Create Account"}</span>
-                  </h3>
-                  <p className="text-sm text-white/80 mt-1">
-                    {isLoginView ? "Sign in to hold your space" : "Create an account to start managing travels"}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowHoldAuthModal(false)}
-                  className="text-white/80 hover:text-white text-2xl leading-none p-1"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            {/* Body */}
-            <form onSubmit={handleAuthSubmit} className="p-6 space-y-4">
-              {!isLoginView && (
-                <div>
-                  <label className="block text-sm font-semibold text-[#3F3F42] mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
-                    value={holdAuthData.fullName}
-                    onChange={(e) => setHoldAuthData({ ...holdAuthData, fullName: e.target.value })}
-                    placeholder="Enter your full name"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-semibold text-[#3F3F42] mb-1">Email address</label>
-                <input
-                  type="email"
-                  required
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
-                  value={holdAuthData.email}
-                  onChange={(e) => setHoldAuthData({ ...holdAuthData, email: e.target.value })}
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#3F3F42] mb-1">Password</label>
-                <input
-                  type="password"
-                  required
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition"
-                  value={holdAuthData.password}
-                  onChange={(e) => setHoldAuthData({ ...holdAuthData, password: e.target.value })}
-                  placeholder={isLoginView ? "Enter your password" : "Create a password"}
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={holdLoading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold text-sm hover:from-purple-700 hover:to-indigo-700 transition disabled:opacity-50 shadow-md"
-              >
-                {holdLoading ? "Processing..." : (isLoginView ? "Sign In" : "Create Account")}
-              </button>
-
-              <div className="text-center text-sm text-gray-600 mt-4">
-                {isLoginView ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  type="button"
-                  onClick={() => setIsLoginView(!isLoginView)}
-                  className="text-purple-600 font-semibold hover:underline"
-                >
-                  {isLoginView ? "Register here" : "Sign in here"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AuthModal
+        isOpen={showHoldAuthModal}
+        onClose={() => setShowHoldAuthModal(false)}
+        initialView="login"
+        onSuccess={() => {
+          setShowHoldAuthModal(false);
+          const url = new URL(window.location.href);
+          const date = url.searchParams.get("date");
+          if (date) {
+            handleHoldSpace(date);
+          } else {
+            handleHoldSpace();
+          }
+        }}
+      />
       {/* Full Itinerary Modal */}
       {showFullItineraryModal && (
         <div
