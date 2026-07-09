@@ -2292,8 +2292,13 @@ export default function CheckoutPage() {
                                 )}
                             </div>
 
-                            <div className="flex items-start justify-between mb-5 px-1">
-                                <h3 className="text-3xl font-medium text-[#2C3238] pr-4 leading-tight">{tour.name}</h3>
+                            <div className="mb-5 px-1">
+                                <div className="flex items-start justify-between">
+                                    <h3 className="text-3xl font-medium text-[#2C3238] pr-4 leading-tight">{tour.name}</h3>
+                                </div>
+                                <div className="mt-2 text-[15px] text-gray-500">
+                                    Trip Code: <span className="font-semibold">{tour.tourCode}</span>
+                                </div>
                             </div>
 
                             <div className="border-t border-gray-200 pt-5 mb-5 px-1">
