@@ -68,6 +68,7 @@ app.use(
       "https://nothingbutadventures.com",
       "https://www.nothingbutadventures.com",
       "http://localhost:3000",
+      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : [])
     ],
     credentials: true,
   }),
