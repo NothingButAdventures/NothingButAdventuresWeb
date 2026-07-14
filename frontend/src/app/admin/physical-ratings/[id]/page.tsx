@@ -14,7 +14,6 @@ import Highlight from "@tiptap/extension-highlight";
 import { uploadPhysicalRatingImage } from "@/lib/firebase";
 import { api } from "@/lib/api";
 
-
 // --- Types ---
 interface PhysicalRating {
     _id: string;
@@ -32,12 +31,12 @@ interface PhysicalRating {
 // --- Icons ---
 const Icons = {
     Back: ({ className }: { className?: string }) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" className={className}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
     ),
     Save: ({ className }: { className?: string }) => (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={className}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={className}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
         </svg>
     ),
@@ -72,13 +71,13 @@ export default function EditPhysicalRatingPage() {
             StarterKit,
             ImageExtension.configure({
                 HTMLAttributes: {
-                    class: "rounded-lg max-w-full h-auto mx-auto shadow-md my-4",
+                    class: "rounded-md max-w-full h-auto mx-auto shadow-md my-4",
                 },
             }),
             LinkExtension.configure({
                 openOnClick: false,
                 HTMLAttributes: {
-                    class: "text-blue-600 hover:text-blue-800 underline",
+                    class: "text-zinc-900 font-semibold hover:underline decoration-zinc-900",
                 },
             }),
             Placeholder.configure({
@@ -205,7 +204,7 @@ export default function EditPhysicalRatingPage() {
         return colors[lvl as keyof typeof colors] || '#3B82F6';
     };
 
-    if (loading) return <div className="p-10 flex justify-center text-gray-500 animate-pulse">Loading physical rating...</div>;
+    if (loading) return <div className="p-10 flex justify-center text-zinc-500 animate-pulse">Loading physical rating...</div>;
     if (!physicalRating) return <div className="p-10 text-center">Physical rating not found</div>;
 
     return (
@@ -214,24 +213,24 @@ export default function EditPhysicalRatingPage() {
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <Link href="/admin/physical-ratings" className="p-2 hover:bg-gray-100 rounded-full transition text-gray-500">
-                                <Icons.Back className="w-5 h-5" />
+                        <div className="flex items-center gap-3">
+                            <Link href="/admin/physical-ratings" className="p-2 border border-gray-200 hover:bg-zinc-100 rounded-md transition text-zinc-650 bg-white shadow-sm flex items-center justify-center">
+                                <Icons.Back className="w-4 h-4" />
                             </Link>
                             <div>
-                                <h1 className="text-xl font-bold text-[#3F3F42]">Edit Physical Rating</h1>
-                                <p className="text-sm text-gray-500">Update details for {physicalRating.name}</p>
+                                <h1 className="text-xl font-bold text-zinc-800">Edit Physical Rating</h1>
+                                <p className="text-xs text-gray-500">Update details for {physicalRating.name}</p>
                             </div>
                         </div>
                         <button
                             onClick={handleSave}
                             disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] disabled:opacity-50 transition shadow-lg"
+                            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800 disabled:opacity-50 transition shadow-sm font-medium text-sm border border-zinc-900"
                         >
                             {saving ? (
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             ) : (
-                                <Icons.Save className="w-5 h-5" />
+                                <Icons.Save className="w-4 h-4" />
                             )}
                             {saving ? "Saving..." : "Save Changes"}
                         </button>
@@ -242,52 +241,52 @@ export default function EditPhysicalRatingPage() {
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
                 {/* Basic Info Card */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                    <h2 className="text-lg font-semibold mb-6">Basic Information</h2>
+                <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 md:p-8">
+                    <h2 className="text-lg font-semibold text-zinc-800 mb-6 border-b border-gray-100 pb-3">Basic Information</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Physical Rating Name</label>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Physical Rating Name</label>
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Level (1-5)</label>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Level (1-5)</label>
                                 <select
                                     value={level}
                                     onChange={(e) => setLevel(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm"
                                 >
-                                    <option value={1}>1</option>
-                                    <option value={2}>2</option>
-                                    <option value={3}>3</option>
-                                    <option value={4}>4</option>
-                                    <option value={5}>5</option>
+                                    <option value={1}>1 - Easy</option>
+                                    <option value={2}>2 - Moderate</option>
+                                    <option value={3}>3 - Challenging</option>
+                                    <option value={4}>4 - Difficult</option>
+                                    <option value={5}>5 - Expert</option>
                                 </select>
                                 <div className="flex gap-1 mt-2">
                                     {[1, 2, 3, 4, 5].map((lvl) => (
                                         <div
                                             key={lvl}
-                                            className={`w-4 h-4 rounded-full ${lvl <= level ? '' : 'opacity-20'}`}
+                                            className={`w-3.5 h-3.5 rounded-full ${lvl <= level ? '' : 'opacity-20'}`}
                                             style={{ backgroundColor: getLevelColor(level) }}
-                                        ></div>
+                                        />
                                     ))}
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Short Description</label>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Short Description</label>
                                 <input
                                     type="text"
                                     value={shortDescription}
                                     onChange={(e) => setShortDescription(e.target.value)}
                                     maxLength={200}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                     placeholder="Brief summary..."
                                 />
                             </div>
@@ -295,31 +294,31 @@ export default function EditPhysicalRatingPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Brand Color</label>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Brand Color</label>
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="color"
                                         value={color}
                                         onChange={(e) => setColor(e.target.value)}
-                                        className="w-12 h-12 rounded-lg border border-gray-200 cursor-pointer"
+                                        className="h-10 w-12 rounded-md border border-gray-300 cursor-pointer shadow-sm"
                                     />
                                     <input
                                         type="text"
                                         value={color}
                                         onChange={(e) => setColor(e.target.value)}
-                                        className="flex-1 px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition uppercase"
+                                        className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm uppercase placeholder:text-gray-400"
                                         placeholder="#3B82F6"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-1">Icon URL (optional)</label>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Icon URL (optional)</label>
                                 <input
                                     type="text"
                                     value={icon}
                                     onChange={(e) => setIcon(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                     placeholder="https://..."
                                 />
                             </div>
@@ -330,20 +329,20 @@ export default function EditPhysicalRatingPage() {
                                     id="isActive"
                                     checked={isActive}
                                     onChange={(e) => setIsActive(e.target.checked)}
-                                    className="w-4 h-4 rounded border-gray-300 text-[#3F3F42] focus:ring-black"
+                                    className="w-4 h-4 rounded border-gray-300 text-zinc-900 focus:ring-zinc-500 focus:ring-2"
                                 />
-                                <label htmlFor="isActive" className="text-sm text-[#3F3F42]">Active (visible in tour creation)</label>
+                                <label htmlFor="isActive" className="text-sm font-medium text-zinc-700">Active (visible in tour creation)</label>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Editor Card */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
-                        <h2 className="text-lg font-semibold text-[#3F3F42]">Detailed Description</h2>
+                <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+                        <h2 className="text-lg font-semibold text-zinc-800">Detailed Description</h2>
                         {/* Simple Toolbar */}
-                        <div className="flex bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+                        <div className="flex bg-white border border-gray-200 rounded-md p-1 shadow-sm">
                             <ToolbarButton
                                 onClick={() => editor?.chain().focus().toggleBold().run()}
                                 isActive={editor?.isActive("bold")}
@@ -376,11 +375,11 @@ export default function EditPhysicalRatingPage() {
                             <button
                                 onClick={handleEditorImageUpload}
                                 disabled={uploadingEditorImage}
-                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition disabled:opacity-50"
+                                className="p-2 text-zinc-600 hover:bg-gray-100 rounded-md transition disabled:opacity-50"
                                 title="Add Image"
                             >
                                 {uploadingEditorImage ? (
-                                    <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
                                 ) : (
                                     <Icons.Image className="w-4 h-4" />
                                 )}
@@ -400,7 +399,7 @@ function ToolbarButton({ onClick, isActive, label, icon, bold, italic }: any) {
         <button
             onClick={onClick}
             className={`p-2 min-w-[32px] rounded-md transition text-sm font-medium flex items-center justify-center
-                ${isActive ? 'bg-[#3F3F42] text-white' : 'text-gray-600 hover:bg-gray-100'}
+                ${isActive ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:bg-zinc-100'}
                 ${bold ? 'font-bold' : ''} ${italic ? 'italic' : ''}
             `}
         >

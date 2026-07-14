@@ -108,7 +108,6 @@ export default function PromoCodesPage() {
             const data = await res.json();
             if (data.status === "success") {
                 setContinents(data.data.continents);
-                // Also flatten and set countries for other parts of the app if needed
                 const allCountries = data.data.continents.flatMap((con: Continent) => con.countries || []);
                 setCountries(allCountries);
             }
@@ -265,13 +264,11 @@ export default function PromoCodesPage() {
         const allSelected = continentCountryIds.every(id => formData.countries.includes(id));
 
         if (allSelected) {
-            // Deselect all
             setFormData(prev => ({
                 ...prev,
                 countries: prev.countries.filter(id => !continentCountryIds.includes(id))
             }));
         } else {
-            // Select all
             setFormData(prev => ({
                 ...prev,
                 countries: Array.from(new Set([...prev.countries, ...continentCountryIds]))
@@ -308,22 +305,31 @@ export default function PromoCodesPage() {
     const isPromoExhausted = (promo: PromoCode) => promo.usedCount >= promo.maxUsers;
 
     const getStatusBadge = (promo: PromoCode) => {
-        if (!promo.isActive) return { label: "Inactive", className: "bg-gray-100 text-gray-600", dotClass: "bg-gray-400" };
-        if (isPromoExpired(promo.endDate)) return { label: "Expired", className: "bg-red-50 text-red-700", dotClass: "bg-red-500" };
-        if (isPromoExhausted(promo)) return { label: "Exhausted", className: "bg-orange-50 text-orange-700", dotClass: "bg-orange-500" };
-        return { label: "Active", className: "bg-green-50 text-green-700", dotClass: "bg-green-500" };
+        if (!promo.isActive) return { label: "Inactive", className: "bg-zinc-100 text-zinc-600 border-zinc-200", dotClass: "bg-zinc-400" };
+        if (isPromoExpired(promo.endDate)) return { label: "Expired", className: "bg-red-50 text-red-700 border-red-100", dotClass: "bg-red-500" };
+        if (isPromoExhausted(promo)) return { label: "Exhausted", className: "bg-amber-50 text-amber-700 border-amber-100", dotClass: "bg-amber-500" };
+        return { label: "Active", className: "bg-emerald-50 text-emerald-700 border-emerald-100", dotClass: "bg-emerald-500" };
     };
 
     if (loading) {
         return (
-            <div className="p-8">
-                <div className="animate-pulse space-y-6">
-                    <div className="h-8 bg-gray-200 rounded w-48"></div>
-                    <div className="h-12 bg-gray-200 rounded w-full max-w-md"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="h-20 bg-gray-200 rounded-xl"></div>
-                        ))}
+            <div className="min-h-screen bg-gray-50">
+                <div className="bg-white border-b border-gray-200">
+                    <div className="px-8 py-6">
+                        <div className="h-7 bg-gray-200 rounded-md w-48 mb-2 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 rounded-md w-64 animate-pulse"></div>
+                    </div>
+                </div>
+                <div className="p-8">
+                    <div className="bg-white rounded-md border border-gray-200 animate-pulse">
+                        <div className="p-4 border-b border-gray-100">
+                            <div className="h-10 bg-gray-200 rounded-md w-64"></div>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="h-16 bg-gray-200 rounded-md animate-pulse"></div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -331,201 +337,206 @@ export default function PromoCodesPage() {
     }
 
     return (
-        <div className="p-8">
+        <div className="min-h-screen bg-gray-50 pb-12">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-2xl font-bold text-[#3F3F42]">Promo Codes</h1>
-                    <p className="text-gray-500 mt-1">
-                        Manage promotional codes for tours ({promoCodes.length} total)
-                    </p>
-                </div>
-                <button
-                    onClick={openCreateModal}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-[#3F3F42] text-white rounded-lg hover:bg-[#3F3F42] transition shadow-lg"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Promo Code
-                </button>
-            </div>
-
-            {/* Search */}
-            <div className="mb-6">
-                <div className="relative max-w-md">
-                    <input
-                        type="text"
-                        placeholder="Search promo codes..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
-                    />
-                    <svg
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+            <div className="bg-white border-b border-gray-200">
+                <div className="px-8 h-16 flex items-center justify-between">
+                    <div>
+                        <h1 className="text-lg font-bold text-zinc-800 leading-none">Promo Codes</h1>
+                        <p className="text-gray-550 text-xs mt-1 leading-none">
+                            Manage promotional codes for tours ({promoCodes.length} total)
+                        </p>
+                    </div>
+                    <button
+                        onClick={openCreateModal}
+                        className="bg-zinc-900 hover:bg-zinc-800 border border-zinc-900 text-white font-medium py-1.5 px-3 rounded-md shadow-sm transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
                     >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Promo Code
+                    </button>
                 </div>
             </div>
 
-            {/* Promo Codes List */}
-            {filteredPromoCodes.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            {/* Content */}
+            <div className="p-8">
+                {/* Search */}
+                <div className="mb-6 flex items-center gap-4">
+                    <div className="relative flex-1 max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Search promo codes..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
+                        />
+                        <svg
+                            className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-[#3F3F42] mb-1">No promo codes found</h3>
-                    <p className="text-gray-500">Create your first promo code to get started</p>
                 </div>
-            ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100">
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Code</th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Discount</th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Usage</th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Validity</th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Scope</th>
-                                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
-                                <th className="text-right px-6 py-4 text-sm font-semibold text-gray-600">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPromoCodes.map((promo) => {
-                                const status = getStatusBadge(promo);
-                                return (
-                                    <tr key={promo._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition">
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#3F3F42] text-white font-bold text-xs shadow-md">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <span className="font-mono font-bold text-[#3F3F42] text-sm tracking-wider">
-                                                        {promo.code}
-                                                    </span>
-                                                    {promo.description && (
-                                                        <p className="text-xs text-gray-500 truncate max-w-[200px]">
-                                                            {promo.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold bg-emerald-50 text-emerald-700">
-                                                {promo.discountType === "percentage"
-                                                    ? `${promo.discountValue}% OFF`
-                                                    : `$${promo.discountValue} OFF`}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex-1 max-w-[80px]">
-                                                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-[#3F3F42] rounded-full transition-all"
-                                                            style={{
-                                                                width: `${Math.min((promo.usedCount / promo.maxUsers) * 100, 100)}%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <span className="text-sm text-gray-600 font-medium">
-                                                    {promo.usedCount}/{promo.maxUsers}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-[#3F3F42]">
-                                                <div>{new Date(promo.startDate).toLocaleDateString()}</div>
-                                                <div className="text-xs text-gray-400">
-                                                    to {new Date(promo.endDate).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex flex-wrap gap-1 max-w-[180px]">
-                                                {(!promo.travelStyles || promo.travelStyles.length === 0) &&
-                                                    (!promo.countries || promo.countries.length === 0) ? (
-                                                    <span className="text-xs text-gray-500 italic">All tours</span>
-                                                ) : (
-                                                    <>
-                                                        {promo.travelStyles?.map((s) => (
-                                                            <span key={s} className="px-1.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] rounded font-medium">
-                                                                {s}
-                                                            </span>
-                                                        ))}
-                                                        {promo.countries?.map((c) => (
-                                                            <span key={c._id} className="px-1.5 py-0.5 bg-purple-50 text-purple-700 text-[10px] rounded font-medium">
-                                                                {c.name}
-                                                            </span>
-                                                        ))}
-                                                    </>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${status.className}`}
-                                            >
-                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${status.dotClass}`} />
-                                                {status.label}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => openEditModal(promo)}
-                                                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                                    title="Edit"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(promo._id, promo.code)}
-                                                    disabled={deleteLoading === promo._id}
-                                                    className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
-                                                    title="Delete"
-                                                >
-                                                    {deleteLoading === promo._id ? (
-                                                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                                        </svg>
-                                                    ) : (
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </td>
+
+                {/* Promo Codes List */}
+                {filteredPromoCodes.length === 0 ? (
+                    <div className="bg-white rounded-md border border-gray-200 p-12 text-center shadow-sm">
+                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                        <h3 className="text-lg font-semibold text-zinc-800 mb-2">No promo codes found</h3>
+                        <p className="text-gray-500">Create your first promo code to get started</p>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Code</th>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Discount</th>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Usage</th>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Validity</th>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Scope</th>
+                                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3.5 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">Actions</th>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-100">
+                                    {filteredPromoCodes.map((promo) => {
+                                        const status = getStatusBadge(promo);
+                                        return (
+                                            <tr key={promo._id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-md flex items-center justify-center bg-zinc-100 text-zinc-700 border border-zinc-200 font-bold text-xs shadow-sm flex-shrink-0">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <span className="font-mono font-bold text-zinc-800 text-sm tracking-wider">
+                                                                {promo.code}
+                                                            </span>
+                                                            {promo.description && (
+                                                                <p className="text-xs text-gray-400 truncate max-w-[200px]">
+                                                                    {promo.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                        {promo.discountType === "percentage"
+                                                            ? `${promo.discountValue}% OFF`
+                                                            : `$${promo.discountValue} OFF`}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex-1 min-w-[80px]">
+                                                            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className="h-full bg-zinc-800 rounded-full transition-all"
+                                                                    style={{
+                                                                        width: `${Math.min((promo.usedCount / promo.maxUsers) * 100, 100)}%`,
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <span className="text-xs text-gray-500 font-medium">
+                                                            {promo.usedCount}/{promo.maxUsers}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-xs text-zinc-700 space-y-0.5">
+                                                        <div>{new Date(promo.startDate).toLocaleDateString()}</div>
+                                                        <div className="text-gray-400">
+                                                            to {new Date(promo.endDate).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-wrap gap-1 max-w-[180px]">
+                                                        {(!promo.travelStyles || promo.travelStyles.length === 0) &&
+                                                            (!promo.countries || promo.countries.length === 0) ? (
+                                                            <span className="text-xs text-gray-400 italic">All tours</span>
+                                                        ) : (
+                                                            <>
+                                                                {promo.travelStyles?.map((s) => (
+                                                                    <span key={s} className="px-1.5 py-0.5 bg-zinc-100 border border-zinc-200 text-zinc-700 text-[9px] rounded-md font-semibold">
+                                                                        {s}
+                                                                    </span>
+                                                                ))}
+                                                                {promo.countries?.map((c) => (
+                                                                    <span key={c._id} className="px-1.5 py-0.5 bg-zinc-100 border border-zinc-200 text-zinc-700 text-[9px] rounded-md font-semibold">
+                                                                        {c.name}
+                                                                    </span>
+                                                                ))}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span
+                                                        className={`inline-flex items-center px-2 py-0.5 border rounded-md text-xs font-medium ${status.className}`}
+                                                    >
+                                                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${status.dotClass}`} />
+                                                        {status.label}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                    <div className="flex justify-end gap-1.5">
+                                                        <button
+                                                            onClick={() => openEditModal(promo)}
+                                                            className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
+                                                            title="Edit"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(promo._id, promo.code)}
+                                                            disabled={deleteLoading === promo._id}
+                                                            className="p-1.5 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                                                            title="Delete"
+                                                        >
+                                                            {deleteLoading === promo._id ? (
+                                                                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                                </svg>
+                                                            ) : (
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+            </div>
 
             {/* Create/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-[#3F3F42]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-2xl">
-                            <h2 className="text-xl font-semibold text-[#3F3F42]">
+                <div className="fixed inset-0 bg-zinc-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-md w-full max-w-2xl shadow-lg border border-gray-200 max-h-[90vh] overflow-y-auto transform transition-all scale-100">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                            <h2 className="text-lg font-bold text-zinc-800">
                                 {editingPromo ? "Edit Promo Code" : "Create New Promo Code"}
                             </h2>
                             <button
@@ -533,9 +544,9 @@ export default function PromoCodesPage() {
                                     setIsModalOpen(false);
                                     resetForm();
                                 }}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                             >
-                                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
@@ -544,33 +555,33 @@ export default function PromoCodesPage() {
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             {/* Code */}
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">
                                     Promo Code <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.code}
                                     onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition font-mono uppercase tracking-wider"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm font-mono uppercase tracking-wider placeholder:text-gray-400"
                                     placeholder="e.g., SUMMER2026"
                                     required
                                     disabled={!!editingPromo}
                                 />
                                 {editingPromo && (
-                                    <p className="text-xs text-gray-400 mt-1">Code cannot be changed after creation</p>
+                                    <p className="text-xs text-gray-400 mt-1.5">Code cannot be changed after creation</p>
                                 )}
                             </div>
 
                             {/* Description */}
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">
                                     Description
                                 </label>
                                 <input
                                     type="text"
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                     placeholder="Brief description of the promo..."
                                     maxLength={500}
                                 />
@@ -579,7 +590,7 @@ export default function PromoCodesPage() {
                             {/* Discount Type & Value */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                                         Discount Type <span className="text-red-500">*</span>
                                     </label>
                                     <select
@@ -590,14 +601,14 @@ export default function PromoCodesPage() {
                                                 discountType: e.target.value as "percentage" | "fixed",
                                             })
                                         }
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition bg-white"
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm"
                                     >
                                         <option value="percentage">Percentage (%)</option>
                                         <option value="fixed">Fixed Amount ($)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                                         Discount Value <span className="text-red-500">*</span>
                                     </label>
                                     <div className="relative">
@@ -608,7 +619,7 @@ export default function PromoCodesPage() {
                                             step="0.01"
                                             value={formData.discountValue}
                                             onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                             placeholder={formData.discountType === "percentage" ? "e.g., 15" : "e.g., 50"}
                                             required
                                         />
@@ -622,7 +633,7 @@ export default function PromoCodesPage() {
                             {/* Max Users & Duration */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                                         Max Users <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -630,14 +641,14 @@ export default function PromoCodesPage() {
                                         min="1"
                                         value={formData.maxUsers}
                                         onChange={(e) => setFormData({ ...formData, maxUsers: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                         placeholder="e.g., 100"
                                         required
                                     />
-                                    <p className="text-xs text-gray-400 mt-1">Maximum number of times this code can be used</p>
+                                    <p className="text-[10px] text-gray-400 mt-1">Maximum number of times this code can be used</p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                                         Duration (days) <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -645,18 +656,18 @@ export default function PromoCodesPage() {
                                         min="1"
                                         value={formData.duration}
                                         onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                         placeholder="e.g., 30"
                                         required
                                     />
-                                    <p className="text-xs text-gray-400 mt-1">How many days the promo code remains valid</p>
+                                    <p className="text-[10px] text-gray-400 mt-1">How many days the promo code remains valid</p>
                                 </div>
                             </div>
 
                             {/* Max Discount Amount & Min Order Value */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">
                                         Min Order Value ($)
                                     </label>
                                     <input
@@ -665,13 +676,13 @@ export default function PromoCodesPage() {
                                         step="0.01"
                                         value={formData.minOrderValue}
                                         onChange={(e) => setFormData({ ...formData, minOrderValue: e.target.value })}
-                                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                         placeholder="e.g., 500"
                                     />
                                 </div>
                                 {formData.discountType === "percentage" && (
                                     <div>
-                                        <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+                                        <label className="block text-sm font-medium text-zinc-700 mb-1">
                                             Max Discount Amount ($)
                                         </label>
                                         <input
@@ -680,47 +691,47 @@ export default function PromoCodesPage() {
                                             step="0.01"
                                             value={formData.maxDiscountAmount}
                                             onChange={(e) => setFormData({ ...formData, maxDiscountAmount: e.target.value })}
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-transparent outline-none transition"
+                                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
                                             placeholder="e.g., 200"
                                         />
-                                        <p className="text-xs text-gray-400 mt-1">Cap on max discount amount</p>
+                                        <p className="text-[10px] text-gray-400 mt-1">Cap on max discount amount</p>
                                     </div>
                                 )}
                             </div>
 
                             {/* Travel Styles (optional) */}
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
-                                    Travel Styles <span className="text-gray-400 text-xs font-normal">(leave empty for all)</span>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">
+                                    Travel Styles <span className="text-gray-400 text-[10px] font-normal">(leave empty for all)</span>
                                 </label>
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-1.5">
                                     {travelStyles.map((style) => (
                                         <button
                                             type="button"
                                             key={style._id}
                                             onClick={() => toggleTravelStyle(style.name)}
-                                            className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${formData.travelStyles.includes(style.name)
-                                                ? "bg-[#3F3F42] text-white border-black"
-                                                : "bg-white text-[#3F3F42] border-gray-200 hover:border-gray-400"
+                                            className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors shadow-sm ${formData.travelStyles.includes(style.name)
+                                                ? "bg-zinc-900 text-white border-zinc-900"
+                                                : "bg-white text-zinc-750 border-gray-300 hover:bg-zinc-50"
                                                 }`}
                                         >
                                             {style.name}
                                         </button>
                                     ))}
                                     {travelStyles.length === 0 && (
-                                        <span className="text-sm text-gray-400">No travel styles available</span>
+                                        <span className="text-xs text-gray-400 italic">No travel styles available</span>
                                     )}
                                 </div>
                             </div>
 
                             {/* Countries (optional) */}
                             <div>
-                                <label className="block text-sm font-medium text-[#3F3F42] mb-2">
-                                    Countries <span className="text-gray-400 text-xs font-normal">(leave empty for all tours)</span>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">
+                                    Countries <span className="text-gray-400 text-[10px] font-normal">(leave empty for all tours)</span>
                                 </label>
-                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 border border-gray-100 rounded-xl p-3 bg-gray-50/30">
+                                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 border border-gray-200 rounded-md p-3 bg-gray-50/50 shadow-inner">
                                     {continents.length === 0 ? (
-                                        <span className="text-sm text-gray-400">No country data available</span>
+                                        <span className="text-xs text-gray-400 italic">No country data available</span>
                                     ) : (
                                         continents.map((continent) => {
                                             const isFullySelected = isContinentFullySelected(continent);
@@ -728,15 +739,15 @@ export default function PromoCodesPage() {
                                             const isExpanded = expandedContinents.includes(continent._id);
 
                                             return (
-                                                <div key={continent._id} className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                                                <div key={continent._id} className="bg-white border border-gray-200 rounded-md overflow-hidden shadow-sm">
                                                     <div 
                                                         className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors"
                                                         onClick={() => toggleContinentExpand(continent._id)}
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div 
-                                                                className={`w-5 h-5 rounded border flex items-center justify-center transition-colors cursor-pointer ${
-                                                                    isFullySelected ? "bg-[#3F3F42] border-black" : "bg-white border-gray-300"
+                                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors cursor-pointer ${
+                                                                    isFullySelected ? "bg-zinc-900 border-zinc-900" : "bg-white border-gray-300"
                                                                 }`}
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
@@ -744,27 +755,27 @@ export default function PromoCodesPage() {
                                                                 }}
                                                             >
                                                                 {isFullySelected ? (
-                                                                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
+                                                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
                                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                                                     </svg>
                                                                 ) : isPartiallySelected ? (
-                                                                    <div className="w-2.5 h-0.5 bg-gray-400 rounded" />
+                                                                    <div className="w-2 h-0.5 bg-gray-400 rounded" />
                                                                 ) : null}
                                                             </div>
-                                                            <span className="font-semibold text-[#3F3F42] text-sm">{continent.name}</span>
+                                                            <span className="font-bold text-zinc-700 text-sm">{continent.name}</span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-bold">
+                                                            <span className="text-[10px] bg-zinc-100 border border-zinc-200 text-zinc-650 px-2 py-0.5 rounded-md font-semibold">
                                                                 {continent.countries?.filter(c => formData.countries.includes(c._id)).length || 0} / {continent.countries?.length || 0}
                                                             </span>
-                                                            <svg className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isExpanded ? "rotate-90" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                             </svg>
                                                         </div>
                                                     </div>
 
                                                     {isExpanded && (
-                                                        <div className="p-3 bg-gray-50/50 border-t border-gray-50 grid grid-cols-2 md:grid-cols-3 gap-2 animate-in slide-in-from-top-1">
+                                                        <div className="p-3 bg-gray-50/50 border-t border-gray-200 grid grid-cols-2 md:grid-cols-3 gap-2">
                                                             {continent.countries?.map((country) => {
                                                                 const isSelected = formData.countries.includes(country._id);
                                                                 return (
@@ -772,16 +783,16 @@ export default function PromoCodesPage() {
                                                                         type="button"
                                                                         key={country._id}
                                                                         onClick={() => toggleCountry(country._id)}
-                                                                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                                                                        className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${
                                                                             isSelected
-                                                                                ? "bg-[#3F3F42] text-white border-black shadow-sm"
-                                                                                : "bg-white text-[#3F3F42] border-gray-200 hover:border-gray-300"
+                                                                                ? "bg-zinc-900 text-white border-zinc-900"
+                                                                                : "bg-white text-zinc-750 border-gray-300 hover:bg-zinc-50"
                                                                         }`}
                                                                     >
-                                                                        <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
-                                                                            isSelected ? "bg-white border-white" : "border-gray-200"
+                                                                        <div className={`w-3 h-3 rounded border flex items-center justify-center ${
+                                                                            isSelected ? "bg-white border-white" : "border-gray-305"
                                                                         }`}>
-                                                                            {isSelected && <div className="w-1.5 h-1.5 bg-[#3F3F42] rounded-sm" />}
+                                                                            {isSelected && <div className="w-1.5 h-1.5 bg-zinc-900 rounded-sm" />}
                                                                         </div>
                                                                         <span className="truncate">{country.name}</span>
                                                                     </button>
@@ -804,35 +815,35 @@ export default function PromoCodesPage() {
                                 <button
                                     type="button"
                                     onClick={() => setFormData({ ...formData, isActive: !formData.isActive })}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? "bg-[#3F3F42]" : "bg-gray-200"
+                                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formData.isActive ? "bg-zinc-900" : "bg-gray-200"
                                         }`}
                                 >
                                     <span
-                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? "translate-x-6" : "translate-x-1"
+                                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${formData.isActive ? "translate-x-4.5" : "translate-x-1"
                                             }`}
                                     />
                                 </button>
-                                <span className="text-sm font-medium text-[#3F3F42]">
+                                <span className="text-sm font-semibold text-zinc-700">
                                     {formData.isActive ? "Active" : "Inactive"}
                                 </span>
                             </div>
 
                             {/* Buttons */}
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-4 border-t border-gray-200">
                                 <button
                                     type="button"
                                     onClick={() => {
                                         setIsModalOpen(false);
                                         resetForm();
                                     }}
-                                    className="flex-1 px-4 py-3 border border-gray-200 text-[#3F3F42] rounded-xl hover:bg-gray-50 transition font-medium"
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-zinc-700 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={creating}
-                                    className="flex-1 px-4 py-3 bg-[#3F3F42] text-white rounded-xl hover:bg-[#3F3F42] disabled:opacity-50 transition font-medium"
+                                    className="flex-1 px-4 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800 disabled:opacity-50 transition-colors border border-zinc-900 font-medium text-sm shadow-sm"
                                 >
                                     {creating
                                         ? "Saving..."

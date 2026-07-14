@@ -126,6 +126,13 @@ export const api = {
       update: (id: string) => `/activities/${id}`,
       delete: (id: string) => `/activities/${id}`,
     },
+    hotels: {
+      getAll: "/hotels",
+      getById: (id: string) => `/hotels/${id}`,
+      create: "/hotels",
+      update: (id: string) => `/hotels/${id}`,
+      delete: (id: string) => `/hotels/${id}`,
+    },
     installments: {
       createPlan: "/installments/create-plan",
       activate: "/installments/activate",

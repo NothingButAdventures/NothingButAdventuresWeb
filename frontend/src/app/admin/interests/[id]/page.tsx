@@ -87,27 +87,27 @@ export default function EditInterestPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-gray-500">Loading...</div>;
+    return <div className="p-8 text-zinc-500 animate-pulse">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
-      <div className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5">
+      <div className="border-b border-gray-200 bg-white sticky top-0 z-10 shadow-sm">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Link
               href="/admin/interests"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-[#3F3F42]"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-gray-50 shadow-sm"
             >
               Back
             </Link>
-            <h1 className="text-xl font-semibold text-[#3F3F42]">Edit Interest</h1>
+            <h1 className="text-lg font-bold text-zinc-800">Edit Interest</h1>
           </div>
           <button
             form="interest-form"
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[#3F3F42] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#3F3F42] disabled:opacity-50"
+            className="rounded-md bg-zinc-900 border border-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 shadow-sm"
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -118,27 +118,27 @@ export default function EditInterestPage() {
         <form
           id="interest-form"
           onSubmit={handleSave}
-          className="space-y-5 rounded-xl border border-gray-200 bg-white p-6"
+          className="space-y-5 rounded-md border border-gray-200 bg-white p-6 shadow-sm"
         >
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Interest Name</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Interest Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
               placeholder="e.g. Wildlife"
               required
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Short Description</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Short Description</label>
             <input
               type="text"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
               placeholder="Short text for cards"
             />
           </div>

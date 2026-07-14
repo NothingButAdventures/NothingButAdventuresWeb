@@ -224,32 +224,52 @@ function PlantingLocationForm() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading form...</div>
+        <div className="text-zinc-500 animate-pulse font-medium">Loading form...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-20">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="px-8 py-6">
-          <h1 className="text-2xl font-bold text-[#3F3F42]">
-            {editId ? "Edit Planting Location" : "Add Planting Location"}
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Specify the region, thrives tree species, FAQs, and cover galleries.
-          </p>
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/planting-locations"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-gray-50 shadow-sm"
+            >
+              Back
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold text-zinc-800">
+                {editId ? "Edit Planting Location" : "Add Planting Location"}
+              </h1>
+            </div>
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={saving || !selectedCountryId || !selectedDestinationName}
+            className="rounded-md bg-zinc-900 border border-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+          >
+            {saving && (
+              <svg className="animate-spin -ml-1 mr-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            )}
+            {editId ? "Save Changes" : "Create Location"}
+          </button>
         </div>
       </div>
 
       {/* Form Area */}
       <div className="p-8 max-w-3xl mx-auto">
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+        <div className="bg-white rounded-md border border-gray-200 shadow-sm p-6 space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Country Selector */}
             <div>
-              <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">
                 Country / Destination Group <span className="text-red-500">*</span>
               </label>
               <select
@@ -257,7 +277,7 @@ function PlantingLocationForm() {
                 value={selectedCountryId}
                 onChange={(e) => handleCountryChange(e.target.value)}
                 disabled={!!editId}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white text-[#3F3F42] disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800 disabled:bg-gray-150 disabled:cursor-not-allowed"
               >
                 <option value="">-- Select Country --</option>
                 {countries.map((c) => (
@@ -270,7 +290,7 @@ function PlantingLocationForm() {
 
             {/* Destination Selector */}
             <div>
-              <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">
                 Planting Location / Destination <span className="text-red-500">*</span>
               </label>
               {selectedCountryId ? (
@@ -279,7 +299,7 @@ function PlantingLocationForm() {
                     required
                     value={selectedDestinationName}
                     onChange={(e) => setSelectedDestinationName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white text-[#3F3F42]"
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
                   >
                     <option value="">-- Select Location Reference --</option>
                     {destinations.map((d) => (
@@ -289,16 +309,16 @@ function PlantingLocationForm() {
                     ))}
                   </select>
                 ) : (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-xs font-medium">
                     No destinations have been added to this country yet. Please add a destination to this country in{" "}
-                    <Link href="/admin/location" className="underline font-semibold hover:text-amber-950">
+                    <Link href="/admin/location" className="underline font-bold hover:text-amber-950">
                       Destination Management
                     </Link>{" "}
                     first.
                   </div>
                 )
               ) : (
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-400 text-sm">
+                <div className="p-3 bg-gray-50 border border-gray-250 rounded-md text-gray-400 text-xs font-semibold">
                   Please select a Country first.
                 </div>
               )}
@@ -306,7 +326,7 @@ function PlantingLocationForm() {
 
             {/* Plant Species Input */}
             <div>
-              <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">
                 Plant / Tree Species <span className="text-red-500">*</span>
               </label>
               <input
@@ -315,16 +335,16 @@ function PlantingLocationForm() {
                 value={plantSpeciesString}
                 onChange={(e) => setPlantSpeciesString(e.target.value)}
                 placeholder="e.g. Acacia, Mahogany, Oak"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-[#3F3F42] placeholder:text-gray-300"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400 text-zinc-800"
               />
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-[10px] text-gray-400 mt-1">
                 Enter multiple species separated by commas.
               </p>
             </div>
 
             {/* Description Input */}
             <div>
-              <label className="block text-sm font-medium text-[#3F3F42] mb-2">
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">
                 Description
               </label>
               <textarea
@@ -332,29 +352,29 @@ function PlantingLocationForm() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Tell users about the planting project in this region, soil types, reforestation status..."
                 rows={4}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-[#3F3F42] placeholder:text-gray-300 resize-y"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400 text-zinc-800 resize-y"
               />
             </div>
 
             {/* Gallery Section */}
-            <div className="pt-4 border-t border-gray-100">
-              <div className="flex justify-between items-center mb-4">
-                <label className="block text-sm font-bold text-[#3F3F42]">
+            <div className="pt-5 border-t border-gray-200">
+              <div className="flex justify-between items-center mb-3">
+                <label className="block text-sm font-bold text-zinc-800">
                   Gallery Images
                 </label>
                 <button
                   type="button"
                   onClick={() => setIsImagePickerOpen(true)}
-                  className="px-3.5 py-1.5 bg-[#3F3F42] hover:bg-[#3F3F42]/90 text-white rounded-lg text-xs font-semibold shadow transition-all"
+                  className="px-3 py-1.5 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md text-xs font-semibold shadow-sm transition-colors cursor-pointer"
                 >
                   Select from Media
                 </button>
               </div>
 
               {gallery.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-4 rounded-md border border-gray-200">
                   {gallery.map((url, index) => (
-                    <div key={index} className="relative group rounded-lg overflow-hidden h-24 bg-white border border-gray-200 shadow-sm">
+                    <div key={index} className="relative group rounded-md overflow-hidden h-24 bg-white border border-gray-200 shadow-sm">
                       <img
                         src={url}
                         alt={`Gallery preview ${index + 1}`}
@@ -363,10 +383,10 @@ function PlantingLocationForm() {
                       <button
                         type="button"
                         onClick={() => handleRemoveGalleryImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-sm"
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-md cursor-pointer"
                         title="Remove Image"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -374,22 +394,22 @@ function PlantingLocationForm() {
                   ))}
                 </div>
               ) : (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-400 text-sm bg-gray-50/50">
+                <div className="rounded-md border-2 border-dashed border-gray-200 p-8 text-center text-gray-400 text-sm bg-gray-50/30">
                   No images selected for the gallery yet.
                 </div>
               )}
             </div>
 
             {/* FAQs Section */}
-            <div className="pt-4 border-t border-gray-100">
-              <div className="flex justify-between items-center mb-4">
-                <label className="block text-sm font-bold text-[#3F3F42]">
+            <div className="pt-5 border-t border-gray-200">
+              <div className="flex justify-between items-center mb-3">
+                <label className="block text-sm font-bold text-zinc-800">
                   Frequently Asked Questions (FAQs)
                 </label>
                 <button
                   type="button"
                   onClick={handleAddFaq}
-                  className="px-3.5 py-1.5 bg-[#3F3F42] hover:bg-[#3F3F42]/90 text-white rounded-lg text-xs font-semibold shadow transition-all"
+                  className="px-3 py-1.5 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md text-xs font-semibold shadow-sm transition-colors cursor-pointer"
                 >
                   + Add FAQ
                 </button>
@@ -398,11 +418,11 @@ function PlantingLocationForm() {
               {faqs.length > 0 ? (
                 <div className="space-y-4">
                   {faqs.map((faq, index) => (
-                    <div key={index} className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3 relative">
+                    <div key={index} className="bg-gray-50 p-4 rounded-md border border-gray-200 space-y-3 relative shadow-inner">
                       <button
                         type="button"
                         onClick={() => handleRemoveFaq(index)}
-                        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors"
+                        className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
                         title="Remove FAQ"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,7 +431,7 @@ function PlantingLocationForm() {
                       </button>
 
                       <div className="pr-8">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                           Question #{index + 1}
                         </label>
                         <input
@@ -420,12 +440,12 @@ function PlantingLocationForm() {
                           value={faq.question}
                           onChange={(e) => handleFaqChange(index, "question", e.target.value)}
                           placeholder="e.g. When are the trees planted?"
-                          className="w-full px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
+                          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                           Answer
                         </label>
                         <textarea
@@ -434,36 +454,36 @@ function PlantingLocationForm() {
                           onChange={(e) => handleFaqChange(index, "answer", e.target.value)}
                           placeholder="Provide the answer..."
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 bg-white rounded-lg text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] resize-y"
+                          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800 resize-y"
                         />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="rounded-xl border-2 border-dashed border-gray-200 p-8 text-center text-gray-400 text-sm bg-gray-50/50">
+                <div className="rounded-md border-2 border-dashed border-gray-200 p-8 text-center text-gray-400 text-sm bg-gray-50/30">
                   No FAQs added to this planting location yet.
                 </div>
               )}
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+            <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
               <Link
                 href="/admin/planting-locations"
-                className="px-5 py-2.5 text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors font-medium text-sm border border-gray-200 bg-white"
+                className="px-4 py-2 border border-gray-300 text-zinc-700 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={saving || !selectedCountryId || !selectedDestinationName}
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-5 py-2 bg-zinc-900 border border-zinc-900 text-white rounded-md hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm shadow-sm flex items-center gap-2"
               >
                 {saving && (
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 )}
                 {editId ? "Save Changes" : "Create Planting Location"}
@@ -488,7 +508,7 @@ export default function NewPlantingLocationPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">Loading form...</div>
+        <div className="text-zinc-500 animate-pulse font-medium">Loading form...</div>
       </div>
     }>
       <PlantingLocationForm />

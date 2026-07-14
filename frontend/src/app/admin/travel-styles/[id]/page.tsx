@@ -92,7 +92,11 @@ export default function EditTravelStylePage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-gray-500">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-zinc-500 animate-pulse">Loading...</div>
+      </div>
+    );
   }
 
   return (
@@ -102,17 +106,17 @@ export default function EditTravelStylePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/admin/travel-styles"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-[#3F3F42]"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-zinc-600 border border-zinc-200 bg-white transition hover:bg-zinc-50 shadow-sm"
             >
               Back
             </Link>
-            <h1 className="text-xl font-semibold text-[#3F3F42]">Edit Travel Style</h1>
+            <h1 className="text-xl font-bold text-zinc-800">Edit Travel Style</h1>
           </div>
           <button
             form="travel-style-form"
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[#3F3F42] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#3F3F42] disabled:opacity-50"
+            className="rounded-md bg-zinc-900 border border-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 shadow-sm"
           >
             {saving ? "Saving..." : "Save"}
           </button>
@@ -123,60 +127,60 @@ export default function EditTravelStylePage() {
         <form
           id="travel-style-form"
           onSubmit={handleSave}
-          className="space-y-5 rounded-xl border border-gray-200 bg-white p-6"
+          className="space-y-5 rounded-md border border-gray-200 bg-white p-6 shadow-sm"
         >
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Travel Style Name</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Travel Style Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
               placeholder="Classic"
               required
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Short Description</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Short Description</label>
             <input
               type="text"
               value={shortDescription}
               onChange={(e) => setShortDescription(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
               placeholder="Short text for cards"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">Brand Color</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Brand Color</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="h-11 w-12 cursor-pointer rounded-md border border-gray-200"
+                className="h-9 w-12 cursor-pointer rounded-md border border-gray-300 shadow-sm"
               />
               <input
                 type="text"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 px-4 py-2.5 uppercase outline-none transition focus:border-black"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm uppercase placeholder:text-gray-400"
                 placeholder="#3B82F6"
               />
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#3F3F42]">URL</label>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">URL</label>
             <input
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 outline-none transition focus:border-black"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
               placeholder="/travel-styles/classic"
             />
-            <p className="mt-1 text-xs text-gray-500">This URL will be used when users click this style on /travel-styles.</p>
+            <p className="mt-1.5 text-xs text-gray-500">This URL will be used when users click this style on /travel-styles.</p>
           </div>
         </form>
       </div>

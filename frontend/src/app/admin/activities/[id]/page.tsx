@@ -142,8 +142,6 @@ export default function EditActivityPage() {
     }
   };
 
-  // Image selection is now handled via ImagePickerModal
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -188,49 +186,70 @@ export default function EditActivityPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center">Loading...</div>;
+  if (loading) return <div className="p-8 flex justify-center text-zinc-500 animate-pulse font-medium">Loading form details...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/admin/activities" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold text-[#3F3F42]">Edit Activity</h1>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div className="max-w-3xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/activities"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-700 transition-colors hover:bg-gray-50 shadow-sm"
+            >
+              Back
+            </Link>
+            <div>
+              <h1 className="text-lg font-bold text-zinc-800">Edit Activity</h1>
+            </div>
+          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="rounded-md bg-zinc-900 border border-zinc-900 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm flex items-center gap-2 cursor-pointer"
+          >
+            {submitting && (
+              <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+            )}
+            {submitting ? "Updating Activity..." : "Update Activity"}
+          </button>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6">
+      <div className="max-w-3xl mx-auto p-8">
+        <form onSubmit={handleSubmit} className="bg-white rounded-md border border-gray-200 shadow-sm p-8 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Title</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-1">Title</label>
             <input
               type="text"
               required
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Description</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-1">Description</label>
             <textarea
               required
               rows={4}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800 resize-y"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Destination</label>
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">Destination (Country)</label>
               <select
                 required
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
                 value={formData.destination}
                 onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
               >
@@ -240,10 +259,93 @@ export default function EditActivityPage() {
                 ))}
               </select>
             </div>
+
+            {formData.destination && (
+              <div className="relative">
+                <label className="block text-sm font-semibold text-zinc-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  readOnly
+                  placeholder="Select a location"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800 cursor-pointer"
+                  value={formData.location}
+                  onClick={() => setShowLocationPopup(true)}
+                />
+                
+                {showLocationPopup && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-md border border-gray-200 w-full max-w-md shadow-lg overflow-hidden">
+                      <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+                        <h3 className="font-bold text-zinc-800">Select Location</h3>
+                        <button 
+                          type="button"
+                          onClick={() => setShowLocationPopup(false)}
+                          className="p-1 hover:bg-gray-100 rounded-full cursor-pointer"
+                        >
+                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="p-4">
+                        <input
+                          type="text"
+                          placeholder="Search locations..."
+                          className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800 mb-4"
+                          value={locationSearch}
+                          onChange={(e) => setLocationSearch(e.target.value)}
+                          autoFocus
+                        />
+                        <div className="space-y-1 max-h-[300px] overflow-y-auto">
+                          {destinations
+                            .filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase()))
+                            .slice(0, 10)
+                            .map((d) => (
+                              <button
+                                key={d._id || d.name}
+                                type="button"
+                                className="w-full text-left px-3 py-2.5 hover:bg-gray-100/70 rounded-md transition-colors flex items-center gap-3 group cursor-pointer border-none"
+                                onClick={() => {
+                                  setFormData({ ...formData, location: d.name });
+                                  setShowLocationPopup(false);
+                                  setLocationSearch("");
+                                }}
+                              >
+                                <div className="w-8 h-8 rounded-md bg-zinc-100 flex items-center justify-center border border-zinc-200">
+                                  <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                </div>
+                                <span className="font-semibold text-zinc-800 text-sm">{d.name}</span>
+                              </button>
+                            ))}
+                          {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
+                            <div className="text-center py-8 text-gray-500 text-xs flex flex-col items-center gap-3">
+                              <p className="font-medium">No locations found</p>
+                              {locationSearch.trim() !== "" && (
+                                <button
+                                  type="button"
+                                  onClick={handleAddLocation}
+                                  disabled={addingLocation}
+                                  className="px-3.5 py-1.5 bg-zinc-900 border border-zinc-900 text-white rounded-md text-xs font-semibold hover:bg-zinc-800 transition disabled:opacity-50 cursor-pointer shadow-sm"
+                                >
+                                  {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Travel Styles</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-2">Travel Styles</label>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
@@ -255,10 +357,10 @@ export default function EditActivityPage() {
                     setFormData({ ...formData, travelStyles: allIds });
                   }
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-bold transition-colors border ${
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition border cursor-pointer shadow-sm ${
                   formData.travelStyles.length === travelStyles.length && travelStyles.length > 0
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-gray-100 text-[#3F3F42] border-gray-300 hover:bg-gray-200"
+                    ? "bg-zinc-900 text-white border-zinc-900"
+                    : "bg-white text-zinc-700 border-gray-300 hover:bg-gray-50"
                 }`}
               >
                 {formData.travelStyles.length === travelStyles.length && travelStyles.length > 0 ? "Deselect All" : "Select All"}
@@ -275,10 +377,10 @@ export default function EditActivityPage() {
                       setFormData({ ...formData, travelStyles: [...current, s._id] });
                     }
                   }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition border cursor-pointer shadow-sm ${
                     formData.travelStyles.includes(s._id)
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-gray-50 text-[#3F3F42] border-gray-200 hover:bg-gray-100"
+                      ? "bg-zinc-900 text-white border-zinc-900"
+                      : "bg-white text-zinc-700 border-gray-300 hover:bg-gray-50"
                   }`}
                 >
                   {s.name}
@@ -286,97 +388,14 @@ export default function EditActivityPage() {
               ))}
             </div>
             {formData.travelStyles.length === 0 && (
-              <p className="text-red-500 text-xs mt-1">Please select at least one travel style</p>
+              <p className="text-red-500 text-[10px] font-semibold mt-1.5">Please select at least one travel style</p>
             )}
           </div>
 
-          {formData.destination && (
-            <div className="relative">
-              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Location</label>
-              <input
-                type="text"
-                readOnly
-                placeholder="Select a location"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition cursor-pointer"
-                value={formData.location}
-                onClick={() => setShowLocationPopup(true)}
-              />
-              
-              {showLocationPopup && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
-                  <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                      <h3 className="font-bold text-[#3F3F42]">Select Location</h3>
-                      <button 
-                        type="button"
-                        onClick={() => setShowLocationPopup(false)}
-                        className="p-1 hover:bg-gray-100 rounded-full"
-                      >
-                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="p-4">
-                      <input
-                        type="text"
-                        placeholder="Search locations..."
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4"
-                        value={locationSearch}
-                        onChange={(e) => setLocationSearch(e.target.value)}
-                        autoFocus
-                      />
-                      <div className="space-y-1 max-h-[300px] overflow-y-auto">
-                        {destinations
-                          .filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase()))
-                          .slice(0, 10)
-                          .map((d) => (
-                            <button
-                              key={d._id || d.name}
-                              type="button"
-                              className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
-                              onClick={() => {
-                                setFormData({ ...formData, location: d.name });
-                                setShowLocationPopup(false);
-                                setLocationSearch("");
-                              }}
-                            >
-                              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
-                                <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                              </div>
-                              <span className="font-medium text-[#3F3F42]">{d.name}</span>
-                            </button>
-                          ))}
-                        {destinations.filter(d => d.name.toLowerCase().includes(locationSearch.toLowerCase())).length === 0 && (
-                          <div className="text-center py-8 text-gray-500 text-sm flex flex-col items-center gap-3">
-                            <p>No locations found</p>
-                            {locationSearch.trim() !== "" && (
-                              <button
-                                type="button"
-                                onClick={handleAddLocation}
-                                disabled={addingLocation}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
-                              >
-                                {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Physical Rating (Optional)</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-1">Physical Rating (Optional)</label>
             <select
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
               value={formData.physicalRating}
               onChange={(e) => setFormData({ ...formData, physicalRating: e.target.value })}
             >
@@ -387,26 +406,26 @@ export default function EditActivityPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 pt-2">
             <input
               type="checkbox"
               id="isFree"
-              className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="w-4 h-4 rounded border-gray-300 text-zinc-900 focus:ring-zinc-500 focus:ring-2"
               checked={formData.isFree}
               onChange={(e) => setFormData({ ...formData, isFree: e.target.checked, price: e.target.checked ? "0" : formData.price })}
             />
-            <label htmlFor="isFree" className="text-sm font-semibold text-[#3F3F42]">This is a free activity</label>
+            <label htmlFor="isFree" className="text-sm font-semibold text-zinc-700">This is a free activity</label>
           </div>
 
           {!formData.isFree && (
             <div>
-              <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Price</label>
+              <label className="block text-sm font-semibold text-zinc-700 mb-1">Price</label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 required={!formData.isFree}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="e.g. 49.99"
@@ -415,10 +434,10 @@ export default function EditActivityPage() {
           )}
 
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Duration (in hrs)</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-1">Duration (in hrs)</label>
             <input
               type="text"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm text-zinc-800"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
               placeholder="e.g. 2.5"
@@ -426,34 +445,24 @@ export default function EditActivityPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-[#3F3F42] mb-2">Cover Image</label>
+            <label className="block text-sm font-semibold text-zinc-700 mb-1">Cover Image</label>
             <div 
               onClick={() => setShowImagePicker(true)}
-              className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-400 transition-colors cursor-pointer relative overflow-hidden group min-h-[140px] items-center"
+              className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-md hover:border-gray-50 transition-colors cursor-pointer relative overflow-hidden group min-h-[140px] items-center bg-gray-50/30 shadow-inner"
             >
               {formData.coverImage ? (
                 <div className="absolute inset-0">
                   <img src={formData.coverImage} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-[#3F3F42]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">Select/Upload Image</span>
+                  <div className="absolute inset-0 bg-zinc-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-semibold">Select/Upload Image</span>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-1 text-center">
-                  <p className="text-sm text-gray-600">Click to select from Media Library or Upload</p>
+                  <p className="text-xs text-gray-500 font-semibold">Click to select from Media Library or Upload</p>
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
-            >
-              {submitting ? "Updating Activity..." : "Update Activity"}
-            </button>
           </div>
         </form>
       </div>

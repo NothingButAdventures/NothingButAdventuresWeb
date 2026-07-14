@@ -7,6 +7,8 @@ import { api } from "@/lib/api";
 import { uploadTourImage } from "@/lib/firebase";
 import ImagePickerModal from "@/components/ImagePickerModal";
 import CreateActivityModal from "@/components/CreateActivityModal";
+import CreateHotelModal from "@/components/CreateHotelModal";
+import SearchHotelModal from "@/components/SearchHotelModal";
 import BeforeYouBookEditor from "@/components/admin/BeforeYouBookEditor";
 
 interface Country {
@@ -145,6 +147,15 @@ export default function EditTourPage() {
   const [addingLocation, setAddingLocation] = useState(false);
   const [activitySearch, setActivitySearchInput] = useState("");
   const [showCreateActivityModal, setShowCreateActivityModal] = useState(false);
+
+  // Hotels state
+  const [hotels, setHotels] = useState<any[]>([]);
+  const [selectedPreHotelId, setSelectedPreHotelId] = useState<string>("");
+  const [selectedPostHotelId, setSelectedPostHotelId] = useState<string>("");
+  const [hotelTarget, setHotelTarget] = useState<"pre" | "post">("pre");
+  const [showCreateHotelModal, setShowCreateHotelModal] = useState<boolean>(false);
+  const [showSearchHotelModal, setShowSearchHotelModal] = useState<boolean>(false);
+  const [searchHotelTarget, setSearchHotelTarget] = useState<"pre" | "post">("pre");
 
   // Image uploads
   const [images, setImages] = useState<ImageUpload[]>([]);
@@ -368,6 +379,8 @@ export default function EditTourPage() {
         });
 
         setSelectedInterests(tour.interests || []);
+        setSelectedPreHotelId(tour.preTripHotel?._id || tour.preTripHotel || "");
+        setSelectedPostHotelId(tour.postTripHotel?._id || tour.postTripHotel || "");
 
         // Load existing description image
         if (tour.descriptionImage) {
@@ -471,12 +484,24 @@ export default function EditTourPage() {
   const fetchPlantingLocations = async (countryId: string) => {
     try {
       const response = await fetch(`${api.baseURL}/planting-locations?country=${countryId}`);
-      const data = await response.json();
-      if (data.status === "success") {
+      if (response.ok) {
+        const data = await response.json();
         setPlantingLocations(data.data.plantingLocations || []);
       }
     } catch (error) {
       console.error("Error fetching planting locations:", error);
+    }
+  };
+
+  const fetchHotels = async (countryId: string) => {
+    try {
+      const response = await fetch(`${api.baseURL}/hotels?destination=${countryId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setHotels(data.data.hotels || []);
+      }
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
     }
   };
 
@@ -540,9 +565,13 @@ export default function EditTourPage() {
     if (formData.country) {
       fetchDestinations(formData.country);
       fetchPlantingLocations(formData.country);
+      fetchHotels(formData.country);
     } else {
       setDestinations([]);
       setPlantingLocations([]);
+      setHotels([]);
+      setSelectedPreHotelId("");
+      setSelectedPostHotelId("");
     }
   }, [formData.country]);
 
@@ -1059,6 +1088,9 @@ export default function EditTourPage() {
         descriptionImage: descriptionImageUrl,
         itineraryMapImage: itineraryMapImageUrl,
         country: formData.country || undefined,
+        preTripHotel: selectedPreHotelId || undefined,
+        postTripHotel: selectedPostHotelId || undefined,
+        hotel: selectedPreHotelId || undefined,
         duration: {
           days: parseInt(formData.durationDays) || undefined,
         },
@@ -1152,7 +1184,7 @@ export default function EditTourPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-8">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-[#3F3F42]">
@@ -1164,7 +1196,7 @@ export default function EditTourPage() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Basic Information
             </h2>
@@ -1181,7 +1213,7 @@ export default function EditTourPage() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     placeholder="e.g., Himalayan Adventure Trek - Everest Base Camp"
                   />
                 </div>
@@ -1449,13 +1481,13 @@ export default function EditTourPage() {
                     {selectedInterests.map((interest) => (
                       <span
                         key={interest}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-200"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-[#f4f4f5] px-3 py-1.5 text-xs font-semibold text-[#18181b] border border-gray-250"
                       >
                         {interest}
                         <button
                           type="button"
                           onClick={() => setSelectedInterests(selectedInterests.filter((i) => i !== interest))}
-                          className="hover:bg-blue-100 rounded-full p-0.5"
+                          className="hover:bg-[#f4f4f5] rounded-full p-0.5"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
@@ -1615,7 +1647,7 @@ export default function EditTourPage() {
                         name="wifiAvailable"
                         checked={formData.wifiAvailable === true}
                         onChange={() => setFormData({ ...formData, wifiAvailable: true })}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        className="w-4 h-4 text-[#18181b] border-gray-300 focus:ring-[#18181b]/20"
                       />
                       <span className="ml-2 text-sm text-[#3F3F42] font-medium">Yes</span>
                     </label>
@@ -1625,7 +1657,7 @@ export default function EditTourPage() {
                         name="wifiAvailable"
                         checked={formData.wifiAvailable === false}
                         onChange={() => setFormData({ ...formData, wifiAvailable: false })}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                        className="w-4 h-4 text-[#18181b] border-gray-300 focus:ring-[#18181b]/20"
                       />
                       <span className="ml-2 text-sm text-[#3F3F42] font-medium">No</span>
                     </label>
@@ -1670,7 +1702,7 @@ export default function EditTourPage() {
           </div>
 
           {/* Images Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Tour Images
             </h2>
@@ -1734,7 +1766,7 @@ export default function EditTourPage() {
                       </svg>
                     </button>
                     {img.isPrimary && (
-                      <div className="absolute top-1 left-1 bg-blue-600 text-white px-2 py-0.5 rounded text-xs">
+                      <div className="absolute top-1 left-1 bg-[#18181b] text-white px-2 py-0.5 rounded text-xs">
                         Primary
                       </div>
                     )}
@@ -1753,7 +1785,7 @@ export default function EditTourPage() {
                       type="button"
                       onClick={() => setImageAsPrimary(index)}
                       className={`w-full py-1 rounded text-xs transition ${img.isPrimary
-                        ? "bg-blue-600 text-white"
+                        ? "bg-[#18181b] text-white"
                         : "bg-gray-100 text-[#3F3F42] hover:bg-gray-200"
                         }`}
                     >
@@ -1772,7 +1804,7 @@ export default function EditTourPage() {
           </div>
 
           {/* Pricing Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Pricing
             </h2>
@@ -1847,8 +1879,9 @@ export default function EditTourPage() {
             </div>
           </div>
 
+
           {/* Add-ons Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Add-ons
             </h2>
@@ -1872,7 +1905,7 @@ export default function EditTourPage() {
 
           {/* Tree Planting Section */}
           {formData.country && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
                 Tree Planting Information
               </h2>
@@ -1896,7 +1929,7 @@ export default function EditTourPage() {
                       ))}
                     </select>
                   ) : (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
                       No planting locations registered for this country. Manage them in{" "}
                       <Link href="/admin/planting-locations" className="underline font-semibold hover:text-amber-950">
                         Planting Locations
@@ -1925,7 +1958,7 @@ export default function EditTourPage() {
 
           {/* Itinerary Section */}
           {formData.country && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold text-[#3F3F42]">
                   Itinerary
@@ -1943,7 +1976,7 @@ export default function EditTourPage() {
                 {itinerary.map((day, dayIndex) => (
                   <div
                     key={dayIndex}
-                    className="border border-gray-200 rounded-lg p-6 bg-gray-50"
+                    className="border border-gray-200 rounded-md p-6 bg-gray-50"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="text-lg font-semibold text-[#3F3F42]">
@@ -1962,7 +1995,7 @@ export default function EditTourPage() {
                     <div className="space-y-3 mb-6">
                       <div className="flex flex-wrap gap-2 mb-2">
                         {(day.title ? day.title.split(",").filter(t => t.trim()) : []).map((tag, tagIndex) => (
-                          <span key={tagIndex} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium border border-blue-200">
+                          <span key={tagIndex} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f4f4f5] text-[#18181b] text-xs font-medium border border-gray-250">
                             {tag}
                             <button
                               type="button"
@@ -1971,7 +2004,7 @@ export default function EditTourPage() {
                                 currentTags.splice(tagIndex, 1);
                                 updateItinerary(dayIndex, "title", currentTags.join(","));
                               }}
-                              className="hover:text-blue-900"
+                              className="hover:text-[#27272a]"
                             >
                               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2061,7 +2094,7 @@ export default function EditTourPage() {
                                     setShowActivityPopup({ dayIndex, activityIndex: actIndex, isOptional: false });
                                     setActivitySearchInput("");
                                   }}
-                                  className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
+                                  className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-[#18181b] transition-colors flex items-center justify-between group"
                                 >
                                   <span className="text-sm text-[#3F3F42]">
                                     {activity.title || activity.name || "Select activity..."}
@@ -2123,7 +2156,7 @@ export default function EditTourPage() {
                                   setShowActivityPopup({ dayIndex, activityIndex: optIndex, isOptional: true });
                                   setActivitySearchInput("");
                                 }}
-                                className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-xl hover:border-blue-500 transition-colors flex items-center justify-between group"
+                                className="w-full text-left px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-[#18181b] transition-colors flex items-center justify-between group"
                               >
                                 <span className="text-sm text-[#3F3F42]">
                                   {optActivity.title || optActivity.name || "Select activity..."}
@@ -2229,7 +2262,7 @@ export default function EditTourPage() {
                                 updateItinerary(dayIndex, "meals", newMeals);
                               }}
                               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors border ${isSelected
-                                ? "bg-blue-600 text-white border-blue-600"
+                                ? "bg-[#18181b] text-white border-blue-600"
                                 : "bg-gray-50 text-[#3F3F42] border-gray-200 hover:bg-gray-100"
                                 }`}
                             >
@@ -2259,8 +2292,131 @@ export default function EditTourPage() {
             </div>
           )}
 
+          {/* Hotel Accommodation Section */}
+          {formData.country && (
+            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-[#3F3F42]">
+                  Pre & post-trip extra
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {/* Pre-trip Hotel */}
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#3F3F42] mb-1">
+                      Pre-trip Hotel (Optional)
+                    </label>
+                    <div
+                      onClick={() => {
+                        setSearchHotelTarget("pre");
+                        setShowSearchHotelModal(true);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white cursor-pointer flex justify-between items-center min-h-[38px] hover:border-zinc-400 transition"
+                    >
+                      <span>
+                        {selectedPreHotelId
+                          ? hotels.find((h) => h._id === selectedPreHotelId)?.name || "Select hotel"
+                          : "Select Pre-trip Hotel"}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {selectedPreHotelId && (
+                    (() => {
+                      const hotel = hotels.find((h) => h._id === selectedPreHotelId);
+                      if (!hotel) return null;
+                      return (
+                        <div className="border border-gray-200 rounded-md p-4 bg-gray-50 flex gap-4 items-center">
+                          {hotel.image ? (
+                            <img
+                              src={hotel.image}
+                              alt={hotel.name}
+                              className="w-16 h-16 rounded-md object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-md bg-gray-250 border border-gray-200 flex items-center justify-center text-xl">
+                              🏨
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-bold text-[#3F3F42] text-sm">{hotel.name}</div>
+                            <div className="text-xs text-gray-500 mb-1">{hotel.location}</div>
+                            <div className="flex flex-col text-[11px] font-semibold text-gray-600">
+                              <span>Private: ${hotel.privateRoomPrice}/night</span>
+                              <span>Shared: ${hotel.sharedRoomPrice}/night</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+
+                {/* Post-trip Hotel */}
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-[#3F3F42] mb-1">
+                      Post-trip Hotel (Optional)
+                    </label>
+                    <div
+                      onClick={() => {
+                        setSearchHotelTarget("post");
+                        setShowSearchHotelModal(true);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42] bg-white cursor-pointer flex justify-between items-center min-h-[38px] hover:border-zinc-400 transition"
+                    >
+                      <span>
+                        {selectedPostHotelId
+                          ? hotels.find((h) => h._id === selectedPostHotelId)?.name || "Select hotel"
+                          : "Select Post-trip Hotel"}
+                      </span>
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {selectedPostHotelId && (
+                    (() => {
+                      const hotel = hotels.find((h) => h._id === selectedPostHotelId);
+                      if (!hotel) return null;
+                      return (
+                        <div className="border border-gray-200 rounded-md p-4 bg-gray-50 flex gap-4 items-center">
+                          {hotel.image ? (
+                            <img
+                              src={hotel.image}
+                              alt={hotel.name}
+                              className="w-16 h-16 rounded-md object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-md bg-gray-250 border border-gray-200 flex items-center justify-center text-xl">
+                              🏨
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-bold text-[#3F3F42] text-sm">{hotel.name}</div>
+                            <div className="text-xs text-gray-500 mb-1">{hotel.location}</div>
+                            <div className="flex flex-col text-[11px] font-semibold text-gray-600">
+                              <span>Private: ${hotel.privateRoomPrice}/night</span>
+                              <span>Shared: ${hotel.sharedRoomPrice}/night</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Before You Book Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <h2 className="text-lg font-semibold text-[#3F3F42] mb-1">
               Before You Book
             </h2>
@@ -2296,7 +2452,7 @@ export default function EditTourPage() {
           </div>
 
           {/* Available Dates Section */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-[#3F3F42]">
                 Available Dates
@@ -2378,7 +2534,7 @@ export default function EditTourPage() {
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex gap-3 sticky bottom-0 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex gap-3 sticky bottom-0 bg-white p-4 rounded-md shadow-sm border border-gray-200">
             <button
               type="submit"
               disabled={submitting}
@@ -2404,7 +2560,7 @@ export default function EditTourPage() {
 
           {showCityPopup && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+              <div className="bg-white rounded-md w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="font-bold text-[#3F3F42]">Select {showCityPopup === 'start' ? 'Start' : 'End'} City</h3>
                   <button
@@ -2421,7 +2577,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search locations..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#18181b]/20 focus:border-[#18181b] mb-4 text-[#3F3F42]"
                     value={locationSearch}
                     onChange={(e) => setLocationSearch(e.target.value)}
                     autoFocus
@@ -2434,7 +2590,7 @@ export default function EditTourPage() {
                         <button
                           key={d._id || d.name}
                           type="button"
-                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          className="w-full text-left px-4 py-3 hover:bg-[#f4f4f5] rounded-md transition-colors flex items-center gap-3 group"
                           onClick={() => {
                             if (showCityPopup === 'start') {
                               setFormData(prev => ({ ...prev, startCity: d.name }));
@@ -2445,14 +2601,14 @@ export default function EditTourPage() {
                             setLocationSearch("");
                           }}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
-                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-[#f4f4f5]">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-[#18181b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                           </div>
                           <div>
-                            <p className="font-medium text-[#3F3F42] group-hover:text-blue-600">{d.name}</p>
+                            <p className="font-medium text-[#3F3F42] group-hover:text-[#18181b]">{d.name}</p>
                           </div>
                         </button>
                       ))}
@@ -2464,7 +2620,7 @@ export default function EditTourPage() {
                             type="button"
                             onClick={handleAddLocation}
                             disabled={addingLocation}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                            className="px-4 py-2 bg-[#18181b] text-white rounded-md text-sm font-medium hover:bg-[#27272a] transition disabled:opacity-50"
                           >
                             {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
                           </button>
@@ -2479,7 +2635,7 @@ export default function EditTourPage() {
 
           {showLocationPopup && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+              <div className="bg-white rounded-md w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="font-bold text-[#3F3F42]">Select Location</h3>
                   <button
@@ -2496,7 +2652,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search locations..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#18181b]/20 focus:border-[#18181b] mb-4 text-[#3F3F42]"
                     value={locationSearch}
                     onChange={(e) => setLocationSearch(e.target.value)}
                     autoFocus
@@ -2509,7 +2665,7 @@ export default function EditTourPage() {
                         <button
                           key={d._id || d.name}
                           type="button"
-                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          className="w-full text-left px-4 py-3 hover:bg-[#f4f4f5] rounded-md transition-colors flex items-center gap-3 group"
                           onClick={() => {
                             const dayIndex = showLocationPopup.dayIndex;
                             const currentTags = itinerary[dayIndex].title ? itinerary[dayIndex].title.split(",").filter(t => t.trim()) : [];
@@ -2521,8 +2677,8 @@ export default function EditTourPage() {
                             setLocationSearch("");
                           }}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
-                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-[#f4f4f5]">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-[#18181b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
@@ -2538,7 +2694,7 @@ export default function EditTourPage() {
                             type="button"
                             onClick={handleAddLocation}
                             disabled={addingLocation}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                            className="px-4 py-2 bg-[#18181b] text-white rounded-md text-sm font-medium hover:bg-[#27272a] transition disabled:opacity-50"
                           >
                             {addingLocation ? "Adding..." : `Add "${locationSearch.trim()}"`}
                           </button>
@@ -2553,7 +2709,7 @@ export default function EditTourPage() {
 
           {showActivityPopup && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#3F3F42]/50 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+              <div className="bg-white rounded-md w-full max-w-md shadow-2xl overflow-hidden">
                 <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="font-bold text-[#3F3F42]">Select Activity</h3>
                   <button
@@ -2570,7 +2726,7 @@ export default function EditTourPage() {
                   <input
                     type="text"
                     placeholder="Search activities..."
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 mb-4 text-[#3F3F42]"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md outline-none focus:ring-2 focus:ring-[#18181b]/20 focus:border-[#18181b] mb-4 text-[#3F3F42]"
                     value={activitySearch}
                     onChange={(e) => setActivitySearchInput(e.target.value)}
                     autoFocus
@@ -2598,7 +2754,7 @@ export default function EditTourPage() {
                         <button
                           key={opt._id}
                           type="button"
-                          className="w-full text-left px-4 py-3 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-3 group"
+                          className="w-full text-left px-4 py-3 hover:bg-[#f4f4f5] rounded-md transition-colors flex items-center gap-3 group"
                           onClick={() => {
                             applyActivityOption(
                               showActivityPopup.dayIndex,
@@ -2610,8 +2766,8 @@ export default function EditTourPage() {
                             setActivitySearchInput("");
                           }}
                         >
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-blue-100">
-                            <svg className="w-4 h-4 text-gray-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div className="w-8 h-8 rounded-md bg-gray-100 flex items-center justify-center group-hover:bg-[#f4f4f5]">
+                            <svg className="w-4 h-4 text-gray-500 group-hover:text-[#18181b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                           </div>
@@ -2623,7 +2779,7 @@ export default function EditTourPage() {
                               {opt.isFree ? (
                                 <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Free</span>
                               ) : (
-                                <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">${opt.price}</span>
+                                <span className="text-[10px] font-semibold text-[#18181b] bg-[#f4f4f5] px-1.5 py-0.5 rounded">${opt.price}</span>
                               )}
                             </div>
                           </div>
@@ -2648,7 +2804,7 @@ export default function EditTourPage() {
                     <button
                       type="button"
                       onClick={() => setShowCreateActivityModal(true)}
-                      className="w-full text-center px-4 py-2.5 bg-[#3F3F42] text-white rounded-lg text-sm font-medium hover:bg-[#3F3F42] transition"
+                      className="w-full text-center px-4 py-2.5 bg-[#3F3F42] text-white rounded-md text-sm font-medium hover:bg-[#3F3F42] transition"
                     >
                       + Create New Activity
                     </button>
@@ -2696,10 +2852,44 @@ export default function EditTourPage() {
         />
       )}
 
+      {formData.country && (
+        <CreateHotelModal
+          isOpen={showCreateHotelModal}
+          onClose={() => setShowCreateHotelModal(false)}
+          destinationId={formData.country}
+          onCreated={(newHotel) => {
+            setHotels((prev) => [newHotel, ...prev]);
+            if (hotelTarget === "pre") {
+              setSelectedPreHotelId(newHotel._id);
+            } else {
+              setSelectedPostHotelId(newHotel._id);
+            }
+          }}
+        />
+      )}
+
+      {showSearchHotelModal && formData.country && (
+        <SearchHotelModal
+          isOpen={showSearchHotelModal}
+          onClose={() => setShowSearchHotelModal(false)}
+          hotels={hotels}
+          countryId={formData.country}
+          onRefresh={() => fetchHotels(formData.country)}
+          title={searchHotelTarget === "pre" ? "Select Pre-Trip Hotel" : "Select Post-Trip Hotel"}
+          onSelect={(hotelId) => {
+            if (searchHotelTarget === "pre") {
+              setSelectedPreHotelId(hotelId);
+            } else {
+              setSelectedPostHotelId(hotelId);
+            }
+          }}
+        />
+      )}
+
       {/* Destination Selection Popup Modal */}
       {showDestinationPopup && (
         <div className="fixed inset-0 z-[150] flex items-center justify-center bg-[#3F3F42]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 flex flex-col max-h-[85vh]">
+          <div className="bg-white rounded-md shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100 flex flex-col max-h-[85vh]">
             <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center sticky top-0 z-10">
               <h2 className="text-lg font-bold text-[#3F3F42]">Select Destination</h2>
               <button 
@@ -2727,7 +2917,7 @@ export default function EditTourPage() {
                   return (
                     <div 
                       key={id}
-                      className="border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                      className="border border-gray-200 rounded-md overflow-hidden shadow-sm"
                     >
                       <button
                         type="button"
@@ -2768,10 +2958,10 @@ export default function EditTourPage() {
                                     setFormData((prev) => ({ ...prev, country: countryId }));
                                     setShowDestinationPopup(false);
                                   }}
-                                  className={`px-4 py-2.5 rounded-lg border text-sm font-medium text-left transition-all ${
+                                  className={`px-4 py-2.5 rounded-md border text-sm font-medium text-left transition-all ${
                                     isSelected
-                                      ? "bg-blue-50 border-blue-500 text-blue-700 shadow-sm"
-                                      : "bg-white border-gray-200 text-[#3F3F42] hover:border-blue-300 hover:bg-blue-50/30"
+                                      ? "bg-[#f4f4f5] border-[#18181b] text-[#18181b] shadow-sm"
+                                      : "bg-white border-gray-200 text-[#3F3F42] hover:border-[#18181b]/40 hover:bg-[#f4f4f5]/30"
                                   }`}
                                 >
                                   {country.name}

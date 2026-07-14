@@ -40,6 +40,15 @@ const menuItems = [
         ),
     },
     {
+        name: "Hotels",
+        href: "/admin/hotels",
+        icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+        ),
+    },
+    {
         name: "Planting Locations",
         href: "/admin/planting-locations",
         icon: (
@@ -167,7 +176,7 @@ function AdminLayoutSkeleton() {
                 {/* Logo Section */}
                 <div className="h-16 px-6 flex items-center border-b border-gray-100">
                     <div className="flex items-center gap-3 animate-pulse">
-                        <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-md"></div>
                         <div className="h-5 bg-gray-200 rounded w-24"></div>
                     </div>
                 </div>
@@ -177,9 +186,9 @@ function AdminLayoutSkeleton() {
                     {[1, 2, 3, 4, 5, 6, 7].map((i) => (
                         <div
                             key={i}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg animate-pulse"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-md animate-pulse"
                         >
-                            <div className="w-5 h-5 bg-gray-200 rounded"></div>
+                            <div className="w-5 h-5 bg-gray-200 rounded-md"></div>
                             <div className="h-4 bg-gray-200 rounded w-20"></div>
                         </div>
                     ))}
@@ -209,9 +218,9 @@ function AdminLayoutSkeleton() {
                 <div className="p-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="bg-white rounded-xl p-6 border border-gray-200 animate-pulse">
+                            <div key={i} className="bg-white rounded-md p-6 border border-gray-200 animate-pulse">
                                 <div className="flex items-center justify-between mb-4">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                                    <div className="w-10 h-10 bg-gray-200 rounded-md"></div>
                                     <div className="h-5 bg-gray-100 rounded w-12"></div>
                                 </div>
                                 <div className="h-8 bg-gray-200 rounded w-16 mb-2"></div>
@@ -299,15 +308,15 @@ export default function AdminLayout({
                 <div className="h-16 px-4 flex items-center justify-between border-b border-gray-100">
                     {!sidebarCollapsed && (
                         <Link href="/admin" className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <div className="w-8 h-8 bg-zinc-900 rounded-md flex items-center justify-center">
                                 <span className="text-white font-bold text-sm">A</span>
                             </div>
-                            <span className="font-semibold text-[#3F3F42]">Admin Panel</span>
+                            <span className="font-semibold text-zinc-800">Admin Panel</span>
                         </Link>
                     )}
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="p-2 text-gray-500 hover:text-[#3F3F42] hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 text-gray-500 hover:text-zinc-800 hover:bg-gray-100 rounded-md transition-colors"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             {sidebarCollapsed ? (
@@ -327,13 +336,13 @@ export default function AdminLayout({
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive
-                                    ? "bg-blue-50 text-blue-600 font-medium"
-                                    : "text-gray-600 hover:bg-gray-100 hover:text-[#3F3F42]"
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 ${isActive
+                                    ? "bg-zinc-100 text-zinc-900 font-semibold"
+                                    : "text-zinc-600 hover:bg-gray-100 hover:text-zinc-900"
                                     }`}
                                 title={sidebarCollapsed ? item.name : undefined}
                             >
-                                <span className={`flex-shrink-0 ${isActive ? "text-blue-600" : "text-gray-500"}`}>
+                                <span className={`flex-shrink-0 ${isActive ? "text-zinc-900" : "text-zinc-500"}`}>
                                     {item.icon}
                                 </span>
                                 {!sidebarCollapsed && <span>{item.name}</span>}
@@ -347,10 +356,10 @@ export default function AdminLayout({
                     {/* Leave Admin Panel Link */}
                     <Link
                         href="/dashboard"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md text-zinc-600 hover:bg-gray-100 hover:text-zinc-900 transition-all duration-200"
                         title={sidebarCollapsed ? "Leave Admin Panel" : undefined}
                     >
-                        <span className="flex-shrink-0 text-gray-500">
+                        <span className="flex-shrink-0 text-zinc-500">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>
@@ -362,21 +371,21 @@ export default function AdminLayout({
                 {/* User Profile Section */}
                 <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-100 bg-white">
                     <div className={`flex items-center gap-3 ${sidebarCollapsed ? "justify-center" : ""}`}>
-                        <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                            <span className="text-blue-600 font-semibold text-sm">
+                        <div className="w-9 h-9 bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="text-zinc-700 font-semibold text-sm">
                                 {user?.name?.charAt(0).toUpperCase()}
                             </span>
                         </div>
                         {!sidebarCollapsed && (
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[#3F3F42] truncate">{user?.name}</p>
+                                <p className="text-sm font-medium text-zinc-800 truncate">{user?.name}</p>
                                 <p className="text-xs text-gray-500 truncate">Admin</p>
                             </div>
                         )}
                         {!sidebarCollapsed && (
                             <button
                                 onClick={handleLogout}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                                 title="Logout"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,3 +407,4 @@ export default function AdminLayout({
         </div>
     );
 }
+

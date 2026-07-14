@@ -181,6 +181,34 @@ const bookingSchema = new mongoose.Schema(
         price: Number,
         count: Number,
       },
+      preTourAccommodation: {
+        hotel: {
+          type: mongoose.Schema.ObjectId,
+          ref: "Hotel",
+        },
+        hotelName: String,
+        roomType: {
+          type: String,
+          enum: ["private", "shared"],
+        },
+        nights: Number,
+        pricePerNight: Number,
+        totalPrice: Number,
+      },
+      postTourAccommodation: {
+        hotel: {
+          type: mongoose.Schema.ObjectId,
+          ref: "Hotel",
+        },
+        hotelName: String,
+        roomType: {
+          type: String,
+          enum: ["private", "shared"],
+        },
+        nights: Number,
+        pricePerNight: Number,
+        totalPrice: Number,
+      },
     },
     status: {
       type: String,

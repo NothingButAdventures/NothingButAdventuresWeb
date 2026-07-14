@@ -34,6 +34,7 @@ const promoCodeRoutes = require("./routes/promoCodeRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const plantingLocationRoutes = require("./routes/plantingLocationRoutes");
 const installmentRoutes = require("./routes/installmentRoutes");
+const hotelRoutes = require("./routes/hotelRoutes");
 
 
 // Load environment variables
@@ -138,6 +139,7 @@ app.use("/api/v1/promo-codes", promoCodeRoutes);
 app.use("/api/v1/activities", activityRoutes);
 app.use("/api/v1/planting-locations", plantingLocationRoutes);
 app.use("/api/v1/installments", installmentRoutes);
+app.use("/api/v1/hotels", hotelRoutes);
 
 
 // Handle undefined routes

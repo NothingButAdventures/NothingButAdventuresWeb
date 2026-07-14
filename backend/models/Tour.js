@@ -244,6 +244,18 @@ const tourSchema = new mongoose.Schema(
       other: [String],
     },
     exclusions: [String],
+    hotel: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Hotel",
+    },
+    preTripHotel: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Hotel",
+    },
+    postTripHotel: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Hotel",
+    },
     travelStyle: {
       type: String,
       trim: true,

@@ -96,6 +96,30 @@ interface Tour {
         };
         isActive: boolean;
     }>;
+    hotel?: {
+        _id: string;
+        name: string;
+        location: string;
+        privateRoomPrice: number;
+        sharedRoomPrice?: number;
+        image?: string;
+    };
+    preTripHotel?: {
+        _id: string;
+        name: string;
+        location: string;
+        privateRoomPrice: number;
+        sharedRoomPrice?: number;
+        image?: string;
+    };
+    postTripHotel?: {
+        _id: string;
+        name: string;
+        location: string;
+        privateRoomPrice: number;
+        sharedRoomPrice?: number;
+        image?: string;
+    };
 }
 
 interface Traveller {
@@ -188,6 +212,16 @@ export default function CheckoutPage() {
     const [promoCodeInput, setPromoCodeInput] = useState("");
     const [promoLoading, setPromoLoading] = useState(false);
     const [promoError, setPromoError] = useState<string | null>(null);
+
+
+    // Pre & Post Tour states
+    const [arriveCount, setArriveCount] = useState(0);
+    const [departCount, setDepartCount] = useState(0);
+    const [preTourHotelSelected, setPreTourHotelSelected] = useState(false);
+    const [postTourHotelSelected, setPostTourHotelSelected] = useState(false);
+    const [preTourRoomType, setPreTourRoomType] = useState<"private" | "shared">("shared");
+    const [postTourRoomType, setPostTourRoomType] = useState<"private" | "shared">("shared");
+
 
     // Helper function to get discount percentage by name
     const getDiscountPercentage = (discountName: string | undefined): number => {
@@ -494,8 +528,19 @@ export default function CheckoutPage() {
         const activitiesTotal = selectedActivities.reduce((sum, act) => sum + act.price * act.count, 0);
         const accommodationTotal = accommodationUpgrade ? accommodationUpgrade.price * accommodationUpgrade.count : 0;
 
-        return Math.round((basePrice * adultCount) + activitiesTotal + accommodationTotal);
-    }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade, promoData]);
+        // Pre & Post trip extras pricing
+        const preHotel = tour.preTripHotel || tour.hotel;
+        const postHotel = tour.postTripHotel || tour.hotel;
+
+        const preTourPrice = (arriveCount > 0 && preTourHotelSelected && preHotel)
+            ? (preTourRoomType === "private" ? preHotel.privateRoomPrice : (preHotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount
+            : 0;
+        const postTourPrice = (departCount > 0 && postTourHotelSelected && postHotel)
+            ? (postTourRoomType === "private" ? postHotel.privateRoomPrice : (postHotel.sharedRoomPrice ?? 0)) * departCount * adultCount
+            : 0;
+
+        return Math.round((basePrice * adultCount) + activitiesTotal + accommodationTotal + preTourPrice + postTourPrice);
+    }, [tour, selectedDate, adultCount, selectedActivities, accommodationUpgrade, promoData, arriveCount, departCount, preTourHotelSelected, postTourHotelSelected, preTourRoomType, postTourRoomType]);
 
     const isDepositAvailable = useMemo(() => {
         if (!selectedDate) return false;
@@ -636,6 +681,13 @@ export default function CheckoutPage() {
         });
     };
 
+    const formatPrePostDate = (dateObj: Date) => {
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const yy = String(dateObj.getFullYear()).slice(-2);
+        return `${days[dateObj.getDay()]}, ${dateObj.getDate()} ${months[dateObj.getMonth()]} '${yy}`;
+    };
+
     // Calendar helpers
     const getDaysInMonth = (date: Date) => {
         const year = date.getFullYear();
@@ -771,7 +823,7 @@ export default function CheckoutPage() {
             setAccommodationUpgrade({
                 name: "Add your own room",
                 description: "Private room upgrade",
-                price: tour?.price?.ownRoomPrice ?? tour?.ownRoomPrice ?? 0,
+                price: tour?.hotel?.privateRoomPrice ?? tour?.price?.ownRoomPrice ?? tour?.ownRoomPrice ?? 0,
                 currency: "USD",
                 count: newCount,
             });
@@ -796,7 +848,7 @@ export default function CheckoutPage() {
                 return {
                     name: "Add your own room",
                     description: "Private room upgrade",
-                    price: tour?.price?.ownRoomPrice ?? tour?.ownRoomPrice ?? 0,
+                    price: tour?.hotel?.privateRoomPrice ?? tour?.price?.ownRoomPrice ?? tour?.ownRoomPrice ?? 0,
                     currency: "USD",
                     count: newParticipants.length,
                     participants: newParticipants
@@ -911,7 +963,29 @@ export default function CheckoutPage() {
                         name: accommodationUpgrade.name,
                         price: accommodationUpgrade.price,
                         count: accommodationUpgrade.count
-                    } : undefined
+                    } : undefined,
+                    preTourAccommodation: (() => {
+                        const preHotel = tour.preTripHotel || tour.hotel;
+                        return arriveCount > 0 && preTourHotelSelected && preHotel ? {
+                            hotel: preHotel._id,
+                            hotelName: preHotel.name,
+                            roomType: preTourRoomType,
+                            nights: arriveCount,
+                            pricePerNight: preTourRoomType === "private" ? preHotel.privateRoomPrice : (preHotel.sharedRoomPrice ?? 0),
+                            totalPrice: (preTourRoomType === "private" ? preHotel.privateRoomPrice : (preHotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount
+                        } : undefined;
+                    })(),
+                    postTourAccommodation: (() => {
+                        const postHotel = tour.postTripHotel || tour.hotel;
+                        return departCount > 0 && postTourHotelSelected && postHotel ? {
+                            hotel: postHotel._id,
+                            hotelName: postHotel.name,
+                            roomType: postTourRoomType,
+                            nights: departCount,
+                            pricePerNight: postTourRoomType === "private" ? postHotel.privateRoomPrice : (postHotel.sharedRoomPrice ?? 0),
+                            totalPrice: (postTourRoomType === "private" ? postHotel.privateRoomPrice : (postHotel.sharedRoomPrice ?? 0)) * departCount * adultCount
+                        } : undefined;
+                    })(),
                 },
                 payment: {
                     method: 'credit_card',
@@ -1485,7 +1559,7 @@ export default function CheckoutPage() {
                                     {currentStep === 3 ? (
                                         <>
                                             {/* Accommodation Customization */}
-                                            {(tour.ownRoomAvailable || (tour.price?.ownRoomPrice !== undefined && tour.price.ownRoomPrice > 0)) && (
+                                            {(tour.ownRoomAvailable || (tour.hotel?.privateRoomPrice !== undefined && tour.hotel.privateRoomPrice > 0) || (tour.price?.ownRoomPrice !== undefined && tour.price.ownRoomPrice > 0)) && (
                                                 <div className="mb-8">
                                                     <h3 className="text-[42px] font-medium text-[#2C3238] mb-6 leading-tight">Room Selection</h3>
 
@@ -1511,7 +1585,7 @@ export default function CheckoutPage() {
                                                                 </div>
                                                                 <div className="flex items-start gap-4">
                                                                     <div className="text-right">
-                                                                        <div className="font-bold text-[#2C3238] text-[19px]">${tour.price?.amount?.toLocaleString() ?? 0}.00 <span className="text-[14px] text-gray-500 font-medium">Per Person</span></div>
+                                                                        <div className="font-bold text-[#2C3238] text-[19px]">${pricePerPerson.toLocaleString()}.00</div>
                                                                     </div>
                                                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${(!accommodationUpgrade?.participants || accommodationUpgrade.participants.length === 0) ? "border-[#6A38C2]" : "border-gray-300"}`}>
                                                                         {(!accommodationUpgrade?.participants || accommodationUpgrade.participants.length === 0) && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
@@ -1818,15 +1892,309 @@ export default function CheckoutPage() {
                                                 </div>
                                             </div>
 
+                                            {/* Pre & post-trip extra Section */}
+{/* Pre & post-trip extra Section */}
+                                            {(() => {
+                                                const preHotel = tour.preTripHotel || tour.hotel;
+                                                const postHotel = tour.postTripHotel || tour.hotel;
+                                                if (!preHotel && !postHotel) return null;
+                                                return (
+                                                    <div className="mb-8 border-t border-gray-200 pt-8">
+                                                        <h3 className="text-[42px] font-medium text-[#2C3238] mb-2 leading-tight">Pre & post-trip extra</h3>
+                                                        <p className="text-[17px] text-gray-500 mb-6 max-w-2xl">
+                                                            Do you need to arrive earlier or leave later? Select the dates you need and we will help you with transport and accommodation.
+                                                        </p>
 
+                                                        <div className="border border-gray-200 rounded-xl overflow-hidden bg-white p-6 space-y-6">
+                                                            {/* Header of container */}
+                                                            <div>
+                                                                <h4 className="font-bold text-[#2C3238] text-[20px] mb-1">{tour.name}</h4>
+                                                                <p className="text-gray-500 text-[14px]">
+                                                                    From {selectedDate ? formatPrePostDate(new Date(selectedDate.startDate)) : ""} to {selectedDate ? formatPrePostDate(new Date(selectedDate.endDate)) : ""}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Arrive Row (Pre-trip Hotel) */}
+                                                            {preHotel && (
+                                                                <>
+                                                                    <div className="border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                                                                        <div className="flex-1">
+                                                                            <div className="font-bold text-[#2C3238] text-[16px] mb-1">Arrive (Pre-trip)</div>
+                                                                            <div className="flex items-center gap-4 text-sm">
+                                                                                <span className="font-medium text-[#2C3238]">
+                                                                                    {selectedDate ? formatPrePostDate(new Date(new Date(selectedDate.startDate).getTime() - arriveCount * 24 * 60 * 60 * 1000)) : ""}
+                                                                                </span>
+                                                                                <span className="text-gray-500">
+                                                                                    {arriveCount === 0
+                                                                                        ? "You're arriving the same day as your tour starts"
+                                                                                        : `You're arriving ${arriveCount} ${arriveCount === 1 ? "day" : "days"} before your tour starts`}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                type="button"
+                                                                                disabled={arriveCount === 0}
+                                                                                onClick={() => setArriveCount((prev) => Math.max(0, prev - 1))}
+                                                                                className={`w-7 h-7 rounded-full flex items-center justify-center transition text-lg font-bold ${arriveCount === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#3F3F42] text-white hover:bg-black'}`}
+                                                                            >
+                                                                                −
+                                                                            </button>
+                                                                            <span className="w-4 text-center text-base font-bold text-[#3F3F42]">{arriveCount}</span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setArriveCount((prev) => prev + 1)}
+                                                                                className="w-7 h-7 rounded-full bg-[#3F3F42] text-white flex items-center justify-center hover:bg-black transition text-lg font-bold"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {arriveCount > 0 && (
+                                                                        <div className="border border-gray-200 rounded-xl p-6 bg-gray-50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                                            <div className="flex justify-between items-start">
+                                                                                <div>
+                                                                                    <h4 className="font-bold text-[#2C3238] text-[18px]">Pre tour accommodation</h4>
+                                                                                    <p className="text-[14px] text-gray-500">
+                                                                                        {arriveCount} {arriveCount === 1 ? "Night" : "Nights"}, {selectedDate ? formatPrePostDate(new Date(new Date(selectedDate.startDate).getTime() - arriveCount * 24 * 60 * 60 * 1000)) : ""} to {selectedDate ? formatPrePostDate(new Date(selectedDate.startDate)) : ""}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                                                                                <div className="flex items-center gap-4">
+                                                                                    {preHotel.image ? (
+                                                                                        <img src={preHotel.image} alt={preHotel.name} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                                                                                    ) : (
+                                                                                        <div className="w-12 h-12 rounded-full bg-gray-200 border border-gray-200 flex items-center justify-center text-xl">
+                                                                                            🏨
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <div>
+                                                                                        <h5 className="font-bold text-[#2C3238] text-[16px]">{preHotel.name}</h5>
+                                                                                        <p className="text-gray-500 text-[13px]">{preHotel.location}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex flex-col items-end">
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[18px] text-[#2C3238]">${preHotel.privateRoomPrice}USD</span>
+                                                                                        <span className="text-[12px] text-gray-500 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setPreTourHotelSelected(prev => !prev)}
+                                                                                        className="mt-2.5 px-6 py-1.5 rounded-full text-[14px] font-semibold transition bg-[#53319C] text-white hover:bg-[#40257a]"
+                                                                                    >
+                                                                                        {preTourHotelSelected ? "-Remove" : "Add to Tour"}
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="border-t border-gray-200 pt-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                                                <label className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition ${preTourRoomType === "private" ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${preTourRoomType === "private" ? "border-[#6A38C2]" : "border-gray-300"}`}>
+                                                                                            {preTourRoomType === "private" && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                                <span className="font-bold text-[#2C3238] text-[15px]">Private Hotel Room</span>
+                                                                                                <span className="bg-gray-850 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Private</span>
+                                                                                            </div>
+                                                                                            <p className="text-[12px] text-gray-500">Each traveller will have their own room</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[#2C3238] text-[15px]">${preHotel.privateRoomPrice} USD</span>
+                                                                                        <span className="text-[12px] text-gray-500 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <input
+                                                                                        type="radio"
+                                                                                        name="preTourRoomType"
+                                                                                        checked={preTourRoomType === "private"}
+                                                                                        onChange={() => setPreTourRoomType("private")}
+                                                                                        className="hidden"
+                                                                                    />
+                                                                                </label>
+
+                                                                                <label className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition ${preTourRoomType === "shared" ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${preTourRoomType === "shared" ? "border-[#6A38C2]" : "border-gray-300"}`}>
+                                                                                            {preTourRoomType === "shared" && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                                <span className="font-bold text-[#2C3238] text-[15px]">Shared Hotel Room</span>
+                                                                                                <span className="bg-gray-850 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Shared</span>
+                                                                                            </div>
+                                                                                            <p className="text-[12px] text-gray-500">We'll assign you as few rooms as possible</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[#2C3238] text-[15px]">${preHotel.sharedRoomPrice || 0} USD</span>
+                                                                                        <span className="text-[12px] text-gray-500 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <input
+                                                                                        type="radio"
+                                                                                        name="preTourRoomType"
+                                                                                        checked={preTourRoomType === "shared"}
+                                                                                        onChange={() => setPreTourRoomType("shared")}
+                                                                                        className="hidden"
+                                                                                    />
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            )}
+
+                                                            {/* Depart Row (Post-trip Hotel) */}
+                                                            {postHotel && (
+                                                                <>
+                                                                    <div className="border border-gray-200 rounded-xl p-4 flex items-center justify-between mt-6">
+                                                                        <div className="flex-1">
+                                                                            <div className="font-bold text-[#2C3238] text-[16px] mb-1">Depart (Post-trip)</div>
+                                                                            <div className="flex items-center gap-4 text-sm">
+                                                                                <span className="font-medium text-[#2C3238]">
+                                                                                    {selectedDate ? formatPrePostDate(new Date(new Date(selectedDate.endDate).getTime() + departCount * 24 * 60 * 60 * 1000)) : ""}
+                                                                                </span>
+                                                                                <span className="text-gray-550">
+                                                                                    {departCount === 0
+                                                                                        ? "You're leaving the same day as your tour ends"
+                                                                                        : `You're leaving ${departCount} ${departCount === 1 ? "day" : "days"} after your tour ends`}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                type="button"
+                                                                                disabled={departCount === 0}
+                                                                                onClick={() => setDepartCount((prev) => Math.max(0, prev - 1))}
+                                                                                className={`w-7 h-7 rounded-full flex items-center justify-center transition text-lg font-bold ${departCount === 0 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#3F3F42] text-white hover:bg-black'}`}
+                                                                            >
+                                                                                −
+                                                                            </button>
+                                                                            <span className="w-4 text-center text-base font-bold text-[#3F3F42]">{departCount}</span>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setDepartCount((prev) => prev + 1)}
+                                                                                className="w-7 h-7 rounded-full bg-[#3F3F42] text-white flex items-center justify-center hover:bg-black transition text-lg font-bold"
+                                                                            >
+                                                                                +
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {departCount > 0 && (
+                                                                        <div className="border border-gray-200 rounded-xl p-6 bg-gray-50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 mt-4">
+                                                                            <div className="flex justify-between items-start">
+                                                                                <div>
+                                                                                    <h4 className="font-bold text-[#2C3238] text-[18px]">Post tour accommodation</h4>
+                                                                                    <p className="text-[14px] text-gray-500">
+                                                                                        {departCount} {departCount === 1 ? "Night" : "Nights"}, {selectedDate ? formatPrePostDate(new Date(selectedDate.endDate)) : ""} to {selectedDate ? formatPrePostDate(new Date(new Date(selectedDate.endDate).getTime() + departCount * 24 * 60 * 60 * 1000)) : ""}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                                                                                <div className="flex items-center gap-4">
+                                                                                    {postHotel.image ? (
+                                                                                        <img src={postHotel.image} alt={postHotel.name} className="w-12 h-12 rounded-full object-cover border border-gray-200" />
+                                                                                    ) : (
+                                                                                        <div className="w-12 h-12 rounded-full bg-gray-200 border border-gray-200 flex items-center justify-center text-xl">
+                                                                                            🏨
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <div>
+                                                                                        <h5 className="font-bold text-[#2C3238] text-[16px]">{postHotel.name}</h5>
+                                                                                        <p className="text-gray-550 text-[13px]">{postHotel.location}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex flex-col items-end">
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[18px] text-[#2C3238]">${postHotel.privateRoomPrice}USD</span>
+                                                                                        <span className="text-[12px] text-gray-550 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setPostTourHotelSelected(prev => !prev)}
+                                                                                        className="mt-2.5 px-6 py-1.5 rounded-full text-[14px] font-semibold transition bg-[#53319C] text-white hover:bg-[#40257a]"
+                                                                                    >
+                                                                                        {postTourHotelSelected ? "-Remove" : "Add to Tour"}
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div className="border-t border-gray-200 pt-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-150">
+                                                                                <label className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition ${postTourRoomType === "private" ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${postTourRoomType === "private" ? "border-[#6A38C2]" : "border-gray-300"}`}>
+                                                                                            {postTourRoomType === "private" && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                                <span className="font-bold text-[#2C3238] text-[15px]">Private Hotel Room</span>
+                                                                                                <span className="bg-gray-850 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Private</span>
+                                                                                            </div>
+                                                                                            <p className="text-[12px] text-gray-500">Each traveller will have their own room</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[#2C3238] text-[15px]">${postHotel.privateRoomPrice} USD</span>
+                                                                                        <span className="text-[12px] text-gray-550 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <input
+                                                                                        type="radio"
+                                                                                        name="postTourRoomType"
+                                                                                        checked={postTourRoomType === "private"}
+                                                                                        onChange={() => setPostTourRoomType("private")}
+                                                                                        className="hidden"
+                                                                                    />
+                                                                                </label>
+
+                                                                                <label className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition ${postTourRoomType === "shared" ? "border-[#6A38C2] bg-[#F4F0FF]" : "border-gray-200 bg-white hover:bg-gray-50"}`}>
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${postTourRoomType === "shared" ? "border-[#6A38C2]" : "border-gray-300"}`}>
+                                                                                            {postTourRoomType === "shared" && <div className="w-2.5 h-2.5 rounded-full bg-[#6A38C2]"></div>}
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <div className="flex items-center gap-2">
+                                                                                                <span className="font-bold text-[#2C3238] text-[15px]">Shared Hotel Room</span>
+                                                                                                <span className="bg-gray-855 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Shared</span>
+                                                                                            </div>
+                                                                                            <p className="text-[12px] text-gray-500">We'll assign you as few rooms as possible</p>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <div className="text-right">
+                                                                                        <span className="font-bold text-[#2C3238] text-[15px]">${postHotel.sharedRoomPrice || 0} USD</span>
+                                                                                        <span className="text-[12px] text-gray-550 block">Per Night</span>
+                                                                                    </div>
+                                                                                    <input
+                                                                                        type="radio"
+                                                                                        name="postTourRoomType"
+                                                                                        checked={postTourRoomType === "shared"}
+                                                                                        onChange={() => setPostTourRoomType("shared")}
+                                                                                        className="hidden"
+                                                                                    />
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
 
                                         </>
                                     ) : (
-                                        (selectedActivities.length > 0 || accommodationUpgrade) && (
+                                        (selectedActivities.length > 0 || accommodationUpgrade || (preTourHotelSelected && arriveCount > 0) || (postTourHotelSelected && departCount > 0)) && (
                                             <div className="text-[#3F3F42] px-6 py-4 border border-gray-200 rounded-xl shadow-sm">
                                                 {selectedActivities.length > 0 && `${selectedActivities.length} activities selected`}
-                                                {accommodationUpgrade && selectedActivities.length > 0 && " • "}
-                                                {accommodationUpgrade && "Room upgrade included"}
+                                                {accommodationUpgrade && (selectedActivities.length > 0 ? " • Room upgrade included" : "Room upgrade included")}
+                                                {((preTourHotelSelected && arriveCount > 0) || (postTourHotelSelected && departCount > 0)) && ` • Pre/Post trip extras included`}
                                             </div>
                                         )
                                     )}
@@ -2420,6 +2788,58 @@ export default function CheckoutPage() {
                                             <span className="text-[16px]">Subtotal</span>
                                             <span className="text-[16px]">+{formatPrice(selectedActivities.reduce((sum, act) => sum + act.price * act.count, 0))}</span>
                                         </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {currentStep >= 3 && tour.hotel && ((arriveCount > 0 && preTourHotelSelected) || (departCount > 0 && postTourHotelSelected)) && (
+                                <div className="border-t border-gray-200 pt-5 mb-5 px-1">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="text-[17px] font-medium text-[#2C3238]">Pre & Post-Trip Extras</h4>
+                                    </div>
+
+                                    <div className="bg-[#EAEBEF] rounded-xl overflow-hidden mb-4 border border-gray-200">
+                                        <div className="divide-y divide-white">
+                                            {arriveCount > 0 && preTourHotelSelected && (
+                                                <div className="flex items-start justify-between text-[14px] p-4 bg-[#EAEBEF]">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
+                                                        <div>
+                                                            <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Pre-Tour: {tour.hotel.name}</div>
+                                                            <div className="text-gray-500 text-[12px] mt-0.5">({preTourRoomType === "private" ? "Private" : "Shared"}, {arriveCount} Nights, {adultCount} Travellers)</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
+                                                        +${(preTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {departCount > 0 && postTourHotelSelected && (
+                                                <div className="flex items-start justify-between text-[14px] p-4 bg-white">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
+                                                        <div>
+                                                            <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Post-Tour: {tour.hotel.name}</div>
+                                                            <div className="text-gray-500 text-[12px] mt-0.5">({postTourRoomType === "private" ? "Private" : "Shared"}, {departCount} Nights, {adultCount} Travellers)</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
+                                                        +${(postTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * departCount * adultCount}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between font-medium text-[#2C3238] pb-1">
+                                        <span className="text-[16px]">Extras Subtotal</span>
+                                        <span className="text-[16px]">
+                                            +${
+                                                ((arriveCount > 0 && preTourHotelSelected) ? (preTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount : 0) +
+                                                ((departCount > 0 && postTourHotelSelected) ? (postTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * departCount * adultCount : 0)
+                                            }
+                                        </span>
                                     </div>
                                 </div>
                             )}

@@ -140,6 +140,14 @@ interface Tour {
     accommodation?: string;
     joiningPoint?: string;
   };
+  hotel?: {
+    _id: string;
+    name: string;
+    location: string;
+    privateRoomPrice: number;
+    sharedRoomPrice?: number;
+    image?: string;
+  };
 }
 
 const iconMap: { [key: string]: string } = {
