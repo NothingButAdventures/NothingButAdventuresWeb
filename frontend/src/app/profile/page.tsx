@@ -6,6 +6,7 @@ import Link from "next/link";
 import { uploadUserAvatar } from "@/lib/firebase";
 import { api } from "@/lib/api";
 import BookingDetailsModal from "@/components/BookingDetailsModal";
+import HoldSpaceDetailsModal from "@/components/HoldSpaceDetailsModal";
 
 // Types
 interface User {
@@ -147,8 +148,8 @@ const formatDate = (dateString: string) => {
     });
 };
 
-type TabType = "overview" | "bookings" | "reviews" | "hold spaces" | "settings" | "wishlist" | "nba club";
-const VALID_TABS: TabType[] = ["overview", "bookings", "reviews", "hold spaces", "settings", "wishlist", "nba club"];
+type TabType = "overview" | "bookings" | "lifetime deposits" | "reviews" | "hold spaces" | "settings" | "wishlist" | "nba club";
+const VALID_TABS: TabType[] = ["overview", "bookings", "lifetime deposits", "reviews", "hold spaces", "settings", "wishlist", "nba club"];
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -158,6 +159,7 @@ export default function ProfilePage() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [holdSpaces, setHoldSpaces] = useState<any[]>([]);
     const [wishlist, setWishlist] = useState<Tour[]>([]);
+    const [lifetimeDeposits, setLifetimeDeposits] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     
     const [activeTab, setActiveTab] = useState<TabType>(() => {
@@ -201,6 +203,7 @@ export default function ProfilePage() {
 
     // Booking details modal state
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [selectedHoldSpace, setSelectedHoldSpace] = useState<any>(null);
 
     // Countdown tick for real-time timer
     const [, setCountdownTick] = useState(0);
@@ -283,6 +286,15 @@ export default function ProfilePage() {
             if (holdsRes.ok) {
                 const holdsData = await holdsRes.json();
                 setHoldSpaces(holdsData.data.holdSpaces || []);
+            }
+
+            // Fetch lifetime deposits
+            const depositsRes = await fetch(`${api.baseURL}/lifetime-deposits/my-deposits`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (depositsRes.ok) {
+                const depositsData = await depositsRes.json();
+                setLifetimeDeposits(depositsData.data.deposits || []);
             }
 
             // Fetch wishlist
@@ -508,7 +520,7 @@ export default function ProfilePage() {
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-4">
                     <div className="flex gap-8 overflow-x-auto pb-2 scrollbar-hide">
-                        {(["overview", "bookings", "hold spaces", "wishlist", "reviews", "nba club", "settings"] as const).map((tab) => (
+                        {(["overview", "bookings", "lifetime deposits", "hold spaces", "wishlist", "reviews", "nba club", "settings"] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}
@@ -739,6 +751,62 @@ export default function ProfilePage() {
                     </div>
                 )}
 
+                {/* Lifetime Deposits Tab */}
+                {activeTab === "lifetime deposits" && (
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                        <div className="p-6 border-b border-gray-100">
+                            <h2 className="text-lg font-semibold text-[#3F3F42]">Lifetime Deposits</h2>
+                            <p className="text-sm text-gray-500 mt-1">
+                                {lifetimeDeposits.filter(d => d.status === 'active').length} active deposit vouchers available
+                            </p>
+                        </div>
+                        {lifetimeDeposits.length === 0 ? (
+                            <div className="p-12 text-center">
+                                <span className="text-gray-400 text-4xl block mb-3">🎫</span>
+                                <h3 className="font-medium text-[#3F3F42] mb-1">No Lifetime Deposits</h3>
+                                <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                                    Lifetime Deposits are issued when you cancel a booking according to our cancellation policies.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="p-6 divide-y divide-gray-100">
+                                {lifetimeDeposits.map((deposit) => (
+                                    <div key={deposit._id} className="py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 first:pt-0 last:pb-0">
+                                        <div className="flex-grow">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="font-mono font-bold text-lg text-[#432360] bg-purple-50 border border-purple-100 px-3 py-1 rounded-lg">
+                                                    {deposit.code}
+                                                </span>
+                                                <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${
+                                                    deposit.status === "active" ? "bg-green-100 text-green-700" :
+                                                    deposit.status === "used" ? "bg-blue-100 text-blue-700" :
+                                                    "bg-red-100 text-red-700"
+                                                }`}>
+                                                    {deposit.status}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mt-2.5">
+                                                Traveler: <strong>{deposit.travelerName}</strong>
+                                            </p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Origin: {deposit.originalTour?.name || "Cancelled Tour"} (Ref: {deposit.originalBooking?.bookingReference || "N/A"})
+                                            </p>
+                                        </div>
+                                        <div className="text-left md:text-right flex-shrink-0">
+                                            <div className="text-2xl font-black text-gray-900">
+                                                ${deposit.amount.toLocaleString()}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                Issued: {new Date(deposit.createdAt).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Hold Spaces Tab */}
                 {activeTab === "hold spaces" && (
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
@@ -832,39 +900,52 @@ export default function ProfilePage() {
                                                     </div>
 
                                                     {/* Actions */}
-                                                    {isActive && (
-                                                        <div className="flex items-center gap-2 mt-3">
-                                                            <button
-                                                                onClick={() => router.push(`/trips/${hold.tour?.slug}/${hold.tour?.tourCode}/checkout`)}
-                                                                className="px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-sm"
-                                                            >
-                                                                Book Now
-                                                            </button>
-                                                            <button
-                                                                onClick={async () => {
-                                                                    setReleasingHold(hold._id);
-                                                                    try {
-                                                                        const token = localStorage.getItem('token');
-                                                                        const res = await fetch(`${api.baseURL}/hold-spaces/${hold._id}/release`, {
-                                                                            method: 'PATCH',
-                                                                            headers: { Authorization: `Bearer ${token}` },
-                                                                        });
-                                                                        if (res.ok) {
-                                                                            setHoldSpaces(prev => prev.map(h => h._id === hold._id ? { ...h, status: 'released' } : h));
+                                                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                                        <button
+                                                            onClick={() => setSelectedHoldSpace(hold)}
+                                                            className="px-4 py-1.5 bg-[#6A38C2] text-white text-xs font-semibold rounded-lg hover:bg-purple-900 transition shadow-sm"
+                                                        >
+                                                            View Details
+                                                        </button>
+                                                        {isActive && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const tourCode = hold.tour?.tourCode || "tour";
+                                                                        const dateStr = hold.startDate ? new Date(hold.startDate).toISOString().split('T')[0] : '';
+                                                                        router.push(`/trips/${hold.tour?.slug}/${tourCode}/checkout?date=${dateStr}&holdId=${hold._id}`);
+                                                                    }}
+                                                                    className="px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-sm"
+                                                                >
+                                                                    Book Now
+                                                                </button>
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        setReleasingHold(hold._id);
+                                                                        try {
+                                                                            const token = localStorage.getItem('token');
+                                                                            const res = await fetch(`${api.baseURL}/hold-spaces/${hold._id}/release`, {
+                                                                                method: 'PATCH',
+                                                                                headers: { Authorization: `Bearer ${token}` },
+                                                                            });
+                                                                            if (res.ok) {
+                                                                                setHoldSpaces(prev => prev.map(h => h._id === hold._id ? { ...h, status: 'released' } : h));
+                                                                            }
+                                                                        } catch (err) {
+                                                                            console.error('Failed to release hold:', err);
+                                                                        } finally {
+                                                                            setReleasingHold(null);
                                                                         }
-                                                                    } catch (err) {
-                                                                        console.error('Failed to release hold:', err);
-                                                                    } finally {
-                                                                        setReleasingHold(null);
-                                                                    }
-                                                                }}
-                                                                disabled={releasingHold === hold._id}
-                                                                className="px-4 py-1.5 bg-white border border-gray-300 text-[#3F3F42] text-xs font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
-                                                            >
-                                                                {releasingHold === hold._id ? 'Releasing...' : 'Release Hold'}
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                                    }}
+                                                                    disabled={releasingHold === hold._id}
+                                                                    className="px-4 py-1.5 bg-white border border-gray-300 text-[#3F3F42] text-xs font-semibold rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50"
+                                                                >
+                                                                    {releasingHold === hold._id ? 'Releasing...' : 'Release Hold'}
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1282,6 +1363,18 @@ export default function ProfilePage() {
                     <BookingDetailsModal
                         booking={selectedBooking as any}
                         onClose={() => setSelectedBooking(null)}
+                        onBookingUpdated={() => fetchUserData()}
+                    />
+                )
+            }
+
+            {/* Hold Space Details Modal */}
+            {
+                selectedHoldSpace && (
+                    <HoldSpaceDetailsModal
+                        hold={selectedHoldSpace as any}
+                        onClose={() => setSelectedHoldSpace(null)}
+                        onHoldUpdated={() => fetchUserData()}
                     />
                 )
             }

@@ -48,6 +48,40 @@ const holdSpaceSchema = new mongoose.Schema(
                 default: 'USD',
             },
         },
+        reminderSent24h: {
+            type: Boolean,
+            default: false,
+        },
+        reminderSent46h: {
+            type: Boolean,
+            default: false,
+        },
+        expiryEmailSent: {
+            type: Boolean,
+            default: false,
+        },
+        travelers: [
+            {
+                title: String,
+                firstName: String,
+                middleName: String,
+                lastName: String,
+                email: String,
+                countryCode: String,
+                phone: String,
+                dobDay: String,
+                dobMonth: String,
+                dobYear: String,
+                nationality: String,
+            },
+        ],
+        extras: {
+            type: mongoose.Schema.Types.Mixed,
+        },
+        specialRequests: {
+            type: String,
+            default: '',
+        },
     },
     {
         timestamps: true,

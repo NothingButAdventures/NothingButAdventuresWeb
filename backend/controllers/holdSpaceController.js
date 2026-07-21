@@ -21,6 +21,12 @@ const createHoldSpace = catchAsync(async (req, res, next) => {
     }
 
     const spots = numberOfSpots || 1;
+    if (spots > 6) {
+        return next(
+            new AppError('Maximum 6 spots can be held at a time for Hold Space', 400)
+        );
+    }
+
     if (availability.availableSpots < spots) {
         return next(
             new AppError(
@@ -33,17 +39,20 @@ const createHoldSpace = catchAsync(async (req, res, next) => {
     // Expire any overdue holds first (and restore their spots)
     await expireAndRestoreHolds();
 
-    // Check if user already has an active hold on this tour + date
+    // Check if user already has any active hold space (only 1 active hold allowed per user across all tours)
     const existingHold = await HoldSpace.findOne({
         user: req.user.id,
-        tour: tourId,
-        startDate: new Date(startDate),
         status: 'active',
-    });
+        expiresAt: { $gt: new Date() },
+    }).populate('tour', 'name');
 
     if (existingHold) {
+        const tourName = existingHold.tour?.name || 'a tour';
         return next(
-            new AppError('You already have an active hold on this date for this tour', 400)
+            new AppError(
+                `You already have an active hold space for "${tourName}". You can only hold one space at a time. Please release your existing hold space from your profile before holding another space.`,
+                400
+            )
         );
     }
 
@@ -71,6 +80,9 @@ const createHoldSpace = catchAsync(async (req, res, next) => {
             amount: pricePerPerson,
             currency: tour.price.currency,
         },
+        travelers: req.body.travelers || [],
+        extras: req.body.extras || {},
+        specialRequests: req.body.specialRequests || '',
     };
 
     const newHold = await HoldSpace.create(holdData);
@@ -85,7 +97,21 @@ const createHoldSpace = catchAsync(async (req, res, next) => {
     }
 
     // Populate tour details for response
-    await newHold.populate('tour', 'name slug images duration location price');
+    await newHold.populate('tour', 'name slug tourCode images duration location price');
+
+    // Dispatch email notification
+    const { sendHoldSpaceCreatedEmail } = require('../utils/emailService');
+    sendHoldSpaceCreatedEmail(req.user.email, {
+        name: req.user.name,
+        tourName: tour.name,
+        holdReference: newHold.holdReference,
+        numberOfSpots: spots,
+        startDate: newHold.startDate,
+        price: newHold.priceAtHold,
+        expiresAt: newHold.expiresAt,
+    }).catch((err) => {
+        console.error('Failed to send hold space created email:', err.message);
+    });
 
     res.status(201).json({
         status: 'success',
@@ -101,7 +127,7 @@ const getMyHoldSpaces = catchAsync(async (req, res, next) => {
     await expireAndRestoreHolds();
 
     const holdSpaces = await HoldSpace.find({ user: req.user.id })
-        .populate('tour', 'name slug images duration location price')
+        .populate('tour', 'name slug tourCode images duration location price')
         .sort('-createdAt');
 
     res.status(200).json({
@@ -136,6 +162,19 @@ const releaseHoldSpace = catchAsync(async (req, res, next) => {
     // Restore available spots on the tour date
     await restoreSpots(holdSpace.tour, holdSpace.startDate, holdSpace.numberOfSpots);
 
+    // Populate tour to get the tour name for the email
+    await holdSpace.populate('tour', 'name');
+
+    // Send hold released email notification
+    const { sendHoldSpaceReleasedEmail } = require('../utils/emailService');
+    sendHoldSpaceReleasedEmail(req.user.email, {
+        name: req.user.name,
+        tourName: holdSpace.tour?.name || 'Tour',
+        holdReference: holdSpace.holdReference,
+    }).catch((err) => {
+        console.error('Failed to send hold space released email:', err.message);
+    });
+
     res.status(200).json({
         status: 'success',
         data: {
@@ -147,7 +186,7 @@ const releaseHoldSpace = catchAsync(async (req, res, next) => {
 // Get a single hold space
 const getHoldSpace = catchAsync(async (req, res, next) => {
     const holdSpace = await HoldSpace.findById(req.params.id)
-        .populate('tour', 'name slug images duration location price');
+        .populate('tour', 'name slug tourCode images duration location price');
 
     if (!holdSpace) {
         return next(new AppError('No hold space found with that ID', 404));
@@ -197,9 +236,111 @@ async function expireAndRestoreHolds() {
     }
 }
 
+// Background worker to check hold space deadlines and dispatch emails
+const checkHoldSpaceDeadlines = async () => {
+    try {
+        const now = new Date();
+        const time24hAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        const {
+            sendHoldSpace24hReminderEmail,
+            sendHoldSpace46hReminderEmail,
+            sendHoldSpaceExpiredEmail,
+        } = require('../utils/emailService');
+
+        // 1. Process 24-hour reminders
+        // Find active holds created at least 24 hours ago that haven't received the 24h reminder
+        const holdsFor24h = await HoldSpace.find({
+            status: 'active',
+            createdAt: { $lte: time24hAgo },
+            reminderSent24h: false,
+        }).populate('user').populate('tour');
+
+        for (const hold of holdsFor24h) {
+            if (hold.user && hold.tour) {
+                await sendHoldSpace24hReminderEmail(hold.user.email, {
+                    name: hold.user.name,
+                    tourName: hold.tour.name,
+                    holdReference: hold.holdReference,
+                    expiresAt: hold.expiresAt,
+                });
+            }
+            hold.reminderSent24h = true;
+            await hold.save({ validateBeforeSave: false });
+        }
+
+        // 2. Process 46-hour reminders (2 hours before expiry)
+        // Find active holds expiring in 2 hours or less that haven't received the 46h reminder
+        const twoHoursFromNow = new Date(Date.now() + 2 * 60 * 60 * 1000);
+        const holdsFor46h = await HoldSpace.find({
+            status: 'active',
+            expiresAt: { $lte: twoHoursFromNow },
+            reminderSent46h: false,
+        }).populate('user').populate('tour');
+
+        for (const hold of holdsFor46h) {
+            if (hold.user && hold.tour) {
+                await sendHoldSpace46hReminderEmail(hold.user.email, {
+                    name: hold.user.name,
+                    tourName: hold.tour.name,
+                    holdReference: hold.holdReference,
+                    expiresAt: hold.expiresAt,
+                });
+            }
+            hold.reminderSent46h = true;
+            await hold.save({ validateBeforeSave: false });
+        }
+
+        // 3. Process Expirations
+        // Find active holds that have passed their expiresAt, expire them, restore spots, and send expiry email
+        const overdueHolds = await HoldSpace.find({
+            status: 'active',
+            expiresAt: { $lt: now },
+        }).populate('user').populate('tour');
+
+        for (const hold of overdueHolds) {
+            hold.status = 'expired';
+            hold.expiryEmailSent = true;
+            await hold.save({ validateBeforeSave: false });
+            await restoreSpots(hold.tour._id || hold.tour, hold.startDate, hold.numberOfSpots);
+
+            if (hold.user && hold.tour) {
+                await sendHoldSpaceExpiredEmail(hold.user.email, {
+                    name: hold.user.name,
+                    tourName: hold.tour.name,
+                    holdReference: hold.holdReference,
+                });
+            }
+        }
+
+        // 4. Process Expiry Emails for already expired holds that haven't received the expiry email yet
+        // (e.g. if they expired during getMyHoldSpaces or releaseHoldSpace)
+        const expiredWithoutEmail = await HoldSpace.find({
+            status: 'expired',
+            expiryEmailSent: false,
+        }).populate('user').populate('tour');
+
+        for (const hold of expiredWithoutEmail) {
+            hold.expiryEmailSent = true;
+            await hold.save({ validateBeforeSave: false });
+
+            if (hold.user && hold.tour) {
+                await sendHoldSpaceExpiredEmail(hold.user.email, {
+                    name: hold.user.name,
+                    tourName: hold.tour.name,
+                    holdReference: hold.holdReference,
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Error checking hold space deadlines:', err);
+    }
+};
+
 module.exports = {
     createHoldSpace,
     getMyHoldSpaces,
     releaseHoldSpace,
     getHoldSpace,
+    checkHoldSpaceDeadlines,
 };

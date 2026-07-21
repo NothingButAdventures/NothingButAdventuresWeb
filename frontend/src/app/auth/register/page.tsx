@@ -66,11 +66,15 @@ export default function RegisterPage() {
         throw new Error(data.message || "Registration failed");
       }
 
-      // Store token in localStorage
-      localStorage.setItem("token", data.token);
-
-      // Redirect to dashboard or callbackUrl
-      router.push(getCallbackUrl());
+      if (data.requiresVerification) {
+        // Redirect to verification sent info page
+        router.push(`/auth/verify-email-sent?email=${encodeURIComponent(formData.email)}`);
+      } else {
+        // Store token in localStorage (fallback if no verification required)
+        localStorage.setItem("token", data.token);
+        // Redirect to dashboard or callbackUrl
+        router.push(getCallbackUrl());
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

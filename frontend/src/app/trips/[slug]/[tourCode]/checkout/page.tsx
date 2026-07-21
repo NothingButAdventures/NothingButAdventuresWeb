@@ -16,6 +16,7 @@ interface Tour {
     summary: string;
     description: string;
     descriptionImage?: string;
+    exemptFromLifetimeDeposit?: boolean;
     price: {
         amount: number;
         currency: string;
@@ -175,6 +176,10 @@ export default function CheckoutPage() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalInitialView, setAuthModalInitialView] = useState<"login" | "register">("login");
 
+    // Lifetime Deposits
+    const [userLifetimeDeposits, setUserLifetimeDeposits] = useState<any[]>([]);
+    const [selectedDepositCodes, setSelectedDepositCodes] = useState<string[]>([]);
+
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [currentStep]);
@@ -198,8 +203,85 @@ export default function CheckoutPage() {
                     }
                 })
                 .catch(() => { });
+
+            // Fetch active Lifetime Deposits
+            fetch(`${api.baseURL}/lifetime-deposits/my-deposits`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data.deposits) {
+                        const active = data.data.deposits.filter((d: any) => d.status === 'active');
+                        setUserLifetimeDeposits(active);
+                    }
+                })
+                .catch(err => console.error("Error fetching deposits:", err));
+
+            // Fetch active hold spaces to pre-fill checkout data if user has held space
+            fetch(`${api.baseURL}/hold-spaces/my-holds`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.data.holdSpaces) {
+                        const now = new Date();
+                        const holds = data.data.holdSpaces.filter(
+                            (h: any) => h.status === 'active' && new Date(h.expiresAt) > now
+                        );
+
+                        const holdIdParam = searchParams.get("holdId");
+                        let targetHold = null;
+                        if (holdIdParam) {
+                            targetHold = holds.find((h: any) => h._id === holdIdParam);
+                        }
+                        if (!targetHold && tour) {
+                            targetHold = holds.find((h: any) => h.tour?._id === tour._id || h.tour?.slug === slug);
+                        }
+
+                        if (targetHold) {
+                            if (targetHold.numberOfSpots) {
+                                setAdultCount(targetHold.numberOfSpots);
+                            }
+                            if (targetHold.travelers && targetHold.travelers.length > 0) {
+                                const primary = targetHold.travelers[0];
+                                setPrimaryTraveller(prev => ({
+                                    ...prev,
+                                    title: primary.title || prev.title,
+                                    firstName: primary.firstName || prev.firstName,
+                                    middleName: primary.middleName || prev.middleName,
+                                    lastName: primary.lastName || prev.lastName,
+                                    email: primary.email || prev.email,
+                                    countryCode: primary.countryCode || prev.countryCode,
+                                    phone: primary.phone || prev.phone,
+                                    dobDay: primary.dobDay || prev.dobDay,
+                                    dobMonth: primary.dobMonth || prev.dobMonth,
+                                    dobYear: primary.dobYear || prev.dobYear,
+                                    nationality: primary.nationality || prev.nationality,
+                                }));
+
+                                const others = targetHold.travelers.slice(1);
+                                if (others.length > 0) {
+                                    setOtherTravellers(others.map((t: any) => ({
+                                        title: t.title || "",
+                                        firstName: t.firstName || "",
+                                        middleName: t.middleName || "",
+                                        lastName: t.lastName || "",
+                                        email: t.email || "",
+                                        countryCode: t.countryCode || "+1 - United States",
+                                        phone: t.phone || "",
+                                        dobDay: t.dobDay || "",
+                                        dobMonth: t.dobMonth || "",
+                                        dobYear: t.dobYear || "",
+                                        nationality: t.nationality || "British",
+                                    })));
+                                }
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.error("Error fetching hold space for checkout prefill:", err));
         }
-    }, []);
+    }, [tour]);
     const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
 
     // Promo code state
@@ -329,6 +411,24 @@ export default function CheckoutPage() {
             fetchTour();
         }
     }, [slug]);
+
+    // Track checkout starts for cart recovery
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token && tour?._id && preSelectedDateParam && isLoggedIn) {
+            fetch(`${api.baseURL}/bookings/track-checkout`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    tour: tour._id,
+                    startDate: preSelectedDateParam
+                })
+            }).catch((err) => console.error("Checkout tracking error:", err));
+        }
+    }, [tour, isLoggedIn, preSelectedDateParam]);
 
     // Pre-select date from query params or default to nearest available
     useEffect(() => {
@@ -567,6 +667,25 @@ export default function CheckoutPage() {
         return Math.round(basePrice * adultCount);
     }, [tour, selectedDate, adultCount, promoData]);
 
+    const pricePerPerson = useMemo(() => {
+        if (!tour) return 0;
+        let basePrice = tour.price.amount;
+
+        // Apply date-specific discount if available
+        const dateDiscount = getDiscountPercentage(selectedDate?.discount);
+        const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
+
+        if (bestDiscount > 0) {
+            basePrice = tour.price.amount * (1 - bestDiscount / 100);
+        } else if (selectedDate?.price?.amount) {
+            basePrice = selectedDate.price.amount;
+        } else if (tour.price.discountPercent > 0) {
+            basePrice = basePrice * (1 - tour.price.discountPercent / 100);
+        }
+
+        return Math.round(basePrice);
+    }, [tour, selectedDate, promoData]);
+
     const depositAmount = useMemo(() => {
         if (!tour) return 0;
 
@@ -578,6 +697,30 @@ export default function CheckoutPage() {
         const originalBasePrice = tour.price.amount * adultCount;
         return Math.round(originalBasePrice * (percentage / 100));
     }, [tour, adultCount]);
+
+    const appliedDepositCredit = useMemo(() => {
+        let total = 0;
+        selectedDepositCodes.forEach(code => {
+            const dep = userLifetimeDeposits.find(d => d.code === code);
+            if (dep) {
+                total += Math.min(dep.amount, pricePerPerson);
+            }
+        });
+        return total;
+    }, [selectedDepositCodes, userLifetimeDeposits, pricePerPerson]);
+
+    const coveredDepositCredit = useMemo(() => {
+        let total = 0;
+        selectedDepositCodes.forEach(code => {
+            const dep = userLifetimeDeposits.find(d => d.code === code);
+            if (dep) {
+                const percentage = tour?.price?.bookingPercentage || 20;
+                const depPerPerson = tour?.price?.bookingType === 'Amount' ? (tour.price.bookingAmount || 0) : Math.round((tour?.price?.amount || 0) * (percentage / 100));
+                total += Math.min(dep.amount, depPerPerson);
+            }
+        });
+        return total;
+    }, [selectedDepositCodes, userLifetimeDeposits, tour]);
 
     const finalPaymentDate = useMemo(() => {
         if (!selectedDate) return new Date();
@@ -602,11 +745,13 @@ export default function CheckoutPage() {
         const availableMonths = Math.floor(daysUntilDeadline / 30);
         const numberOfInstallments = Math.min(Math.max(availableMonths, 2), 12);
 
-        // Remaining = total price minus the deposit
-        const rawRemaining = calculateTotalPrice - depositAmount;
+        // Deduct applied credits from total price and deposit
+        const adjustedTotal = Math.max(0, calculateTotalPrice - appliedDepositCredit);
+        const rawRemaining = Math.max(0, adjustedTotal - Math.max(0, depositAmount - coveredDepositCredit));
+
         const installmentAmount = Math.floor((rawRemaining / numberOfInstallments) * 100) / 100;
         const totalFromInstallments = Math.round(installmentAmount * numberOfInstallments * 100) / 100;
-        const upfrontAmount = Math.round((calculateTotalPrice - totalFromInstallments) * 100) / 100;
+        const upfrontAmount = Math.round((adjustedTotal - totalFromInstallments) * 100) / 100;
 
         const schedule = [];
         for (let i = 0; i < numberOfInstallments; i++) {
@@ -627,33 +772,18 @@ export default function CheckoutPage() {
             installmentAmount,
             schedule
         };
-    }, [selectedDate, isDepositAvailable, calculateTotalPrice, depositAmount, finalPaymentDate, tour]);
+    }, [selectedDate, isDepositAvailable, calculateTotalPrice, depositAmount, finalPaymentDate, tour, appliedDepositCredit, coveredDepositCredit]);
 
     const payNowAmount = useMemo(() => {
         if (paymentOption === "installments" && installmentPlan) {
-            return installmentPlan.upfrontAmount;
+            return Math.max(0, installmentPlan.upfrontAmount);
         }
-        return paymentOption === "deposit" && isDepositAvailable ? depositAmount : calculateTotalPrice;
-    }, [paymentOption, isDepositAvailable, depositAmount, calculateTotalPrice, installmentPlan]);
-
-    const pricePerPerson = useMemo(() => {
-        if (!tour) return 0;
-        let basePrice = tour.price.amount;
-
-        // Apply date-specific discount if available
-        const dateDiscount = getDiscountPercentage(selectedDate?.discount);
-        const bestDiscount = getBestDiscountPct(dateDiscount, tour.price.amount);
-
-        if (bestDiscount > 0) {
-            basePrice = tour.price.amount * (1 - bestDiscount / 100);
-        } else if (selectedDate?.price?.amount) {
-            basePrice = selectedDate.price.amount;
-        } else if (tour.price.discountPercent > 0) {
-            basePrice = basePrice * (1 - tour.price.discountPercent / 100);
+        if (paymentOption === "deposit" && isDepositAvailable) {
+            return Math.max(0, depositAmount - coveredDepositCredit);
         }
+        return Math.max(0, calculateTotalPrice - appliedDepositCredit);
+    }, [paymentOption, isDepositAvailable, depositAmount, calculateTotalPrice, installmentPlan, coveredDepositCredit, appliedDepositCredit]);
 
-        return Math.round(basePrice);
-    }, [tour, selectedDate, promoData]);
 
     const formatPrice = (amount: number, currency: string = "USD") => {
         return new Intl.NumberFormat("en-US", {
@@ -953,6 +1083,8 @@ export default function CheckoutPage() {
                 travelers: travelersList,
                 pricePerPerson,
                 totalPrice: calculateTotalPrice,
+                lifetimeDepositCodes: selectedDepositCodes,
+                paymentOption,
                 extras: {
                     activities: selectedActivities.map(activity => ({
                         name: activity.name,
@@ -1893,7 +2025,7 @@ export default function CheckoutPage() {
                                             </div>
 
                                             {/* Pre & post-trip extra Section */}
-{/* Pre & post-trip extra Section */}
+                                            {/* Pre & post-trip extra Section */}
                                             {(() => {
                                                 const preHotel = tour.preTripHotel || tour.hotel;
                                                 const postHotel = tour.postTripHotel || tour.hotel;
@@ -2226,7 +2358,7 @@ export default function CheckoutPage() {
                                                             {primaryTraveller.firstName || "Utsav"} {primaryTraveller.lastName || "Singh"}
                                                         </span>
                                                     </div>
-                                                    {!(primaryTraveller.email && primaryTraveller.phone && primaryTraveller.nationality) && (
+                                                    {!(primaryTraveller.email && primaryTraveller.phone && primaryTraveller.dobDay && primaryTraveller.dobMonth && primaryTraveller.dobYear && primaryTraveller.nationality) && (
                                                         <span className="absolute top-2 right-2 text-orange-400 font-bold leading-none">*</span>
                                                     )}
                                                 </div>
@@ -2522,6 +2654,56 @@ export default function CheckoutPage() {
                                                     </div>
                                                 </div>
 
+                                                {/* Lifetime Deposits redemption section */}
+                                                {isLoggedIn && userLifetimeDeposits.length > 0 && !tour?.exemptFromLifetimeDeposit && (
+                                                    <div className="mb-6 p-5 bg-purple-50/50 rounded-xl border border-purple-100">
+                                                        <h3 className="font-bold text-[17px] text-[#432360] flex items-center gap-2 mb-2">
+                                                            <span>🎫</span> Redeem Lifetime Deposits
+                                                        </h3>
+                                                        <p className="text-[13px] text-gray-600 mb-4">
+                                                            You can apply up to {adultCount} active Lifetime Deposit voucher{adultCount > 1 ? 's' : ''} (one per traveler) to confirm your booking with no cash down.
+                                                        </p>
+                                                        <div className="space-y-2">
+                                                            {userLifetimeDeposits.map((dep) => {
+                                                                const isChecked = selectedDepositCodes.includes(dep.code);
+                                                                const isDisabled = !isChecked && selectedDepositCodes.length >= adultCount;
+                                                                return (
+                                                                    <label
+                                                                        key={dep._id}
+                                                                        className={`flex items-center justify-between p-3 rounded-lg border text-sm transition-all ${isChecked
+                                                                            ? "bg-white border-purple-300 shadow-sm"
+                                                                            : "bg-white/40 border-gray-100 hover:border-gray-300"
+                                                                            } ${isDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                                                                    >
+                                                                        <div className="flex items-center gap-3">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={isChecked}
+                                                                                disabled={isDisabled}
+                                                                                onChange={() => {
+                                                                                    if (isChecked) {
+                                                                                        setSelectedDepositCodes(prev => prev.filter(c => c !== dep.code));
+                                                                                    } else {
+                                                                                        setSelectedDepositCodes(prev => [...prev, dep.code]);
+                                                                                    }
+                                                                                }}
+                                                                                className="rounded text-purple-600 focus:ring-purple-500 h-4 w-4 border-gray-300"
+                                                                            />
+                                                                            <div>
+                                                                                <span className="font-mono font-bold text-[#432360]">{dep.code}</span>
+                                                                                <span className="text-[12px] text-gray-500 ml-2">({dep.travelerName})</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="font-black text-[#432360]">
+                                                                            ${dep.amount.toLocaleString()}
+                                                                        </div>
+                                                                    </label>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* Details Section */}
                                                 <div className="border border-gray-200 rounded-xl p-6">
                                                     {paymentOption === 'deposit' && (
@@ -2530,14 +2712,14 @@ export default function CheckoutPage() {
                                                                 <div>
                                                                     <div className="font-medium text-[#3F3F42]">Due today</div>
                                                                 </div>
-                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(depositAmount)}</div>
+                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(Math.max(0, depositAmount - coveredDepositCredit))}</div>
                                                             </div>
                                                             <div className="flex justify-between items-center px-4 py-4 text-[17px] border-b border-gray-100 last:border-b-0">
                                                                 <div>
                                                                     <div className="font-medium text-[#3F3F42]">Final payment</div>
                                                                     <div className="text-[15px] text-gray-500 mt-0.5">Debited on {formatShortDate(finalPaymentDate.toISOString())}</div>
                                                                 </div>
-                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(calculateTotalPrice - depositAmount)}</div>
+                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(Math.max(0, (calculateTotalPrice - appliedDepositCredit) - Math.max(0, depositAmount - coveredDepositCredit)))}</div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -2548,7 +2730,7 @@ export default function CheckoutPage() {
                                                                 <div>
                                                                     <div className="font-medium text-[#3F3F42]">Due today</div>
                                                                 </div>
-                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(calculateTotalPrice)}</div>
+                                                                <div className="font-bold text-[#3F3F42]">{formatPrice(Math.max(0, calculateTotalPrice - appliedDepositCredit))}</div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -2792,57 +2974,61 @@ export default function CheckoutPage() {
                                 </div>
                             )}
 
-                            {currentStep >= 3 && tour.hotel && ((arriveCount > 0 && preTourHotelSelected) || (departCount > 0 && postTourHotelSelected)) && (
-                                <div className="border-t border-gray-200 pt-5 mb-5 px-1">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h4 className="text-[17px] font-medium text-[#2C3238]">Pre & Post-Trip Extras</h4>
-                                    </div>
+                            {currentStep >= 3 && (tour.hotel || tour.preTripHotel || tour.postTripHotel) && ((arriveCount > 0 && preTourHotelSelected) || (departCount > 0 && postTourHotelSelected)) && (() => {
+                                const preHotel = tour.preTripHotel || tour.hotel;
+                                const postHotel = tour.postTripHotel || tour.hotel;
+                                return (
+                                    <div className="border-t border-gray-200 pt-5 mb-5 px-1">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h4 className="text-[17px] font-medium text-[#2C3238]">Pre & Post-Trip Extras</h4>
+                                        </div>
 
-                                    <div className="bg-[#EAEBEF] rounded-xl overflow-hidden mb-4 border border-gray-200">
-                                        <div className="divide-y divide-white">
-                                            {arriveCount > 0 && preTourHotelSelected && (
-                                                <div className="flex items-start justify-between text-[14px] p-4 bg-[#EAEBEF]">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
-                                                        <div>
-                                                            <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Pre-Tour: {tour.hotel.name}</div>
-                                                            <div className="text-gray-500 text-[12px] mt-0.5">({preTourRoomType === "private" ? "Private" : "Shared"}, {arriveCount} Nights, {adultCount} Travellers)</div>
+                                        <div className="bg-[#EAEBEF] rounded-xl overflow-hidden mb-4 border border-gray-200">
+                                            <div className="divide-y divide-white">
+                                                {arriveCount > 0 && preTourHotelSelected && preHotel && (
+                                                    <div className="flex items-start justify-between text-[14px] p-4 bg-[#EAEBEF]">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
+                                                            <div>
+                                                                <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Pre-Tour: {preHotel.name}</div>
+                                                                <div className="text-gray-500 text-[12px] mt-0.5">({preTourRoomType === "private" ? "Private" : "Shared"}, {arriveCount} Nights, {adultCount} Travellers)</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
+                                                            +${(preTourRoomType === "private" ? preHotel.privateRoomPrice : (preHotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount}
                                                         </div>
                                                     </div>
-                                                    <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
-                                                        +${(preTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount}
-                                                    </div>
-                                                </div>
-                                            )}
+                                                )}
 
-                                            {departCount > 0 && postTourHotelSelected && (
-                                                <div className="flex items-start justify-between text-[14px] p-4 bg-white">
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
-                                                        <div>
-                                                            <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Post-Tour: {tour.hotel.name}</div>
-                                                            <div className="text-gray-500 text-[12px] mt-0.5">({postTourRoomType === "private" ? "Private" : "Shared"}, {departCount} Nights, {adultCount} Travellers)</div>
+                                                {departCount > 0 && postTourHotelSelected && postHotel && (
+                                                    <div className="flex items-start justify-between text-[14px] p-4 bg-white">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-[#2C3238] mt-2"></div>
+                                                            <div>
+                                                                <div className="text-[#2C3238] font-medium text-[13px] leading-tight">Post-Tour: {postHotel.name}</div>
+                                                                <div className="text-gray-500 text-[12px] mt-0.5">({postTourRoomType === "private" ? "Private" : "Shared"}, {departCount} Nights, {adultCount} Travellers)</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
+                                                            +${(postTourRoomType === "private" ? postHotel.privateRoomPrice : (postHotel.sharedRoomPrice ?? 0)) * departCount * adultCount}
                                                         </div>
                                                     </div>
-                                                    <div className="text-[#2C3238] font-medium text-[13px] mt-0.5">
-                                                        +${(postTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * departCount * adultCount}
-                                                    </div>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-between font-medium text-[#2C3238] pb-1">
+                                            <span className="text-[16px]">Subtotal</span>
+                                            <span className="text-[16px]">
+                                                +${
+                                                    ((arriveCount > 0 && preTourHotelSelected && preHotel) ? (preTourRoomType === "private" ? preHotel.privateRoomPrice : (preHotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount : 0) +
+                                                    ((departCount > 0 && postTourHotelSelected && postHotel) ? (postTourRoomType === "private" ? postHotel.privateRoomPrice : (postHotel.sharedRoomPrice ?? 0)) * departCount * adultCount : 0)
+                                                }
+                                            </span>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center justify-between font-medium text-[#2C3238] pb-1">
-                                        <span className="text-[16px]">Extras Subtotal</span>
-                                        <span className="text-[16px]">
-                                            +${
-                                                ((arriveCount > 0 && preTourHotelSelected) ? (preTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * arriveCount * adultCount : 0) +
-                                                ((departCount > 0 && postTourHotelSelected) ? (postTourRoomType === "private" ? tour.hotel.privateRoomPrice : (tour.hotel.sharedRoomPrice ?? 0)) * departCount * adultCount : 0)
-                                            }
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             <div className="border-t border-gray-200 pt-5 mb-5 px-1">
                                 <div className="text-[14px] font-bold tracking-wide uppercase mb-4 text-[#2C3238]">PROMO CODE</div>
@@ -2886,12 +3072,18 @@ export default function CheckoutPage() {
                             </div>
 
                             <div className="border-t border-gray-200 pt-6 px-1">
+                                {appliedDepositCredit > 0 && (
+                                    <div className="flex justify-between items-center mb-3 text-sm">
+                                        <span className="text-gray-500 font-medium">Lifetime Deposit:</span>
+                                        <span className="text-purple-600 font-bold">-${appliedDepositCredit.toLocaleString()}</span>
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-1.5">
                                         <span className="text-[22px] font-medium text-[#2C3238]">Total Price</span>
                                         <span className="text-[12px] text-gray-400 mt-1.5">(Taxes Included)</span>
                                     </div>
-                                    <span className="text-[26px] font-bold text-[#2C3238] tracking-tight">${formatPrice(calculateTotalPrice).replace(/[^0-9]/g, '')}</span>
+                                    <span className="text-[26px] font-bold text-[#2C3238] tracking-tight">${formatPrice(Math.max(0, calculateTotalPrice - appliedDepositCredit)).replace(/[^0-9]/g, '')}</span>
                                 </div>
                                 <div className="h-[3px] w-full bg-[#6A38C2] rounded-full mt-2"></div>
                             </div>

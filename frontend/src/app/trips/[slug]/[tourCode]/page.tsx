@@ -910,9 +910,8 @@ export default function TourDetailPage() {
                       <div className="flex gap-2.5">
                         <button
                           onClick={() => {
-                            setShowHoldModal(true);
-                            setHoldMessage(null);
-                            setHoldSelectedDate("");
+                            const dateStr = bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : '';
+                            router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
                           }}
                           className="flex-1 bg-[#3F3F42] text-white py-[12px] px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3F3F42] transition text-[14px]"
                         >
@@ -2193,8 +2192,8 @@ export default function TourDetailPage() {
                                       {!isSoldOut && (
                                         <button
                                           onClick={() => {
-                                            setHoldSelectedDate(date.startDate);
-                                            setShowHoldModal(true);
+                                            const dateStr = new Date(date.startDate).toISOString().split('T')[0];
+                                            router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
                                           }}
                                           className="py-[11px] px-7 rounded-full font-bold text-[14px] bg-[#C8C8C8] hover:bg-[#B0B0B0] text-white transition-colors whitespace-nowrap"
                                         >
@@ -2359,7 +2358,10 @@ export default function TourDetailPage() {
               {/* Actions */}
               <div className="flex items-center gap-3 w-full md:w-auto">
                 <button
-                  onClick={() => setShowHoldModal(true)}
+                  onClick={() => {
+                    const dateStr = sortedDates.length > 0 ? new Date(sortedDates[0].startDate).toISOString().split('T')[0] : '';
+                    router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
+                  }}
                   className="flex-1 md:flex-none bg-gray-200 hover:bg-gray-300 text-[#3F3F42] font-bold py-3 px-6 rounded transition-colors whitespace-nowrap"
                 >
                   Hold Space

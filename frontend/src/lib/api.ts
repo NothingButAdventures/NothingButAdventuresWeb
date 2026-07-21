@@ -41,7 +41,14 @@ export const api = {
       getById: (id: string) => `/bookings/${id}`,
       update: (id: string) => `/bookings/${id}`,
       cancel: (id: string) => `/bookings/${id}/cancel`,
+      cancellationPreview: (id: string) => `/bookings/${id}/cancellation-preview`,
       getByTour: (tourId: string) => `/bookings?tour=${tourId}`,
+      submitDocuments: (id: string) => `/bookings/${id}/submit-documents`,
+      toggleDocVerification: (id: string) => `/bookings/${id}/toggle-doc-verification`,
+    },
+    lifetimeDeposits: {
+      getMyDeposits: "/lifetime-deposits/my-deposits",
+      validate: "/lifetime-deposits/validate",
     },
     reviews: {
       getAll: "/reviews",

@@ -179,6 +179,9 @@ export const uploadTravelStyleImage = (file: File, onProgress?: (pct: number) =>
 export const uploadActivityImage = (file: File, onProgress?: (pct: number) => void) =>
     uploadToFirebase(file, "activities", onProgress);
 
+export const uploadTravelerDocument = (file: File, onProgress?: (pct: number) => void) =>
+    uploadToFirebase(file, "traveler-documents", onProgress);
+
 /**
  * Delete an image from Firebase Storage by its URL.
  */

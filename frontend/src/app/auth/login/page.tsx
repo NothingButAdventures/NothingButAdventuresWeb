@@ -16,6 +16,9 @@ export default function LoginPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showResend, setShowResend] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   
   const getCallbackUrl = () => {
     if (typeof window !== "undefined") {
@@ -36,6 +39,8 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setShowResend(false);
+    setResendStatus(null);
 
     try {
       const response = await fetch(
@@ -52,6 +57,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401 && data.message?.toLowerCase().includes("verify")) {
+          setShowResend(true);
+        }
         throw new Error(data.message || "Login failed");
       }
 
@@ -61,6 +69,49 @@ export default function LoginPage() {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      setResendStatus({
+        type: "error",
+        message: "Please enter your email address first.",
+      });
+      return;
+    }
+    setIsResending(true);
+    setResendStatus(null);
+
+    try {
+      const response = await fetch(
+        `${api.baseURL}/auth/resend-verification`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: formData.email }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to resend email.");
+      }
+
+      setResendStatus({
+        type: "success",
+        message: "Verification email sent successfully! Please check your inbox.",
+      });
+    } catch (err: any) {
+      setResendStatus({
+        type: "error",
+        message: err.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -98,8 +149,28 @@ export default function LoginPage() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm space-y-2">
+              <p>{error}</p>
+              {showResend && (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={isResending}
+                  className="block font-semibold underline text-red-800 hover:text-red-900 focus:outline-none disabled:opacity-50 text-left"
+                >
+                  {isResending ? "Resending..." : "Click here to resend verification email"}
+                </button>
+              )}
+            </div>
+          )}
+
+          {resendStatus && (
+            <div className={`border px-4 py-3 rounded-md text-sm ${
+              resendStatus.type === "success" 
+                ? "bg-green-50 border-green-200 text-green-700" 
+                : "bg-red-50 border-red-200 text-red-700"
+            }`}>
+              {resendStatus.message}
             </div>
           )}
 

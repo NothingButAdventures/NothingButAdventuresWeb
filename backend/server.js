@@ -35,6 +35,7 @@ const activityRoutes = require("./routes/activityRoutes");
 const plantingLocationRoutes = require("./routes/plantingLocationRoutes");
 const installmentRoutes = require("./routes/installmentRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
+const lifetimeDepositRoutes = require("./routes/lifetimeDepositRoutes");
 
 
 // Load environment variables
@@ -140,6 +141,7 @@ app.use("/api/v1/activities", activityRoutes);
 app.use("/api/v1/planting-locations", plantingLocationRoutes);
 app.use("/api/v1/installments", installmentRoutes);
 app.use("/api/v1/hotels", hotelRoutes);
+app.use("/api/v1/lifetime-deposits", lifetimeDepositRoutes);
 
 
 // Handle undefined routes
@@ -167,6 +169,23 @@ if (require.main === module) {
     // Then every 6 hours
     setInterval(() => checkInstallmentDeadlines().catch(console.error), SIX_HOURS);
     console.log("⏰ Installment deadline checker scheduled (every 6 hours)");
+
+    // Start hold space deadline checker (runs every 15 minutes)
+    const { checkHoldSpaceDeadlines } = require("./controllers/holdSpaceController");
+    const FIFTEEN_MINUTES = 15 * 60 * 1000;
+    // Run once on startup (after 45 seconds to let DB connect)
+    setTimeout(() => checkHoldSpaceDeadlines().catch(console.error), 45000);
+    // Then every 15 minutes
+    setInterval(() => checkHoldSpaceDeadlines().catch(console.error), FIFTEEN_MINUTES);
+    console.log("⏰ Hold space deadline checker scheduled (every 15 minutes)");
+
+    // Start abandoned checkout checker (runs every 15 minutes)
+    const { checkAbandonedCheckouts } = require("./controllers/bookingController");
+    // Run once on startup (after 60 seconds to let DB connect)
+    setTimeout(() => checkAbandonedCheckouts().catch(console.error), 60000);
+    // Then every 15 minutes
+    setInterval(() => checkAbandonedCheckouts().catch(console.error), FIFTEEN_MINUTES);
+    console.log("⏰ Abandoned checkout checker scheduled (every 15 minutes)");
   });
 
   process.on("unhandledRejection", (err, promise) => {

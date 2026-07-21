@@ -232,6 +232,7 @@ export default function CreateTourPage() {
     bookingPercentage: "",
     bookingAmount: "",
     ownRoomPrice: "",
+    exemptFromLifetimeDeposit: false,
     travelStyle: "",
     tripType: "",
     startCity: "",
@@ -977,6 +978,7 @@ export default function CreateTourPage() {
           bookingAmount: parseFloat(formData.bookingAmount) || 0,
           ownRoomPrice: parseFloat(formData.ownRoomPrice) || 0,
         },
+        exemptFromLifetimeDeposit: formData.exemptFromLifetimeDeposit,
         travelStyle: formData.travelStyle || undefined,
         tripType: formData.tripType || undefined,
         interests: selectedInterests,
@@ -1997,6 +1999,20 @@ export default function CreateTourPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-[#3F3F42]"
                   placeholder={formData.bookingType === "Percentage" ? "20" : "500"}
                 />
+              </div>
+
+              <div className="flex items-center md:col-span-3 mt-2">
+                <input
+                  type="checkbox"
+                  id="exemptFromLifetimeDeposit"
+                  name="exemptFromLifetimeDeposit"
+                  checked={formData.exemptFromLifetimeDeposit}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded cursor-pointer"
+                />
+                <label htmlFor="exemptFromLifetimeDeposit" className="ml-2 block text-sm text-[#3F3F42] font-semibold cursor-pointer">
+                  Exempt from Lifetime Deposit
+                </label>
               </div>
 
             </div>

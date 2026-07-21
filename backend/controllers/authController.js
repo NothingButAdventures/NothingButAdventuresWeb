@@ -6,6 +6,7 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const { createSendToken } = require("../middleware/auth");
 const { checkWalletExpiration } = require("../utils/walletUtils");
+const { sendVerificationEmail, sendWelcomeEmail } = require("../utils/emailService");
 
 const register = catchAsync(async (req, res, next) => {
   const {
@@ -23,7 +24,7 @@ const register = catchAsync(async (req, res, next) => {
   const allowedRoles = ["user", "partner"];
   const userRole = allowedRoles.includes(role) ? role : "user";
 
-  // Create new user
+  // Create new user (unverified initially)
   const newUser = await User.create({
     name,
     email,
@@ -33,10 +34,39 @@ const register = catchAsync(async (req, res, next) => {
     dateOfBirth,
     nationality,
     role: userRole,
-    isEmailVerified: true, // Skip email verification for now
+    isEmailVerified: false,
   });
 
-  createSendToken(newUser, 201, res);
+  // Generate verification token
+  const verifyToken = newUser.createEmailVerificationToken();
+  await newUser.save({ validateBeforeSave: false });
+
+  // Send verification email
+  try {
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const verificationUrl = `${clientUrl}/auth/verify-email?token=${verifyToken}`;
+    
+    await sendVerificationEmail(newUser.email, {
+      name: newUser.name,
+      verificationUrl,
+    });
+
+    res.status(201).json({
+      status: "success",
+      message: "Registration successful. Please verify your email.",
+      requiresVerification: true,
+      email: newUser.email,
+    });
+  } catch (err) {
+    // If sending fails, delete user to allow registration retry
+    await User.findByIdAndDelete(newUser.id);
+    return next(
+      new AppError(
+        `There was an error sending the verification email: ${err.message}. Please try again later.`,
+        500
+      )
+    );
+  }
 });
 
 const login = catchAsync(async (req, res, next) => {
@@ -48,10 +78,15 @@ const login = catchAsync(async (req, res, next) => {
   }
 
   // Check if user exists and password is correct
-  const user = await User.findOne({ email }).select("+password +isActive");
+  const user = await User.findOne({ email }).select("+password +isActive +isEmailVerified");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Incorrect email or password", 401));
+  }
+
+  // Check if email is verified
+  if (!user.isEmailVerified) {
+    return next(new AppError("Please verify your email address before logging in.", 401));
   }
 
   // Check if user account is active
@@ -176,6 +211,15 @@ const verifyEmail = catchAsync(async (req, res, next) => {
   user.emailVerificationExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
+  // Send Welcome Email asynchronously
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+  sendWelcomeEmail(user.email, {
+    name: user.name,
+    loginUrl: `${clientUrl}/auth/login`,
+  }).catch((err) => {
+    console.error(`Failed to send welcome email to ${user.email}:`, err.message);
+  });
+
   res.status(200).json({
     status: "success",
     message: "Email verified successfully!",
@@ -198,8 +242,13 @@ const resendVerificationEmail = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   try {
-    // TODO: Send verification email
-    // await sendVerificationEmail(user.email, verifyToken);
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+    const verificationUrl = `${clientUrl}/auth/verify-email?token=${verifyToken}`;
+
+    await sendVerificationEmail(user.email, {
+      name: user.name,
+      verificationUrl,
+    });
 
     res.status(200).json({
       status: "success",
@@ -211,7 +260,7 @@ const resendVerificationEmail = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError("There was an error sending the email. Try again later!"),
+      new AppError(`There was an error sending the email: ${err.message}. Try again later!`),
       500,
     );
   }

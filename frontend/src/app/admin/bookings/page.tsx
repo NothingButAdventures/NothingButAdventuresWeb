@@ -9,7 +9,12 @@ import {
     Search,
     Eye,
     X,
-    Lock
+    Lock,
+    FileText,
+    Shield,
+    CheckCircle2,
+    XCircle,
+    Loader2,
 } from "lucide-react";
 import BookingDetailsModal from "@/components/BookingDetailsModal";
 
@@ -147,6 +152,37 @@ export default function BookingsManagementPage() {
     const [loadingBookings, setLoadingBookings] = useState(false);
     
     const [selectedBookingDetails, setSelectedBookingDetails] = useState<any | null>(null);
+
+    // Docs verification modal
+    const [docsModalBooking, setDocsModalBooking] = useState<any | null>(null);
+    const [docsActiveTab, setDocsActiveTab] = useState(0);
+    const [togglingDoc, setTogglingDoc] = useState<string | null>(null);
+
+    const handleToggleVerification = async (bookingId: string, travelerIndex: number, docType: string) => {
+        const key = `${travelerIndex}-${docType}`;
+        setTogglingDoc(key);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${api.baseURL}${api.endpoints.bookings.toggleDocVerification(bookingId)}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ travelerIndex, docType }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setDocsModalBooking(data.data.booking);
+                // Update in allBookings too
+                setAllBookings(prev => prev.map(b => b._id === bookingId ? { ...b, ...data.data.booking } : b));
+            }
+        } catch (err) {
+            console.error("Toggle verification failed:", err);
+        } finally {
+            setTogglingDoc(null);
+        }
+    };
 
     useEffect(() => {
         loadInitialData();
@@ -722,6 +758,7 @@ export default function BookingsManagementPage() {
                                             <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-655 uppercase tracking-wider">Travelers</th>
                                             <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-655 uppercase tracking-wider">Amount</th>
                                             <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-655 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-gray-655 uppercase tracking-wider">Docs</th>
                                             <th className="px-6 py-3.5 text-right text-xs font-semibold text-gray-655 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
@@ -745,6 +782,24 @@ export default function BookingsManagementPage() {
                                                     >
                                                         {booking.status}
                                                     </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {(booking as any).documentsSubmitted ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${(booking as any).documentsVerified ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                                                {(booking as any).documentsVerified ? 'Verified' : 'Not Verified'}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => { setDocsModalBooking(booking); setDocsActiveTab(0); }}
+                                                                className="p-1 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded transition-colors cursor-pointer"
+                                                                title="View documents"
+                                                            >
+                                                                <FileText className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-400 text-xs">—</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <button
@@ -1095,6 +1150,140 @@ export default function BookingsManagementPage() {
                     booking={selectedBookingDetails} 
                     onClose={() => setSelectedBookingDetails(null)} 
                 />
+            )}
+
+            {/* Modal: Docs Verification */}
+            {docsModalBooking && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDocsModalBooking(null)} />
+                    <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+                        {/* Header */}
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg font-bold text-zinc-800 flex items-center gap-2">
+                                    <Shield className="w-5 h-5 text-purple-600" />
+                                    Document Verification
+                                </h2>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    #{docsModalBooking.bookingReference} • {docsModalBooking.tour?.name || 'Tour'}
+                                </p>
+                            </div>
+                            <button onClick={() => setDocsModalBooking(null)} className="p-2 text-gray-400 hover:text-gray-600 rounded-full transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Traveller Tabs */}
+                        <div className="px-6 pt-4 pb-0 border-b border-gray-100">
+                            <div className="flex gap-2 overflow-x-auto">
+                                {(docsModalBooking.travelers || []).map((t: any, i: number) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setDocsActiveTab(i)}
+                                        className={`flex items-center gap-2 px-4 py-2.5 rounded-t-lg text-sm font-medium whitespace-nowrap transition border-b-2 ${
+                                            docsActiveTab === i
+                                                ? 'border-purple-600 text-purple-700 bg-purple-50/50'
+                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <span className={`w-7 h-7 rounded-full ${i === 0 ? 'bg-zinc-800' : 'bg-teal-700'} text-white flex items-center justify-center text-xs font-bold`}>
+                                            {t.firstName?.charAt(0)?.toUpperCase() || 'T'}
+                                        </span>
+                                        {t.firstName} {t.lastName}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Docs Content */}
+                        <div className="p-6 overflow-y-auto flex-1">
+                            {(() => {
+                                const travelerDoc = docsModalBooking.travelerDocuments?.find((d: any) => d.travelerIndex === docsActiveTab);
+                                if (!travelerDoc) {
+                                    return (
+                                        <div className="text-center py-12">
+                                            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                                            <p className="text-gray-500 text-sm">No documents submitted for this traveller.</p>
+                                        </div>
+                                    );
+                                }
+
+                                const docTypes = [
+                                    { key: 'passport', label: 'Passport', icon: '🛂' },
+                                    { key: 'visa', label: 'Visa', icon: '📋' },
+                                    { key: 'medicalCertificate', label: 'Medical Certificate / Vaccination', icon: '💉' },
+                                    { key: 'insurance', label: 'Insurance Details', icon: '🛡️' },
+                                ];
+
+                                return (
+                                    <div className="space-y-4">
+                                        {docTypes.map(dt => {
+                                            const doc = travelerDoc[dt.key];
+                                            if (!doc || !doc.url) return null;
+                                            const isToggling = togglingDoc === `${docsActiveTab}-${dt.key}`;
+
+                                            return (
+                                                <div key={dt.key} className={`border rounded-xl p-4 flex items-center justify-between gap-4 ${doc.verified ? 'border-green-200 bg-green-50/30' : 'border-gray-200'}`}>
+                                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                        <span className="text-lg">{dt.icon}</span>
+                                                        <div className="min-w-0">
+                                                            <h4 className="font-medium text-zinc-800 text-sm">{dt.label}</h4>
+                                                            <p className="text-xs text-gray-500 truncate">{doc.fileName}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                                        <a
+                                                            href={doc.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-purple-600 hover:text-purple-800 text-xs font-medium flex items-center gap-1"
+                                                        >
+                                                            <Eye className="w-3.5 h-3.5" /> View PDF
+                                                        </a>
+                                                        <button
+                                                            onClick={() => handleToggleVerification(docsModalBooking._id, docsActiveTab, dt.key)}
+                                                            disabled={isToggling}
+                                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition border cursor-pointer ${
+                                                                doc.verified
+                                                                    ? 'bg-green-100 text-green-700 border-green-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                                                                    : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200'
+                                                            } disabled:opacity-50`}
+                                                        >
+                                                            {isToggling ? (
+                                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                                            ) : doc.verified ? (
+                                                                <><CheckCircle2 className="w-3 h-3" /> Verified</>
+                                                            ) : (
+                                                                <><XCircle className="w-3 h-3" /> Not Verified</>
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                                {docsModalBooking.documentsVerified ? (
+                                    <span className="flex items-center gap-1 text-green-600 font-semibold"><CheckCircle2 className="w-3.5 h-3.5" /> All documents verified</span>
+                                ) : (
+                                    <span className="flex items-center gap-1 text-amber-600 font-semibold"><XCircle className="w-3.5 h-3.5" /> Verification incomplete</span>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setDocsModalBooking(null)}
+                                className="px-4 py-2 text-sm font-semibold text-zinc-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

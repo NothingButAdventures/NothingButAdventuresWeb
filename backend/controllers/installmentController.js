@@ -291,10 +291,31 @@ const activateInstallmentSubscription = catchAsync(async (req, res, next) => {
         gatewayResponse: { subscriptionId, type: "setup_fee" },
       },
     ],
+    lifetimeDepositApplied: booking.payment.lifetimeDepositApplied || 0,
+    lifetimeDepositCodes: booking.payment.lifetimeDepositCodes || [],
   };
 
   booking.status = "confirmed";
   await booking.save({ validateBeforeSave: false });
+
+  // Send booking confirmation email (regardless of payment plan)
+  booking.sendConfirmationEmail();
+
+  // Mark abandoned checkout as completed
+  try {
+    const AbandonedCheckout = require('../models/AbandonedCheckout');
+    await AbandonedCheckout.updateMany(
+      { 
+        user: booking.user._id || booking.user, 
+        tour: booking.tour._id || booking.tour, 
+        startDate: booking.startDate, 
+        status: 'pending' 
+      },
+      { status: 'completed' }
+    );
+  } catch (err) {
+    console.error('Failed to update abandoned checkout status:', err.message);
+  }
 
   // Send activation email
   if (booking.user?.email) {

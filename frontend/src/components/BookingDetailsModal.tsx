@@ -93,14 +93,85 @@ interface BookingDetails {
 interface BookingDetailsModalProps {
     booking: BookingDetails;
     onClose: () => void;
+    onBookingUpdated?: () => void;
 }
 
-export default function BookingDetailsModal({ booking: initialBooking, onClose }: BookingDetailsModalProps) {
+export default function BookingDetailsModal({ booking: initialBooking, onClose, onBookingUpdated }: BookingDetailsModalProps) {
     const router = useRouter();
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [booking, setBooking] = useState(initialBooking);
     const [isSyncing, setIsSyncing] = useState(false);
+
+    // Cancellation specific states
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancellationPreview, setCancellationPreview] = useState<any>(null);
+    const [loadingPreview, setLoadingPreview] = useState(false);
+    const [previewError, setPreviewError] = useState("");
+    const [cancellationReason, setCancellationReason] = useState("");
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [cancellationSuccess, setCancellationSuccess] = useState(false);
+
+    const fetchCancellationPreview = async () => {
+        setLoadingPreview(true);
+        setPreviewError("");
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No authorization token found");
+
+            const res = await fetch(`${api.baseURL}/bookings/${booking._id}/cancellation-preview`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to fetch cancellation preview");
+
+            setCancellationPreview(data.data);
+        } catch (err: any) {
+            console.error("Fetch Cancellation Preview Error", err);
+            setPreviewError(err.message || "Could not retrieve cancellation preview.");
+        } finally {
+            setLoadingPreview(false);
+        }
+    };
+
+    const handleConfirmCancellation = async () => {
+        setIsCancelling(true);
+        setPreviewError("");
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No authorization token found");
+
+            const res = await fetch(`${api.baseURL}/bookings/${booking._id}/cancel`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ reason: cancellationReason })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to cancel booking");
+
+            setBooking(data.data.booking);
+            setCancellationSuccess(true);
+            if (onBookingUpdated) {
+                onBookingUpdated();
+            }
+        } catch (err: any) {
+            console.error("Cancel Booking Error", err);
+            setPreviewError(err.message || "Could not cancel booking. Please try again.");
+        } finally {
+            setIsCancelling(false);
+        }
+    };
+
+    useEffect(() => {
+        if (showCancelModal) {
+            fetchCancellationPreview();
+        }
+    }, [showCancelModal]);
 
     // Sync installment status from PayPal on mount
     useEffect(() => {
@@ -594,24 +665,188 @@ export default function BookingDetailsModal({ booking: initialBooking, onClose }
                     </div>
 
                     {/* Footer */}
-                    <div className="p-6 border-t border-gray-100 bg-white flex items-center justify-between">
-                        <div className="flex items-center gap-3">
+                    <div className="p-4 sm:p-5 border-t border-gray-100 bg-white flex flex-wrap items-center justify-between gap-2.5">
+                        <div className="flex flex-wrap items-center gap-2">
                             <Link
                                 href={`/trips/${booking.tour.slug}/${booking.tour.tourCode}`}
-                                className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-[#3F3F42] bg-white hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center px-3.5 py-2 border border-gray-300 text-xs font-semibold rounded-lg text-[#3F3F42] bg-white hover:bg-gray-50 transition-colors"
                             >
                                 View Trip
                             </Link>
+                            {booking.status !== "cancelled" && (
+                                <button
+                                    onClick={() => {
+                                        onClose();
+                                        router.push(`/bookings?bookingId=${booking._id}`);
+                                    }}
+                                    className={`inline-flex items-center px-3.5 py-2 border text-xs font-semibold rounded-lg transition-colors ${(booking as any).documentsVerified
+                                        ? 'border-green-300 text-green-700 bg-green-50 cursor-default'
+                                        : (booking as any).documentsSubmitted
+                                            ? 'border-amber-300 text-amber-700 bg-white hover:bg-amber-50'
+                                            : 'border-purple-300 text-[#6A38C2] bg-white hover:bg-purple-50'
+                                        }`}
+                                    disabled={(booking as any).documentsVerified}
+                                >
+                                    {(booking as any).documentsVerified
+                                        ? '✓ Documents Verified'
+                                        : (booking as any).documentsSubmitted
+                                            ? 'View Documents'
+                                            : 'Submit Documents'}
+                                </button>
+                            )}
+                            {booking.status !== "cancelled" && booking.status !== "completed" && (
+                                <button
+                                    onClick={() => setShowCancelModal(true)}
+                                    className="inline-flex items-center px-3.5 py-2 border border-red-300 text-xs font-semibold rounded-lg text-red-600 bg-white hover:bg-red-50 transition-colors"
+                                >
+                                    Cancel Booking
+                                </button>
+                            )}
                         </div>
                         <button
                             onClick={onClose}
-                            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-[#432360] hover:bg-[#3F3F42] transition-colors"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-xs font-bold rounded-lg text-white bg-[#432360] hover:bg-[#3F3F42] transition-colors"
                         >
                             Close
                         </button>
                     </div>
                 </div>
             </div>
+
+            {/* Cancellation Modal Overlay */}
+            {
+                showCancelModal && (
+                    <div className="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            {/* Background overlay */}
+                            <div
+                                className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                                aria-hidden="true"
+                                onClick={() => !isCancelling && setShowCancelModal(false)}
+                            ></div>
+
+                            {/* Modal panel */}
+                            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                            <div className="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl relative z-[70] sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div className="bg-white px-6 pt-5 pb-6 sm:p-6">
+                                    <div className="sm:flex sm:items-start">
+                                        <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                            <span className="text-red-600 text-lg">⚠️</span>
+                                        </div>
+                                        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                            <h3 className="text-xl leading-6 font-bold text-gray-900" id="modal-title">
+                                                Cancel Booking
+                                            </h3>
+
+                                            {loadingPreview ? (
+                                                <div className="mt-6 flex flex-col items-center justify-center py-6">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                                                    <p className="mt-2 text-sm text-gray-500 text-center">Calculating refund and deposit options...</p>
+                                                </div>
+                                            ) : previewError ? (
+                                                <div className="mt-4 p-4 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
+                                                    {previewError}
+                                                    <div className="mt-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowCancelModal(false)}
+                                                            className="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:text-sm"
+                                                        >
+                                                            Close
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : cancellationSuccess ? (
+                                                <div className="mt-4 text-center py-4">
+                                                    <div className="text-green-500 text-5xl mb-3">✅</div>
+                                                    <h4 className="text-lg font-bold text-gray-900 mb-1">Booking Cancelled Successfully</h4>
+                                                    <p className="text-sm text-gray-500 mb-6">Your cancellation has been processed. Confirmation emails and any eligible Lifetime Deposits have been sent.</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setShowCancelModal(false);
+                                                            onClose();
+                                                        }}
+                                                        className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2.5 bg-green-600 text-base font-medium text-white hover:bg-green-700 sm:text-sm font-bold"
+                                                    >
+                                                        Done
+                                                    </button>
+                                                </div>
+                                            ) : cancellationPreview ? (
+                                                <div className="mt-4">
+                                                    <p className="text-sm text-gray-500 mb-4">
+                                                        Are you sure you want to cancel your booking? Below is the policy breakdown for your cancellation.
+                                                    </p>
+
+                                                    <div className="bg-gray-50 p-4 rounded-xl mb-4 border border-gray-100 text-sm space-y-2">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Ref:</span>
+                                                            <span className="font-mono font-semibold">{booking.bookingReference}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Days to Departure:</span>
+                                                            <span className="font-semibold">{cancellationPreview.daysBeforeDeparture} days</span>
+                                                        </div>
+                                                        <div className="flex justify-between pt-1.5 border-t border-gray-200">
+                                                            <span className="text-gray-500">Total Paid:</span>
+                                                            <span className="font-semibold text-gray-900">${cancellationPreview.totalPaid.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-500">Lifetime Deposit held:</span>
+                                                            <span className="font-semibold text-purple-700">${cancellationPreview.heldDepositAmount.toLocaleString()}</span>
+                                                        </div>
+                                                        <div className="flex justify-between pt-1.5 border-t border-gray-200 text-base">
+                                                            <span className="text-gray-900 font-medium">Cash Refund:</span>
+                                                            <span className="font-bold text-green-600">${cancellationPreview.refundAmount.toLocaleString()}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-4 text-xs text-purple-800 bg-purple-50 p-3 rounded-lg border border-purple-100 leading-normal">
+                                                        ℹ️ <strong>Cancellation Policy:</strong><br />
+                                                        {cancellationPreview.policyApplied}
+                                                    </div>
+
+                                                    <div className="mb-4">
+                                                        <label htmlFor="reason" className="block text-xs font-semibold text-gray-700 mb-1">
+                                                            Reason for cancellation (optional)
+                                                        </label>
+                                                        <textarea
+                                                            id="reason"
+                                                            value={cancellationReason}
+                                                            onChange={(e) => setCancellationReason(e.target.value)}
+                                                            placeholder="Please let us know why you are cancelling..."
+                                                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 outline-none resize-none h-20 transition"
+                                                        />
+                                                    </div>
+
+                                                    <div className="flex flex-col gap-2">
+                                                        <button
+                                                            type="button"
+                                                            disabled={isCancelling}
+                                                            onClick={handleConfirmCancellation}
+                                                            className="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2.5 bg-red-600 text-base font-medium text-white hover:bg-red-700 sm:text-sm disabled:opacity-50 font-bold"
+                                                        >
+                                                            {isCancelling ? "Processing..." : "Confirm Cancellation"}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            disabled={isCancelling}
+                                                            onClick={() => setShowCancelModal(false)}
+                                                            className="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-[#3F3F42] hover:bg-gray-50 sm:text-sm font-semibold"
+                                                        >
+                                                            Go Back
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Payment Simulation Modal Overlay */}
             {

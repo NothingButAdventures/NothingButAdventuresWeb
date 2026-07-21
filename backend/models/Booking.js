@@ -158,6 +158,17 @@ const bookingSchema = new mongoose.Schema(
           gatewayResponse: mongoose.Schema.Types.Mixed,
         },
       ],
+      lifetimeDepositApplied: {
+        type: Number,
+        default: 0,
+      },
+      lifetimeDepositCodes: [
+        {
+          type: String,
+          uppercase: true,
+          trim: true,
+        },
+      ],
     },
     extras: {
       activities: [
@@ -266,6 +277,13 @@ const bookingSchema = new mongoose.Schema(
         enum: ["pending", "processed", "declined"],
         default: "pending",
       },
+      issuedLifetimeDeposits: [
+        {
+          code: String,
+          amount: Number,
+          travelerName: String,
+        }
+      ],
     },
     installmentPlan: {
       isActive: {
@@ -323,6 +341,50 @@ const bookingSchema = new mongoose.Schema(
         },
       },
     ],
+    travelerDocuments: [
+      {
+        travelerIndex: {
+          type: Number,
+          required: true,
+        },
+        passport: {
+          url: String,
+          fileName: String,
+          uploadedAt: Date,
+          verified: { type: Boolean, default: false },
+        },
+        visa: {
+          url: String,
+          fileName: String,
+          uploadedAt: Date,
+          verified: { type: Boolean, default: false },
+        },
+        medicalCertificate: {
+          url: String,
+          fileName: String,
+          uploadedAt: Date,
+          verified: { type: Boolean, default: false },
+        },
+        insurance: {
+          url: String,
+          fileName: String,
+          uploadedAt: Date,
+          verified: { type: Boolean, default: false },
+        },
+        submittedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    documentsSubmitted: {
+      type: Boolean,
+      default: false,
+    },
+    documentsVerified: {
+      type: Boolean,
+      default: false,
+    },
     notes: [
       {
         author: {
@@ -440,12 +502,31 @@ bookingSchema.methods.calculateRefund = function () {
 };
 
 // Instance method to send confirmation email
-bookingSchema.methods.sendConfirmationEmail = function () {
-  // Implementation for sending confirmation email
-  // This would integrate with your email service
-  console.log(
-    `Sending confirmation email for booking ${this.bookingReference}`,
-  );
+bookingSchema.methods.sendConfirmationEmail = async function () {
+  try {
+    const User = mongoose.model('User');
+    const Tour = mongoose.model('Tour');
+
+    const user = await User.findById(this.user);
+    const tour = await Tour.findById(this.tour);
+
+    if (!user || !tour) return;
+
+    const { sendBookingConfirmationEmail } = require('../utils/emailService');
+    await sendBookingConfirmationEmail(user.email, {
+      name: user.name,
+      tourName: tour.name,
+      bookingReference: this.bookingReference,
+      startDate: this.startDate,
+      numberOfTravelers: this.numberOfTravelers,
+      totalPrice: this.price.totalPrice,
+      currency: this.price.currency,
+      paymentStatus: this.payment.status,
+      paymentMethod: this.payment.method,
+    });
+  } catch (err) {
+    console.error('Failed to send booking confirmation email:', err.message);
+  }
 };
 
 const Booking = mongoose.model("Booking", bookingSchema);

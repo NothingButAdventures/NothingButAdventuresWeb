@@ -95,6 +95,10 @@ const tourSchema = new mongoose.Schema(
         min: [0, "Own room price cannot be negative"],
       },
     },
+    exemptFromLifetimeDeposit: {
+      type: Boolean,
+      default: false,
+    },
     ratingsAverage: {
       type: Number,
       default: 0,
