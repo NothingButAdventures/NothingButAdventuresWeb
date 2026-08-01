@@ -9,6 +9,7 @@ import ReviewsSection from "@/components/ReviewsSection";
 import MeetLocalGuidesSection from "@/components/MeetLocalGuidesSection";
 import StartPlanningSection from "@/components/StartPlanningSection";
 import BeyondTheMapSection from "@/components/BeyondTheMapSection";
+import FaqSection from "@/components/FaqSection";
 import RecentlyViewedSection from "@/components/RecentlyViewedSection";
 import { api } from "@/lib/api";
 
@@ -83,68 +84,71 @@ export default async function Home() {
   });
 
   return (
-    <main className="w-full mx-auto mt-2 font-sans">
-      <div className="px-4 md:px-6">
-        <div
-          className="relative w-full h-[calc(100vh)] min-h-[800px] md:min-h-[850px] rounded-[16px] mx-auto overflow-hidden bg-[#3F3F42] group"
-        >
+    <main className="w-full mx-auto font-sans">
+      <div className="relative w-full mb-12 sm:mb-16 lg:mb-20">
+        <div className="relative w-full h-[580px] sm:h-[650px] md:h-[720px] lg:h-[780px] overflow-hidden bg-[#242239] group flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28">
           {/* Background Image with Overlay */}
           <div
-            className="absolute inset-0 z-0 transition-transform duration-[2s] ease-out group-hover:scale-105"
+            className="absolute inset-0 z-0 transition-transform duration-[2s] ease-out group-hover:scale-[1.02]"
             style={{
-              backgroundImage: 'url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=3506&auto=format&fit=crop")',
+              backgroundImage: 'url("/hero-1.svg")',
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           ></div>
-          <div className="absolute inset-0 bg-[#3F3F42]/30 z-10 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent z-10 pointer-events-none"></div>
 
-          {/* Main Content */}
-          <div className="relative z-20 h-full flex flex-col justify-center px-8 md:px-24">
-            <h1 className="text-white text-5xl md:text-[85px] font-normal leading-[1.1] mb-12 max-w-2xl">
-              <span className="block">Explore the Soul</span>
-              <span className="block">Natural Places</span>
+          {/* Main Headline Content (positioned lower) */}
+          <div className="relative z-20 mt-auto mb-10 sm:mb-14 md:mb-16 max-w-5xl pt-16">
+            <h1 className="text-white text-4xl sm:text-6xl md:text-7xl lg:text-[84px] xl:text-[92px] font-normal tracking-tight leading-[1.12] font-outfit">
+              See yourself & the World
             </h1>
-
-            {/* Search Box */}
-            <div className="max-w-[500px] w-full mt-4">
-              <div className="relative flex items-center w-full bg-white/40 backdrop-blur-md rounded-full overflow-hidden p-1 min-h-[64px]">
-                <input
-                  type="text"
-                  placeholder="Search Plans"
-                  className="w-full bg-transparent border-none outline-none text-[#3F3F42] placeholder:text-[#3F3F42] px-6 text-xl"
-                />
-                <button className="flex items-center justify-center w-12 h-12 mr-2 bg-transparent text-[#3F3F42] shrink-0">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </button>
-              </div>
+            <div className="font-gochi text-[#9AE600] text-5xl sm:text-7xl md:text-8xl lg:text-[108px] xl:text-[120px] font-normal leading-none mt-1 sm:mt-2 drop-shadow-sm">
+              DifferentLy.
             </div>
           </div>
 
-          {/* Right Side Scroll Indicator Setup */}
-          <div className="absolute z-20 right-8 md:right-16 top-1/2 -translate-y-1/2 hidden md:flex items-center space-x-6">
-            <div className="flex flex-col space-y-24 items-end text-white/80 font-medium text-lg tracking-wide py-12">
-              <span className="cursor-pointer hover:text-white transition-colors">Adventure</span>
-              <span className="cursor-pointer hover:text-white transition-colors">Journeys</span>
-              <span className="cursor-pointer hover:text-white transition-colors">Classic</span>
-            </div>
-
-            <div className="w-[3px] h-[300px] bg-white/20 rounded-full relative">
-              <div className="absolute top-0 left-0 w-full h-1/3 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.7)]"></div>
-            </div>
+          {/* Bottom-Right White Logo Watermark (40% smaller) */}
+          <div className="absolute -bottom-6 -right-6 sm:-bottom-8 sm:-right-8 md:-bottom-10 md:-right-10 lg:-bottom-12 lg:-right-12 z-10 pointer-events-none overflow-hidden select-none">
+            <img
+              src="/nba_logo1.svg"
+              alt=""
+              className="w-[180px] h-[180px] sm:w-[250px] sm:h-[250px] md:w-[320px] md:h-[320px] lg:w-[400px] lg:h-[400px] opacity-95 invert brightness-0 object-contain"
+            />
           </div>
+        </div>
+
+        {/* Floating Search Box (Sleeker height & lower padding) */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-30 w-[95%]">
+          <form action="/search" method="GET" className="w-full">
+            <div className="relative flex items-center w-full bg-white rounded-full p-1.5 sm:p-2 pl-5 sm:pl-7 shadow-xl shadow-black/10 border border-gray-100/80">
+              <input
+                type="text"
+                name="q"
+                placeholder="Search Plans"
+                className="w-full bg-transparent border-none outline-none text-[#18181B] placeholder:text-gray-400 font-outfit text-base sm:text-lg font-normal"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-full bg-[#18181B] hover:bg-black transition-all duration-200 flex items-center justify-center text-white shrink-0 ml-auto cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -152,60 +156,92 @@ export default async function Home() {
         <RecentlyViewedSection />
       </div>
 
-      <section className="py-20 bg-white">
-        <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-6xl md:text-[68px] font-medium text-[#3F3F42] max-w-full leading-tight tracking-tight">
-            Small Group Adventures Changing<br />the way you see life and Yourself
-          </h2>
+      {/* Small Group Adventures Section */}
+      <div className="px-4 md:px-6 mt-16 sm:mt-20 md:mt-24">
+        <div className="bg-[#FAF7F2] rounded-2xl p-8 sm:p-12 md:p-14 lg:p-16 relative overflow-hidden">
+          {/* Subheading & Title */}
+          <div className="mb-10 sm:mb-14">
+            <div className="font-gochi text-[#4F6D38] text-2xl sm:text-3xl md:text-4xl font-normal mb-1">
+              Small Group Adventures
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-normal leading-tight text-[#18181B] tracking-tight font-outfit">
+              Changing the way you see life and Yourself
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 md:divide-x md:divide-gray-200  lg:mx-32 max-w-full items-stretch mt-16">
-            {/* Feature 1 */}
-            <div className="flex flex-col items-center text-center md:pr-12 pb-8 md:pb-0">
-              <div className="mb-6 flex justify-center">
-                <img src="/ns-1.svg" className="w-[96px] h-[96px] object-contain" alt="1000s of experiences" />
+          {/* 3 Illustration Columns - Left, Center, Right aligned */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 lg:gap-16 items-end mb-8">
+            <div className="flex justify-center md:justify-start items-center">
+              <img src="/sg_1.svg" alt="Shared adventures" className="h-56 sm:h-64 md:h-[280px] lg:h-[300px] w-auto object-contain" />
+            </div>
+            <div className="flex justify-center items-center">
+              <img src="/sg_2.svg" alt="1000s of experiences" className="h-56 sm:h-64 md:h-[280px] lg:h-[300px] w-auto object-contain" />
+            </div>
+            <div className="flex justify-center md:justify-end items-center">
+              <img src="/sg_3.svg" alt="Creating positive change" className="h-56 sm:h-64 md:h-[280px] lg:h-[300px] w-auto object-contain" />
+            </div>
+          </div>
+
+          {/* Timeline Dashed Line (Starts at Middle of 1st Col & Ends at Middle of 3rd Col) & 3 Dots */}
+          <div className="relative w-full mb-6 hidden md:block">
+            <div
+              className="absolute left-[16.666%] right-[16.666%] top-1/2 -translate-y-1/2 border-t-2 border-dashed border-[#18181B]/70 pointer-events-none"
+              aria-hidden="true"
+            ></div>
+            <div className="relative grid grid-cols-3 gap-12 lg:gap-16">
+              <div className="flex justify-center items-center">
+                <div className="w-3.5 h-3.5 bg-[#18181B] rounded-full z-10"></div>
               </div>
-              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
-                1000s of experiences,<br />over 100 countries
+              <div className="flex justify-center items-center">
+                <div className="w-3.5 h-3.5 bg-[#18181B] rounded-full z-10"></div>
+              </div>
+              <div className="flex justify-center items-center">
+                <div className="w-3.5 h-3.5 bg-[#18181B] rounded-full z-10"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Text Labels below Dots - Centered in Middle of Each Column */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 lg:gap-16 pt-1">
+            <div className="flex justify-center">
+              <p className="text-[#18181B] font-semibold text-sm sm:text-base leading-snug max-w-[260px] text-center font-outfit">
+                Shared adventures with<br className="hidden sm:inline" /> like-minded people
               </p>
             </div>
-
-            {/* Feature 2 */}
-            <div className="flex flex-col items-center text-center md:px-12 py-8 md:py-0">
-              <div className="mb-6 flex justify-center">
-                <img src="/ns-2.svg" className="w-[96px] h-[96px] object-contain" alt="Shared adventures" />
-              </div>
-              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
-                Shared adventures with<br />like-minded people
+            <div className="flex justify-center">
+              <p className="text-[#18181B] font-semibold text-sm sm:text-base leading-snug max-w-[260px] text-center font-outfit">
+                1000s of experiences,<br className="hidden sm:inline" /> over 100 countries
               </p>
             </div>
-
-            {/* Feature 3 */}
-            <div className="flex flex-col items-center text-center md:pl-12 pt-8 md:pt-0">
-              <div className="mb-6 flex justify-center">
-                <img src="/sss3.svg" className="w-[96px] h-[96px] object-contain" alt="Creating positive change" />
-              </div>
-              <p className="text-[#3F3F42] font-semibold text-[15px] leading-snug max-w-[280px]">
-                Creating positive change around the<br />place you visit
+            <div className="flex justify-center">
+              <p className="text-[#18181B] font-semibold text-sm sm:text-base leading-snug max-w-[260px] text-center font-outfit">
+                Creating positive change around the<br className="hidden sm:inline" /> place you visit
               </p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       <div className="px-4 md:px-6">
         <PopularToursSection tours={tours} /> </div>
       <div className="px-4 md:px-6">
         <ExploreSection /></div> <div className="px-4 md:px-6">
-        <PostcardsInMotionSection /></div> 
+        <PostcardsInMotionSection /></div>
       <WhyNothingButAdventuresSection />
       <div className="px-4 md:px-6">
         <PopularDestinationsSection countries={countries} /></div> <div className="px-4 md:px-6">
         <ReviewsSection /></div> <div className="px-4 md:px-6">
         <MeetLocalGuidesSection /></div>
-      <StartPlanningSection />
+      <div className="px-4 md:px-6">
+        <StartPlanningSection />
+      </div>
 
       <div className="px-4 md:px-6">
         <BeyondTheMapSection blogs={blogs} />
+      </div>
+
+      <div className="px-4 md:px-6">
+        <FaqSection />
       </div>
 
     </main>

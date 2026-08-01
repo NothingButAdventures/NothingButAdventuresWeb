@@ -3,64 +3,82 @@ import React from "react";
 
 export default function ExploreSection() {
     return (
-        <section className="mx-auto mt-32 mb-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-                {/* Left Side */}
-                <div className="pr-0 md:pr-10">
-                    <div className="inline-block px-4 py-1 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-medium tracking-wide mb-6">
-                        Explore
+        <section className="mx-auto mt-16 sm:mt-20 md:mt-24 mb-16">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 md:gap-12 lg:gap-14">
+                {/* Left Content */}
+                <div className="flex flex-col justify-center max-w-xl">
+                    <div className="inline-block px-4 py-1.5 bg-red-600 text-white rounded-full text-xs sm:text-[13px] font-semibold tracking-wide w-fit mb-4">
+                        Sale
                     </div>
-                    <h2 className="text-[32px] md:text-[36px] lg:text-[40px] font-medium leading-[1.2] text-[#3F3F42] mb-8">
+                    <h2 className="text-3xl sm:text-4xl lg:text-[46px] font-normal leading-tight text-[#18181B] tracking-tight font-outfit mb-2.5">
                         The Adventure Sale is On
                     </h2>
-                    <div className="flex items-center gap-3 group">
-                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#3F3F42] text-white px-7 py-3 rounded-full font-medium text-[16px] hover:bg-[#3F3F42] hover:scale-105 transition-all">
-                            Learn More
+                    <p className="text-gray-500 text-xs sm:text-sm md:text-base font-normal mb-7 font-outfit">
+                        New to Sale Upto 50% OFF
+                    </p>
+                    <div className="flex items-center gap-3.5 group">
+                        <Link
+                            href="/trips"
+                            className="inline-flex items-center justify-center bg-[#18181B] text-white px-8 py-3.5 rounded-full font-medium text-base sm:text-lg hover:bg-black transition-all border-2 border-[#18181B] cursor-pointer"
+                        >
+                            Start Exploring
                         </Link>
-                        <Link href="/tours" className="inline-flex items-center justify-center bg-[#3F3F42] text-white w-12 h-12 rounded-full hover:bg-[#3F3F42] hover:scale-105 transition-all shrink-0">
-                            <svg className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 19L19 5M19 5v10M19 5H9" />
+                        <Link
+                            href="/trips"
+                            className="inline-flex items-center justify-center bg-[#18181B] text-white w-13 h-13 rounded-full hover:bg-black transition-all border-2 border-[#18181B] shrink-0 cursor-pointer"
+                            aria-label="Start Exploring"
+                        >
+                            <svg className="w-5.5 h-5.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
                             </svg>
                         </Link>
                     </div>
                 </div>
 
-                {/* Right Side */}
-                <div>
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        {/* Lime Green Stats Card */}
-                        <div 
-                            className="h-60 rounded-[16px] p-6 lg:p-7 flex flex-col justify-between relative aspect-square overflow-hidden group"
-                            style={{ backgroundColor: '#C2FD1E' }}
-                        >
-                            <div className="text-[#3F3F42]">
-                                <div className="text-[64px] font-bold leading-none mb-1">20%</div>
-                                <div className="text-[20px] font-semibold leading-[1.25] text-[#3F3F42]/90">
-                                    off on Selected<br />Trips
+                {/* Right Cards Container */}
+                <div className="flex flex-col sm:flex-row items-start gap-6 shrink-0 w-full lg:w-auto">
+                    {/* Square Green Card */}
+                    <div className="w-[235px] h-[235px] sm:w-[260px] sm:h-[260px] bg-[#234D0B] rounded-[22px] p-6 sm:p-7 flex flex-col justify-between shrink-0 shadow-xs">
+                        <div>
+                            <div className="text-5xl sm:text-6xl font-normal text-white leading-none font-outfit mb-1">
+                                50%
+                            </div>
+                            <div className="text-xl sm:text-2xl text-white/95 font-normal leading-snug font-outfit">
+                                Discount<br />on new<br />tours
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            <Link
+                                href="/trips"
+                                className="w-11 h-11 bg-white text-[#234D0B] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-md"
+                                aria-label="View discount tours"
+                            >
+                                <svg className="w-4.5 h-4.5 text-[#234D0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
+                                </svg>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* Photo & Text Card */}
+                    <div className="w-full sm:w-[330px] lg:w-[360px] flex flex-col justify-between shrink-0">
+                        <div className="w-full h-[170px] rounded-[20px] overflow-hidden relative bg-gray-900">
+                            <img
+                                src="https://images.unsplash.com/photo-1517824806704-9040b037703b?q=80&w=1200&auto=format&fit=crop"
+                                alt="Campfire under stars"
+                                className="w-full h-full object-cover opacity-90"
+                            />
+                            {/* Live Sale Badge */}
+                            <div className="absolute top-3.5 right-3.5 z-10">
+                                <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs border border-white/70 text-white px-3.5 py-1 rounded-full text-xs font-normal">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                    <span>Live Sale</span>
                                 </div>
                             </div>
-                            <div className="absolute bottom-5 right-5 lg:bottom-6 lg:right-6">
-                                <Link href="/tours" className="w-9 h-9 md:w-10 md:h-10 bg-white text-[#3F3F42] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shadow-md">
-                                    <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 19L19 5M19 5v10M19 5H9" />
-                                    </svg>
-                                </Link>
-                            </div>
                         </div>
-
-                        {/* Image & Text Card */}
-                        <div className="flex flex-col gap-3 flex-1 min-w-0">
-                            <div className="w-full flex-1 rounded-[16px] overflow-hidden min-h-[200px] max-h-[200px] md:max-h-[160px]">
-                                <img
-                                    src="https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?q=80&w=2000&auto=format&fit=crop"
-                                    alt="Scenic spots across Asia"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <p className="text-[16px] md:text-[17px] text-[#3F3F42] font-medium leading-[1.3] pr-2">
-                                Discover beautiful routes and scenic spots across Asia Region.
-                            </p>
-                        </div>
+                        <p className="text-sm sm:text-base text-[#18181B] font-normal leading-snug font-outfit mt-3.5">
+                            Discover beautiful routes and scenic spots across Asia Region.
+                        </p>
                     </div>
                 </div>
             </div>

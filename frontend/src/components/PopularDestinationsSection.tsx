@@ -101,18 +101,15 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
     };
 
     return (
-        <section className="mx-auto mt-24 mb-16">
+        <section className="mx-auto mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-16">
             {/* Header Area */}
-            <div className="mb-10">
-                <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
+            <div className="mb-8 md:mb-10">
+                <div className="inline-block px-3.5 py-1 bg-[#F4F4F5] text-[#71717A] rounded-full text-[13px] font-medium tracking-normal mb-3">
                     Views
                 </div>
-                <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight mb-4">
-                    Popular Destinations
+                <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-normal leading-tight text-[#18181B] tracking-tight font-outfit">
+                    Popular <span className="font-gochi text-[#4F6D38]">Destinations</span>
                 </h2>
-                <p className="text-[17px] md:text-[18px] text-gray-500 font-medium leading-[1.6]">
-                    From the Himalayas to the tropical south, discover India's diverse landscapes
-                </p>
             </div>
 
             {/* Destination Carousel */}

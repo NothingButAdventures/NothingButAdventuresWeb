@@ -141,22 +141,24 @@ export default function Header() {
         }
       }}
       className={`relative z-50 font-outfit px-4 md:px-8 transition-all duration-300 transform ${isMenuOpenAtTop ? "" : "sticky top-0"
-        } ${show ? "translate-y-0" : "-translate-y-full shadow-none"
-        } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white shadow-sm"}`}
+        } ${show ? "translate-y-0" : "-translate-y-full"
+        } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}
     >
       <div className="mx-auto">
         <div className="flex justify-between items-center md:grid md:grid-cols-[1fr_auto_1fr] py-4">
           {/* Logo */}
           <div className="flex items-center justify-start">
             <Link href="/" className="flex items-center space-x-3">
-              <img src="/logo.svg" alt="Nothing But Adventure Logo" className="w-[44px] h-[44px] object-contain transition-all duration-300" />
-              <div className="flex flex-col leading-none logo-text transition-colors duration-300">
-                <span className="text-[18px] font-bold tracking-widest mt-0.5 flex items-center">
-                  NOTHING
-                  <span className="lowercase font-normal ml-1" style={{ fontFamily: '"Brush Script MT", "League Script", "Dancing Script", cursive', fontSize: '24px', letterSpacing: 'normal', transform: 'translateY(-2px)' }}>but</span>
-                </span>
-                <span className="text-[18px] font-bold tracking-widest mt-0.5">ADVENTURES</span>
-              </div>
+              <img
+                src="/nba_logo1.svg"
+                alt="Nothing But Adventures Icon"
+                className="h-10 md:h-10 w-auto object-contain transition-all duration-300"
+              />
+              <img
+                src="/nba_logo2.svg"
+                alt="Nothing But Adventures"
+                className="h-10 md:h-10 w-auto object-contain transition-all duration-300"
+              />
             </Link>
           </div>
 
@@ -170,7 +172,7 @@ export default function Header() {
                   setActiveMenu("destinations");
                 }}
                 aria-expanded={activeMenu === "destinations"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "destinations" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "destinations" ? "bg-white text-[#412A6B] font-medium" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Destinations</span>
@@ -182,7 +184,7 @@ export default function Header() {
                   setActiveMenu("adventures");
                 }}
                 aria-expanded={activeMenu === "adventures"}
-                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "adventures" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "adventures" ? "bg-white text-[#412A6B] font-medium" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Adventures</span>
@@ -194,7 +196,7 @@ export default function Header() {
                   setActiveMenu("interests");
                 }}
                 aria-expanded={activeMenu === "interests"}
-                className={`flex items-center justify-center px-6 py-3.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "interests" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "interests" ? "bg-white text-[#412A6B] font-medium" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Explore by Interest</span>
@@ -206,7 +208,7 @@ export default function Header() {
                   setActiveMenu("deals");
                 }}
                 aria-expanded={activeMenu === "deals"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "deals" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "deals" ? "bg-white text-[#412A6B] font-medium" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Deals</span>
@@ -218,7 +220,7 @@ export default function Header() {
                   setActiveMenu("why-us");
                 }}
                 aria-expanded={activeMenu === "why-us"}
-                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-medium text-[16px] cursor-pointer rounded-xl ${activeMenu === "why-us" ? "bg-white text-[#412A6B] font-semibold" : "hover:text-[#3F3F42]"
+                className={`flex items-center justify-center px-6 py-2.5 text-[#3F3F42] transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "why-us" ? "bg-white text-[#412A6B] font-medium" : "hover:text-[#3F3F42]"
                   }`}
               >
                 <span>Why Us</span>
@@ -250,13 +252,14 @@ export default function Header() {
               </div>
             ) : (
               <>
+
                 {/* Call Icon */}
                 <a
                   href="tel:+1234567890"
                   className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
                   aria-label="Call us"
                 >
-                  <img src="/call-header.svg" alt="Call" className="w-6 h-6" />
+                  <img src="/phone-nba.svg" alt="Call" className="w-6 h-6" />
                 </a>
 
                 {/* Profile Icon */}
@@ -267,7 +270,7 @@ export default function Header() {
                       className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
                       aria-label="User profile"
                     >
-                      <img src="/profile-header.svg" alt="Profile" className="w-6 h-6" />
+                      <img src="/user-nba.svg" alt="Profile" className="w-6 h-6" />
                     </button>
 
                     {/* User Dropdown */}
@@ -307,9 +310,15 @@ export default function Header() {
                         </Link>
 
                         {user.role === "admin" && (
-                          <Link href="/admin" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
-                            Admin Panel
-                          </Link>
+                          <>
+                            <Link href="/guide" className="flex items-center px-5 py-2.5 text-sm text-purple-700 font-semibold hover:bg-purple-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                              App Directory & Guide
+                            </Link>
+
+                            <Link href="/admin" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                              Admin Panel
+                            </Link>
+                          </>
                         )}
 
                         <div className="border-t border-gray-100 mt-2 pt-2">
@@ -329,7 +338,7 @@ export default function Header() {
                     className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
                     aria-label="Sign in"
                   >
-                    <img src="/profile-header.svg" alt="Profile" className="w-6 h-6" />
+                    <img src="/user-nba.svg" alt="Profile" className="w-6 h-6" />
                   </Link>
                 )}
               </>
@@ -370,6 +379,9 @@ export default function Header() {
                   <Link href="/wallet" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Wallet (${(user.walletBalance || 0).toLocaleString()})</Link>
                   <Link href="/profile" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>My Profile</Link>
                   <Link href="/wishlist" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>My Wishlist</Link>
+                  {user.role === "admin" && (
+                    <Link href="/guide" className="text-purple-700 font-semibold hover:text-purple-900 transition-colors" onClick={() => setIsMenuOpen(false)}>App Directory & Guide</Link>
+                  )}
                   <button onClick={handleLogout} className="text-red-600 hover:text-red-700 font-medium text-left transition-colors">Sign Out</button>
                 </>
               ) : (

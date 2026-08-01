@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap');
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
@@ -48,6 +49,11 @@
   --font-sans: var(--font-outfit), sans-serif;
   --font-mono: var(--font-outfit), monospace;
   --font-outfit: var(--font-outfit), sans-serif;
+  --font-gochi: 'Gochi Hand', cursive, sans-serif;
+}
+
+.font-gochi {
+  font-family: 'Gochi Hand', cursive, sans-serif !important;
 }
 
 * {

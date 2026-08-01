@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Notebook, Images, MapTrifold, Buildings, CalendarBlank, CheckCircle } from "@phosphor-icons/react";
+import { Toaster, toast } from "react-hot-toast";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -252,6 +254,33 @@ export default function EditTourPage() {
     plantingLocation: "",
     treesPlanted: "0",
   });
+
+  // Step wizard state
+  type TourStep = 1 | 2 | 3 | 4 | 5;
+  const [currentStep, setCurrentStep] = useState<TourStep>(1);
+  const totalSteps = 5;
+
+  const stepConfig = [
+    { label: "Tour Details", step: 1 as TourStep, icon: Notebook },
+    { label: "Media & Pricing", step: 2 as TourStep, icon: Images },
+    { label: "Itinerary", step: 3 as TourStep, icon: MapTrifold },
+    { label: "Hotels & Info", step: 4 as TourStep, icon: Buildings },
+    { label: "Dates & Publish", step: 5 as TourStep, icon: CalendarBlank },
+  ];
+
+  const handleStepNext = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep((prev) => (prev + 1) as TourStep);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleStepPrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => (prev - 1) as TourStep);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   useEffect(() => {
     checkAuthAndFetchData();
@@ -1186,23 +1215,62 @@ export default function EditTourPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="w-full px-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-[#3F3F42]">
-            Edit Tour
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Update tour details below
-          </p>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <Toaster position="top-right" />
+      {/* Header & Breadcrumbs */}
+      <div className="w-full bg-white border-b">
+        <div className="max-w-full mx-auto px-4 md:px-12 lg:px-24 py-4 md:py-6">
+          <div className="text-[13px] text-gray-500 mb-4">
+            <Link href="/admin" className="hover:text-[#4C1D95]">Admin</Link> / <Link href="/admin/tours-management" className="hover:text-[#4C1D95]">Tours</Link> / Edit Tour
+          </div>
+          <h1 className="text-3xl md:text-4xl font-semibold text-[#4C1D95] mb-2">Edit Tour</h1>
+          <div className="text-gray-500 text-sm">Update tour details step by step</div>
         </div>
+      </div>
 
+      {/* Main Content */}
+      <div className="max-w-full mx-auto px-4 md:px-12 lg:px-24 py-8">
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+          {/* Progress Stepper */}
+          <div className="bg-white rounded-xl border p-6 flex items-start justify-between relative overflow-hidden mb-6">
+            <div className="absolute left-[10%] right-[10%] top-[48px] h-[1px] bg-gray-300 z-0"></div>
+            {stepConfig.map((s, index) => {
+              const isCompleted = currentStep > s.step;
+              const isCurrent = currentStep === s.step;
+              const Icon = s.icon;
+              return (
+                <div key={index} className="flex flex-col items-center relative z-10 flex-1 cursor-pointer" onClick={() => { setCurrentStep(s.step); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                  <div className="bg-[#fff] px-2 mb-3">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center relative text-white ${isCompleted || isCurrent ? 'bg-[#6A38C2]' : 'bg-[#2f3d44]'}`}>
+                      <Icon size={24} weight={isCompleted || isCurrent ? "fill" : "bold"} />
+                      {isCompleted && (
+                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-[2px]">
+                          <CheckCircle size={16} weight="fill" className="text-[#6A38C2]" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className={`text-[15px] text-center font-medium ${isCurrent ? 'text-[#6A38C2]' : 'text-[#4E4E4E]'}`}>
+                    {s.label}
+                  </span>
+                  <span className={`text-[13px] mt-1 ${isCompleted ? 'text-[#6A38C2]' : 'text-gray-500'}`}>
+                    {isCompleted ? 'Completed' : `Step ${s.step}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ==================== STEP 1: TOUR DETAILS ==================== */}
+          {currentStep === 1 && (
+          <div className="space-y-6">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-[32px] font-medium text-[#2C3238] leading-tight">Tour Details</h2>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Basic Information
-            </h2>
+            </h3>
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1703,12 +1771,20 @@ export default function EditTourPage() {
               </div>
             </div>
           </div>
+          </div>
+          )}
 
+          {/* ==================== STEP 2: MEDIA & PRICING ==================== */}
+          {currentStep === 2 && (
+          <div className="space-y-6">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-[32px] font-medium text-[#2C3238] leading-tight">Media & Pricing</h2>
+          </div>
           {/* Images Section */}
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Tour Images
-            </h2>
+            </h3>
 
             <div className="mb-4">
               <div
@@ -1807,10 +1883,10 @@ export default function EditTourPage() {
           </div>
 
           {/* Pricing Section */}
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Pricing
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">
@@ -1898,10 +1974,10 @@ export default function EditTourPage() {
 
 
           {/* Add-ons Section */}
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
               Add-ons
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#3F3F42] mb-1">
@@ -1922,10 +1998,10 @@ export default function EditTourPage() {
 
           {/* Tree Planting Section */}
           {formData.country && (
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-              <h2 className="text-lg font-semibold text-[#3F3F42] mb-4">
+            <div className="bg-white rounded-xl shadow-sm border p-8">
+              <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
                 Tree Planting Information
-              </h2>
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-[#3F3F42] mb-1">
@@ -1972,14 +2048,22 @@ export default function EditTourPage() {
               </div>
             </div>
           )}
+          </div>
+          )}
 
+          {/* ==================== STEP 3: ITINERARY ==================== */}
+          {currentStep === 3 && (
+          <div className="space-y-6">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-[32px] font-medium text-[#2C3238] leading-tight">Itinerary Builder</h2>
+          </div>
           {/* Itinerary Section */}
-          {formData.country && (
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
+          {formData.country ? (
+            <div className="bg-white rounded-xl shadow-sm border p-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-[#3F3F42]">
+                <h3 className="text-lg font-semibold text-[#3F3F42]">
                   Itinerary
-                </h2>
+                </h3>
                 <button
                   type="button"
                   onClick={addItineraryDay}
@@ -2307,15 +2391,27 @@ export default function EditTourPage() {
                 + Add Day
               </button>
             </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+              <p className="text-gray-500">Please select a destination in Step 1 to build the itinerary.</p>
+            </div>
+          )}
+          </div>
           )}
 
+          {/* ==================== STEP 4: HOTELS & INFO ==================== */}
+          {currentStep === 4 && (
+          <div className="space-y-6">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-[32px] font-medium text-[#2C3238] leading-tight">Hotels & Information</h2>
+          </div>
           {/* Hotel Accommodation Section */}
           {formData.country && (
-            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-[#3F3F42]">
+            <div className="bg-white rounded-xl shadow-sm border p-8">
+              <div className="flex justify-[#3F3F42] justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-[#3F3F42]">
                   Pre & post-trip extra
-                </h2>
+                </h3>
               </div>
 
               <div className="grid grid-cols-1 gap-6">
@@ -2433,10 +2529,10 @@ export default function EditTourPage() {
           )}
 
           {/* Before You Book Section */}
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-[#3F3F42] mb-1">
+          <div className="bg-white rounded-xl shadow-sm border p-8">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-1">
               Before You Book
-            </h2>
+            </h3>
             <p className="text-sm text-gray-500 mb-4">Add content for each tab. Use &quot;Normal Text&quot; for paragraphs (left column) and &quot;List Item&quot; for checklist items (right column) on the frontend.</p>
 
             {/* Tab Navigation */}
@@ -2467,17 +2563,25 @@ export default function EditTourPage() {
               }}
             />
           </div>
+          </div>
+          )}
 
+          {/* ==================== STEP 5: DATES & PUBLISH ==================== */}
+          {currentStep === 5 && (
+          <div className="space-y-6">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <h2 className="text-[32px] font-medium text-[#2C3238] leading-tight">Dates & Publish</h2>
+          </div>
           {/* Available Dates Section */}
-          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border p-8">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[#3F3F42]">
+              <h3 className="text-lg font-semibold text-[#3F3F42]">
                 Available Dates
-              </h2>
+              </h3>
               <button
                 type="button"
                 onClick={addAvailableDate}
-                className="bg-[#3F3F42] text-white px-4 py-2 rounded-md text-sm hover:bg-[#3F3F42] transition"
+                className="bg-[#4C1D95] text-white px-4 py-2 rounded-md text-sm hover:bg-purple-900 transition"
               >
                 + Add Date
               </button>
@@ -2550,29 +2654,59 @@ export default function EditTourPage() {
             )}
           </div>
 
-          {/* Submit Buttons */}
-          <div className="flex gap-3 sticky bottom-0 bg-white p-4 rounded-md shadow-sm border border-gray-200">
+          {/* Submit Button in Step 5 */}
+          <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
+            <h3 className="text-lg font-semibold text-[#3F3F42] mb-2">Ready to Save Changes?</h3>
+            <p className="text-sm text-gray-500 mb-6">Review all steps before updating the tour. You can click on any step above to go back.</p>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 bg-[#3F3F42] hover:bg-[#3F3F42] text-white font-semibold py-3 px-6 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="bg-[#4C1D95] hover:bg-purple-900 text-white font-semibold py-3 px-10 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2 text-base"
             >
               {submitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Updating...
+                  Updating Tour...
                 </>
               ) : (
                 <>Update Tour</>
               )}
             </button>
+          </div>
+          </div>
+          )}
+
+          {/* Step Navigation Buttons */}
+          <div className="flex items-center justify-between pt-6">
             <button
               type="button"
-              onClick={() => router.push("/admin/tours-management")}
-              className="px-6 py-3 border border-gray-300 text-[#3F3F42] font-semibold rounded-md hover:bg-gray-50 transition"
+              onClick={handleStepPrev}
+              disabled={currentStep === 1}
+              className={`px-6 py-2.5 rounded-full font-medium transition ${currentStep === 1
+                ? "bg-transparent text-transparent cursor-default"
+                : "bg-[#A6AAB4] text-white hover:bg-gray-500"
+              }`}
             >
-              Cancel
+              Previous
             </button>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => router.push("/admin/tours-management")}
+                className="px-6 py-2.5 border border-gray-300 text-[#3F3F42] font-medium rounded-full hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              {currentStep < totalSteps && (
+                <button
+                  type="button"
+                  onClick={handleStepNext}
+                  className="px-8 py-2.5 rounded-full font-medium transition bg-[#4C1D95] text-white hover:bg-purple-900"
+                >
+                  Continue
+                </button>
+              )}
+            </div>
           </div>
 
           {showCityPopup && (

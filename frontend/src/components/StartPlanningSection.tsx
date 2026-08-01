@@ -1,159 +1,63 @@
 "use client";
 
-import React, { useState } from "react";
-import { api } from "@/lib/api";
+import React from "react";
+import Link from "next/link";
 
 export default function StartPlanningSection() {
-    const [formData, setFormData] = useState({
-        fullName: "",
-        email: "",
-    });
-
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    const [error, setError] = useState("");
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError("");
-        setSuccess(false);
-
-        try {
-            const res = await fetch(`${api.baseURL}${api.endpoints.queries.create}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    fullName: formData.fullName,
-                    email: formData.email,
-                    dreamTripDetails: "Newsletter Subscription - Subscribed to save 10% off on next adventure",
-                }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                setSuccess(true);
-                setFormData({
-                    fullName: "",
-                    email: "",
-                });
-            } else {
-                setError(data.message || "Something went wrong. Please try again.");
-            }
-        } catch (err) {
-            setError("Failed to submit. Please check your connection.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
-        <section className="bg-[#F1F3FF] py-24 relative">
-            <div className="max-w-[800px] mx-auto px-4 sm:px-6 relative z-10 text-center mb-10">
-                <h2 className="text-[36px] md:text-[48px] font-semibold text-[#3F3F42] leading-tight mb-4 tracking-tight">
-                    Subscribe to save 10% off on your next Adventure
-                </h2>
-                <p className="text-[17px] text-[#3F3F42] font-medium leading-relaxed">
-                    Share your travel dreams with us, and we'll craft a{" "}
-                    <span className="font-semibold text-[#3F3F42]">personalised</span>
-                    <br />
-                    <span className="font-semibold text-[#3F3F42]">itinerary</span> just for you
-                </p>
-            </div>
+        <section className="mx-auto mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-16">
+            <div className="bg-[#FAF7F2] rounded-[28px] sm:rounded-[36px] p-8 sm:p-12 lg:p-16 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14 shadow-2xs">
+                {/* Left Text & CTA Area */}
+                <div className="flex-1 max-w-xl">
+                    <div className="inline-block px-3.5 py-1 bg-[#F4F4F5] text-[#71717A] rounded-full text-xs font-medium font-outfit mb-5">
+                        Tours Snippets
+                    </div>
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[60px] font-normal leading-[1.12] text-[#18181B] tracking-tight font-outfit mb-5">
+                        Subscribe to save 10%<br />
+                        off <span className="font-gochi text-[#4F6D38]">on your next</span><br />
+                        <span className="font-gochi text-[#4F6D38]">Adventure</span>
+                    </h2>
+                    <p className="text-base sm:text-lg md:text-xl text-gray-600 font-normal leading-relaxed max-w-lg mb-8 font-outfit">
+                        Share your travel dreams with us, and we'll craft a<br className="hidden sm:inline" /> personalised itinerary just for you
+                    </p>
+                    <div className="flex items-center gap-3 group">
+                        <Link
+                            href="/trips"
+                            className="inline-flex items-center justify-center bg-[#18181B] text-white px-7 py-3.5 rounded-full font-medium text-sm hover:bg-black transition-all border-2 border-[#18181B] cursor-pointer"
+                        >
+                            Start Exploring
+                        </Link>
+                        <Link
+                            href="/trips"
+                            className="inline-flex items-center justify-center bg-[#18181B] text-white w-12 h-12 rounded-full hover:bg-black transition-all border-2 border-[#18181B] shrink-0 cursor-pointer"
+                            aria-label="Start Exploring"
+                        >
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
+                            </svg>
+                        </Link>
+                    </div>
+                </div>
 
-            <div className="max-w-[1050px] mx-auto px-4 sm:px-6 relative z-10">
-                <div className="bg-white rounded-[24px] p-8 md:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.03)]">
-                    {success ? (
-                        <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <h3 className="text-2xl font-bold text-[#3F3F42] mb-2">Subscribed!</h3>
-                            <p className="text-gray-600 font-medium mb-6">
-                                Thank you for subscribing. You've been successfully added to our mailing list.
-                            </p>
-                            <button
-                                onClick={() => setSuccess(false)}
-                                className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-[#3F3F42] rounded-lg font-medium transition-colors"
-                            >
-                                Subscribe another email
-                            </button>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="flex flex-col">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mb-6">
-                                {/* Full Name */}
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-[14px] font-semibold text-[#3F3F42] pl-1">
-                                        Full Name *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="fullName"
-                                        required
-                                        placeholder="John Doe"
-                                        value={formData.fullName}
-                                        onChange={handleChange}
-                                        className="w-full px-5 py-4 bg-transparent border border-gray-200 rounded-[12px] text-[#3F3F42] placeholder:text-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all font-medium"
-                                    />
-                                </div>
+                {/* Right Photos (2 Images) */}
+                <div className="flex items-start gap-4 sm:gap-5 shrink-0 w-full lg:w-auto justify-center lg:justify-end">
+                    {/* Image 1: Tall Portrait */}
+                    <div className="w-[220px] sm:w-[260px] lg:w-[300px] h-[320px] sm:h-[370px] lg:h-[400px] rounded-[24px] overflow-hidden relative shadow-xs shrink-0 bg-gray-900 group">
+                        <img
+                            src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?q=80&w=3540&auto=format&fit=crop"
+                            alt="Travellers watching sunset"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                        />
+                    </div>
 
-                                {/* Email Address */}
-                                <div className="flex flex-col gap-2">
-                                    <label className="text-[14px] font-semibold text-[#3F3F42] pl-1">
-                                        Email Address *
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        required
-                                        placeholder="john@example.com"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        className="w-full px-5 py-4 bg-transparent border border-gray-200 rounded-[12px] text-[#3F3F42] placeholder:text-gray-400 focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all font-medium"
-                                    />
-                                </div>
-                            </div>
-
-                            <p className="text-[12px] text-[#777] font-medium leading-[1.6] mb-8">
-                                By submitting this form, you agree to our privacy policy. We'll never share your information with third parties and will only use it to create your perfect Indian adventure.
-                            </p>
-
-                            {error && <p className="text-red-500 font-medium text-sm mb-4">{error}</p>}
-
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full bg-[#3F3F42] text-white py-4 rounded-full font-semibold text-[16px] flex items-center justify-center gap-2 hover:bg-[#3F3F42] transition-colors disabled:opacity-70"
-                            >
-                                {loading ? "Subscribing..." : "Subscribe"}
-                                <svg
-                                    className="w-5 h-5 ml-1"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </form>
-                    )}
+                    {/* Image 2: Square */}
+                    <div className="w-[170px] sm:w-[200px] lg:w-[230px] aspect-square rounded-[24px] overflow-hidden relative shadow-xs shrink-0 bg-gray-900 self-start group">
+                        <img
+                            src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=3540&auto=format&fit=crop"
+                            alt="Travellers crossing mountain bridge"
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                        />
+                    </div>
                 </div>
             </div>
         </section>

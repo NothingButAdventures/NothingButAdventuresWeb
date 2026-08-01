@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 const reviews = [
     {
@@ -8,7 +9,7 @@ const reviews = [
         name: "Nishant Yadav",
         avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop",
         rating: 4.8,
-        review: "Beautiful beaches, vibrant nightlife, delicious seafood. Can be crowded in peak season but perfect for relaxing holidays.",
+        review: "Beautiful beaches, vibrant nightlife, delicious seafood. Can be crowded in peak season but perfect for relaxing holidays. Thank you Nothing but Adventures",
     },
     {
         id: 2,
@@ -49,18 +50,18 @@ const reviews = [
 
 function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; className?: string }) {
     return (
-        <div className={`bg-[#f4f5f6] rounded-[20px] p-6 shrink-0 ${className}`}>
-            <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
+        <div className={`bg-[#F5F5F3] rounded-[20px] p-5 shrink-0 ${className}`}>
+            <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
                     <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
-                    <h4 className="font-semibold text-[15px] text-gray-500 mb-0.5">{review.name}</h4>
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-[15px] text-[#3F3F42]">{review.rating}</span>
-                        <div className="flex gap-1">
+                    <h4 className="font-semibold text-sm text-[#18181B] mb-0.5 font-outfit">{review.name}</h4>
+                    <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-xs text-[#18181B] font-outfit">{review.rating}</span>
+                        <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
-                                <svg key={star} className="w-3.5 h-3.5 text-[#3F3F42]" fill="currentColor" viewBox="0 0 20 20">
+                                <svg key={star} className="w-3 h-3 text-[#18181B]" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                 </svg>
                             ))}
@@ -68,7 +69,7 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
                     </div>
                 </div>
             </div>
-            <p className="text-[16px] font-medium text-[#3F3F42] leading-[1.4]">
+            <p className="text-xs sm:text-sm text-gray-500 font-normal leading-relaxed font-outfit mt-2.5">
                 {review.review}
             </p>
         </div>
@@ -76,11 +77,11 @@ function ReviewCard({ review, className = "" }: { review: typeof reviews[0]; cla
 }
 
 export default function ReviewsSection({
-    title = "What travellers say about our tours",
-    pillClasses = "bg-[#DEECFF] text-gray-500",
-    btnClasses = "bg-[#3F3F42] hover:bg-[#3F3F42]",
-    btnText = "Plan Your Trip",
-    titleClassName = "text-[32px] md:text-[40px] font-medium leading-tight text-[#3F3F42]",
+    title,
+    pillClasses,
+    btnClasses,
+    btnText,
+    titleClassName,
 }: {
     title?: string;
     pillClasses?: string;
@@ -89,74 +90,83 @@ export default function ReviewsSection({
     titleClassName?: string;
 } = {}) {
     return (
-        <section className="mx-auto mt-32 mb-16">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 border-b border-transparent">
-                <div className="max-w-[700px]">
-                    <div className={`inline-block px-5 py-2 rounded-full text-[13px] font-semibold tracking-wide mb-6 ${pillClasses}`}>
+        <section className="mx-auto mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-16">
+            {/* Header Area */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-10">
+                <div>
+                    <div className="inline-block px-3.5 py-1 bg-[#F4F4F5] text-[#71717A] rounded-full text-[13px] font-medium tracking-normal mb-3">
                         Reviews
                     </div>
-                    <h2 className={titleClassName}>
-                        {title}
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-normal leading-tight text-[#18181B] tracking-tight font-outfit">
+                        What travellers say about<br />
+                        our tours
                     </h2>
                 </div>
-                <div className="max-w-[320px] text-right mt-6 md:mt-0">
-                    <p className="text-[15px] font-medium text-[#3F3F42] leading-[1.4]">
-                        Enjoy journey we organise is built on trust, safety and unforgettable views
+                <div className="max-w-[300px] md:text-right mt-4 md:mt-0 self-end">
+                    <p className="text-xs sm:text-sm text-[#4F6D38] font-normal leading-snug font-outfit">
+                        Enjoy journey we organise is built on trust,<br className="hidden sm:inline" /> safety and unforgettable views
                     </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[420px]">
-                {/* Left Card: CTA */}
-                <div className="bg-[#f4f5f6] rounded-[24px] p-8 md:p-10 flex flex-col justify-between h-full min-h-[300px]">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-baseline font-medium text-[#3F3F42]">
-                            <span className="text-[56px] leading-none tracking-tight">4.9</span>
-                            <span className="text-[24px] text-gray-400">/5</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-auto lg:h-[450px]">
+                {/* Left Card: Rating & CTA */}
+                <div className="bg-[#F5F5F3] rounded-[24px] p-7 sm:p-9 flex flex-col justify-between h-full min-h-[380px]">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-baseline font-normal text-[#18181B] font-outfit">
+                            <span className="text-5xl sm:text-6xl leading-none">4.9</span>
+                            <span className="text-xl text-gray-400 font-normal ml-1">/5</span>
                         </div>
-                        <p className="text-[16px] font-medium text-[#3F3F42] leading-tight max-w-[140px]">
+                        <p className="text-xs text-gray-600 font-normal leading-snug font-outfit max-w-[130px] ml-2">
                             Based on 280+ verified travlers
                         </p>
                     </div>
 
                     <div>
-                        <p className="text-[20px] text-[#3F3F42] font-medium leading-tight mb-6 max-w-[220px]">
+                        <p className="text-sm text-[#18181B] font-normal leading-snug mb-5 max-w-[220px] font-outfit">
                             Ready to plan your own journey? Let's get started!
                         </p>
                         <div className="flex items-center gap-3 group">
-                            <button className={`${btnClasses} text-white px-6 py-3.5 rounded-full font-medium text-[15px] transition-all`}>
-                                {btnText}
-                            </button>
-                            <button className={`${btnClasses} text-white w-12 h-12 rounded-full flex items-center justify-center transition-all shrink-0`}>
-                                <svg className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19L19 5M19 5v10M19 5H9" />
+                            <Link
+                                href="/trips"
+                                className="inline-flex items-center justify-center bg-[#18181B] text-white px-6 py-3.5 rounded-full font-medium text-sm hover:bg-black transition-all border-2 border-[#18181B] cursor-pointer"
+                            >
+                                Plan Your Trip
+                            </Link>
+                            <Link
+                                href="/trips"
+                                className="inline-flex items-center justify-center bg-[#18181B] text-white w-12 h-12 rounded-full hover:bg-black transition-all border-2 border-[#18181B] shrink-0 cursor-pointer"
+                                aria-label="Plan Your Trip"
+                            >
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M17 7H7M17 7V17" />
                                 </svg>
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
 
                 {/* Middle Card: Image Review */}
-                <div className="relative rounded-[24px] overflow-hidden h-full min-h-[350px]">
+                <div className="relative rounded-[24px] overflow-hidden min-h-[380px] lg:h-full w-full bg-gray-900 shadow-xs">
                     <img
                         src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=3540&auto=format&fit=crop"
                         alt="Travellers exploring"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover opacity-95"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none"></div>
 
-                    <div className="absolute bottom-8 left-8 right-8 text-white z-10">
-                        <p className="text-white/80 text-[14px] mb-2 font-medium">Alexa, 23 March 2025</p>
-                        <p className="text-[18px] font-medium leading-[1.3]">
+                    <div className="absolute bottom-6 left-6 right-6 text-white z-10 font-outfit">
+                        <p className="text-white/80 text-xs mb-1 font-normal">Alexa, 23 March 2025</p>
+                        <p className="text-base sm:text-lg font-medium leading-snug">
                             Beautiful beaches, vibrant nightlife, delicious seafood.
                         </p>
                     </div>
                 </div>
 
                 {/* Right Card: Auto-scrolling Reviews */}
-                <div className="flex flex-col overflow-hidden relative h-[420px]">
+                <div className="flex flex-col overflow-hidden relative h-[450px]">
                     {/* Top fade */}
-                    <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-b from-white to-transparent pointer-events-none z-20"></div>
+                    <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white to-transparent pointer-events-none z-20"></div>
 
                     {/* Scrolling container */}
                     <div className="reviews-scroll-container flex flex-col gap-4">
@@ -172,9 +182,8 @@ export default function ReviewsSection({
                     </div>
 
                     {/* Bottom fade */}
-                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-20"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-20"></div>
                 </div>
-
             </div>
 
             <style jsx>{`

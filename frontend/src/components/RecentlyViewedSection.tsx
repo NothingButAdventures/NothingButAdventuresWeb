@@ -14,11 +14,72 @@ export default function RecentlyViewedSection() {
         const parsed = JSON.parse(recentlyViewedStr);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setTours(parsed);
+          return;
         }
       }
     } catch (err) {
       console.error("Failed to read recently viewed tours:", err);
     }
+
+    // Fallback tours for preview when localStorage is empty
+    setTours([
+      {
+        _id: "demo-1",
+        title: "Purani Dilli Adventure Full Name",
+        durationDays: 12,
+        slug: "purani-dilli-adventure",
+        tourCode: "DEL123",
+        pricing: { startingPrice: 2399, currency: "USD" },
+        startLocation: { name: "Delhi" },
+        endLocation: { name: "Jaipur" },
+        destinationsCount: 3,
+        travelStyle: { name: "Classic" },
+        images: ["/mountain_hikers.png"],
+        nextDepartureDate: "2026-08-29",
+      },
+      {
+        _id: "demo-2",
+        title: "Purani Dilli Adventure Full Name",
+        durationDays: 12,
+        slug: "purani-dilli-adventure-2",
+        tourCode: "DEL124",
+        pricing: { startingPrice: 2399, currency: "USD" },
+        startLocation: { name: "Delhi" },
+        endLocation: { name: "Jaipur" },
+        destinationsCount: 3,
+        travelStyle: { name: "Classic" },
+        images: ["/mountain_hikers.png"],
+        nextDepartureDate: "2026-08-29",
+      },
+      {
+        _id: "demo-3",
+        title: "Purani Dilli Adventure Full Name",
+        durationDays: 12,
+        slug: "purani-dilli-adventure-3",
+        tourCode: "DEL125",
+        pricing: { startingPrice: 2399, currency: "USD" },
+        startLocation: { name: "Delhi" },
+        endLocation: { name: "Jaipur" },
+        destinationsCount: 3,
+        travelStyle: { name: "Classic" },
+        images: ["/mountain_hikers.png"],
+        nextDepartureDate: "2026-08-29",
+      },
+      {
+        _id: "demo-4",
+        title: "Purani Dilli Adventure Full Name",
+        durationDays: 12,
+        slug: "purani-dilli-adventure-4",
+        tourCode: "DEL126",
+        pricing: { startingPrice: 2399, currency: "USD" },
+        startLocation: { name: "Delhi" },
+        endLocation: { name: "Jaipur" },
+        destinationsCount: 3,
+        travelStyle: { name: "Classic" },
+        images: ["/mountain_hikers.png"],
+        nextDepartureDate: "2026-08-29",
+      },
+    ]);
   }, []);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -72,15 +133,18 @@ export default function RecentlyViewedSection() {
   if (tours.length === 0) return null;
 
   return (
-    <section className="mx-auto mt-24 relative">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
+    <section className="mx-auto mt-20 sm:mt-24 md:mt-28 lg:mt-32 relative">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-10">
         <div>
-          <div className="inline-block px-4 py-1.5 bg-[#DEECFF] text-gray-500 rounded-full text-[13px] font-semibold tracking-wide mb-6">
+          <div className="inline-block px-3.5 py-1 bg-[#F4F4F5] text-[#71717A] rounded-full text-[13px] font-medium tracking-normal mb-3">
             Recently Viewed
           </div>
-          <h2 className="text-6xl md:text-[68px] font-medium leading-tight text-[#3F3F42] tracking-tight">
-            Still thinking about these?<br />So are we.
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-normal leading-tight text-[#18181B] tracking-tight font-outfit">
+            Still thinking about these?
           </h2>
+          <div className="font-gochi text-[#4F6D38] text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-normal leading-tight mt-1 sm:mt-1.5">
+            So are we.
+          </div>
         </div>
       </div>
 
