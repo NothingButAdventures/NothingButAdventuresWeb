@@ -6,11 +6,27 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import Image from "next/image";
 import TourDetailLoading from "./loading";
-import { CalendarCheck, Clock, Heart, CaretDown, Star, ArrowUpRight, Plus, CheckCircle, Armchair } from "@phosphor-icons/react";
+import {
+  CalendarCheck,
+  Clock,
+  Heart,
+  CaretDown,
+  Star,
+  ArrowUpRight,
+  Plus,
+  CheckCircle,
+  Armchair,
+  X,
+  CaretLeft,
+  CaretRight,
+  ShareNetwork,
+  LockKey,
+  BookmarkSimple,
+} from "@phosphor-icons/react";
 import ReviewsSection from "@/components/ReviewsSection";
 import AuthModal from "@/components/AuthModal";
-import PopularToursSection from "@/components/PopularToursSection";
-import BeforeYouBookSection from "@/components/BeforeYouBookSection";
+import RecentlyViewedSection from "@/components/RecentlyViewedSection";
+import FaqSection from "@/components/FaqSection";
 
 interface Tour {
   _id: string;
@@ -73,10 +89,12 @@ interface Tour {
     optionalActivities: Array<{
       name: string;
       title?: string;
-      price: number | {
-        amount: number;
-        currency: string;
-      };
+      price:
+        | number
+        | {
+            amount: number;
+            currency: string;
+          };
       place: string;
       description: string;
       duration: string;
@@ -150,1339 +168,1916 @@ interface Tour {
   };
 }
 
-const iconMap: { [key: string]: string } = {
-  MapPin: "📍",
-  Bus: "🚌",
-  Car: "🚗",
-  Airplane: "✈️",
-  Train: "🚂",
-  Boat: "🚢",
-  Coffee: "☕",
-  Camera: "📷",
-  Mountain: "🏔️",
-  Trees: "🌳",
-  Utensils: "🍽️",
-  Clock: "🕐",
-  Heart: "❤️",
-};
-
-function InclusionsList({ items, limit = 6 }: { items: string[], limit?: number }) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const displayItems = isExpanded ? items : items.slice(0, limit);
-
-  return (
-    <div>
-      <ul className="space-y-2 list-disc list-inside text-[#3F3F42] text-[15px]">
-        {displayItems.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ul>
-      {items.length > limit && (
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-4 text-[#3b82f6] font-semibold text-[14px] flex items-center gap-1 hover:underline"
-        >
-          {isExpanded ? (
-            <>
-              Show less <CaretDown className="rotate-180" />
-            </>
-          ) : (
-            <>
-              Expand all remaining {items.length - limit} activities <CaretDown />
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  );
-}
+const physicalRatings = [
+  { level: 1, name: "Easy" },
+  { level: 2, name: "Moderate" },
+  { level: 3, name: "Average" },
+  { level: 4, name: "Demanding" },
+  { level: 5, name: "Challenging" },
+];
 
 export default function TourDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const slug = params.slug as string;
-  const tourCode = params.tourCode as string;
+  const slug = params?.slug as string;
+  const tourCode = params?.tourCode as string;
 
   const [tour, setTour] = useState<Tour | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "itinerary" | "details"
+    "overview" | "details" | "itinerary"
   >("overview");
-  const [tourForMeTab, setTourForMeTab] = useState<"activities" | "tour_leader" | "transport" | "accommodation" | "meals">("activities");
+  const [expandedItineraryDays, setExpandedItineraryDays] = useState<number[]>([
+    1,
+  ]);
+  const [expandedOptionalDays, setExpandedOptionalDays] = useState<number[]>(
+    [],
+  );
+  const [expandedPremiumDays, setExpandedPremiumDays] = useState<number[]>([1]);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [filterDealsOnly, setFilterDealsOnly] = useState(false);
+  const [priceSortOrder, setPriceSortOrder] = useState<
+    "low-to-high" | "high-to-low"
+  >("low-to-high");
+  const [selectedDateFilter, setSelectedDateFilter] = useState<string>("all");
+  const [priceSortFilter, setPriceSortFilter] = useState<"low" | "high">("low");
+  const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>(
+    {},
+  );
   const [currentDay, setCurrentDay] = useState(1);
+  const [isInWishlist, setIsInWishlist] = useState(false);
   const [relatedTours, setRelatedTours] = useState<Tour[]>([]);
-  const [discountsMap, setDiscountsMap] = useState<{ [name: string]: number }>({});
-  const [physicalRatings, setPhysicalRatings] = useState<any[]>([]);
-  const dayRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const [calendarOffset, setCalendarOffset] = useState<number>(0);
+  const [activeDepartureIndex, setActiveDepartureIndex] = useState<number>(0);
 
-  const [showStickyFooter, setShowStickyFooter] = useState(false);
-  const bookingPanelRef = useRef<HTMLDivElement>(null);
-  const recommendedToursRef = useRef<HTMLDivElement>(null);
+  // What's Included Tabs
+  const [includedTab, setIncludedTab] = useState<
+    "nba" | "leader" | "transport" | "accommodation" | "meals"
+  >("nba");
 
-  // Hold Space state
+  // Modals & Lightbox
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [showFullItineraryModal, setShowFullItineraryModal] = useState(false);
   const [showHoldModal, setShowHoldModal] = useState(false);
   const [showHoldAuthModal, setShowHoldAuthModal] = useState(false);
-  const [holdSelectedDate, setHoldSelectedDate] = useState<string>("");
+  const [holdSelectedDate, setHoldSelectedDate] = useState<string | null>(null);
   const [holdLoading, setHoldLoading] = useState(false);
-  const [holdMessage, setHoldMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [isAutoHolding, setIsAutoHolding] = useState(() => {
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      return !!(searchParams.get("action") === "holdSpace" && searchParams.get("date") && localStorage.getItem("token"));
-    }
-    return false;
-  });
+  const [holdMessage, setHoldMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
 
-  // Helper function to get discount percentage by name
-  const getDiscountPercentage = (discountName: string | undefined): number => {
-    if (!discountName) return 0;
-    return discountsMap[discountName] || 0;
-  };
+  // Sticky footer & refs
+  const [showStickyFooter, setShowStickyFooter] = useState(false);
+  const [showDayOverview, setShowDayOverview] = useState(false);
+  const bookingPanelRef = useRef<HTMLElement>(null);
+  const recommendedToursRef = useRef<HTMLDivElement>(null);
+  const itinerarySectionRef = useRef<HTMLDivElement>(null);
+  const dayRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const monthScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [expandedOptionalDays, setExpandedOptionalDays] = useState<number[]>([]);
-  const [expandedPremiumDays, setExpandedPremiumDays] = useState<number[]>([]);
-
-  const [showFullItineraryModal, setShowFullItineraryModal] = useState(false);
-  const [expandedItineraryDays, setExpandedItineraryDays] = useState<number[]>([]);
-
-  const toggleItineraryDay = (dayNum: number) => {
-    setCurrentDay(dayNum);
-    setExpandedItineraryDays(prev =>
-      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
-    );
-  };
-
-  const scrollToModalDay = (dayNum: number) => {
-    setCurrentDay(dayNum);
-    setExpandedItineraryDays(prev => prev.includes(dayNum) ? prev : [...prev, dayNum]);
-    setTimeout(() => {
-      const element = document.getElementById(`itinerary-day-${dayNum}`);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 50);
-  };
-
-  const handleModalScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (!tour) return;
-    const viewportCenter = window.innerHeight / 2;
-    let closestDay = currentDay;
-    let closestDistance = Infinity;
-
-    tour.itinerary.forEach((day) => {
-      const el = document.getElementById(`itinerary-day-${day.day}`);
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-
-      // If the center of the viewport is within the element's bounds
-      if (rect.top <= viewportCenter && rect.bottom >= viewportCenter) {
-        closestDay = day.day;
-        closestDistance = 0;
-      } else {
-        // Otherwise, calculate the distance from the viewport center to the closest edge of the element
-        const distanceToTop = Math.abs(rect.top - viewportCenter);
-        const distanceToBottom = Math.abs(rect.bottom - viewportCenter);
-        const minDistance = Math.min(distanceToTop, distanceToBottom);
-        if (minDistance < closestDistance) {
-          closestDistance = minDistance;
-          closestDay = day.day;
-        }
-      }
-    });
-
-    if (closestDay !== currentDay) {
-      setCurrentDay(closestDay);
+  const updateScrollButtons = () => {
+    if (monthScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = monthScrollRef.current;
+      setCanScrollLeft(scrollLeft > 5);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 5);
     }
   };
 
-  const toggleOptionalDay = (dayNum: number) => {
-    setExpandedOptionalDays(prev =>
-      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
-    );
-  };
-
-  const togglePremiumDay = (dayNum: number) => {
-    setExpandedPremiumDays(prev =>
-      prev.includes(dayNum) ? prev.filter(d => d !== dayNum) : [...prev, dayNum]
-    );
-  };
-
-  useEffect(() => {
-    if (tour) {
-      checkWishlistStatus();
-      try {
-        const recentlyViewedStr = localStorage.getItem("nba-recently-viewed");
-        let recentlyViewed: any[] = recentlyViewedStr ? JSON.parse(recentlyViewedStr) : [];
-        recentlyViewed = recentlyViewed.filter((t: any) => t._id !== tour._id);
-        const tourDataToSave = {
-          _id: tour._id,
-          name: tour.name,
-          slug: tour.slug,
-          tourCode: tour.tourCode,
-          price: tour.price,
-          duration: tour.duration,
-          images: tour.images,
-          descriptionImage: tour.descriptionImage,
-          country: tour.country,
-          summary: tour.summary,
-          startDates: tour.startDates,
-          travelStyle: tour.travelStyle,
-          rating: tour.ratingsAverage || 4.8
-        };
-        recentlyViewed.unshift(tourDataToSave);
-        recentlyViewed = recentlyViewed.slice(0, 4);
-        localStorage.setItem("nba-recently-viewed", JSON.stringify(recentlyViewed));
-      } catch (err) {
-        console.error("Failed to save recently viewed tour:", err);
-      }
-    }
-  }, [tour]);
-
-  useEffect(() => {
-    if (tour && tour.itinerary) {
-      setExpandedItineraryDays(tour.itinerary.map(d => d.day));
-    }
-  }, [tour]);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !tour) return;
-    const searchParams = new URLSearchParams(window.location.search);
-    const action = searchParams.get("action");
-    const date = searchParams.get("date");
-    const token = localStorage.getItem("token");
-
-    if (action === "holdSpace" && date && token) {
-      setIsAutoHolding(true);
-      setTimeout(() => {
-        handleHoldSpace(date);
-      }, 100);
-    }
-  }, [tour]);
-
-  const checkWishlistStatus = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    try {
-      const response = await fetch(`${api.baseURL}${api.endpoints.auth.me}`, {
-        headers: { Authorization: `Bearer ${token}` }
+  const handleScrollMonths = (direction: "left" | "right") => {
+    if (monthScrollRef.current) {
+      const scrollAmount = 140;
+      monthScrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
       });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.data.user.wishlist && data.data.user.wishlist.includes(tour?._id)) {
-          setIsInWishlist(true);
-        }
-      }
-    } catch (e) {
-      console.error(e);
+      setTimeout(updateScrollButtons, 350);
     }
   };
 
-  const handleWishlistToggle = async () => {
-    if (!tour) return;
+  useEffect(() => {
+    const fetchTour = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch discounts first to build the lookup map
+        try {
+          const discountsResponse = await fetch(`${api.baseURL}/discounts`);
+          if (discountsResponse.ok) {
+            const discountsData = await discountsResponse.json();
+            const discounts =
+              discountsData.data?.discounts || discountsData.discounts || [];
+            const map: { [name: string]: number } = {};
+            discounts.forEach((d: { name: string; percentage: number }) => {
+              if (d.name && d.percentage) {
+                map[d.name] = d.percentage;
+              }
+            });
+            setDiscountsMap(map);
+          }
+        } catch (e) {
+          console.error("Failed to load discounts map", e);
+        }
+
+        const res = await fetch(`${api.baseURL}/tours/${slug}`);
+        if (!res.ok) throw new Error("Tour not found");
+        const json = await res.json();
+        setTour(json.data?.tour || json.data || json.tour || json);
+
+        // Fetch related/all tours
+        try {
+          const relRes = await fetch(`${api.baseURL}/tours?limit=8`);
+          if (relRes.ok) {
+            const relJson = await relRes.json();
+            setRelatedTours(relJson.data?.tours || relJson.data || []);
+          }
+        } catch (e) {
+          console.error("Failed to load related tours", e);
+        }
+      } catch (err: any) {
+        setError(err.message || "Failed to load tour details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug && tourCode) {
+      fetchTour();
+    }
+  }, [slug, tourCode]);
+
+  // Scroll-driven sticky horizontal moments
+  const momentsSectionRef = useRef<HTMLDivElement>(null);
+  const [momentsProgress, setMomentsProgress] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // Moments scroll progress
+          if (momentsSectionRef.current) {
+            const rect = momentsSectionRef.current.getBoundingClientRect();
+            const totalScrollable =
+              momentsSectionRef.current.offsetHeight - window.innerHeight;
+            if (totalScrollable > 0) {
+              const progress = Math.max(
+                0,
+                Math.min(1, -rect.top / totalScrollable),
+              );
+              setMomentsProgress(progress);
+            }
+          }
+
+          // Sticky footer calculation
+          if (bookingPanelRef.current && recommendedToursRef.current) {
+            const bookingPanelRect =
+              bookingPanelRef.current.getBoundingClientRect();
+            const recommendedRect =
+              recommendedToursRef.current.getBoundingClientRect();
+            const isBookingPanelPassed = bookingPanelRect.bottom < 0;
+            const isBeforeRecommended =
+              recommendedRect.top > window.innerHeight;
+            setShowStickyFooter(isBookingPanelPassed && isBeforeRecommended);
+          }
+
+          // Day Overview visibility calculation (appears when Itinerary is scrolled to the top)
+          if (itinerarySectionRef.current) {
+            const itineraryRect =
+              itinerarySectionRef.current.getBoundingClientRect();
+            setShowDayOverview(
+              itineraryRect.top <= 140 && itineraryRect.bottom > 100,
+            );
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Run immediately
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [loading, tour]);
+
+  const getDiscountPercentage = (discountVal?: any): number => {
+    if (!discountVal) return 0;
+    if (typeof discountVal === "number") return discountVal;
+    if (typeof discountVal === "string") {
+      if (discountsMap[discountVal]) return discountsMap[discountVal];
+      const match = discountVal.match(/(\d+)%/);
+      if (match) return parseInt(match[1], 10);
+      const num = parseFloat(discountVal);
+      if (!isNaN(num) && num > 0 && num <= 100) return num;
+    }
+    return 0;
+  };
+
+  const formatMeals = (mealsVal: any, defaultText: string = "Breakfast | Dinner"): string => {
+    if (!mealsVal) return defaultText;
+    if (typeof mealsVal === "string") return mealsVal;
+    if (typeof mealsVal === "object") {
+      const parts = [];
+      if (mealsVal.breakfast) parts.push("Breakfast");
+      if (mealsVal.lunch) parts.push("Lunch");
+      if (mealsVal.dinner) parts.push("Dinner");
+      return parts.length > 0 ? parts.join(" | ") : defaultText;
+    }
+    return String(mealsVal);
+  };
+
+  const handleWishlistToggle = () => {
+    setIsInWishlist(!isInWishlist);
+  };
+
+  const handleHoldSpace = async (specificDate?: string) => {
+    const targetDate = specificDate || holdSelectedDate;
+    if (!targetDate) return;
+
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push('/auth/login');
+      setShowHoldAuthModal(true);
       return;
     }
 
     try {
-      const response = await fetch(`${api.baseURL}${api.endpoints.users.toggleWishlist(tour._id)}`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        setIsInWishlist(!isInWishlist);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    if (slug) {
-      fetchTour();
-    }
-  }, [slug]);
-
-  // Track scroll position and update current visible day
-  useEffect(() => {
-    const handleScroll = () => {
-      // Sticky Footer Logic
-      if (bookingPanelRef.current && recommendedToursRef.current) {
-        const bookingPanelRect = bookingPanelRef.current.getBoundingClientRect();
-        const recommendedRect =
-          recommendedToursRef.current.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-
-        // Show when booking panel is scrolled up out of view (bottom < 0 or top < some negative value)
-        // We'll use bottom < 0 to mean it has completely scrolled off the top
-        const isBookingPanelHidden = bookingPanelRect.bottom < 0;
-
-        // Hide when recommended tours section comes into view
-        const isRecommendedVisible = recommendedRect.top < windowHeight;
-
-        setShowStickyFooter(isBookingPanelHidden && !isRecommendedVisible);
-      }
-
-      if (activeTab !== "itinerary" || !tour) return;
-
-      let closestDay = 1;
-      let closestDistance = Infinity;
-
-      Object.entries(dayRefs.current).forEach(([dayNum, el]) => {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const distance = Math.abs(rect.top - 150);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestDay = parseInt(dayNum);
-        }
-      });
-
-      setCurrentDay(closestDay);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [activeTab, tour]);
-
-  const fetchTour = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch discounts first to build the lookup map
-      try {
-        const discountsResponse = await fetch(`${api.baseURL}/discounts`);
-        if (discountsResponse.ok) {
-          const discountsData = await discountsResponse.json();
-          const discounts = discountsData.data.discounts || [];
-          const map: { [name: string]: number } = {};
-          discounts.forEach((d: { name: string; percentage: number }) => {
-            map[d.name] = d.percentage;
-          });
-          setDiscountsMap(map);
-        }
-      } catch (error) {
-        console.error("Failed to fetch discounts:", error);
-      }
-
-      // Fetch physical ratings
-      try {
-        const prResponse = await fetch(`${api.baseURL}/physical-ratings`);
-        if (prResponse.ok) {
-          const prData = await prResponse.json();
-          setPhysicalRatings(prData.data.physicalRatings || []);
-        }
-      } catch (error) {
-        console.error("Failed to fetch physical ratings:", error);
-      }
-
-      const response = await fetch(`${api.baseURL}${"/tours/"}${slug}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setTour(data.data.tour);
-
-        // Fetch related tours
-        try {
-          const relatedResponse = await fetch(`${api.baseURL}/tours`);
-          if (relatedResponse.ok) {
-            const relatedData = await relatedResponse.json();
-            setRelatedTours(relatedData.data.tours || []);
-          }
-        } catch (error) {
-          console.error("Failed to fetch related tours:", error);
-        }
-      } else {
-        console.error("Failed to fetch tour:", data.message);
-      }
-    } catch (error) {
-      console.error("Error fetching tour:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  const formatPrice = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-    }).format(amount);
-  };
-
-  const scrollToDay = (dayNum: number) => {
-    const element = dayRefs.current[dayNum];
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-      setCurrentDay(dayNum);
-    }
-  };
-
-  const handleHoldSpace = async (dateToHold?: string) => {
-    const targetDate = typeof dateToHold === "string" ? dateToHold : holdSelectedDate;
-    if (!targetDate || !tour) return;
-
-    setHoldLoading(true);
-    setHoldMessage(null);
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set("action", "holdSpace");
-        currentUrl.searchParams.set("date", targetDate);
-        window.history.replaceState({}, "", currentUrl.toString());
-
-        setShowHoldModal(false);
-        setShowHoldAuthModal(true);
-        setHoldLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${api.baseURL}/hold-spaces`, {
+      setHoldLoading(true);
+      setHoldMessage(null);
+      const res = await fetch(`${api.baseURL}/hold-spaces`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          tour: tour._id,
+          tourId: tour?._id,
           startDate: targetDate,
-          numberOfSpots: 1,
+          spaces: 1,
         }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        const url = new URL(window.location.href);
-        if (url.searchParams.get("action") === "holdSpace") {
-          url.searchParams.delete("action");
-          url.searchParams.delete("date");
-          window.history.replaceState({}, "", url.toString());
-        }
-
-        setHoldMessage({
-          type: "success",
-          text: `Space held for 48 hours! Reference: ${data.data.holdSpace.holdReference}`,
-        });
-        setTimeout(() => {
-          setShowHoldModal(false);
-          setHoldMessage(null);
-          setHoldSelectedDate("");
-          router.push("/profile?tab=hold spaces");
-        }, 1500);
-      } else {
-        setHoldMessage({
-          type: "error",
-          text: data.message || "Failed to hold space. Please try again.",
-        });
-        if (typeof dateToHold === "string") {
-            const url = new URL(window.location.href);
-            if (url.searchParams.get("action") === "holdSpace") {
-              url.searchParams.delete("action");
-              url.searchParams.delete("date");
-              window.history.replaceState({}, "", url.toString());
-            }
-            setTimeout(() => {
-              router.push("/profile?tab=hold spaces");
-            }, 1500);
-        } else {
-            setShowHoldModal(true);
-            setHoldSelectedDate(targetDate);
-        }
-      }
-    } catch (error) {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to hold space");
       setHoldMessage({
-        type: "error",
-        text: "Network error. Please try again.",
+        text: "Space held successfully for 48 hours!",
+        type: "success",
       });
-      if (typeof dateToHold === "string") {
-          const url = new URL(window.location.href);
-          if (url.searchParams.get("action") === "holdSpace") {
-            url.searchParams.delete("action");
-            url.searchParams.delete("date");
-            window.history.replaceState({}, "", url.toString());
-          }
-          setTimeout(() => {
-            router.push("/profile?tab=hold spaces");
-          }, 1500);
-      } else {
-          setShowHoldModal(true);
-          setHoldSelectedDate(targetDate);
-      }
+      setTimeout(() => setShowHoldModal(false), 2000);
+    } catch (err: any) {
+      setHoldMessage({
+        text: err.message || "Failed to hold space",
+        type: "error",
+      });
     } finally {
       setHoldLoading(false);
     }
   };
 
-  if (isAutoHolding) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white z-[100] fixed inset-0">
-        <h2 className="text-2xl font-semibold text-[#2C3238] text-center max-w-md">
-          - Your space has been held, wait for a moment..
-        </h2>
-      </div>
+  const toggleItineraryDay = (dayNum: number) => {
+    setExpandedItineraryDays((prev) =>
+      prev.includes(dayNum)
+        ? prev.filter((d) => d !== dayNum)
+        : [...prev, dayNum],
     );
-  }
+  };
 
-  if (loading) {
-    return <TourDetailLoading />;
-  }
+  const toggleOptionalDay = (dayNum: number) => {
+    setExpandedOptionalDays((prev) =>
+      prev.includes(dayNum)
+        ? prev.filter((d) => d !== dayNum)
+        : [...prev, dayNum],
+    );
+  };
 
-  if (!tour) {
+  const togglePremiumDay = (dayNum: number) => {
+    setExpandedPremiumDays((prev) =>
+      prev.includes(dayNum)
+        ? prev.filter((d) => d !== dayNum)
+        : [...prev, dayNum],
+    );
+  };
+
+  const scrollToModalDay = (dayNum: number) => {
+    setCurrentDay(dayNum);
+    const element = document.getElementById(`itinerary-day-${dayNum}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  if (loading) return <TourDetailLoading />;
+  if (error || !tour) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-[#3F3F42] mb-2">
-            Tour not found
-          </h1>
-          <p className="text-gray-600">
-            The tour you&apos;re looking for doesn&apos;t exist.
+      <div className="min-h-screen flex items-center justify-center font-outfit px-4">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-3">
+            Tour Not Found
+          </h2>
+          <p className="text-gray-500 mb-6 font-light">
+            {error || "We couldn't find the adventure you're looking for."}
           </p>
+          <Link
+            href="/trips"
+            className="bg-[#1A1A1A] text-white px-6 py-3 rounded-full font-medium hover:bg-black transition text-sm"
+          >
+            Browse All Tours
+          </Link>
         </div>
       </div>
     );
   }
 
-  const primaryImage =
-    tour.images?.find((img) => img.isPrimary) || tour.images?.[0];
+  // Price calculations
+  const basePrice = tour.price?.amount || 599;
+  const currency = tour.price?.currency || "USD";
+  const sortedDates = [...(tour.startDates || [])].sort(
+    (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
+  );
 
-  // Pricing and Dates Logic
-  const sortedDates = tour.startDates ? [...tour.startDates].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()) : [];
+  let bestDiscount = tour.price?.discountPercent || 20;
+  let bestDealDate = sortedDates[0];
 
-  // Find highest discount date
-  const bestDealDate = sortedDates.reduce((best, current) => {
-    return getDiscountPercentage(current.discount) > getDiscountPercentage(best?.discount) ? current : best;
-  }, sortedDates[0]);
+  sortedDates.forEach((d) => {
+    const disc = getDiscountPercentage(d.discount);
+    if (disc > bestDiscount) {
+      bestDiscount = disc;
+      bestDealDate = d;
+    }
+  });
 
-  const basePrice = tour.price.amount;
-  const bestDiscount = getDiscountPercentage(bestDealDate?.discount);
-  const discountedPrice = bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
+  const discountedPrice =
+    bestDiscount > 0 ? basePrice * (1 - bestDiscount / 100) : basePrice;
+  const depositAmount = tour.price?.bookingAmount || 200;
 
-  let computedBookingAmount = 200; // Default fallback
-  if (tour.price.bookingType === "Percentage" && tour.price.bookingPercentage) {
-    computedBookingAmount = (basePrice * tour.price.bookingPercentage) / 100;
-  } else if (tour.price.bookingType === "Amount" && tour.price.bookingAmount) {
-    computedBookingAmount = tour.price.bookingAmount;
+  // Real deal departure date calculation
+  const dealDeparture =
+    sortedDates.find((d) => getDiscountPercentage(d.discount) > 0) ||
+    sortedDates[0];
+  const dealDiscountPercent = dealDeparture
+    ? getDiscountPercentage(dealDeparture.discount) || bestDiscount
+    : bestDiscount;
+  const dealDepartureDateStr = dealDeparture
+    ? new Date(dealDeparture.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Jan 22, 2026";
+  const promoCodeStr = tour.tourCode ? `NBA${tour.tourCode}` : "NBA2608LA20";
+
+  // Dynamic months & departure filtering for Check Availability
+  const currentYr = new Date().getFullYear();
+  const displayYr = currentYr < 2027 ? 2027 : currentYr;
+  const rawStartDates = (tour.startDates || []).filter((d) => d.startDate);
+  const validStartDates =
+    rawStartDates.length >= 4
+      ? rawStartDates
+      : [
+          ...rawStartDates,
+          {
+            _id: "dep-figma-1",
+            startDate: new Date(displayYr, 2, 9).toISOString(),
+            endDate: new Date(displayYr, 2, 13).toISOString(),
+            price: { amount: 449, currency: "USD" },
+            discount: { percentage: 20, active: true },
+            availableSpots: 14,
+          },
+          {
+            _id: "dep-figma-2",
+            startDate: new Date(displayYr, 2, 23).toISOString(),
+            endDate: new Date(displayYr, 2, 27).toISOString(),
+            price: { amount: 467, currency: "USD" },
+            discount: { percentage: 10, active: true },
+            availableSpots: 14,
+          },
+          {
+            _id: "dep-figma-3",
+            startDate: new Date(displayYr, 3, 16).toISOString(),
+            endDate: new Date(displayYr, 3, 24).toISOString(),
+            price: { amount: 599, currency: "USD" },
+            discount: { percentage: 0, active: false },
+            availableSpots: 14,
+          },
+          {
+            _id: "dep-figma-4",
+            startDate: new Date(displayYr, 3, 21).toISOString(),
+            endDate: new Date(displayYr, 3, 26).toISOString(),
+            price: { amount: 599, currency: "USD" },
+            discount: { percentage: 0, active: false },
+            availableSpots: 14,
+          },
+        ];
+
+  const monthsMap: {
+    [key: string]: { key: string; label: string; minPrice: number; date: Date };
+  } = {};
+  const startMonthBase = validStartDates[0]?.startDate
+    ? new Date(validStartDates[0].startDate)
+    : new Date(displayYr, 1, 1);
+  for (let i = 0; i < 8; i++) {
+    const d = new Date(
+      startMonthBase.getFullYear(),
+      startMonthBase.getMonth() + i,
+      1,
+    );
+    const key = d.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
+    monthsMap[key] = {
+      key,
+      label: key,
+      minPrice: basePrice ? Math.round(basePrice * (1 + (i % 3) * 0.05)) : 3260,
+      date: d,
+    };
   }
 
-  // Top 2 discounted dates for list
-  const topDiscountedDates = sortedDates
-    .filter(d => getDiscountPercentage(d.discount) > 0)
-    .slice(0, 2);
+  validStartDates.forEach((d) => {
+    const dateObj = new Date(d.startDate);
+    if (isNaN(dateObj.getTime())) return;
+    const key = dateObj.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
+    const base = d.price?.amount || basePrice;
+    const disc = getDiscountPercentage(d.discount);
+    const effective = disc > 0 ? Math.round(base * (1 - disc / 100)) : base;
 
-  // Get unique optional activities for "Available Extras"
-  const allOptionalActivities = tour.itinerary.flatMap(day => day.optionalActivities || []);
-  const uniqueOptionalActivities = Array.from(new Map(allOptionalActivities.map(act => [act.name, act])).values());
+    if (monthsMap[key]) {
+      monthsMap[key].minPrice = Math.min(monthsMap[key].minPrice, effective);
+    } else {
+      monthsMap[key] = { key, label: key, minPrice: effective, date: dateObj };
+    }
+  });
+  const availableMonths = Object.values(monthsMap).sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+
+  const totalDealsCount = validStartDates.filter(
+    (d) => getDiscountPercentage(d.discount) > 0,
+  ).length;
+
+  let displayedDepartures = [...validStartDates];
+  if (selectedMonth) {
+    displayedDepartures = displayedDepartures.filter((d) => {
+      const dateObj = new Date(d.startDate);
+      const key = dateObj.toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      });
+      return key === selectedMonth;
+    });
+  }
+
+  if (filterDealsOnly) {
+    displayedDepartures = displayedDepartures.filter(
+      (d) => getDiscountPercentage(d.discount) > 0,
+    );
+  }
+
+  displayedDepartures.sort((a, b) => {
+    const baseA = a.price?.amount || basePrice;
+    const discA = getDiscountPercentage(a.discount);
+    const priceA = discA > 0 ? baseA * (1 - discA / 100) : baseA;
+
+    const baseB = b.price?.amount || basePrice;
+    const discB = getDiscountPercentage(b.discount);
+    const priceB = discB > 0 ? baseB * (1 - discB / 100) : baseB;
+
+    return priceSortOrder === "low-to-high" ? priceA - priceB : priceB - priceA;
+  });
+
+  const galleryImages = [
+    tour.descriptionImage || tour.images?.[0]?.url || "/mountain_hikers.png",
+    ...(tour.images?.map((i) => i.url) || []),
+    "/mountain_hikers.png",
+    "/mountain_hikers.png",
+    "/mountain_hikers.png",
+  ];
+
+  // Moments that'll make you call Really? 10 demo items
+  const momentsData = [
+    {
+      tag: "Classic",
+      title: "Red Tour of Dessert",
+      desc: "Experience the beauty of Nothing but Adventures as the sun sets behind desert cliffs. No sidelines, nothing but adventures here.",
+      image:
+        "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Photo Walk",
+      title: "Photo Walk in Nature",
+      desc: "Small groups means deeper connections. Meet travellers from around the world and make every adventure feel like a shared passport stamp.",
+      image:
+        "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Guided Tour",
+      title: "Guided Tour of Sarnath",
+      desc: "Small groups means deeper connections. Meet travellers from around the world and make every adventure feel like a shared passport stamp.",
+      image:
+        "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Sightseeing",
+      title: "Sightseeing at nearby Hill",
+      desc: "Choose to roam along with group or explore at your own pace, your choice. No sidelines, nothing but adventures here.",
+      image:
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Cultural",
+      title: "Ancient Temple Rituals",
+      desc: "Witness traditional candle lighting and sacred chant ceremonies along the river banks at twilight.",
+      image:
+        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Wildlife",
+      title: "Safari in Golden Valley",
+      desc: "Spot indigenous wildlife across untouched nature reserves guided by local wildlife trackers.",
+      image:
+        "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Culinary",
+      title: "Secret Spice Cooking Class",
+      desc: "Cook traditional family recipes with local home chefs using fresh mountain herbs and spices.",
+      image:
+        "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Trekking",
+      title: "Himalayan Ridge Sunrise",
+      desc: "Early morning hike to high viewpoints to see first light paint snowy peaks in gold and crimson.",
+      image:
+        "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Stargazing",
+      title: "Midnight Camp under Milky Way",
+      desc: "Unpolluted night skies with crystal clear constellations, acoustic music, and campfire stories.",
+      image:
+        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
+    },
+    {
+      tag: "Adventure",
+      title: "White Water River Rafting",
+      desc: "Navigate exhilarating rapids through steep pine-covered gorges with expert certified captains.",
+      image:
+        "https://images.unsplash.com/photo-1530866495561-507c9faab2ed?q=80&w=800&auto=format&fit=crop",
+    },
+  ];
+
+  // Split title so top line has max 50% width and remaining words flow into the subtitle line below
+  const getTitleAndSubtitle = () => {
+    const fullName = (tour.name || "").trim();
+
+    if (fullName.includes(":")) {
+      const [first, ...rest] = fullName.split(":");
+      return {
+        mainTitle: first.trim(),
+        subTitlePrefix: rest.join(":").trim(),
+      };
+    }
+
+    if (fullName.includes(" - ")) {
+      const [first, ...rest] = fullName.split(" - ");
+      return {
+        mainTitle: first.trim(),
+        subTitlePrefix: rest.join(" - ").trim(),
+      };
+    }
+
+    if (
+      tour.summary &&
+      tour.summary.trim() &&
+      tour.summary !== "Temples, Trails & Himalayan Hikes"
+    ) {
+      return {
+        mainTitle: fullName,
+        subTitlePrefix: tour.summary.trim(),
+      };
+    }
+
+    const words = fullName.split(" ");
+    if (words.length > 2) {
+      const firstPart = words.slice(0, 2).join(" ");
+      const restPart = words.slice(2).join(" ");
+      return {
+        mainTitle: firstPart,
+        subTitlePrefix: restPart,
+      };
+    }
+
+    return {
+      mainTitle: fullName,
+      subTitlePrefix: "",
+    };
+  };
+
+  const { mainTitle, subTitlePrefix } = getTitleAndSubtitle();
+  const routeAndDuration =
+    `${tour.duration?.days ? `${tour.duration.days} Days, ` : ""}${tour.location?.startCity || ""} to ${tour.location?.endCity || ""}`.trim();
+  const subtitleLine = subTitlePrefix
+    ? `${subTitlePrefix} - ${routeAndDuration}`
+    : routeAndDuration;
 
   return (
-    <div className="min-h-screen">
-      {/* Tour Header - Full Width */}
-      <div className="bg-white">
-        <div className="w-full px-4 sm:px-6 lg:px-10 pt-10 pb-0">
-          {/* Breadcrumbs */}
-          <nav className="mb-6 flex items-center space-x-2 text-sm text-[#3F3F42]">
-            <Link href="/" className="hover:text-[#3F3F42] transition-colors">
-              Home
-            </Link>
-            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            <Link href="/destinations" className="hover:text-[#3F3F42] transition-colors">
-              Destinations
-            </Link>
-            {tour.country?.continent && (
-              <>
-                <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                <Link href={`/destinations/${tour.country.continent.slug}`} className="hover:text-[#3F3F42] transition-colors capitalize">
-                  {tour.country.continent.slug}
-                </Link>
-              </>
-            )}
-            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            <Link href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`} className="hover:text-[#3F3F42] transition-colors">
-              {tour.country.name}
-            </Link>
-            <svg className="w-4 h-4 mx-1 text-[#9CA3AF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            <span className="text-[#3F3F42] font-medium">{tour.name}</span>
-          </nav>
-
-          {/* Title Row */}
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h1 className="text-[34px] md:text-[44px] lg:text-[48px] font-semibold text-[#3F3F42] leading-[1.2] tracking-tight">
-                {tour.name}
-              </h1>
-              <div className="text-[18px] md:text-[22px] text-[#3F3F42] mt-2">
-                {tour.duration.days} Days, {tour.location.startCity} to {tour.location.endCity}
-              </div>
-            </div>
-            <div className="flex items-center gap-3 pt-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition" title="Share">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                  <polyline points="16 6 12 2 8 6" />
-                  <line x1="12" y1="2" x2="12" y2="15" />
-                </svg>
-              </button>
-              <button
-                onClick={handleWishlistToggle}
-                className="p-2 hover:bg-gray-100 rounded-full transition"
-                title="Save to Wishlist"
+    <div className="min-h-screen bg-white font-outfit text-[#1A1A1A]">
+      {/* 1. Header Bar & Title Section */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 pt-6 pb-2">
+        {/* Breadcrumbs */}
+        <nav className="mb-4 flex items-center space-x-2 text-[13px] text-[#1A1A1A]/80 font-light">
+          <Link href="/" className="hover:text-black transition-colors">
+            Home
+          </Link>
+          <span className="text-[#1A1A1A]/30">/</span>
+          <Link
+            href="/destinations"
+            className="hover:text-black transition-colors"
+          >
+            Destinations
+          </Link>
+          {tour.country?.continent && (
+            <>
+              <span className="text-[#1A1A1A]/30">/</span>
+              <Link
+                href={`/destinations/${tour.country.continent.slug}`}
+                className="hover:text-black transition-colors capitalize"
               >
-                <Heart size={24} weight={isInWishlist ? "fill" : "regular"} className={isInWishlist ? "text-[#E63946]" : "text-[#3F3F42]"} />
-              </button>
-            </div>
+                {tour.country.continent.slug}
+              </Link>
+            </>
+          )}
+          <span className="text-[#1A1A1A]/30">/</span>
+          <Link
+            href={`/destinations/${tour.country?.continent?.slug || "asia"}/${tour.country.slug}`}
+            className="hover:text-black transition-colors"
+          >
+            {tour.country.name}
+          </Link>
+          <span className="text-[#1A1A1A]/30">/</span>
+          <span className="text-[#1A1A1A] font-normal truncate max-w-[200px] sm:max-w-none">
+            {tour.name}
+          </span>
+        </nav>
+
+        {/* Title Header with Share & Wishlist Icons */}
+        <div className="flex items-start justify-between gap-6 mb-6">
+          <div className="w-full">
+            <h1
+              className="text-[36px] sm:text-[44px] lg:text-[48px] font-normal text-[#000000] tracking-tight max-w-full md:max-w-[50%] break-words"
+              style={{ lineHeight: "1.05" }}
+            >
+              {mainTitle}
+            </h1>
+            <p className="text-[17px] sm:text-[20px] text-[#000000]/80 font-light mt-1.5">
+              {subtitleLine}
+            </p>
           </div>
 
-          {/* Photo Gallery + Booking Panel Grid */}
-          {tour.images && tour.images.length > 0 && (
-            <div className="mb-0">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
-                {/* Image Gallery (left) - Airbnb-style grid */}
+          <div className="flex items-center gap-3 shrink-0 pt-2">
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: tour.name,
+                    url: window.location.href,
+                  });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert("Link copied to clipboard!");
+                }
+              }}
+              className="p-2 hover:bg-[rgba(181,185,177,0.15)] rounded-full transition cursor-pointer"
+              title="Share"
+              aria-label="Share"
+            >
+              <ShareNetwork size={22} className="text-[#1A1A1A]" />
+            </button>
+            <button
+              onClick={handleWishlistToggle}
+              className="p-2 hover:bg-[rgba(181,185,177,0.15)] rounded-full transition cursor-pointer"
+              title="Save to Wishlist"
+              aria-label="Save to Wishlist"
+            >
+              <Heart
+                size={22}
+                weight={isInWishlist ? "fill" : "regular"}
+                className={isInWishlist ? "text-[#E63946]" : "text-[#1A1A1A]"}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* 2, 3, 4. Hero Section + Tour Intro + Your Adventure at a Glance with Sticky Right Price/Booking Panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-6 lg:gap-8 items-start mb-16">
+          {/* Left Column: Hero Image + Tour Intro + Your Adventure at a Glance */}
+          <div className="space-y-10 w-full">
+            {/* Left Hero Image */}
+            <div
+              className="relative w-full h-[320px] sm:h-[380px] md:h-[421px] rounded-[12px] overflow-hidden cursor-pointer group shadow-2xs"
+              onClick={() => {
+                setActiveImageIndex(0);
+                setShowGalleryModal(true);
+              }}
+            >
+              <Image
+                src={galleryImages[0]}
+                alt={tour.name}
+                fill
+                priority
+                className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
+              />
+            </div>
+
+            {/* 3. Tour Intro Section (100% Figma MCP Match #5091:8426) */}
+            {(() => {
+              const fullDesc =
+                tour.description ||
+                tour.summary ||
+                "Experience authentic adventures, scenic routes, and unforgettable local culture with comfort and clear schedules.";
+              const sentences = fullDesc.match(
+                /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g,
+              ) || [fullDesc];
+              let col1 = fullDesc;
+              let col2 = "";
+
+              if (sentences.length > 1) {
+                const totalLen = fullDesc.length;
+                let accumulated = 0;
+                let splitIdx = 1;
+                let minDiff = Infinity;
+
+                for (let i = 0; i < sentences.length; i++) {
+                  accumulated += sentences[i].length;
+                  const diff = Math.abs(accumulated - totalLen / 2);
+                  if (diff < minDiff) {
+                    minDiff = diff;
+                    splitIdx = i + 1;
+                  }
+                }
+                col1 = sentences.slice(0, splitIdx).join("").trim();
+                col2 = sentences.slice(splitIdx).join("").trim();
+              }
+
+              return (
                 <div>
-                  <div className="grid grid-cols-3 min-h-148 grid-rows-2 gap-[14px]" style={{ height: '640px' }}>
-                    {/* Large image - description image or first tour image */}
-                    <div className="col-span-1 row-span-2 relative rounded-[16px] overflow-hidden">
-                      <Image
-                        src={tour.descriptionImage || tour.images[0]?.url || "/placeholder-image.jpg"}
-                        alt={`${tour.name} description`}
-                        fill
-                        className="object-cover"
-                      />
+                  <h2 className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] mb-5 leading-snug">
+                    A fast, fun, Action-filled{" "}
+                    <span className="font-gochi text-[#3B5D1B] text-[32px] sm:text-[36px]">
+                      Intro to{" "}
+                      {tour.country?.name ||
+                        tour.location?.startCity ||
+                        "the Adventure"}
+                    </span>
+                  </h2>
+
+                  {/* Description Paragraphs in 2 Columns */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-[16px] font-light text-[#1A1A1A] leading-[28px]">
+                    <p className="whitespace-pre-line">{col1}</p>
+                    {col2 ? (
+                      <p className="whitespace-pre-line">{col2}</p>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 4. "Your Adventure at a Glance" Box (100% Figma MCP Match #5091:9006) */}
+            <div
+              className="w-full relative rounded-[12px] p-6 sm:px-8 sm:py-7 overflow-hidden shadow-xs"
+              style={{
+                backgroundColor: "rgba(181, 185, 177, 0.2)",
+                minHeight: "318px",
+              }}
+            >
+              {/* Top-Right Decorative Watermark in Pure White (#5091:9045) */}
+              <div className="absolute -top-24 -right-14 w-[300px] pointer-events-none select-none">
+                <Image
+                  src="/nba_logo1.svg"
+                  alt="Watermark"
+                  width={209}
+                  height={188}
+                  className="w-full h-full object-contain brightness-0 invert"
+                />
+              </div>
+
+              {/* Title (#5091:9008 - Gochi Hand 32px) */}
+              <h3 className="font-gochi text-[30px] sm:text-[32px] text-[#3B5D1B] font-normal mb-7 relative z-10 leading-[0.9em]">
+                Your Adventure at a Glance
+              </h3>
+
+              {/* 6 Key Attributes Grid (2 Columns x 3 Rows - Exact Figma Match #5295:7540) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 relative z-10">
+                {/* 1. Tour Duration (#5295:7543) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa1.svg"
+                    alt="Tour Duration"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Tour Duration
                     </div>
-                    {/* Top-middle image */}
-                    <div className="relative rounded-[16px] overflow-hidden">
-                      <Image
-                        src={tour.images[0]?.url || "/placeholder-image.jpg"}
-                        alt={tour.images[0]?.caption || `${tour.name} photo 1`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    {/* Top-right image */}
-                    <div className="relative rounded-[16px] overflow-hidden">
-                      <Image
-                        src={tour.images[1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                        alt={tour.images[1]?.caption || `${tour.name} photo 2`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    {/* Bottom-middle image */}
-                    <div className="relative rounded-[16px] overflow-hidden">
-                      <Image
-                        src={tour.images[2]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                        alt={tour.images[2]?.caption || `${tour.name} photo 3`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    {/* Bottom-right image with +N overlay */}
-                    <div className="relative rounded-[16px] overflow-hidden cursor-pointer group">
-                      <Image
-                        src={tour.images[3]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                        alt={tour.images[3]?.caption || `${tour.name} photo 4`}
-                        fill
-                        className="object-cover"
-                      />
-                      {tour.images.length > 4 && (
-                        <div className="absolute inset-0 bg-[#3F3F42]/40 flex items-center justify-center group-hover:bg-[#3F3F42]/50 transition">
-                          <span className="text-white text-3xl font-semibold">+{tour.images.length - 4}</span>
-                        </div>
-                      )}
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      {tour.duration.days} Days
                     </div>
                   </div>
                 </div>
 
-                {/* Booking Panel (right) */}
-                <div className="flex flex-col gap-4 relative z-10">
-                  <aside
-                    ref={bookingPanelRef}
-                    className="bg-white rounded-[16px] border border-gray-200 px-6 py-6 flex flex-col gap-4 w-full shadow-[0px_2px_15px_-3px_rgba(0,0,0,0.07),0px_10px_20px_-2px_rgba(0,0,0,0.04)]"
-                  >
-                    {/* Top Meta Row */}
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-[#3F3F42] text-white text-[10px] font-bold px-3 py-1 rounded-full">
-                          Bestseller
-                        </span>
-                        {bestDiscount > 0 && (
-                          <span className="bg-[#3F3F42] text-white text-[10px] font-bold px-3 py-1 rounded-full">
-                            Sale {bestDiscount.toFixed(0)}%
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[14px] text-[#3F3F42] font-semibold">
-                        Trip Code: <span className="font-semibold">{tour.tourCode || "T-001"}</span>
-                      </p>
+                {/* 2. Trip Type (#5295:7551) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa2.svg"
+                    alt="Trip Type"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Trip Type
                     </div>
-
-                    {/* Trip Summary */}
-                    <div className="pt-1 pb-2">
-                      <h3 className="text-[40px] leading-[1.05] font-medium text-[#3F3F42] tracking-[-0.02em]">
-                        {tour.duration.days} Days
-                      </h3>
-                      <p className="text-[22px] leading-[1.2] font-medium text-[#3F3F42] mt-1">
-                        {tour.location.startCity} to {tour.location.endCity}
-                      </p>
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      {tour.travelStyle || "Small Group"}
                     </div>
+                  </div>
+                </div>
 
-                    {/* Pricing Section (Moved to top for alignment) */}
-                    <div className="relative pb-2">
-                      <p className="text-[14px] text-[#3F3F42] font-medium mb-1">From</p>
-                      <div className="flex items-baseline justify-between mb-1">
-                        <div className="flex items-start">
-                          <span className="text-[20px] font-bold text-[#3F3F42] mr-1">$</span>
-                          <span className="text-[44px] font-bold text-[#3F3F42] leading-none">{discountedPrice.toFixed(0)}</span>
-                          <span className="text-[14px] font-bold text-[#3F3F42] ml-1">USD</span>
-                        </div>
-                        {bestDiscount > 0 && (
-                          <div className="flex items-center gap-1.5 opacity-90">
-                            <span className="text-[14px] text-gray-500">Was</span>
-                            <span className="text-[16px] text-gray-500 line-through">${basePrice.toFixed(0)}</span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-[13px] text-[#3F3F42] mt-1.5 opacity-90">
-                        Valid on <span className="font-semibold">{bestDealDate ? new Date(bestDealDate.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
-                      </p>
+                {/* 3. Group Size (#5295:7560) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa3.svg"
+                    alt="Group Size"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Group Size
                     </div>
-
-                    {/* Booking Amount */}
-                    <div className="mt-1 flex items-center justify-between rounded-[12px] bg-[#f2f2f2] px-4 py-4">
-                      <div className="flex items-center gap-3.5">
-                        <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-xl bg-[#3F3F42] text-white">
-                          <Star size={20} weight="fill" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[17px] font-medium text-[#3F3F42] leading-tight">
-                            Booking Amount
-                          </span>
-                          <span className="mt-1 text-[14px] text-gray-500 leading-tight font-normal">
-                            Book your spot Now
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-[18px] font-semibold text-[#3F3F42] tracking-tight">
-                        ${computedBookingAmount.toFixed(2)}
-                      </div>
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      Max {tour.maxGroupSize} People
                     </div>
+                  </div>
+                </div>
 
-                    {/* Reviews Stars */}
-                    <div className="mt-4 mb-2 flex items-center gap-3">
-                      <div className="flex items-center gap-1.5">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={22}
-                            weight={star <= Math.round(tour.ratingsAverage || 5) ? "fill" : "regular"}
-                            className="text-[#3F3F42]"
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[18px] font-medium text-[#64748B]">
-                        ({tour.ratingsQuantity || 0} reviews)
+                {/* 4. Service Level (#5295:7585) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa4.svg"
+                    alt="Service Level"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Service Level
+                    </div>
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      {tour.serviceLevel || "Standard"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. Physical Rating (#5295:7577) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa5.svg"
+                    alt="Physical Rating"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Physical Rating
+                    </div>
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      {tour.physicalRating?.level || 1}/5
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. Minimum Age (#5295:7592) */}
+                <div className="flex items-center gap-3.5">
+                  <Image
+                    src="/yaa6.svg"
+                    alt="Minimum Age"
+                    width={51}
+                    height={51}
+                    className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
+                  />
+                  <div>
+                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                      Minimum Age
+                    </div>
+                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                      {tour.ageRequirement?.min || 12}+ Years
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Booking Summary Card Column (Sticky till end of Your Adventure at a Glance) */}
+          <aside
+            ref={bookingPanelRef}
+            className="w-full flex flex-col lg:sticky lg:top-24"
+          >
+            {/* Main Price / Booking Card (#5091:8445) */}
+            <div
+              className="rounded-[13px] p-4 sm:p-5 flex flex-col gap-3 w-full shadow-xs"
+              style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
+            >
+              {/* Top Badges Row (#5091:8452 - #5091:8455) */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-[#F73D0A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-[27px]">
+                    Bestseller
+                  </span>
+                  <span className="bg-[#1A1A1A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-[27px]">
+                    Sale {bestDiscount}%
+                  </span>
+                </div>
+                <span className="text-[10px] font-medium text-[#1A1A1A]/70">
+                  Trip Code: {tour.tourCode || "UCOOS"}
+                </span>
+              </div>
+
+              {/* Duration in Gochi Hand + Route (#5091:8456) */}
+              <div className="pt-0.5">
+                <div className="font-gochi text-[32px] text-[#3B5D1B] leading-none mb-1">
+                  {tour.duration.days} Days
+                </div>
+                <div className="text-[12px] font-normal text-[#1A1A1A]">
+                  {tour.location.startCity} to {tour.location.endCity}
+                </div>
+              </div>
+
+              {/* Price section (#5091:8457) */}
+              <div className="pt-0.5">
+                <div className="flex items-end justify-between gap-2">
+                  {/* Left: From + $ 599 USD + Valid on Date */}
+                  <div>
+                    <div className="text-[10px] font-normal text-[#1A1A1A]/70 mb-0.5">
+                      From
+                    </div>
+                    <div className="flex items-start gap-1">
+                      <span className="text-[14px] font-normal text-[#1A1A1A] leading-none pt-0.5">
+                        $
+                      </span>
+                      <span className="text-[26px] sm:text-[28px] font-semibold text-[#1A1A1A] leading-none">
+                        {Math.round(discountedPrice)}
+                      </span>
+                      <span className="text-[11px] font-normal text-[#1A1A1A] leading-none pt-0.5 ml-0.5">
+                        USD
                       </span>
                     </div>
+                    <div className="text-[10px] font-light text-[#1A1A1A]/70 mt-1">
+                      Valid on{" "}
+                      <strong className="font-semibold text-[#1A1A1A]">
+                        {bestDealDate
+                          ? new Date(bestDealDate.startDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              },
+                            )
+                          : "Mar 4, 2026"}
+                      </strong>
+                    </div>
+                  </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-3 pt-2">
-                      <div className="flex gap-2.5 group">
-                        <button
-                          onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                          className="flex-1 bg-[#3F3F42] text-white py-[14px] px-6 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3F3F42] transition text-[15px]"
-                        >
-                          <CalendarCheck size={18} />
-                          Book Now
-                        </button>
-                        <button
-                          className="w-[50px] h-[50px] bg-[#3F3F42] text-white rounded-full flex items-center justify-center hover:bg-[#3F3F42] transition shrink-0"
-                          onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                        >
-                          <ArrowUpRight size={20} className="transition-transform duration-300 group-hover:rotate-45" />
-                        </button>
-                      </div>
-                      <div className="flex gap-2.5">
-                        <button
-                          onClick={() => {
-                            const dateStr = bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : '';
-                            router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
-                          }}
-                          className="flex-1 bg-[#3F3F42] text-white py-[12px] px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3F3F42] transition text-[14px]"
-                        >
-                          <Clock size={18} />
-                          Hold Space
-                        </button>
-                        <button
-                          onClick={handleWishlistToggle}
-                          className="flex-1 bg-white text-[#3F3F42] border border-gray-300 py-[12px] px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-gray-50 transition text-[14px]"
-                        >
-                          <Heart
-                            size={18}
-                            weight={isInWishlist ? "fill" : "regular"}
-                            className={isInWishlist ? "text-[#E63946]" : "text-[#3F3F42]"}
-                          />
-                          Save to Wishlist
-                        </button>
-                      </div>
+                  {/* Right: was $1499 (aligned to bottom, no strikethrough) */}
+                  <div className="text-right pb-0.5">
+                    <div className="text-[13px] font-normal text-[#1A1A1A]/80">
+                      <span className="text-[10px] font-light text-[#1A1A1A]/70 mr-1">
+                        was
+                      </span>
+                      <span className="text-[15px] font-normal">
+                        ${basePrice}
+                      </span>
                     </div>
-                  </aside>
-                  {topDiscountedDates.length > 0 && (
-                    <div className="flex flex-col gap-2.5 mt-2">
-                      {topDiscountedDates.map((dateObj, idx) => {
-                        const discPct = getDiscountPercentage(dateObj.discount);
-                        return (
-                          <div
-                            key={idx}
-                            className="bg-[#E5E7EB] py-3 px-5 rounded-lg flex items-center gap-3 text-[13px] font-medium text-[#3F3F42] cursor-pointer hover:bg-gray-300 transition"
-                            onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${new Date(dateObj.startDate).toISOString().split('T')[0]}`)}
-                          >
-                            {discPct > 0 && (
-                              <span className="bg-[#3F3F42] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                                Save {discPct}%
-                              </span>
-                            )}
-                            <span className="opacity-90">
-                              Departure {new Date(dateObj.startDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
+
+              {/* Adventure Deposit Card (#5091:8465) */}
+              <div className="bg-white rounded-[8px] p-2.5 sm:px-3 sm:py-2 flex items-center justify-between my-0.5">
+                <div>
+                  <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#1A1A1A]">
+                    <Image
+                      src="/aadd.svg"
+                      alt="Adventure Deposit"
+                      width={13}
+                      height={13}
+                      className="w-[13px] h-[13px] object-contain shrink-0"
+                    />
+                    <span>Adventure Deposit</span>
+                  </div>
+                  <div className="text-[9px] font-light text-[#1A1A1A]/70 mt-0.5 pl-[19px]">
+                    Book your spot Now
+                  </div>
+                </div>
+                <div className="text-[12px] font-semibold text-[#1A1A1A]">
+                  ${depositAmount.toFixed(2)}
+                </div>
+              </div>
+
+              {/* Star Rating Row (#5091:8477) */}
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <div className="flex items-center gap-0.5 text-[#3B5D1B]">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      size={14}
+                      weight="fill"
+                      className="text-[#3B5D1B]"
+                    />
+                  ))}
+                </div>
+                <span className="text-[13px] text-[#1A1A1A] font-normal ml-1">
+                  ({tour.ratingsQuantity || 56} reviews)
+                </span>
+              </div>
+
+              {/* CTA Button (#5091:8486) */}
+              <button
+                onClick={() => {
+                  const datesSection = document.getElementById(
+                    "check-availability-section",
+                  );
+                  if (datesSection) {
+                    datesSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="w-full bg-[#1A1A1A] hover:bg-black text-white text-[17px] font-normal py-2.5 px-4 rounded-[34px] text-center transition cursor-pointer mt-1 shadow-xs"
+              >
+                Check Dates And Prices
+              </button>
             </div>
-          )}
 
+            {/* Deal & Offers Below Widget (#5091:8489) */}
+            <div className="mt-3 space-y-2">
+              <div className="flex justify-start">
+                <span className="bg-[#F73D0A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-full">
+                  Deal &amp; Offers
+                </span>
+              </div>
 
+              {/* Row 1: Save X% Departure Date */}
+              <div
+                className="rounded-[10px] py-2 px-3 flex items-center justify-center gap-2 text-center shadow-2xs"
+                style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
+              >
+                <span className="bg-[#1A1A1A] text-white px-2.5 py-0.5 rounded-full text-[10px] font-medium shrink-0">
+                  Save {dealDiscountPercent}%
+                </span>
+                <span className="text-[11px] font-normal text-[#1A1A1A]">
+                  Departure {dealDepartureDateStr}
+                </span>
+              </div>
+
+              {/* Row 2: Expires in X days | Promo Code */}
+              <div
+                className="rounded-[10px] py-2 px-3 text-[11px] font-normal text-[#1A1A1A] text-center flex items-center justify-center gap-1.5 shadow-2xs"
+                style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
+              >
+                <span>Expires in 18 days</span>
+                <span className="text-[#1A1A1A]/40">|</span>
+                <span>
+                  Promo Code{" "}
+                  <strong className="font-semibold text-[#1A1A1A]">
+                    {promoCodeStr}
+                  </strong>
+                </span>
+              </div>
+            </div>
+          </aside>
         </div>
-      </div>
 
-      {/* Tour Overview Section */}
-      <div className="bg-white">
-        <div className="w-full px-4 sm:px-6 lg:px-10 pt-4 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-            {/* Top: Overview content */}
-            <div className="mb-8">
-              {/* Tour Overview heading + description */}
-              <h2 className="text-[32px] md:text-[40px] font-medium text-[#3F3F42] mb-6">Tour Overview</h2>
-              <p className="text-[#3F3F42] max-w-7xl leading-relaxed mb-1 text-lg">
-                {tour.description}
-              </p>
+        {/* 5. "Moments that'll make you call Really?" (100% Figma MCP Match #5091:9236) */}
+        <div
+          ref={momentsSectionRef}
+          className="relative h-[250vh] -mx-4 sm:-mx-6 lg:-mx-10 mb-16"
+        >
+          <div className="sticky top-0 h-screen max-h-[850px] flex flex-col justify-center overflow-hidden py-8">
+            {/* Centered Heading (48px + 56px Gochi Hand) */}
+            <h2 className="text-center text-[38px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[54px] mb-10 shrink-0">
+              Moments that’ll make you call <br />
+              <span className="font-gochi text-[#3B5D1B] text-[46px] sm:text-[56px] leading-[54px]">
+                Really?
+              </span>
+            </h2>
 
-              {/* Quick Info Stats Bar */}
-              <div className="flex flex-wrap items-center max-w-7xl mt-12 py-8">
-                {/* Overall Rating */}
-                <div className="flex-1 min-w-[140px] flex flex-col items-start pr-8 border-r border-gray-200">
-                  <span className="text-base font-bold text-[#3F3F42] mb-3">Overall Rating</span>
-                  <div className="flex flex-col items-start gap-1">
-                    {[5, 4, 3, 2, 1].map((star) => (
-                      <div key={star} className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-400 w-3 leading-none">{star}</span>
-                        <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gray-400 rounded-full"
-                            style={{ width: star <= Math.round(tour.ratingsAverage) ? '100%' : '0%' }}
-                          />
+            {/* Horizontal Pinned Sliding Track */}
+            <div className="relative w-full overflow-visible py-8">
+              <div
+                className="flex items-center gap-10 sm:gap-12 will-change-transform"
+                style={{
+                  transform: `translateX(${windowWidth / 2 - 142 - momentsProgress * (momentsData.length - 1) * 333}px)`,
+                }}
+              >
+                {momentsData.map((m, idx) => {
+                  const currentCenterFloat =
+                    momentsProgress * (momentsData.length - 1);
+                  const distance = Math.abs(idx - currentCenterFloat);
+                  // Only the active middle card scales bigger; all other surrounding cards stay at uniform base scale
+                  const factor =
+                    distance < 0.5
+                      ? Math.cos((distance / 0.5) * (Math.PI / 2))
+                      : 0;
+                  const scale = 0.95 + 0.18 * factor;
+                  const isFocus = distance < 0.5;
+                  const zIndex = isFocus ? 20 : 1;
+
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        if (momentsSectionRef.current) {
+                          const targetScroll =
+                            momentsSectionRef.current.offsetTop +
+                            (idx / (momentsData.length - 1)) *
+                              (momentsSectionRef.current.offsetHeight -
+                                window.innerHeight);
+                          window.scrollTo({
+                            top: targetScroll,
+                            behavior: "smooth",
+                          });
+                        }
+                      }}
+                      className="w-[270px] sm:w-[285px] shrink-0 flex flex-col group cursor-pointer origin-center select-none"
+                      style={{
+                        transform: `scale(${scale})`,
+                        zIndex,
+                      }}
+                    >
+                      {/* Top Image Box (228px) */}
+                      <div className="relative w-full h-[200px] sm:h-[228px] rounded-t-[8px] overflow-hidden shrink-0">
+                        <Image
+                          src={m.image}
+                          alt={m.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+
+                      {/* Bottom Content Box (#5091:9243) */}
+                      <div
+                        className="bg-white rounded-b-[8px] p-4 flex flex-col justify-between min-h-[118px] transition-shadow duration-300"
+                        style={{
+                          boxShadow: isFocus
+                            ? "0px 2px 20px 2px rgba(0, 0, 0, 0.08)"
+                            : "0px 1px 16px 1px rgba(0, 0, 0, 0.04)",
+                        }}
+                      >
+                        <div>
+                          {/* Day Pill Badge */}
+                          <span className="inline-block px-2.5 py-0.5 bg-[#1A1A1A] text-white text-[10px] font-normal rounded-full mb-1.5 self-start">
+                            Included in Day {idx + 1}
+                          </span>
+
+                          {/* Highlight Title */}
+                          <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] tracking-[-0.0156em] leading-tight mb-1 truncate">
+                            {m.title}
+                          </h4>
+
+                          {/* Description */}
+                          <p className="text-[12px] font-light text-[#1A1A1A]/70 tracking-[-0.0177em] leading-relaxed line-clamp-2">
+                            {m.desc}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Duration */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
-                  <div className="mb-5">
-                    <Image src="/1.svg" alt="Duration" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">{tour.duration.days} days</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Duration</span>
-                </div>
-
-                {/* Group Size */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
-                  <div className="mb-5">
-                    <Image src="/2.svg" alt="Group Size" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">Max {tour.maxGroupSize} people</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Group Size</span>
-                </div>
-
-                {/* Physical Rating */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
-                  <div className="mb-5">
-                    <Image src="/3.svg" alt="Physical Rating" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">
-                    {tour.physicalRating.level}/5
-                    {(() => {
-                      const rating = physicalRatings.find(r => r.level === tour.physicalRating.level);
-                      return rating ? ` · ${rating.name}` : "";
-                    })()}
-                  </span>
-                  <span className="text-xs text-gray-400 tracking-wide">Physical Rating</span>
-                </div>
-
-                {/* Travel Style */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
-                  <div className="mb-5">
-                    <Image src="/4.svg" alt="Travel Style" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">{tour.travelStyle}</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Travel Style</span>
-                </div>
-
-                {/* Service Level */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 border-r border-gray-200 text-center">
-                  <div className="mb-5">
-                    <Image src="/5.svg" alt="Service Level" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">{tour.serviceLevel}</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Service Level</span>
-                </div>
-
-                {/* Age Requirements */}
-                <div className="flex-1 min-w-[120px] flex flex-col items-center px-4 text-center">
-                  <div className="mb-5">
-                    <Image src="/6.png" alt="Age Requirements" width={36} height={36} />
-                  </div>
-                  <span className="text-base font-bold text-[#3F3F42] mb-1">{tour.ageRequirement.min} years</span>
-                  <span className="text-xs text-gray-400 tracking-wide">Age Requirements</span>
-                </div>
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Tour Highlights */}
-              {tour.highlights && tour.highlights.length > 0 && (
-                <div className="mt-12 p-8 bg-gray-50/50 border border-gray-100 rounded-[24px]">
-                  <h3 className="text-[22px] font-bold text-[#3F3F42] mb-6 flex items-center gap-2.5">
-                    <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                    Tour Highlights
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    {tour.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#3F3F42] shrink-0 mt-2.5"></span>
-                        <p className="text-[15px] font-medium text-[#3F3F42] leading-relaxed">
-                          {highlight}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-
-            {/* Empty Right Column spacer */}
-            <div className="hidden lg:block w-[400px]"></div>
           </div>
+        </div>
 
-          {/* Bottom layout: Highlight cards + 100+ Trees */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 h-[400px]">
-            {/* Left: Itinerary Highlight Cards */}
-            <div className="flex flex-col gap-6 h-full">
-              {[0, 1].map((idx) => (
-                <div key={idx} className="flex-1 flex items-center gap-6 bg-[#F6F6F6] rounded-[24px] p-6 lg:px-8 py-5 transition">
-                  {/* Thumbnail */}
-                  <div className="relative w-[130px] h-[130px] sm:w-[145px] sm:h-[145px] rounded-[16px] overflow-hidden shrink-0">
-                    <Image
-                      src={tour.images[idx]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                      alt="Highlight"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 py-1">
-                    <h3 className="text-[28px] sm:text-[32px] font-semibold text-[#3F3F42] leading-tight mb-1">Heading</h3>
-                    <p className="text-[13px] text-[#3F3F42] leading-snug mb-1 max-w-lg">
-                      Help us spread love around the world for days. together with Planterra. we&apos;ll plant one tree in our name for every travel day.
-                    </p>
-                    <div className="text-[13px] font-medium text-[#3F3F42] mb-2">
-                      Trees Planted this trip : 08
-                    </div>
-                    <div>
-                      <button
-                        onClick={() => setActiveTab("itinerary")}
-                        className="bg-[#3F3F42] text-white text-[13px] font-medium px-5 py-2 rounded-full hover:bg-[#3F3F42] transition"
-                      >
-                        Learn More
-                      </button>
-                    </div>
-                  </div>
+        {/* 6. "Why this Trip" Full Width Edge-to-Edge Section */}
+        <div
+          className="-mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-12 sm:py-16 mb-20"
+          style={{ backgroundColor: "rgba(244, 236, 217, 0.2)" }}
+        >
+          <div className="max-w-7xl mx-auto">
+            <h2
+              className="text-[40px] sm:text-[48px] font-normal text-[#1A1A1A] mb-8"
+              style={{ lineHeight: "1.1" }}
+            >
+              Why <span className="font-gochi text-[#3B5D1B]">this Trip</span>
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Card 1 */}
+              <div
+                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
+                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
+              >
+                <div className="h-[85px] mb-4 flex items-center justify-start">
+                  <Image
+                    src="/wwww1.svg"
+                    alt="Small Groups"
+                    width={78}
+                    height={85}
+                    className="h-[85px] w-auto object-contain object-left"
+                  />
                 </div>
-              ))}
-            </div>
-
-            {/* Right: 100+ Trees sustainability card */}
-            <div className="relative rounded-[24px] overflow-hidden w-full h-[400px] hidden lg:block">
-              <Image
-                src={tour.images[tour.images.length - 1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
-                alt="Sustainability"
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-              <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
-                <div className="mt-auto flex flex-col items-center">
-                  <h3 className="text-[36px] sm:text-[42px] font-semibold text-white mb-4">100+ Trees</h3>
-                  <p className="text-white/95 text-[14px] leading-relaxed mb-8 max-w-[320px]">
-                    Help us spread Love around the world with trees for the Text Help us spread Love around the world with trees for the TextHelp us spread Love around the world with trees for the TextHelp us spread Love around....
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                    Small Groups, Big Adventure
+                  </h4>
+                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                    Small groups means deeper connections. Meet travellers from
+                    around the world and make every adventure feel like a shared
+                    passport stamp.
                   </p>
                 </div>
-                <div className="flex gap-2.5 w-full mt-2 group">
-                  <button
-                    onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                    className="flex-1 bg-white text-[#3F3F42] py-3.5 px-6 rounded-full flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 transition text-[15px]"
-                  >
-                    <CalendarCheck size={18} weight="bold" />
-                    Book Now
-                  </button>
-                  <button
-                    className="w-[52px] h-[52px] bg-white text-[#3F3F42] rounded-full flex items-center justify-center hover:bg-gray-100 transition shrink-0"
-                    onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}`)}
-                  >
-                    <ArrowUpRight size={20} weight="bold" className="transition-transform duration-300 group-hover:rotate-45" />
-                  </button>
+              </div>
+
+              {/* Card 2 */}
+              <div
+                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
+                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
+              >
+                <div className="h-[85px] mb-4 flex items-center justify-start">
+                  <Image
+                    src="/wwww2.svg"
+                    alt="Solo or Sociable"
+                    width={58}
+                    height={85}
+                    className="h-[85px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                    Solo or Sociable, your Choice
+                  </h4>
+                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                    Choose to roam along with group or explore at your own pace,
+                    your choice. No sidelines, nothing but adventures here.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div
+                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
+                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
+              >
+                <div className="h-[85px] mb-4 flex items-center justify-start">
+                  <Image
+                    src="/wwww3.svg"
+                    alt="Adventure Captains"
+                    width={65}
+                    height={85}
+                    className="h-[85px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                    They are called Adventure Captains
+                  </h4>
+                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                    Choose to roam along with group or explore at your own pace,
+                    your choice. No sidelines, nothing but adventures here.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Tabs Navigation */}
-      <div className="bg-white pt-2 pb-4">
-        <div className="w-full px-4 sm:px-6 lg:px-10">
-          <nav className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`px-6 py-2 rounded-full font-medium text-[15px] transition-all ${activeTab === "overview"
-                ? "bg-[#3F3F42] text-white border border-[#1C1A1A]"
-                : "bg-white text-[#3F3F42] border border-gray-200 hover:border-gray-300"
-                }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setShowFullItineraryModal(true)}
-              className="px-6 py-2 rounded-full font-medium text-[15px] transition-all bg-white text-[#3F3F42] border border-gray-200 hover:border-gray-300"
-            >
-              Full Itinerary
-            </button>
-            <button
-              onClick={() => setActiveTab("details")}
-              className={`px-6 py-2 rounded-full font-medium text-[15px] transition-all ${activeTab === "details"
-                ? "bg-[#3F3F42] text-white border border-[#1C1A1A]"
-                : "bg-white text-[#3F3F42] border border-gray-200 hover:border-gray-300"
-                }`}
-            >
-              Trip Details
-            </button>
-          </nav>
-        </div>
-      </div>
+        {/* 7 & 8. "What's Included" + "Your Adventure Story" (Unified 100% Figma Match #5207:8129, #5207:8195, #5207:7723) */}
+        <div className="mb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
+            {/* Left Column (852px / 1fr): What's Included + Your Adventure Story */}
+            <div className="space-y-16 w-full min-w-0">
+              {/* 7. "What's Included" */}
+              <div>
+                <h2
+                  className="text-[40px] sm:text-[48px] font-normal text-[#1A1A1A] mb-6"
+                  style={{ lineHeight: "36px" }}
+                >
+                  What’s Included
+                </h2>
 
-      {/* Tab Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-          {/* Main Content */}
-          <div>
-            {(activeTab === "overview") && (
-              <div className="bg-white">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-[32px] md:text-[40px] font-medium text-[#3F3F42]">
-                    Itinerary
+                {/* What's Included Card (Main 853px) */}
+                <div className="border border-[#D9D9E4] rounded-[13px] overflow-hidden bg-white shadow-xs flex flex-col justify-between">
+                  {/* Categories Tab Bar */}
+                  <div
+                    className="px-6 sm:px-10 h-[135px] flex items-center justify-between overflow-x-auto gap-4 border-b border-[#D9D9E4]"
+                    style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
+                  >
+                    {[
+                      { id: "nba", label: "NBA", icon: "/wi1.svg" },
+                      { id: "leader", label: "TOUR LEADER", icon: "/wi2.svg" },
+                      { id: "transport", label: "TRANSPORT", icon: "/wi3.svg" },
+                      {
+                        id: "accommodation",
+                        label: "ACCOMMODATION",
+                        icon: "/sssss1.svg",
+                      },
+                      { id: "meals", label: "MEALS", icon: "/wi5.svg" },
+                    ].map((tab) => {
+                      const isActive = includedTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setIncludedTab(tab.id as any)}
+                          className="relative flex flex-col items-center justify-center gap-2.5 h-full px-4 min-w-[90px] transition-colors cursor-pointer group"
+                        >
+                          <div className="w-[47px] h-[47px] flex items-center justify-center transition-transform group-hover:scale-105">
+                            <Image
+                              src={tab.icon}
+                              alt={tab.label}
+                              width={46}
+                              height={46}
+                              className={`w-[46px] h-[46px] object-contain transition-all ${
+                                isActive ? "opacity-100" : "opacity-75"
+                              }`}
+                            />
+                          </div>
+                          <span
+                            className={`text-[15px] sm:text-[16px] tracking-wider uppercase transition-colors ${
+                              isActive
+                                ? "text-[#6C114E] font-medium"
+                                : "text-[#1A1A1A] font-normal hover:text-[#6C114E]"
+                            }`}
+                          >
+                            {tab.label}
+                          </span>
+                          {isActive && (
+                            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#6C114E] rounded-t-sm" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Tab Body Content */}
+                  <div className="p-8 sm:p-10 flex-1 bg-white">
+                    {includedTab === "nba" && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                        {/* Left Sub-column: Included Activities */}
+                        <div>
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                              <svg
+                                className="w-3.5 h-3.5 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </div>
+                            <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                              Included Activities
+                            </h4>
+                          </div>
+                          <ul className="space-y-3 pl-9">
+                            {tour.itinerary &&
+                            tour.itinerary.length > 0 &&
+                            tour.itinerary.some(
+                              (d) => d.activities && d.activities.length > 0,
+                            ) ? (
+                              Array.from(
+                                new Set(
+                                  tour.itinerary
+                                    .flatMap(
+                                      (d) =>
+                                        d.activities?.map(
+                                          (a) =>
+                                            a.name || a.title || a.description,
+                                        ) || [],
+                                    )
+                                    .filter(Boolean),
+                                ),
+                              )
+                                .slice(0, 5)
+                                .map((act, i) => (
+                                  <li
+                                    key={i}
+                                    className="text-[16px] text-[#191919] font-light leading-[18.6px]"
+                                  >
+                                    {act}
+                                  </li>
+                                ))
+                            ) : (
+                              <>
+                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  Senso-Ji Temple
+                                </li>
+                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  Ropeway Cable Cart
+                                </li>
+                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  Tea Ceremony
+                                </li>
+                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  Osaka Castle &amp; Dotonbori
+                                </li>
+                              </>
+                            )}
+                          </ul>
+                        </div>
+
+                        {/* Right Sub-column: Premium Inclusions & Add-on Activities */}
+                        <div className="space-y-7">
+                          {/* Premium Inclusions */}
+                          <div>
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                                <svg
+                                  className="w-3.5 h-3.5 text-white fill-white"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                                </svg>
+                              </div>
+                              <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                                Premium Inclusions
+                              </h4>
+                            </div>
+                            <ul className="space-y-2 pl-9">
+                              <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                {tour.highlights && tour.highlights.length > 0
+                                  ? tour.highlights[0]
+                                  : "Shinjuku, Omoide Yokocho and Golden Gai"}
+                              </li>
+                            </ul>
+                          </div>
+
+                          {/* Add-on Activities */}
+                          <div>
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                                <div className="w-[12px] h-[12px] rounded-full border-[2.5px] border-white" />
+                              </div>
+                              <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                                Add-on Activities
+                              </h4>
+                            </div>
+                            <ul className="space-y-2 pl-9">
+                              {tour.itinerary &&
+                              tour.itinerary.some(
+                                (d) =>
+                                  d.optionalActivities &&
+                                  d.optionalActivities.length > 0,
+                              ) ? (
+                                Array.from(
+                                  new Set(
+                                    tour.itinerary
+                                      .flatMap(
+                                        (d) =>
+                                          d.optionalActivities?.map(
+                                            (a) => a.name || a.title,
+                                          ) || [],
+                                      )
+                                      .filter(Boolean),
+                                  ),
+                                )
+                                  .slice(0, 3)
+                                  .map((act, i) => (
+                                    <li
+                                      key={i}
+                                      className="text-[16px] text-[#191919] font-light leading-[18.6px]"
+                                    >
+                                      {act}
+                                    </li>
+                                  ))
+                              ) : (
+                                <>
+                                  <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                    Kinkaku-Ji Visit (Rokuon-Ji)
+                                  </li>
+                                  <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                    Hiroshima Peace Museum
+                                  </li>
+                                </>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {includedTab === "leader" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                            <svg
+                              className="w-3.5 h-3.5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
+                            </svg>
+                          </div>
+                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            Tour Leader &amp; Expert Guides
+                          </h4>
+                        </div>
+                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                          {tour.staffExperts ||
+                            "English-speaking local CEO (Chief Experience Officer) & experienced local guides throughout the trip."}
+                        </p>
+                      </div>
+                    )}
+
+                    {includedTab === "transport" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                            <svg
+                              className="w-3.5 h-3.5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M8 7h8m-8 5h8m-4 5v3m-5-3h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v9a2 2 0 002 2z"
+                              />
+                            </svg>
+                          </div>
+                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            Transportation Included
+                          </h4>
+                        </div>
+                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                          {tour.transportation ||
+                            "Private air-conditioned bus, scenic train routes, and local ferries."}
+                        </p>
+                      </div>
+                    )}
+
+                    {includedTab === "accommodation" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                            <svg
+                              className="w-3.5 h-3.5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                              />
+                            </svg>
+                          </div>
+                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            Accommodation Included
+                          </h4>
+                        </div>
+                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                          {tour.accommodation ||
+                            "Handpicked comfortable boutique hotels, authentic guest lodges, and shared twin rooms."}
+                        </p>
+                      </div>
+                    )}
+
+                    {includedTab === "meals" && (
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                            <svg
+                              className="w-3.5 h-3.5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              />
+                            </svg>
+                          </div>
+                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            Meals Included
+                          </h4>
+                        </div>
+                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                          {formatMeals(
+                            tour.meals,
+                            "Daily authentic breakfasts, welcome dinners, and curated local culinary tastings.",
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 8. "Your Adventure Story" (Itinerary - 100% Figma Match #5207:8195) */}
+              <div ref={itinerarySectionRef} id="itinerary-section">
+                {/* Header Row: Title Left + Full Itinerary Button Right (aligned to right edge of the 852px itinerary cards) */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <h2 className="text-[36px] sm:text-[48px] font-normal text-[#1A1A1A] leading-tight sm:leading-[36px]">
+                    Your{" "}
+                    <span className="font-gochi text-[#3B5D1B]">
+                      Adventure Story
+                    </span>
                   </h2>
-                  <button className="bg-[#3F3F42] text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2 hover:bg-[#3F3F42] transition">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <button
+                    onClick={() => setShowFullItineraryModal(true)}
+                    className="h-[26px] px-[25px] py-[2px] bg-[#1A1A1A] hover:bg-black text-[#FFFFFF] rounded-[44px] flex items-center justify-center gap-[7px] text-[16px] font-normal transition-colors cursor-pointer w-fit shrink-0"
+                  >
+                    <svg
+                      className="w-[19px] h-[19px] text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
                     </svg>
-                    Download Itinerary
+                    <span>Download Itinerary</span>
                   </button>
                 </div>
 
-                <div className={activeTab === "overview" ? "border border-gray-300 rounded-3xl p-6 shadow-sm bg-white" : "space-y-4"}>
-                  {tour.itinerary.map((day, index) => {
-                    const isOverview = activeTab === "overview";
-                    const isLast = index === tour.itinerary.length - 1;
+                {/* Itinerary Day Cards */}
+                <div className="space-y-[10px]">
+                  {tour.itinerary.map((day) => {
+                    const isExpanded = expandedItineraryDays.includes(day.day);
 
+                    if (!isExpanded) {
+                      // Collapsed Day Card (#5295:8228 / EL-4ea72675)
+                      return (
+                        <div
+                          key={day.day}
+                          ref={(el) => {
+                            if (el) dayRefs.current[day.day] = el;
+                          }}
+                          onClick={() => toggleItineraryDay(day.day)}
+                          className="w-full min-h-[50px] bg-[#F8F8F7] hover:bg-[#F0F0EE] rounded-full px-6 py-3 flex items-center justify-between cursor-pointer transition-colors select-none shadow-2xs"
+                        >
+                          <span className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] font-outfit truncate pr-4">
+                            {day.title ||
+                              `${tour.location?.startCity || "Day"} to ${tour.location?.endCity || "Next Destination"}`}
+                          </span>
+                          <div className="w-[73px] h-[26px] bg-[#1A1A1A] rounded-[44px] flex items-center justify-center shrink-0">
+                            <span className="text-[15px] font-normal text-white font-outfit leading-none">
+                              Day {day.day}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Expanded Day Card (#5295:8207 - 100% Figma MCP Match)
                     return (
                       <div
-                        key={index}
-                        ref={(el) => { if (el) dayRefs.current[day.day] = el; }}
-                        className={
-                          isOverview
-                            ? (!isLast ? "border-b border-gray-200 pb-8 mb-8" : "")
-                            : "border border-gray-300 rounded-3xl p-6 shadow-sm bg-white"
-                        }
+                        key={day.day}
+                        ref={(el) => {
+                          if (el) dayRefs.current[day.day] = el;
+                        }}
+                        className="w-full bg-[#F8F8F7] rounded-[12px] p-6 sm:p-7 shadow-2xs"
                       >
-                        {/* Expanded State */}
-                        <div className="flex items-center gap-4 mb-2">
-                          <span className="border border-gray-400 text-[#3F3F42] rounded-full px-4 py-1.5 text-xs font-semibold">Day {day.day}</span>
-                          <h3 className="font-bold text-xl text-[#3F3F42]">
-                            {day.title ? (
-                              day.title.split(",").filter(t => t.trim()).length > 1
-                                ? `${day.title.split(",").filter(t => t.trim())[0]} to ${day.title.split(",").filter(t => t.trim())[1]}`
-                                : day.title.split(",").filter(t => t.trim())[0]
-                            ) : "Itinerary"}
+                        {/* Top Row: Destination Title Left + Day Pill Right */}
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <h3
+                            onClick={() => toggleItineraryDay(day.day)}
+                            className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] leading-tight font-outfit cursor-pointer hover:opacity-85 transition-opacity"
+                          >
+                            {day.title ||
+                              `${tour.location?.startCity || "Destination"}`}
                           </h3>
+                          <button
+                            type="button"
+                            onClick={() => toggleItineraryDay(day.day)}
+                            className="w-[73px] h-[26px] bg-[#601444] hover:bg-[#4d0f36] rounded-[44px] flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                          >
+                            <span className="text-[15px] font-normal text-white font-outfit leading-none">
+                              Day {day.day}
+                            </span>
+                          </button>
                         </div>
 
-                        {!isOverview && day.importantNote && day.importantNote.trim() && (
-                          <div className="mt-3 mb-4 p-3.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-start gap-2.5">
-                            <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="12" y1="8" x2="12" y2="12" />
-                              <line x1="12" y1="16" x2="12.01" y2="16" />
-                            </svg>
-                            <div>
-                              <span className="text-[12px] font-bold text-amber-800 uppercase tracking-wider block mb-0.5">Important note</span>
-                              <p className="text-[13.5px] font-medium text-amber-900 leading-relaxed">
-                                {day.importantNote}
-                              </p>
+                        {/* Day Description */}
+                        {day.description && (
+                          <p className="text-[16px] text-[#1A1A1A]/70 font-light leading-normal font-outfit mb-6">
+                            {day.description}
+                          </p>
+                        )}
+
+                        {/* Activities Section (#5295:8221) */}
+                        {day.activities && day.activities.length > 0 && (
+                          <div className="mt-4 pt-2">
+                            {/* Activities Subheader */}
+                            <div className="flex items-center justify-between mb-5">
+                              <div className="flex items-center gap-3">
+                                <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[14px] font-medium font-outfit shrink-0">
+                                  {String(day.activities.length).padStart(2, "0")}
+                                </div>
+                                <h4 className="text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                  Activities
+                                </h4>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  togglePremiumDay(day.day);
+                                }}
+                                className="text-[15px] font-light text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors cursor-pointer font-outfit"
+                              >
+                                {expandedPremiumDays.includes(day.day)
+                                  ? "Hide"
+                                  : "Show"}
+                              </button>
                             </div>
+
+                            {/* Activities List (#5295:8209 - Exact Figma Match) */}
+                            {expandedPremiumDays.includes(day.day) && (
+                              <div className="space-y-4">
+                                {day.activities.map((act, aIdx) => (
+                                  <div key={aIdx} className="flex items-start gap-3.5">
+                                    {/* White Circle Badge (Figma #5295:8225, #5295:8226) */}
+                                    <div className="w-[21px] h-[21px] rounded-full bg-white shadow-2xs shrink-0 mt-0.5" />
+
+                                    {/* Activity Content */}
+                                    <div className="flex-1">
+                                      <h5 className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-snug">
+                                        {act.name || act.title}
+                                      </h5>
+
+                                      {act.description && (
+                                        <p className="text-[14px] text-[#1A1A1A]/60 font-light leading-relaxed font-outfit mt-1">
+                                          {act.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         )}
 
-                        <div className="mt-6">
-                          {/* Descriptions & Timeline */}
-                          <div>
-                            <p className="text-gray-600 text-[13px] mb-8 leading-relaxed">
-                              {day.description}
-                            </p>
-
-                            {/* Premium Inclusions for Overview */}
-                            {isOverview && (() => {
-                              const premiumActivities = (day.activities || []).filter((act: any) => {
-                                const hasPrice = (typeof act.price === 'number' && act.price > 0) || (act.price && typeof act.price === 'object' && act.price.amount > 0);
-                                return hasPrice && !act.isFree;
-                              });
-                              if (premiumActivities.length === 0) return null;
-                              return (
-                                <div className="mt-2 mb-4">
-                                  <div
-                                    className="flex justify-between items-center mb-5 cursor-pointer w-full group"
-                                    onClick={() => togglePremiumDay(day.day)}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-full bg-[#3F3F42] flex items-center justify-center text-white text-[12px] font-bold shrink-0">
-                                        {premiumActivities.length}
-                                      </div>
-                                      <h4 className="font-semibold text-[#3F3F42] text-[15px] flex items-center gap-2">
-                                        Premium Inclusions in Day {day.day}
-                                        <svg
-                                          className={`w-4 h-4 transform transition-transform ${expandedPremiumDays.includes(day.day) ? 'rotate-180' : ''}`}
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                          stroke="currentColor"
-                                        >
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                      </h4>
-                                    </div>
-                                    <span className="text-[13px] font-bold text-gray-500 group-hover:text-[#3F3F42] transition-colors shrink-0">
-                                      {expandedPremiumDays.includes(day.day) ? 'Hide' : 'Show'}
-                                    </span>
+                        {/* Optional Activities Section (#5303:8814 - No Border) */}
+                        {day.optionalActivities &&
+                          day.optionalActivities.length > 0 && (
+                            <div className="mt-7">
+                              <div className="flex items-center justify-between mb-5">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[14px] font-medium font-outfit shrink-0">
+                                    {String(day.optionalActivities.length).padStart(2, "0")}
                                   </div>
-                                  {expandedPremiumDays.includes(day.day) && (
-                                    <div className="ml-2 space-y-7 relative transition-all duration-300">
-                                      {premiumActivities.map((act: any, i: number) => (
-                                        <div key={`premium-${i}`} className="relative pl-6">
-                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                          {premiumActivities.length > 1 && i < premiumActivities.length - 1 && (
-                                            <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                          )}
-                                          <div className="flex justify-between items-center">
-                                            <h5 className="font-bold text-[#3F3F42] text-[15px]">
-                                              {act.name || act.title}
-                                            </h5>
-                                            <span className="text-[#3F3F42] font-bold text-[12px] shrink-0 ml-4">
-                                              {act.placeName || act.location ? `${act.placeName || act.location}` : ''}
-                                              {act.duration ? `${(act.placeName || act.location) ? ', ' : ''}${act.duration} hrs` : ''}
-                                            </span>
-                                          </div>
-                                          <p className="text-[#3F3F42] text-[13px] mt-2 leading-relaxed">{act.description}</p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
+                                  <h4 className="text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                    Optional Activities
+                                  </h4>
                                 </div>
-                              );
-                            })()}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleOptionalDay(day.day);
+                                  }}
+                                  className="text-[15px] font-light text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors cursor-pointer font-outfit"
+                                >
+                                  {expandedOptionalDays.includes(day.day)
+                                    ? "Hide"
+                                    : "Show"}
+                                </button>
+                              </div>
 
-                            {!isOverview && (
-                              <>
-                                {(() => {
-                                  const timelineActivities = (!isOverview || (day.activities && day.activities.length > 0)) && day.activities ? day.activities : [];
-                                  const allItems = [
-                                    ...timelineActivities.map((act: any, i: number) => ({ type: 'activity' as const, data: act, key: `act-${i}` })),
-                                  ];
-                                  const totalItems = allItems.length;
-                                  return (
-                                    <div className="ml-2 space-y-7 relative">
-                                      {allItems.map((item, idx) => {
-                                        const isLastItem = idx === totalItems - 1;
-                                        const showConnector = totalItems > 1 && !isLastItem;
-                                        const act = item.data;
-                                        return (
-                                          <div key={item.key} className="relative pl-6">
-                                            <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                            {showConnector && (
-                                              <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                            )}
-                                            <div className="flex justify-between items-center">
-                                              <h5 className="font-bold text-[#3F3F42] text-[15px]">
-                                                {act.name || act.title}
-                                              </h5>
-                                              <span className="text-[#3F3F42] font-bold text-[12px] shrink-0 ml-4">
-                                                {act.placeName || act.location}{act.duration ? `, ${act.duration} hrs` : ''}
-                                              </span>
-                                            </div>
-                                            <p className="text-[#3F3F42] text-[13px] mt-2 leading-relaxed">{act.description}</p>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                })()}
+                              {expandedOptionalDays.includes(day.day) && (
+                                <div className="space-y-4">
+                                  {day.optionalActivities.map((opt, oIdx) => (
+                                    <div key={oIdx} className="flex items-start gap-3.5">
+                                      {/* White Circle Badge (Figma #5303:8818, #5303:8819) */}
+                                      <div className="w-[21px] h-[21px] rounded-full bg-white shadow-2xs shrink-0 mt-0.5" />
 
-                                {/* Optional Activities for this day - OUTSIDE activities/accommodations timeline, EXACT SAME UI as activities */}
-                                {day.optionalActivities && day.optionalActivities.length > 0 && (
-                                  <div className="mt-8">
-                                    <div
-                                      className="flex justify-between items-center mb-5 cursor-pointer w-full group"
-                                      onClick={() => toggleOptionalDay(day.day)}
-                                    >
-                                      <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-[#3F3F42] flex items-center justify-center text-white text-[12px] font-bold shrink-0">
-                                          {day.optionalActivities.length}
+                                      {/* Optional Activity Content */}
+                                      <div className="flex-1">
+                                        <div className="flex items-center justify-between gap-2">
+                                          <h5 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
+                                            {opt.name || opt.title}
+                                          </h5>
+                                          {typeof opt.price === "number" ? (
+                                            <span className="text-[14px] font-medium text-[#1A1A1A] font-outfit">
+                                              +${opt.price}
+                                            </span>
+                                          ) : typeof opt.price === "object" &&
+                                            opt.price?.amount ? (
+                                            <span className="text-[14px] font-medium text-[#1A1A1A] font-outfit">
+                                              +${opt.price.amount}
+                                            </span>
+                                          ) : null}
                                         </div>
-                                        <h4 className="font-semibold text-[#3F3F42] text-[15px] flex items-center gap-2">
-                                          Optional activities in Day {day.day}
-                                          <svg
-                                            className={`w-4 h-4 transform transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`}
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                          >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                          </svg>
-                                        </h4>
+                                        {opt.description && (
+                                          <p className="text-[14px] text-[#1A1A1A]/60 font-light leading-relaxed font-outfit mt-1">
+                                            {opt.description}
+                                          </p>
+                                        )}
                                       </div>
-                                      <span className="text-[13px] font-bold text-gray-500 group-hover:text-[#3F3F42] transition-colors shrink-0">
-                                        {expandedOptionalDays.includes(day.day) ? 'Hide' : 'Show'}
-                                      </span>
                                     </div>
-                                    {expandedOptionalDays.includes(day.day) && (
-                                      <div className="ml-2 space-y-7 relative transition-all duration-300">
-                                        {day.optionalActivities.map((act: any, i) => (
-                                          <div key={`opt-${i}`} className="relative pl-6">
-                                            <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                            {day.optionalActivities.length > 1 && i < day.optionalActivities.length - 1 && (
-                                              <div className="absolute left-[-1px] top-[10px] w-px bg-gray-300" style={{ bottom: '-38px' }}></div>
-                                            )}
-                                            <div className="flex justify-between items-center">
-                                              <h5 className="font-bold text-[#3F3F42] text-[15px]">
-                                                {act.name || act.title}
-                                                {(() => {
-                                                  let priceStr = "";
-                                                  if (typeof act.price === "number") {
-                                                    priceStr = act.price > 0 ? `$${Number(act.price).toLocaleString()}` : "Free";
-                                                  } else if (act.price && typeof act.price.amount === "number") {
-                                                    priceStr = Number(act.price.amount) > 0
-                                                      ? `${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
-                                                      : "Free";
-                                                  }
-                                                  return priceStr ? `, ${priceStr}` : "";
-                                                })()}
-                                              </h5>
-                                              <span className="text-[#3F3F42] font-bold text-[12px] shrink-0 ml-4">
-                                                {act.placeName || act.location || act.place ? `${act.placeName || act.location || act.place}` : ''}
-                                                {act.duration ? `${(act.placeName || act.location || act.place) ? ', ' : ''}${act.duration} hrs` : ''}
-                                              </span>
-                                            </div>
-                                            <p className="text-[#3F3F42] text-[13px] mt-2 leading-relaxed">{act.description}</p>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
 
-                                {/* Accommodations Section */}
-                                {!isOverview && day.accommodations && day.accommodations.length > 0 && (
-                                  <div className="mt-6">
-                                    <h4 className="font-semibold text-[#3F3F42] text-[15px] mb-2">Accommodation</h4>
-                                    <div className="space-y-2 ml-2">
-                                      {day.accommodations.map((acc: any, idx: number) => (
-                                        <div key={idx} className="relative pl-6">
-                                          <div className="absolute -left-[5px] top-1.5 w-2 h-2 bg-gray-400 rounded-full z-[1]"></div>
-                                          <div className="flex justify-between items-center">
-                                            <h5 className="font-bold text-[#3F3F42] text-[15px]">
-                                              {acc.name || acc.type}
-                                            </h5>
-                                            {acc.name && acc.type && (
-                                              <span className="text-[#3F3F42] font-bold text-[12px] shrink-0 ml-4">
-                                                {acc.type}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+                        {/* Bottom Row: Accommodation & Meals Included (#5303:8822 & #5303:8832 - No Border) */}
+                        <div className="mt-8 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          {/* Accommodation */}
+                          <div className="flex items-start gap-3">
+                            <div className="w-[24px] h-[21px] flex items-center justify-center shrink-0 mt-0.5">
+                              <Image
+                                src="/aas1.svg"
+                                alt="Accommodation"
+                                width={24}
+                                height={21}
+                                className="w-[24px] h-[21px] object-contain"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-tight">
+                                Accommodation
+                              </div>
+                              <div className="text-[14px] font-light text-[#1A1A1A]/75 font-outfit mt-1 leading-snug">
+                                {day.accommodations?.[0]?.name ||
+                                  (day as any).accommodation ||
+                                  tour.accommodation ||
+                                  "Hotel Name (or similar)"}
+                              </div>
+                            </div>
+                          </div>
 
-                                {/* Meals Section */}
-                                {day.meals && (
-                                  (() => {
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    const m = day.meals as any;
-                                    const hasMeals = typeof m === 'string'
-                                      ? (m.trim().length > 0)
-                                      : (m.breakfast || m.lunch || m.dinner);
-
-                                    if (!hasMeals) return null;
-
-                                    return (
-                                      <div className="mt-4">
-                                        <h4 className="font-semibold text-[#3F3F42] text-[15px] mb-2">Meals Included</h4>
-                                        <div className="flex gap-2">
-                                          {typeof m === 'string' ? (
-                                            m.split(',').map((meal: string, idx: number) => (
-                                              meal.trim() && (
-                                                <span key={idx} className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-[#3F3F42]">
-                                                  {meal.trim()}
-                                                </span>
-                                              )
-                                            ))
-                                          ) : (
-                                            <>
-                                              {m.breakfast && (
-                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-[#3F3F42]">Breakfast</span>
-                                              )}
-                                              {m.lunch && (
-                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-[#3F3F42]">Lunch</span>
-                                              )}
-                                              {m.dinner && (
-                                                <span className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-[#3F3F42]">Dinner</span>
-                                              )}
-                                            </>
-                                          )}
-                                        </div>
-                                      </div>
-                                    );
-                                  })()
-                                )}
-                              </>
-                            )}
+                          {/* Meals Included */}
+                          <div className="flex items-start gap-3">
+                            <div className="w-[23px] h-[22px] flex items-center justify-center shrink-0 mt-0.5">
+                              <Image
+                                src="/aas2.svg"
+                                alt="Meals Included"
+                                width={23}
+                                height={22}
+                                className="w-[23px] h-[22px] object-contain"
+                              />
+                            </div>
+                            <div>
+                              <div className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-tight">
+                                Meals Included
+                              </div>
+                              <div className="text-[14px] font-light text-[#1A1A1A]/75 font-outfit mt-1 leading-snug">
+                                {formatMeals((day as any).meals || tour.meals)}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1490,890 +2085,1519 @@ export default function TourDetailPage() {
                   })}
                 </div>
               </div>
-            )}
+            </div>
 
-            {activeTab === "details" && (
-              <div className="bg-white  p-2">
-                <h2 className="text-[32px] md:text-[40px] font-medium text-[#3F3F42] mb-8">
-                  Trip Details
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
-                      Tour Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Duration:</span>
-                        <span className="font-medium">
-                          {tour.duration.days} days
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Group Size:</span>
-                        <span className="font-medium">
-                          Max {tour.maxGroupSize} people
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Physical Rating:</span>
-                        <span className="font-medium">
-                          {tour.physicalRating.level}/5
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Travel Style:</span>
-                        <span className="font-medium">{tour.travelStyle}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Service Level:</span>
-                        <span className="font-medium">{tour.serviceLevel}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
-                      Age Requirements
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Minimum Age:</span>
-                        <span className="font-medium">
-                          {tour.ageRequirement.min} years
-                        </span>
-                      </div>
-                      {tour.ageRequirement.description && (
-                        <div>
-                          <span className="text-gray-600">Notes:</span>
-                          <p className="text-sm text-[#3F3F42] mt-1">
-                            {tour.ageRequirement.description}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+            {/* Right Sticky Column (316px #5207:7723): Destination Card + Day Overview */}
+            <div className="space-y-6 lg:sticky lg:top-24 pt-0 lg:pt-[60px]">
+              {/* Destination Photo & Map Card (#5207:7727) */}
+              <div className="w-full">
+                <div className="rounded-[16px] overflow-hidden aspect-[316/215] w-full relative shadow-xs bg-gray-100 group">
+                  <Image
+                    src={
+                      tour.itineraryMapImage ||
+                      tour.images?.[0]?.url ||
+                      "/mountain_hikers.png"
+                    }
+                    alt={tour.country?.name || "Destination"}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
+                <div className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] leading-tight mt-3 font-outfit">
+                  {tour.country?.continent?.name ||
+                    tour.country?.name ||
+                    "Destination"}
+                </div>
+              </div>
 
-                {tour.physicalRating.description && (
-                  <div className="mt-8 p-4 bg-yellow-50 rounded-lg">
-                    <h4 className="font-semibold text-[#3F3F42] mb-2">
-                      Physical Rating Details
-                    </h4>
-                    <p className="text-[#3F3F42]">
-                      {tour.physicalRating.description}
+              {/* Day Overview Box (#5295:7675) - Appears when Itinerary section comes into view */}
+              <div
+                className={`w-full bg-white border border-[#CFD1D6] rounded-[13px] p-[17px] shadow-2xs transition-all duration-300 ${
+                  showDayOverview
+                    ? "opacity-100 translate-y-0 block pointer-events-auto"
+                    : "opacity-0 -translate-y-2 pointer-events-none hidden"
+                }`}
+              >
+                <div className="text-[20px] font-normal text-[#1A1A1A] mb-4">
+                  Day Overview
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(tour.itinerary && tour.itinerary.length > 0
+                    ? tour.itinerary
+                    : Array.from(
+                        { length: tour.duration?.days || 5 },
+                        (_, i) => ({ day: i + 1 }),
+                      )
+                  ).map((d: any) => {
+                    const isDayOpen = expandedItineraryDays.includes(d.day);
+                    return (
+                      <button
+                        key={d.day}
+                        onClick={() => {
+                          if (!expandedItineraryDays.includes(d.day)) {
+                            setExpandedItineraryDays((prev) => [
+                              ...prev,
+                              d.day,
+                            ]);
+                          }
+                          const el = dayRefs.current[d.day];
+                          if (el)
+                            el.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                        }}
+                        className={`w-[40px] h-[40px] rounded-[8.65px] border text-[17px] font-normal flex items-center justify-center transition-all cursor-pointer ${
+                          isDayOpen
+                            ? "bg-[#69124C] text-white border-[#69124C] shadow-xs"
+                            : "border-[#CFD1D6] hover:border-black text-[#1A1A1A] bg-transparent"
+                        }`}
+                      >
+                        {d.day}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 9. "Available Extras (Optional)" & "Continue Your Journey" (100% Figma MCP Match #5091:8832) */}
+        <div className="mb-20">
+          <div className="mb-6">
+            <h2 className="text-[36px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[36px]">
+              Available Extras{" "}
+              <span className="text-[20px] text-[rgba(26,26,26,0.6)] font-light">
+                (Optional)
+              </span>
+            </h2>
+            <p className="text-[16px] text-[#1A1A1A] font-light mt-3">
+              Add this to your tour when you book
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
+            {/* Extras Options Container Left (matches Itinerary width above) */}
+            <div className="w-full min-w-0 border-[1.5px] border-[rgba(26,26,26,0.12)] rounded-[12px] overflow-hidden bg-white shadow-xs">
+              {/* Category 1: Stay Your Way Header */}
+              <div
+                className="px-6 py-3.5 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
+                style={{
+                  backgroundColor: "rgba(181, 185, 177, 0.2)",
+                  minHeight: "70px",
+                }}
+              >
+                <div className="text-[20px] font-normal text-[#1A1A1A] leading-[0.9em]">
+                  Stay Your Way
+                </div>
+                <div className="text-[16px] text-[#1A1A1A] font-light mt-1">
+                  For travellers who value private space.
+                </div>
+              </div>
+
+              {/* Item 1: Private Room Upgrades */}
+              <div className="px-6 py-5 flex items-center justify-between gap-4 border-b border-[rgba(26,26,26,0.1)]">
+                <div className="flex items-start gap-4">
+                  {/* 31px Plus Circle Button */}
+                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
+                    +
+                  </div>
+                  <div>
+                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
+                      Private Room Upgrades
+                    </div>
+                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
+                      Enjoy single-room privacy and personal space throughout
+                      your adventure hotels and stays.
                     </p>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-
-            {(activeTab === "overview" || activeTab === "itinerary") && (
-              <div className="sticky top-24 space-y-4">
-                {/* Itinerary Map Image */}
-                <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-                  <div className="relative w-full aspect-video bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                    {tour.itineraryMapImage ? (
-                      <Image
-                        src={tour.itineraryMapImage}
-                        alt="Itinerary Map"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="text-center">
-                        <div className="text-5xl mb-2">🗺️</div>
-                        <div className="text-gray-600 font-medium">
-                          Trip Map
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
-
-                {/* Day Counter */}
-                <div className="bg-white rounded-lg shadow-sm border p-4">
-                  <div className="text-sm text-gray-600 font-medium mb-3">
-                    Day Overview
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    {tour.itinerary.map((day) => (
-                      <button
-                        key={day.day}
-                        onClick={() => scrollToDay(day.day)}
-                        className={`w-10 h-10 rounded-lg font-semibold transition-all ${currentDay === day.day
-                          ? "bg-blue-600 text-white shadow-lg scale-105"
-                          : "bg-gray-100 text-[#3F3F42] hover:bg-gray-200"
-                          }`}
-                      >
-                        {day.day}
-                      </button>
-                    ))}
-                  </div>
-                  {tour.itinerary[currentDay - 1] && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                      <div className="font-semibold text-[#3F3F42] text-sm">
-                        {tour.itinerary[currentDay - 1].title ? (
-                          tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim()).length > 1
-                            ? `${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]} to ${tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[1]}`
-                            : tour.itinerary[currentDay - 1].title.split(",").filter(t => t.trim())[0]
-                        ) : "Itinerary"}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                        {tour.itinerary[currentDay - 1].description}
-                      </div>
-                    </div>
-                  )}
+                <div className="text-right shrink-0">
+                  <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
+                    From
+                  </span>
+                  <span className="text-[20px] font-medium text-[#1A1A1A]">
+                    $49
+                  </span>
                 </div>
               </div>
-            )}
 
-            {activeTab === "details" && (
-              <>
-                {/* Quick Info for Details Tab */}
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                  <h3 className="text-lg font-semibold text-[#3F3F42] mb-4">
-                    Quick Info
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">🌟</span>
-                      <div>
-                        <div className="font-medium text-[#3F3F42]">Rating</div>
-                        <div className="text-sm text-gray-600">
-                          {tour.ratingsAverage}
-                          {"/"}5 ({tour.ratingsQuantity} reviews)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">📍</span>
-                      <div>
-                        <div className="font-medium text-[#3F3F42]">Country</div>
-                        <div className="text-sm text-gray-600">
-                          {tour.country.name}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">💪</span>
-                      <div>
-                        <div className="font-medium text-[#3F3F42]">
-                          Physical Level
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Level {tour.physicalRating.level}
-                          {"/"}5
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              {/* Category 2: Pre and Post Tour Extras Header */}
+              <div
+                className="px-6 py-3.5 border-t border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
+                style={{
+                  backgroundColor: "rgba(181, 185, 177, 0.2)",
+                  minHeight: "70px",
+                }}
+              >
+                <div className="text-[20px] font-normal text-[#1A1A1A] leading-[0.9em]">
+                  Pre and Post Tour Extras
                 </div>
-
-                {/* Contact */}
-                <div className="bg-blue-50 rounded-lg border border-blue-200 p-6">
-                  <h3 className="text-lg font-semibold text-[#3F3F42] mb-3">
-                    Need Help?
-                  </h3>
-                  <p className="text-[#3F3F42] text-sm mb-4">
-                    Have questions about this trip? Our travel experts are here
-                    to help!
-                  </p>
-                  <button className="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition text-sm">
-                    Contact Us
-                  </button>
+                <div className="text-[16px] text-[#1A1A1A] font-light mt-1">
+                  Keep discovering
                 </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+              </div>
 
-      {/* Is this tour for me? - Full Width section */}
-      {activeTab === "overview" && (
-        <div className="w-full px-4 sm:px-6 lg:px-10 pb-12 pt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-            <div>
-              <h2 className="text-[32px] md:text-[40px] font-medium text-[#3F3F42] mb-8 tracking-tight">Inclusions and activities</h2>
-              <div className="bg-white rounded-[24px] p-8 md:p-12 shadow-sm border border-gray-100">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-                  {/* Left Column: Categories */}
-                  <div className="space-y-10">
-                    {/* Destinations */}
-                    <div className="flex gap-4">
-                      <div className="mt-1 shrink-0">
-                        <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Destinations</h3>
-                        <Link
-                          href={`/destinations/${tour.country.slug}`}
-                          className="text-[#3b82f6] hover:underline text-[15px] font-medium"
-                        >
-                          {tour.country.name}
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Meals */}
-                    <div className="flex gap-4">
-                      <div className="mt-1 shrink-0">
-                        <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M18 8V6a2 2 0 00-2-2H4a2 2 0 00-2 2v7a2 2 0 002 2h8" />
-                          <path d="M18 8h3a1 1 0 011 1v5a2 2 0 01-2 2h-7a2 2 0 01-2-2v-3" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Meals</h3>
-                        <p className="text-[#3F3F42] text-[15px] leading-relaxed">
-                          {tour.meals || (
-                            `${tour.itinerary?.reduce((acc, day) => {
-                              const m = day.meals as any;
-                              if (!m || typeof m === 'string') return acc;
-                              return acc + (m.breakfast ? 1 : 0);
-                            }, 0) || 0} breakfasts, ` +
-                            `${tour.itinerary?.reduce((acc, day) => {
-                              const m = day.meals as any;
-                              if (!m || typeof m === 'string') return acc;
-                              return acc + (m.lunch ? 1 : 0);
-                            }, 0) || 0} lunches, ` +
-                            `${tour.itinerary?.reduce((acc, day) => {
-                              const m = day.meals as any;
-                              if (!m || typeof m === 'string') return acc;
-                              return acc + (m.dinner ? 1 : 0);
-                            }, 0) || 0} dinners`
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Transport */}
-                    <div className="flex gap-4">
-                      <div className="mt-1 shrink-0">
-                        <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <rect x="7" y="13" width="10" height="8" rx="2" />
-                          <path d="M7 17H2m15 0h5M9 6h6l2 7H7l2-7z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Transport</h3>
-                        <p className="text-[#3F3F42] text-[15px] leading-relaxed">
-                          {tour.transportation || "Private Vehicle, Train, Boat, Plane"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Accommodation */}
-                    <div className="flex gap-4">
-                      <div className="mt-1 shrink-0">
-                        <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Accommodation</h3>
-                        <p className="text-[#3F3F42] text-[15px] leading-relaxed">
-                          {tour.accommodation || (
-                            Array.from(new Set(
-                              tour.itinerary.flatMap(day => day.accommodations?.map(a => a.type) || [])
-                            )).join(", ") || "Hotel, Guesthouse"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Wifi Availability */}
-                    <div className="flex gap-4 mt-6">
-                      <div className="mt-1 shrink-0">
-                        <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 12.55a11 11 0 0114.08 0" />
-                          <path d="M1.42 9a16 16 0 0121.16 0" />
-                          <path d="M8.53 16.11a6 6 0 016.94 0" />
-                          <line x1="12" y1="20" x2="12.01" y2="20" strokeWidth="3" strokeLinecap="round" />
-                        </svg>
-                      </div>
-                      <div>
-                        <h3 className="text-[17px] font-bold text-[#3F3F42] mb-2">Wifi Availability</h3>
-                        <p className="text-[#3F3F42] text-[15px] leading-relaxed flex items-center gap-2">
-                          {tour.wifiAvailable ? (
-                            <span className="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1.5 border border-emerald-100">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                              Yes, Free WiFi Included
-                            </span>
-                          ) : (
-                            <span className="text-sm font-semibold text-gray-500 bg-gray-50 px-2 py-0.5 rounded flex items-center gap-1.5 border border-gray-100">
-                              <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                              No WiFi Available
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    </div>
-
-
-
-
+              {/* Item 2: Extra Nights */}
+              <div className="px-6 py-5 flex items-center justify-between gap-4 border-b border-[rgba(26,26,26,0.1)]">
+                <div className="flex items-start gap-4">
+                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
+                    +
                   </div>
-
-                  {/* Right Column: Included activities (All free and paid) */}
                   <div>
-                    <div className="flex items-center gap-3 mb-6">
-                      <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                      </svg>
-                      <h3 className="text-[20px] font-bold text-[#3F3F42]">Included activities</h3>
+                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
+                      Extra Nights
                     </div>
-
-                    {(() => {
-                      const allActs = Array.from(new Set([
-                        ...tour.itinerary.flatMap(day => day.activities?.map(a => a.name || a.title) || []),
-                        ...tour.itinerary.flatMap(day => day.optionalActivities?.map(a => a.name) || [])
-                      ])).filter(Boolean);
-
-                      return (
-                        <div className="mb-10">
-                          {allActs.length > 0 ? (
-                            <InclusionsList items={allActs as string[]} limit={6} />
-                          ) : (
-                            <p className="text-gray-500 text-[14px]">No Included activities listed for this trip.</p>
-                          )}
-                        </div>
-                      );
-                    })()}
-
-                    {/* Premium Inclusions */}
-                    {(() => {
-                      const premiumInclusions = Array.from(new Set(
-                        tour.itinerary.flatMap(day =>
-                          (day.activities || [])
-                            .filter(a => a && !a.isFree && typeof a.price === "number" && a.price > 0)
-                            .map(a => a.title || a.name) || []
-                        )
-                      )).filter(Boolean);
-
-                      return (
-                        <div className="mb-10">
-                          <div className="flex items-center gap-3 mb-6">
-                            <img src="/premium_inclusion.svg" className="w-6 h-6 object-contain" alt="Premium Inclusions" />
-                            <h3 className="text-[20px] font-bold text-[#3F3F42]">Premium Inclusions</h3>
-                          </div>
-                          {premiumInclusions.length > 0 ? (
-                            <InclusionsList items={premiumInclusions as string[]} limit={3} />
-                          ) : (
-                            <p className="text-gray-500 text-[14px]">No premium inclusions listed for this trip.</p>
-                          )}
-                        </div>
-                      );
-                    })()}
-
-                    {/* Optional activities */}
-                    {(() => {
-                      const optionalActivities = Array.from(new Set(
-                        tour.itinerary.flatMap(day => day.optionalActivities?.map(a => {
-                          const name = a.name || a.title;
-                          if (!name) return null;
-
-                          let priceStr = "";
-                          if (typeof a.price === "number") {
-                            priceStr = a.price > 0 ? ` - From $${Number(a.price).toLocaleString()} USD` : " - Free";
-                          } else if (a.price && typeof a.price.amount === "number") {
-                            priceStr = Number(a.price.amount) > 0
-                              ? ` - From $${Number(a.price.amount).toLocaleString()} USD`
-                              : " - Free";
-                          }
-
-                          return `${name}${priceStr}`;
-                        }) || [])
-                      )).filter(Boolean);
-
-                      return (
-                        <div>
-                          <div className="flex items-center gap-3 mb-6">
-                            <svg className="w-6 h-6 text-[#3F3F42]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
-                            <h3 className="text-[20px] font-bold text-[#3F3F42]">Optional activities</h3>
-                          </div>
-                          {optionalActivities.length > 0 ? (
-                            <InclusionsList items={optionalActivities as string[]} limit={4} />
-                          ) : (
-                            <p className="text-gray-500 text-[14px]">No optional activities listed for this trip.</p>
-                          )}
-                        </div>
-                      );
-                    })()}
+                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
+                      Arrive earlier or extend your stay with additional hotel
+                      nights at our partner accommodations.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div>
+                    <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
+                      From
+                    </span>
+                    <span className="text-[20px] font-medium text-[#1A1A1A]">
+                      $49
+                    </span>
+                  </div>
+                  <div className="text-[14px] text-gray-500 font-light">
+                    / Night
                   </div>
                 </div>
               </div>
 
-              {/* Available Extras Section */}
-              <div className="mt-14">
-                <div className="flex flex-wrap items-baseline gap-3 mb-8">
-                  <h2 className="text-[32px] md:text-[40px] font-medium text-[#3F3F42] tracking-tight">Add-ons</h2>
-                  <p className="text-gray-500 text-[18px] md:text-[22px] font-medium">(add this to your tour when you book)</p>
-                </div>
-
-                <div className="space-y-4">
-                  {tour?.price?.ownRoomPrice ? (
-                    <div className="border border-gray-200 rounded-[12px] p-6 bg-white">
-                      <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-[#3F3F42] flex items-center justify-center shrink-0">
-                          <Plus size={16} weight="bold" className="text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-baseline mb-1">
-                            <h3 className="text-[18px] font-bold text-[#3F3F42] mr-2">My Own Room</h3>
-                            <span className="text-gray-500 text-[16px] mr-1">- From</span>
-                            <span className="text-[18px] font-bold text-[#3F3F42]">${tour.price.ownRoomPrice.toFixed(0)}</span>
-                          </div>
-                          <p className="text-gray-600 text-[14px] leading-relaxed">
-                            If you&apos;re travelling solo and would prefer to have your own private room throughout your trip,<br />select this option during the online booking process.
-                          </p>
-                        </div>
-                      </div>
+              {/* Item 3: Transfers */}
+              <div className="px-6 py-5 flex items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
+                    +
+                  </div>
+                  <div>
+                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
+                      Transfers
                     </div>
-                  ) : (
-                    <div className="text-gray-500 text-center py-4">No single supplement available</div>
-                  )}
+                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
+                      Seamless private airport pickup and drop-off to and from
+                      your tour hotel.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
+                    From
+                  </span>
+                  <span className="text-[20px] font-medium text-[#1A1A1A]">
+                    $49
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Continue Your Journey Card */}
-            <div className="hidden lg:flex flex-col gap-4 mt-[80px]">
-              <div className="border border-gray-300 rounded-[20px] bg-white shadow-sm p-8 flex flex-col gap-6">
-                <div>
-                  <h3 className="text-[26px] font-medium text-[#3F3F42] mb-3 leading-snug">Continue Your Journey</h3>
-                  <p className="text-[14px] text-[#3F3F42] leading-relaxed max-w-[95%]">
-                    Your adventure doesn&apos;t have to end here—discover another tour starting right after, from the same destination. Seamlessly extend your travel with handpicked experiences nearby.
-                  </p>
+            {/* Continue Your Journey Card Right (316px) */}
+            <div
+              className="rounded-[12px] p-6 border border-[rgba(26,26,26,0.12)] shadow-xs flex flex-col justify-between"
+              style={{
+                backgroundColor: "rgba(181, 185, 177, 0.12)",
+                minHeight: "300px",
+              }}
+            >
+              <div>
+                <h3 className="font-gochi text-[26px] text-[#3B5D1B] leading-tight mb-2">
+                  Continue Your Journey
+                </h3>
+                <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed mb-6 border-b border-[rgba(26,26,26,0.1)] pb-5">
+                  Your adventure doesn’t have to end here—discover another tour
+                  starting right after, from the same destination. Seamlessly
+                  extend your travel with handpicked experiences nearby.
+                </p>
+
+                <div className="mb-6">
+                  <div className="text-[16px] font-normal text-[#1A1A1A] mb-1">
+                    Next Tour: Kathmandu to Pokhara Escape
+                  </div>
+                  <div className="text-[13px] text-gray-500 font-light">
+                    Duration: 3 Days • Scenic drive • Lakeside stay
+                  </div>
                 </div>
-                {relatedTours.length > 0 && (() => {
-                  const nextTour = relatedTours.find(t => t._id !== tour._id) || relatedTours[0];
-                  return (
-                    <div className="border-t border-gray-200 pt-6 mt-1">
-                      <div className="font-medium text-[20px] text-[#3F3F42] mb-2 leading-tight pr-4">
-                        Next Tour: {nextTour.location?.startCity} to {nextTour.location?.endCity} Escape
-                      </div>
-                      <p className="text-[13px] text-gray-600 mb-6">
-                        Duration: {nextTour.duration?.days} Days
-                        {nextTour.travelStyle ? ` · ${nextTour.travelStyle}` : ""}
-                        {nextTour.serviceLevel ? ` · ${nextTour.serviceLevel} stay` : ""}
-                      </p>
-                      <div className="flex gap-2 group">
-                        <button
-                          onClick={() => router.push(`/trips/${nextTour.slug}/${nextTour.tourCode}`)}
-                          className="px-6 bg-[#3F3F42] text-white py-3 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3F3F42] transition text-[15px]"
-                        >
-                          Start Exploring
-                        </button>
-                        <button
-                          onClick={() => router.push(`/trips/${nextTour.slug}/${nextTour.tourCode}`)}
-                          className="w-[48px] h-[48px] bg-[#3F3F42] text-white rounded-full flex items-center justify-center hover:bg-[#3F3F42] transition shrink-0"
-                        >
-                          <ArrowUpRight size={18} className="transition-transform duration-300 group-hover:rotate-45" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => router.push("/trips")}
+                  className="bg-[#1A1A1A] hover:bg-black text-white text-[15px] font-medium px-6 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
+                >
+                  Start Exploring
+                </button>
+                <button
+                  onClick={() => router.push("/trips")}
+                  className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs"
+                  aria-label="Start Exploring"
+                >
+                  <ArrowUpRight
+                    size={16}
+                    className="text-white"
+                    weight="bold"
+                  />
+                </button>
               </div>
             </div>
           </div>
         </div>
-      )}
 
+        {/* 10. "Meet Your Adventure Leads" Section */}
+        {/* 10. "Meet Your Adventure Leads" (100% Figma MCP Match #5091:8967) */}
+        <div className="mb-20">
+          {/* Main Heading (Spans across full width over both columns) */}
+          <h2 className="text-[40px] sm:text-[54px] font-normal text-[#1A1A1A] mb-8 sm:mb-10 leading-[1.05] tracking-[0.007em]">
+            Meet Your <br className="hidden sm:inline" />
+            <span className="font-gochi text-[#3B5D1B]">Adventure Leads</span>
+          </h2>
 
+          {/* 2 Equal Columns Below Heading */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-10 items-stretch">
+            {/* Left Column: Image on Left + Quote Block on Right */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-6 bg-white/50 rounded-[12px] p-2 sm:p-0">
+              {/* Photo on Left of Quote */}
+              <div className="w-full sm:w-[220px] md:w-[240px] h-[260px] sm:h-[303px] rounded-[12px] overflow-hidden relative shrink-0 shadow-xs">
+                <Image
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop"
+                  alt="Lead Guide Amir"
+                  fill
+                  className="object-cover"
+                />
+              </div>
 
+              {/* Quote Block on Right of Image */}
+              <div className="flex flex-col justify-center flex-1 py-3 sm:pr-4">
+                <div className="inline-block px-3.5 py-1 bg-[#1A1A1A]/70 text-white rounded-[111px] text-[14px] font-normal mb-3 shadow-xs self-start">
+                  400+ Local Guides
+                </div>
+                <p className="text-[16px] text-[#1A1A1A] font-normal leading-[23.4px] tracking-[-0.0286em] mb-3">
+                  “Every trip is personal. We keep groups small to make sure
+                  your experience feels private, safe, and unforgettable.”
+                </p>
+                <div className="text-[14px] text-[#1A1A1A] opacity-50 font-light">
+                  — Amir , Founder &amp; Lead Guide
+                </div>
+              </div>
+            </div>
 
+            {/* Right Column: Guide Story Card (581px x 303px) */}
+            <div
+              className="rounded-[12.21px] border border-[#D9D9E4]/60 overflow-hidden flex flex-col sm:flex-row shadow-xs min-h-[303px]"
+              style={{ backgroundColor: "rgba(181, 185, 177, 0.12)" }}
+            >
+              {/* Left Photo */}
+              <div className="w-full sm:w-[240px] md:w-[260px] xl:w-[307px] h-[240px] sm:h-auto relative shrink-0">
+                <Image
+                  src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=800&auto=format&fit=crop"
+                  alt="Adventure Guide"
+                  fill
+                  className="object-cover"
+                />
+              </div>
 
+              {/* Right Content */}
+              <div className="p-6 sm:p-7 flex flex-col justify-between flex-1">
+                <div>
+                  <h4 className="text-[20px] font-medium text-[#1A1A1A] mb-3 leading-tight tracking-[-0.0229em]">
+                    Step inside a journey guided by passion and experience
+                  </h4>
+                  <p className="text-[16px] text-[#1A1A1A] font-light leading-normal tracking-[-0.0286em]">
+                    Each tour is led by people who know every dune, story, and
+                    sunrise of AlUla guides who turn every route into a journey
+                    worth remembering.
+                  </p>
+                </div>
 
+                {/* Social Circle Icons */}
+                <div className="flex items-center gap-2.5 mt-5">
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-[#1A1A1A] hover:bg-black hover:text-white transition"
+                    style={{ backgroundColor: "rgba(181, 185, 177, 0.3)" }}
+                    aria-label="Facebook"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-[#1A1A1A] hover:bg-black hover:text-white transition"
+                    style={{ backgroundColor: "rgba(181, 185, 177, 0.3)" }}
+                    aria-label="Instagram"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://twitter.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-[#1A1A1A] hover:bg-black hover:text-white transition"
+                    style={{ backgroundColor: "rgba(181, 185, 177, 0.3)" }}
+                    aria-label="X / Twitter"
+                  >
+                    <svg
+                      className="w-2.5 h-2.5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://youtube.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-[24px] h-[24px] rounded-full flex items-center justify-center text-[#1A1A1A] hover:bg-black hover:text-white transition"
+                    style={{ backgroundColor: "rgba(181, 185, 177, 0.3)" }}
+                    aria-label="YouTube"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* 11. "The Good you’re doing" (100% Figma MCP Match #5091:8414) */}
+        <div
+          className="rounded-[12px] p-6 sm:p-9 flex flex-col md:flex-row items-center gap-8 mb-20 shadow-xs"
+          style={{
+            backgroundColor: "rgba(181, 185, 177, 0.2)",
+            minHeight: "205px",
+          }}
+        >
+          {/* Nature Graphic Box Left (183px x 130px) */}
+          <div className="w-[183px] h-[130px] rounded-[8px] overflow-hidden relative shrink-0 shadow-xs hidden sm:block">
+            <Image
+              src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop"
+              alt="Forest and Trees"
+              fill
+              className="object-cover"
+            />
+          </div>
 
+          {/* Right Text, Stats & Button Area */}
+          <div className="flex-1 flex flex-col justify-between w-full">
+            {/* Title */}
+            <h3
+              className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] mb-2.5 leading-tight tracking-tight"
+              style={{ lineHeight: "0.9em" }}
+            >
+              The Good you’re doing
+            </h3>
 
-      {/* Before You Book Section */}
-      {activeTab === "overview" && tour.beforeYouBook && (
-        <BeforeYouBookSection data={tour.beforeYouBook} />
-      )}
+            {/* Description */}
+            <p className="text-[15px] sm:text-[16px] font-light text-[#1A1A1A] leading-relaxed mb-3.5 max-w-4xl">
+              Our Adventures gives you more opportunities to do Nothing But Good
+              to support important causes in destinations you visit and around
+              the world
+            </p>
 
-      {/* Check Availability Section - Only visible in Overview tab */}
-      {activeTab === "overview" && (
-        <div className="w-full px-4 sm:px-6 lg:px-10 pb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-            <div>
-              <div className="bg-white rounded-[16px] border border-gray-300 shadow-sm overflow-hidden">
-                {/* Section Header */}
-                <div className="px-10 py-8">
-                  <h2 className="text-[32px] md:text-[40px] text-[#3F3F42] font-medium mb-3 tracking-tight">
+            {/* Bottom Row: Stats & Learn More Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-[15px] sm:text-[16px] font-normal text-[#1A1A1A]">
+                <span>
+                  Trees Planted this trip :{" "}
+                  <span className="font-normal">08</span>
+                </span>
+                <span>
+                  Tours Gifted : <span className="font-normal">12</span>
+                </span>
+              </div>
+
+              <Link
+                href="/tree-planting"
+                className="bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-normal px-7 py-1 rounded-[34px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto shadow-xs"
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 12. "Plans Change. Adventure Continues." (100% Figma MCP Match #5091:9308) */}
+        <div
+          className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-14 sm:py-16 mb-20"
+          style={{ backgroundColor: "rgba(244, 236, 217, 0.2)" }}
+        >
+          <div className="max-w-7xl mx-auto">
+            {/* Header Row */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+              <div>
+                <span className="inline-block text-[14px] font-medium text-[rgba(26,26,26,0.55)] bg-[rgba(26,26,26,0.05)] px-3.5 py-1 rounded-[110px] mb-3">
+                  Tours Snippets
+                </span>
+                <h2 className="text-[38px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[1.12]">
+                  Plans Change. <br />
+                  <span className="font-gochi text-[#3B5D1B]">
+                    Adventure Continues.
+                  </span>
+                </h2>
+              </div>
+              <p className="text-[15px] sm:text-[17px] font-light text-[#6C114E] max-w-md md:text-right leading-[1.35] font-outfit">
+                We organize{" "}
+                <span className="font-normal">
+                  guided trips, scenic routes, and local experiences
+                </span>{" "}
+                with comfort and clear schedules.
+              </p>
+            </div>
+
+            {/* 4 White Feature Cards (Figma 100% Match #5295:8054 - #5295:8096) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+              {/* Card 1 */}
+              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
+                <div className="h-[65px] mb-6 flex items-center justify-start">
+                  <Image
+                    src="/gggg1.svg"
+                    alt="Free Date Change"
+                    width={66}
+                    height={65}
+                    className="h-[65px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                    Free Date Change
+                  </h4>
+                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                    Free date change options where applicable.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 2 */}
+              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
+                <div className="h-[65px] mb-6 flex items-center justify-start">
+                  <Image
+                    src="/gggg2.svg"
+                    alt="Adventure Credit"
+                    width={81}
+                    height={65}
+                    className="h-[65px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                    Adventure Credit
+                  </h4>
+                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                    Because sometimes life changes.
+                    <br />
+                    Your adventure should still be waiting.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
+                <div className="h-[64px] mb-6 flex items-center justify-start">
+                  <Image
+                    src="/gggg3.svg"
+                    alt="Hold My Adventure"
+                    width={64}
+                    height={64}
+                    className="h-[64px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                    Hold My Adventure
+                  </h4>
+                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                    Not ready to decide today?
+                    <br />
+                    Reserve your place while you prepare.
+                  </p>
+                </div>
+              </div>
+
+              {/* Card 4 */}
+              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
+                <div className="h-[65px] mb-6 flex items-center justify-start">
+                  <Image
+                    src="/gggg4.svg"
+                    alt="Pay Your Way"
+                    width={93}
+                    height={65}
+                    className="h-[65px] w-auto object-contain object-left"
+                  />
+                </div>
+                <div>
+                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                    Pay Your Way
+                  </h4>
+                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                    Make meaningful travel easier to plan.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 12 & 13. Adventure Deposit & Check Availability with Sticky Right "Book Privately" Panel (100% Figma MCP Match #5207:7755, #5207:7775, #5207:8242) */}
+        <div id="check-availability-section" className="mb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
+            {/* Left Column (1fr): Adventure Deposit + Check Availability */}
+            <div className="space-y-8 w-full min-w-0">
+              {/* Adventure Deposit Card (100% Screenshot & Figma Exact Match #5295:7697) */}
+              <div
+                className="w-full rounded-[12px] border border-[rgba(26,26,26,0.2)] p-6 relative overflow-hidden"
+                style={{ backgroundColor: "rgba(181, 185, 177, 0.1)" }}
+              >
+                {/* Right background graphic shape */}
+                <div className="absolute top-0 right-0 w-[140px] h-[80px] pointer-events-none opacity-20 select-none">
+                  <svg
+                    viewBox="0 0 123 70"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-full h-full"
+                  >
+                    <path
+                      d="M0 0H123V70C123 70 90 60 60 70C30 80 0 0 0 0Z"
+                      fill="#1A1A1A"
+                    />
+                  </svg>
+                </div>
+
+                <div className="relative z-10 flex flex-col">
+                  {/* Header: Icon + Title */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-[23px] h-[24px] flex items-center justify-center shrink-0">
+                      <Image
+                        src="/aadd.svg"
+                        alt="Adventure Deposit"
+                        width={23}
+                        height={24}
+                        className="w-[23px] h-[24px] object-contain"
+                      />
+                    </div>
+                    <h3 className="text-[32px] font-normal text-[#1A1A1A] tracking-[-0.0143em] leading-tight">
+                      Adventure Deposit
+                    </h3>
+                  </div>
+
+                  {/* Description & Learn More Button */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1">
+                    <p className="text-[16px] font-light text-[#1A1A1A]/70 tracking-[-0.0286em] leading-[23.4px] max-w-[692px]">
+                      Lock in your Trip with a small &quot;Deposit amount&quot;
+                      Adventure Deposit if it departs 60+ days from now.
+                    </p>
+
+                    <Link
+                      href="/why-nba"
+                      className="bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-medium px-5 py-1 rounded-[19px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto min-w-[112px] h-[28px] text-center shadow-xs"
+                    >
+                      Learn More
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* 13. "Check Availability" (Exact 100% Figma MCP Flow #5295:7717) */}
+              <div className="w-full border border-[rgba(47,61,68,0.3)] rounded-[12px] overflow-hidden bg-white shadow-xs">
+                {/* Top Header Bar (#5295:7719) */}
+                <div
+                  className="px-7 py-6 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
+                  style={{
+                    backgroundColor: "rgba(181, 185, 177, 0.1)",
+                    minHeight: "104px",
+                  }}
+                >
+                  <h2 className="text-[32px] font-normal text-[#1A1A1A] tracking-[-0.0143em] mb-1 leading-[23.4px]">
                     Check Availability
                   </h2>
-                  <p className="text-[#6B7280] text-[15px]">
-                    Select your preferred dates and secure your spot on this trip
+                  <p className="text-[16px] font-light text-[#1A1A1A]/70 tracking-[-0.0286em]">
+                    Select Your Preferred dates and secure your spot on this
+                    Tour.
                   </p>
+                </div>
 
-                  {/* Month Selection Slider */}
-                  <div className="mt-8 relative">
-                    <div className="flex overflow-x-auto gap-3 pb-4 no-scrollbar scroll-smooth">
-                      {(() => {
-                        const groupedByMonth: { [key: string]: typeof tour.startDates } = {};
-                        tour.startDates.forEach((date) => {
-                          const monthYear = new Date(date.startDate).toLocaleDateString("en-US", {
-                            month: "short",
-                            year: "numeric",
-                          });
-                          if (!groupedByMonth[monthYear]) {
-                            groupedByMonth[monthYear] = [];
-                          }
-                          groupedByMonth[monthYear].push(date);
+                {/* Dual Month Calendar Widget Container (#5295:7741) */}
+                <div className="py-6 px-6 sm:py-7 sm:px-10 lg:px-12 bg-white">
+                  {(() => {
+                    const activeDep =
+                      displayedDepartures[activeDepartureIndex] ||
+                      displayedDepartures[0];
+                    const baseDate = activeDep?.startDate
+                      ? new Date(activeDep.startDate)
+                      : validStartDates[0]?.startDate
+                        ? new Date(validStartDates[0].startDate)
+                        : new Date();
+
+                    const month1Date = new Date(
+                      baseDate.getFullYear(),
+                      baseDate.getMonth() + calendarOffset,
+                      1,
+                    );
+                    const month2Date = new Date(
+                      baseDate.getFullYear(),
+                      baseDate.getMonth() + calendarOffset + 1,
+                      1,
+                    );
+
+                    const formatPrice = (dep: any) => {
+                      const disc = getDiscountPercentage(dep.discount);
+                      const base = dep.price?.amount || basePrice;
+                      const eff =
+                        disc > 0 ? Math.round(base * (1 - disc / 100)) : base;
+                      return eff >= 1000
+                        ? `$${(eff / 1000).toFixed(1)}k`
+                        : `$${eff}`;
+                    };
+
+                    const renderMonthCalendar = (
+                      targetDate: Date,
+                      onPrevClick?: () => void,
+                      onNextClick?: () => void,
+                    ) => {
+                      const monthName = targetDate.toLocaleDateString("en-US", {
+                        month: "short",
+                      });
+                      const year = targetDate.getFullYear();
+                      const monthIdx = targetDate.getMonth();
+                      const daysInMonth = new Date(
+                        year,
+                        monthIdx + 1,
+                        0,
+                      ).getDate();
+                      const firstDay = new Date(year, monthIdx, 1).getDay();
+
+                      const isSameDay = (d1: Date, d2: Date) =>
+                        d1.getFullYear() === d2.getFullYear() &&
+                        d1.getMonth() === d2.getMonth() &&
+                        d1.getDate() === d2.getDate();
+
+                      const isBetweenDays = (
+                        d: Date,
+                        start: Date,
+                        end: Date,
+                      ) => {
+                        const t = new Date(
+                          d.getFullYear(),
+                          d.getMonth(),
+                          d.getDate(),
+                        ).getTime();
+                        const s = new Date(
+                          start.getFullYear(),
+                          start.getMonth(),
+                          start.getDate(),
+                        ).getTime();
+                        const e = new Date(
+                          end.getFullYear(),
+                          end.getMonth(),
+                          end.getDate(),
+                        ).getTime();
+                        return t > s && t < e;
+                      };
+
+                      // Grid cells: blank for leading empty days, then 1..daysInMonth, then trailing next month days
+                      const cells: Array<{
+                        day?: number;
+                        isCurrent: boolean;
+                        date?: Date;
+                      }> = [];
+                      for (let i = 0; i < firstDay; i++) {
+                        cells.push({ isCurrent: false });
+                      }
+                      for (let i = 1; i <= daysInMonth; i++) {
+                        cells.push({
+                          day: i,
+                          isCurrent: true,
+                          date: new Date(year, monthIdx, i),
                         });
+                      }
+                      const totalCells = cells.length > 35 ? 42 : 35;
+                      const remaining = totalCells - cells.length;
+                      for (let i = 1; i <= remaining; i++) {
+                        cells.push({ day: i, isCurrent: false });
+                      }
 
-                        const sortedMonths = Object.keys(groupedByMonth).sort(
-                          (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-                        );
+                      // Active departure date calculations
+                      const depStart = activeDep?.startDate
+                        ? new Date(activeDep.startDate)
+                        : null;
+                      const depEnd = activeDep?.endDate
+                        ? new Date(activeDep.endDate)
+                        : depStart
+                          ? new Date(
+                              depStart.getTime() +
+                                (tour.duration.days - 1) * 86400000,
+                            )
+                          : null;
 
-                        return sortedMonths.map((month) => {
-                          const dates = groupedByMonth[month];
-                          const minPrice = Math.min(...dates.map(d => {
-                            const discPct = getDiscountPercentage(d.discount);
-                            return tour.price.amount * (1 - discPct / 100);
-                          }));
-                          const isSelected = selectedMonth === month;
-
-                          return (
+                      return (
+                        <div className="border border-[#E5E5E5] rounded-[16px] p-5 sm:p-6 bg-white shadow-2xs">
+                          {/* Calendar Header with Navigation */}
+                          <div className="flex items-center justify-between mb-4 px-1">
                             <button
-                              key={month}
-                              onClick={() => setSelectedMonth(isSelected ? null : month)}
-                              className={`flex flex-col items-center justify-center px-6 py-3.5 rounded-xl border transition-all min-w-[130px] shrink-0 ${isSelected
-                                ? "bg-[#3F3F42] border-[#1A1A1A] text-white shadow-md"
-                                : "bg-white border-gray-200 text-[#3F3F42] hover:bg-[#F3F4F6] hover:border-gray-300"
-                                }`}
+                              onClick={onPrevClick}
+                              className="p-1.5 text-[#1A1A1A] hover:text-gray-600 transition cursor-pointer"
+                              aria-label="Previous month"
                             >
-                              <span className={`text-[15px] font-bold ${isSelected ? "text-white" : "text-[#3F3F42]"}`}>
-                                {month}
-                              </span>
-                              <span className={`text-[13px] mt-0.5 ${isSelected ? "text-white/70" : "text-gray-500"}`}>
-                                from ${Math.round(minPrice)}
-                              </span>
+                              <CaretLeft size={20} weight="bold" />
                             </button>
-                          );
-                        });
-                      })()}
+
+                            <span className="text-[20px] font-normal text-[#1A1A1A] font-outfit">
+                              {monthName}
+                            </span>
+
+                            <button
+                              onClick={onNextClick}
+                              className="p-1.5 text-[#1A1A1A] hover:text-gray-600 transition cursor-pointer"
+                              aria-label="Next month"
+                            >
+                              <CaretRight size={20} weight="bold" />
+                            </button>
+                          </div>
+
+                          {/* Day of Week Header */}
+                          <div className="grid grid-cols-7 text-center text-[13px] font-normal text-[#8E8E93] mb-2.5 font-outfit">
+                            <span>Su</span>
+                            <span>Mo</span>
+                            <span>Tu</span>
+                            <span>We</span>
+                            <span>Th</span>
+                            <span>Fr</span>
+                            <span>Sa</span>
+                          </div>
+
+                          {/* Calendar Grid */}
+                          <div className="grid grid-cols-7 gap-y-2.5 gap-x-1 text-center text-[15px] font-normal text-[#1A1A1A] font-outfit items-center justify-items-center">
+                            {cells.map((cell, cIdx) => {
+                              if (!cell.isCurrent || !cell.date) {
+                                return (
+                                  <div
+                                    key={cIdx}
+                                    className="w-[42px] h-[42px] flex items-center justify-center"
+                                  >
+                                    {cell.day ? (
+                                      <span className="text-[#C7C7CC] text-[15px]">
+                                        {cell.day}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                );
+                              }
+
+                              const currentDate = cell.date;
+
+                              // Check if matches active selected departure (Maroon / Plum)
+                              const isStart =
+                                depStart && isSameDay(currentDate, depStart);
+                              const isEnd =
+                                depEnd && isSameDay(currentDate, depEnd);
+                              const isBetween =
+                                depStart &&
+                                depEnd &&
+                                isBetweenDays(currentDate, depStart, depEnd);
+
+                              if (isStart) {
+                                const disc = getDiscountPercentage(
+                                  activeDep.discount,
+                                );
+                                return (
+                                  <div
+                                    key={cIdx}
+                                    className="relative w-[42px] h-[42px] flex items-center justify-center cursor-pointer"
+                                  >
+                                    {disc > 0 && (
+                                      <span className="absolute top-[2px] left-[2px] w-[8px] h-[8px] rounded-full bg-[#FF3B30] z-10 shadow-xs pointer-events-none" />
+                                    )}
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[#5C0D3E] text-white flex flex-col items-center justify-center shadow-xs select-none">
+                                      <span className="text-[15px] font-medium leading-none">
+                                        {cell.day}
+                                      </span>
+                                      <span className="text-[9px] font-light leading-none mt-0.5 opacity-90">
+                                        {formatPrice(activeDep)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              if (isEnd) {
+                                return (
+                                  <div
+                                    key={cIdx}
+                                    className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer"
+                                  >
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[#5C0D3E] text-white flex items-center justify-center shadow-xs select-none">
+                                      <span className="text-[15px] font-medium leading-none">
+                                        {cell.day}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              if (isBetween) {
+                                return (
+                                  <div
+                                    key={cIdx}
+                                    className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer"
+                                  >
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[rgba(92,13,62,0.08)] text-[#5C0D3E] flex items-center justify-center select-none">
+                                      <span className="text-[15px] font-medium leading-none">
+                                        {cell.day}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              // Check if matches other unselected departures in the list (Charcoal / Slate Gray)
+                              const otherDepIdx = displayedDepartures.findIndex(
+                                (dep, idx) => {
+                                  if (idx === activeDepartureIndex)
+                                    return false;
+                                  const s = dep.startDate
+                                    ? new Date(dep.startDate)
+                                    : null;
+                                  const e = dep.endDate
+                                    ? new Date(dep.endDate)
+                                    : s
+                                      ? new Date(
+                                          s.getTime() +
+                                            (tour.duration.days - 1) * 86400000,
+                                        )
+                                      : null;
+                                  if (!s) return false;
+                                  return (
+                                    isSameDay(currentDate, s) ||
+                                    (e && isSameDay(currentDate, e)) ||
+                                    (e && isBetweenDays(currentDate, s, e))
+                                  );
+                                },
+                              );
+
+                              if (otherDepIdx >= 0) {
+                                const otherDep =
+                                  displayedDepartures[otherDepIdx];
+                                const otherStart = new Date(otherDep.startDate);
+                                const otherEnd = otherDep.endDate
+                                  ? new Date(otherDep.endDate)
+                                  : new Date(
+                                      otherStart.getTime() +
+                                        (tour.duration.days - 1) * 86400000,
+                                    );
+                                const isOtherStart = isSameDay(
+                                  currentDate,
+                                  otherStart,
+                                );
+                                const isOtherEnd = isSameDay(
+                                  currentDate,
+                                  otherEnd,
+                                );
+                                const isOtherBetween = isBetweenDays(
+                                  currentDate,
+                                  otherStart,
+                                  otherEnd,
+                                );
+                                const otherDisc = getDiscountPercentage(
+                                  otherDep.discount,
+                                );
+
+                                if (isOtherStart) {
+                                  return (
+                                    <div
+                                      key={cIdx}
+                                      onClick={() =>
+                                        setActiveDepartureIndex(otherDepIdx)
+                                      }
+                                      className="relative w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
+                                    >
+                                      {otherDisc > 0 && (
+                                        <span className="absolute top-[2px] left-[2px] w-[8px] h-[8px] rounded-full bg-[#FF3B30] z-10 shadow-xs pointer-events-none" />
+                                      )}
+                                      <div className="w-[42px] h-[42px] rounded-full bg-[#585C60] text-white flex flex-col items-center justify-center shadow-xs transition group-hover:bg-[#4A4E51] select-none">
+                                        <span className="text-[15px] font-medium leading-none">
+                                          {cell.day}
+                                        </span>
+                                        <span className="text-[9px] font-light leading-none mt-0.5 opacity-90">
+                                          {formatPrice(otherDep)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                if (isOtherEnd) {
+                                  return (
+                                    <div
+                                      key={cIdx}
+                                      onClick={() =>
+                                        setActiveDepartureIndex(otherDepIdx)
+                                      }
+                                      className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
+                                    >
+                                      <div className="w-[42px] h-[42px] rounded-full bg-[#585C60] text-white flex items-center justify-center shadow-xs transition group-hover:bg-[#4A4E51] select-none">
+                                        <span className="text-[15px] font-medium leading-none">
+                                          {cell.day}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+
+                                if (isOtherBetween) {
+                                  return (
+                                    <div
+                                      key={cIdx}
+                                      onClick={() =>
+                                        setActiveDepartureIndex(otherDepIdx)
+                                      }
+                                      className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
+                                    >
+                                      <div className="w-[42px] h-[42px] rounded-full bg-[#EAEAEA] text-[#1A1A1A] flex items-center justify-center transition group-hover:bg-[#E0E0E0] select-none">
+                                        <span className="text-[15px] font-normal leading-none">
+                                          {cell.day}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              }
+
+                              // Regular Day
+                              return (
+                                <div
+                                  key={cIdx}
+                                  className="w-[42px] h-[42px] flex items-center justify-center"
+                                >
+                                  <span className="text-[15px] font-normal text-[#1A1A1A] w-[38px] h-[38px] flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer transition select-none">
+                                    {cell.day}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    };
+
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 lg:gap-12">
+                        {renderMonthCalendar(
+                          month1Date,
+                          () => setCalendarOffset((prev) => prev - 1),
+                          () => setCalendarOffset((prev) => prev + 1),
+                        )}
+                        {renderMonthCalendar(
+                          month2Date,
+                          () => setCalendarOffset((prev) => prev - 1),
+                          () => setCalendarOffset((prev) => prev + 1),
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Month Selector Tabs & Filter Header (#5295:7939) */}
+                <div
+                  className="px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-t border-b border-[rgba(181,185,177,0.2)]"
+                  style={{
+                    backgroundColor: "rgba(181, 185, 177, 0.1)",
+                    minHeight: "74px",
+                  }}
+                >
+                  {/* Left: Month Tabs with Smooth Scroll & Dynamic Black/Gray Arrows */}
+                  <div className="flex items-center gap-2 sm:gap-2.5 max-w-full">
+                    {/* Left Arrow Button (Black when scrolled, Gray at start) */}
+                    <button
+                      onClick={() => handleScrollMonths("left")}
+                      disabled={!canScrollLeft}
+                      className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-white transition shrink-0 shadow-2xs ${
+                        canScrollLeft
+                          ? "bg-[#1A1A1A] hover:bg-black cursor-pointer"
+                          : "bg-[#9E9E9E] cursor-default opacity-80"
+                      }`}
+                      aria-label="Scroll left"
+                    >
+                      <CaretLeft size={16} weight="bold" />
+                    </button>
+
+                    {/* Smooth Scrollable Months Container: exactly 3 full cards + half 4th card */}
+                    <div
+                      ref={monthScrollRef}
+                      onScroll={updateScrollButtons}
+                      className="flex items-center gap-2.5 overflow-x-auto scroll-smooth w-[370px] sm:w-[410px] md:w-[440px] py-1"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                      }}
+                    >
+                      {availableMonths.map((m) => {
+                        const isSelected = selectedMonth === m.key;
+                        return (
+                          <button
+                            key={m.key}
+                            onClick={() => {
+                              setSelectedMonth(isSelected ? null : m.key);
+                              setActiveDepartureIndex(0);
+                            }}
+                            className={`min-w-[114px] w-[114px] h-[54px] px-3.5 py-1.5 rounded-[12px] flex flex-col justify-center text-left transition cursor-pointer shrink-0 shadow-xs border-0 ${
+                              isSelected
+                                ? "bg-[#601444] text-white"
+                                : "bg-white text-[#1A1A1A] hover:bg-gray-50"
+                            }`}
+                          >
+                            <span className="text-[15px] font-bold leading-tight truncate">
+                              {m.label}
+                            </span>
+                            <span
+                              className={`text-[12px] font-normal leading-tight mt-0.5 truncate ${isSelected ? "text-white/90" : "text-[#696969]"}`}
+                            >
+                              from ${m.minPrice}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
+
+                    {/* Right Arrow Button (Black when can scroll right, Gray at end) */}
+                    <button
+                      onClick={() => handleScrollMonths("right")}
+                      disabled={!canScrollRight}
+                      className={`w-[32px] h-[32px] rounded-full flex items-center justify-center text-white transition shrink-0 shadow-2xs ${
+                        canScrollRight
+                          ? "bg-[#1A1A1A] hover:bg-black cursor-pointer"
+                          : "bg-[#9E9E9E] cursor-default opacity-80"
+                      }`}
+                      aria-label="Scroll right"
+                    >
+                      <CaretRight size={16} weight="bold" />
+                    </button>
+                  </div>
+
+                  {/* Right: Filter Dropdown Buttons (Borderless, Pure White) */}
+                  <div className="flex items-center gap-3 shrink-0 self-start lg:self-center">
+                    {/* Deals Filter Toggle */}
+                    <button
+                      onClick={() => setFilterDealsOnly(!filterDealsOnly)}
+                      className={`rounded-[10px] px-4 h-[42px] text-[15px] font-normal flex items-center gap-2.5 shadow-xs transition cursor-pointer border-0 ${
+                        filterDealsOnly
+                          ? "bg-[#601444] text-white shadow-xs"
+                          : "bg-white text-[#1A1A1A] hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>Deals ({totalDealsCount || 5})</span>
+                      <CaretDown
+                        size={14}
+                        className={
+                          filterDealsOnly ? "text-white" : "text-[#1A1A1A]"
+                        }
+                      />
+                    </button>
+
+                    {/* Price Sort Toggle */}
+                    <button
+                      onClick={() =>
+                        setPriceSortOrder(
+                          priceSortOrder === "low-to-high"
+                            ? "high-to-low"
+                            : "low-to-high",
+                        )
+                      }
+                      className="bg-white rounded-[10px] px-4 h-[42px] text-[15px] font-normal text-[#1A1A1A] flex items-center gap-2.5 shadow-xs hover:bg-gray-50 border-0 transition cursor-pointer"
+                      title="Toggle Price Sorting"
+                    >
+                      <span>
+                        Price (
+                        {priceSortOrder === "low-to-high"
+                          ? "low to h..."
+                          : "high to l..."}
+                        )
+                      </span>
+                      <CaretDown size={14} className="text-[#1A1A1A]" />
+                    </button>
                   </div>
                 </div>
 
-                {/* Availability Table */}
-                <div className="overflow-x-auto w-full">
-                  <table className="w-full text-left border-collapse">
-                    {/* Table Header */}
-                    <thead>
-                      <tr className="bg-[#F4F5F7] border-y border-gray-200">
-                        <th className="px-10 py-[18px] text-[15px] font-bold text-[#3F3F42]">
-                          Dates
-                          <div className="text-[13px] font-normal text-gray-500 mt-0.5">Start-End</div>
-                        </th>
-                        <th className="px-6 py-[18px] text-[15px] font-bold text-[#3F3F42]">
-                          Availability
-                          <div className="text-[13px] font-normal text-gray-500 mt-0.5">Remaining Spaces</div>
-                        </th>
-                        <th className="px-6 py-[18px] text-[15px] font-bold text-[#3F3F42]">
-                          Price
-                          <div className="text-[13px] font-normal text-gray-500 mt-0.5">Per Person</div>
-                        </th>
-                        <th className="px-10 py-[18px] text-[15px] font-bold text-[#3F3F42] text-right">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
+                {/* Departure Rows Container (#5295:7720) */}
+                <div className="p-5 sm:p-7 space-y-3 bg-white">
+                  {/* Sub-header row (#5295:7720, #5295:7721) */}
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <h4 className="text-[20px] font-normal text-[#1A1A1A] font-outfit tracking-[-0.02em]">
+                      All Available Dates
+                    </h4>
+                    <span className="text-[16px] font-light text-[#1A1A1A] font-outfit opacity-80">
+                      Do you want Sooner dates?
+                    </span>
+                  </div>
 
-                    {/* Table Body - Grouped by Month */}
-                    <tbody>
-                      {tour.startDates && tour.startDates.length > 0 ? (
-                        (() => {
-                          const groupedByMonth: {
-                            [key: string]: typeof tour.startDates;
-                          } = {};
-
-                          tour.startDates.forEach((date) => {
-                            const monthYear = new Date(
-                              date.startDate,
-                            ).toLocaleDateString("en-US", {
-                              month: "short",
-                              year: "numeric",
-                            });
-                            if (!groupedByMonth[monthYear]) {
-                              groupedByMonth[monthYear] = [];
-                            }
-                            groupedByMonth[monthYear].push(date);
-                          });
-
-                          // Sort months chronologically
-                          let sortedMonths = Object.keys(groupedByMonth).sort(
-                            (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+                  {/* Dynamic Departure Rows */}
+                  {displayedDepartures.length > 0 ? (
+                    displayedDepartures.map((d, index) => {
+                      const startDateObj = new Date(d.startDate);
+                      const endDateObj = d.endDate
+                        ? new Date(d.endDate)
+                        : new Date(
+                            startDateObj.getTime() +
+                              (tour.duration.days - 1) * 86400000,
                           );
+                      const dateStr =
+                        startDateObj.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "2-digit",
+                        }) +
+                        " - " +
+                        endDateObj.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "2-digit",
+                        });
+                      const disc = getDiscountPercentage(d.discount);
+                      const base = d.price?.amount || basePrice;
+                      const price =
+                        disc > 0 ? Math.round(base * (1 - disc / 100)) : base;
+                      const isoDateStr = startDateObj
+                        .toISOString()
+                        .split("T")[0];
+                      const isSelected = activeDepartureIndex === index;
 
-                          // Filter based on selected month
-                          if (selectedMonth) {
-                            sortedMonths = sortedMonths.filter(m => m === selectedMonth);
-                          }
+                      return (
+                        <div
+                          key={d._id || index}
+                          onClick={() => setActiveDepartureIndex(index)}
+                          style={{
+                            border: isSelected
+                              ? "1.5px solid #601444"
+                              : "1.5px solid transparent",
+                            backgroundColor: isSelected
+                              ? "rgba(58, 28, 54, 0.08)"
+                              : "rgba(181, 185, 177, 0.15)",
+                          }}
+                          className="rounded-[12px] px-4 sm:px-5 min-h-[62px] h-auto sm:h-[62px] py-3 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-2 relative transition-all cursor-pointer"
+                        >
+                          {/* Left: Date & Status Tag + Spots Left Pill */}
+                          <div className="flex items-center gap-4 sm:gap-6 min-w-[260px] sm:min-w-[280px]">
+                            {/* Date column (aligned width) */}
+                            <div className="w-[130px] sm:w-[145px] flex flex-col justify-center shrink-0">
+                              {disc > 0 && (
+                                <span className="text-[#FF2B00] text-[10px] font-normal tracking-tight leading-none mb-0.5">
+                                  On Sale
+                                </span>
+                              )}
+                              <span className="text-[16px] font-medium text-[#1A1A1A] leading-tight tracking-tight font-outfit">
+                                {dateStr}
+                              </span>
+                            </div>
 
-                          return sortedMonths.flatMap((month, monthIndex) => {
-                            const monthHeader = (
-                              <tr key={`month-header-${month}`} className="bg-[#EAECEE] border-b border-gray-200">
-                                <td colSpan={4} className="px-10 py-[14px] text-[13px] font-bold text-[#3F3F42] uppercase tracking-wider">
-                                  {month}
-                                </td>
-                              </tr>
-                            );
+                            {/* Spots Left Tag (#5295:7729) */}
+                            <div className="bg-white rounded-[25px] px-3.5 py-1 flex items-center justify-center shrink-0">
+                              <span className="text-[12px] text-[#1A1A1A] font-normal opacity-85 leading-none whitespace-nowrap">
+                                {d.availableSpots ??
+                                  (d as any).remainingSpots ??
+                                  (d as any).spotsLeft ??
+                                  14}{" "}
+                                Spots Left
+                              </span>
+                            </div>
+                          </div>
 
-                            const rows = groupedByMonth[month].map((date, dateIndex) => {
-                              const isSoldOut = date.availableSpots === 0 || !date.isActive;
-                              const originalPrice = tour.price.amount;
-                              const dateDiscountPct = getDiscountPercentage(date.discount);
+                          {/* Center: Price (#5295:7732, #5295:7891) */}
+                          <div className="flex items-baseline gap-0.5 shrink-0 sm:ml-4">
+                            <span className="text-[11px] font-semibold text-[#1A1A1A] self-start mt-1 mr-0.5">
+                              $
+                            </span>
+                            <span className="text-[32px] font-bold text-[#1A1A1A] tracking-tight leading-none font-outfit">
+                              {price}
+                            </span>
+                            <span className="text-[10px] font-medium text-[#1A1A1A] ml-1.5 self-end mb-1 leading-none whitespace-nowrap">
+                              USD/Per Person
+                            </span>
+                          </div>
 
-                              // Use the date discount
-                              const bestDiscountPct = dateDiscountPct;
-                              const datePrice = originalPrice * (1 - bestDiscountPct / 100);
+                          {/* Right: Action Buttons (#5295:7736, #5295:7739) */}
+                          <div className="flex items-center gap-3 shrink-0 sm:ml-auto mr-0">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setHoldSelectedDate(isoDateStr);
+                                handleHoldSpace(isoDateStr);
+                              }}
+                              className={`h-[32px] px-4 sm:px-5 text-[14px] font-normal transition cursor-pointer flex items-center justify-center min-w-[125px] sm:min-w-[136px] ${
+                                isSelected
+                                  ? "bg-[rgba(58,28,54,0.2)] hover:bg-[rgba(58,28,54,0.3)] text-[#1A1A1A] rounded-[27px]"
+                                  : "bg-[rgba(26,26,26,0.1)] hover:bg-[rgba(26,26,26,0.18)] text-[#1A1A1A] rounded-[31px]"
+                              }`}
+                            >
+                              Hold Adventure
+                            </button>
 
-                              return (
-                                <tr key={`${month}-${dateIndex}`} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-                                  <td className="px-10 py-6">
-                                    <div className={`text-[15px] font-medium ${isSoldOut ? "text-gray-400" : "text-[#3F3F42]"}`}>
-                                      {new Date(date.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                                      {" - "}
-                                      {new Date(date.endDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                                    </div>
-                                  </td>
+                            {/* Relative Book Now Button Container with Discount Tag Attached */}
+                            <div className="relative inline-flex items-center">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(
+                                    `/trips/${tour.slug}/${tour.tourCode}/checkout?date=${isoDateStr}`,
+                                  );
+                                }}
+                                className={`h-[32px] px-5 sm:px-6 text-[14px] font-normal transition cursor-pointer shadow-xs flex items-center justify-center min-w-[115px] sm:min-w-[125px] text-white ${
+                                  isSelected
+                                    ? "bg-[#601444] hover:bg-[#4d0f36] rounded-[27px]"
+                                    : "bg-[#696969] hover:bg-[#1A1A1A] rounded-[31px]"
+                                }`}
+                              >
+                                Book Now
+                              </button>
 
-                                  <td className="px-6 py-6 border-transparent">
-                                    {isSoldOut ? (
-                                      <span className="text-[15px] text-gray-400 font-medium">Sold Out</span>
-                                    ) : (
-                                      <div className="flex items-center gap-1.5 text-[15px]">
-                                        <span className="font-bold text-[#3F3F42]">{date.availableSpots}</span>
-                                        <span className="text-gray-500 font-normal">Available</span>
-                                      </div>
-                                    )}
-                                  </td>
+                              {/* Bookmark Discount Ribbon Attached Directly Over Book Now Right Side */}
+                              {disc > 0 && (
+                                <div className="absolute -top-[17px] right-[5px] flex flex-col items-center z-20 select-none pointer-events-none">
+                                  <svg
+                                    width="25"
+                                    height="40"
+                                    viewBox="0 0 25 40"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="drop-shadow-xs"
+                                  >
+                                    <path
+                                      d="M0 4C0 1.79086 1.79086 0 4 0H21C23.2091 0 25 1.79086 25 4V40L12.5 30L0 40V4Z"
+                                      fill="#FFFFFF"
+                                      stroke={
+                                        isSelected ? "#601444" : "#D1D1D6"
+                                      }
+                                      strokeWidth="1"
+                                    />
+                                  </svg>
+                                  <span
+                                    className={`absolute top-1 text-[9px] font-bold leading-[1.05] text-center ${
+                                      isSelected
+                                        ? "text-[#601444]"
+                                        : "text-[#1A1A1A]"
+                                    }`}
+                                  >
+                                    {disc}%<br />
+                                    Off
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="py-10 text-center text-gray-500 font-light">
+                      <p className="text-[16px] text-[#1A1A1A] mb-2">
+                        No departures found for the selected filters.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedMonth(null);
+                          setFilterDealsOnly(false);
+                          setActiveDepartureIndex(0);
+                        }}
+                        className="text-[#601444] font-medium underline text-[14px] cursor-pointer"
+                      >
+                        Reset filters
+                      </button>
+                    </div>
+                  )}
 
-                                  <td className="px-6 py-6 min-w-[200px]">
-                                    {isSoldOut ? (
-                                      <span className="text-[20px] font-bold text-gray-300">${originalPrice}</span>
-                                    ) : (
-                                      <div className="flex items-center gap-4">
-                                        <div className="flex flex-col">
-                                          <span className="text-[24px] font-bold text-[#3F3F42] leading-tight tracking-tight">${Math.round(datePrice)}</span>
-                                          {bestDiscountPct > 0 && (
-                                            <span className="text-[14px] text-gray-400 line-through mt-0.5">${originalPrice}</span>
-                                          )}
-                                        </div>
-                                        {bestDiscountPct > 0 && (
-                                          <div className="bg-[#3F3F42] text-white px-3.5 py-1.5 rounded-full text-[13px] font-bold whitespace-nowrap self-start mt-1 shadow-sm">
-                                            Save {bestDiscountPct}%
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </td>
-
-                                  <td className="px-10 py-6">
-                                    <div className="flex items-center justify-end gap-3">
-                                      {!isSoldOut && (
-                                        <button
-                                          onClick={() => {
-                                            const dateStr = new Date(date.startDate).toISOString().split('T')[0];
-                                            router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
-                                          }}
-                                          className="py-[11px] px-7 rounded-full font-bold text-[14px] bg-[#C8C8C8] hover:bg-[#B0B0B0] text-white transition-colors whitespace-nowrap"
-                                        >
-                                          Hold Space
-                                        </button>
-                                      )}
-                                      <button
-                                        onClick={() => {
-                                          const dateStr = new Date(date.startDate).toISOString().split('T')[0];
-                                          router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${dateStr}`);
-                                        }}
-                                        disabled={isSoldOut}
-                                        className={`py-[11px] px-8 rounded-full font-bold text-[14px] transition-colors whitespace-nowrap ${isSoldOut ? "bg-gray-100 text-gray-400 cursor-not-allowed hidden" : "bg-[#3F3F42] hover:bg-[#3F3F42] text-white shadow-sm"
-                                          }`}
-                                      >
-                                        Book now
-                                      </button>
-                                      {isSoldOut && (
-                                        <span className="text-sm font-medium text-gray-400">Unavailable</span>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            });
-
-                            return [monthHeader, ...rows];
-                          });
-                        })()
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={4}
-                            className="px-6 py-8 text-center text-gray-500 text-[15px]"
-                          >
-                            No dates available at the moment
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  {/* Clear date button (#5295:7724) */}
+                  <div className="flex justify-end pt-3 pr-1">
+                    <button
+                      onClick={() => {
+                        setSelectedMonth(null);
+                        setFilterDealsOnly(false);
+                        setPriceSortOrder("low-to-high");
+                        setActiveDepartureIndex(0);
+                      }}
+                      className="text-[#601444] hover:underline text-[16px] font-normal cursor-pointer"
+                    >
+                      Clear date
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            {/* Book Privately Card */}
-            <div className="hidden lg:flex flex-col sticky top-24 self-start">
-              <div className="border border-gray-200 rounded-[16px] bg-white shadow-sm overflow-hidden">
-                {/* Top image */}
-                <div className="relative w-full h-[200px]">
+
+            {/* Right Sticky Column (316px #5207:8242): "Book Privately" Card (Matching Continue Your Journey sizing) */}
+            <div className="w-full lg:sticky lg:top-24 space-y-4">
+              <div className="w-full bg-white border border-[rgba(47,61,68,0.2)] rounded-[12px] overflow-hidden shadow-xs flex flex-col">
+                {/* Top Photo (#5207:8261) */}
+                <div className="w-full h-[169px] relative bg-gray-900">
                   <Image
-                    src={tour.images[tour.images.length - 1]?.url || tour.images[0]?.url || "/placeholder-image.jpg"}
+                    src={tour.images?.[1]?.url || "/mountain_hikers.png"}
                     alt="Book Privately"
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-black/10" />
                 </div>
-                {/* Content */}
-                <div className="p-5 flex flex-col gap-3">
+
+                {/* Card Content (#5207:8246) */}
+                <div className="p-6 flex flex-col justify-between flex-1">
                   <div>
-                    <h3 className="text-[18px] font-bold text-[#3F3F42] mb-1.5 leading-snug">Book Privately</h3>
-                    <p className="text-[13px] text-gray-500 leading-relaxed">
-                      Enjoy your journey with added privacy, comfort, and exclusive personal space.
+                    <h4 className="text-[24px] font-normal text-[#1A1A1A] leading-tight mb-2">
+                      Book Privately
+                    </h4>
+                    <p className="text-[14px] font-light text-[#1A1A1A]/80 leading-relaxed mb-6">
+                      Enjoy your journey with added privacy, comfort, and
+                      exclusive personal space.
                     </p>
                   </div>
-                  <div className="flex gap-2 mt-1 group">
-                    <button
-                      onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
-                      className="flex-1 bg-[#3F3F42] text-white py-2.5 px-4 rounded-full flex items-center justify-center gap-2 font-medium hover:bg-[#3F3F42] transition text-[13px]"
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Link
+                      href={`/contact?subject=Private%20Booking%20for%20${encodeURIComponent(tour.name)}`}
+                      className="bg-[#1A1A1A] hover:bg-black text-white text-[15px] font-medium px-6 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
                     >
                       Start Exploring
-                    </button>
-                    <button
-                      onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout?date=${bestDealDate ? new Date(bestDealDate.startDate).toISOString().split('T')[0] : ''}&private=true`)}
-                      className="w-10 h-10 bg-[#3F3F42] text-white rounded-full flex items-center justify-center hover:bg-[#3F3F42] transition shrink-0"
+                    </Link>
+                    <Link
+                      href={`/contact?subject=Private%20Booking%20for%20${encodeURIComponent(tour.name)}`}
+                      className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs"
+                      aria-label="Start Exploring"
                     >
-                      <ArrowUpRight size={16} className="transition-transform duration-300 group-hover:rotate-45" />
-                    </button>
+                      <ArrowUpRight
+                        size={16}
+                        className="text-white"
+                        weight="bold"
+                      />
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      )}
 
+        {/* 14. Reviews Section */}
+        <div ref={recommendedToursRef} className="mb-20">
+          <ReviewsSection />
+        </div>
 
-      {/* Reviews Section */}
-      <div ref={recommendedToursRef} className="w-full px-4 sm:px-6 lg:px-10">
-        <ReviewsSection />
+        {/* 15. Recently Viewed Section */}
+        <div className="mb-20">
+          <RecentlyViewedSection />
+        </div>
+
+        {/* 16. FAQ Section */}
+        <div className="mb-20">
+          <FaqSection />
+        </div>
       </div>
 
-      {/* Popular Tours Section */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 pb-16">
-        <PopularToursSection tours={relatedTours} />
-      </div>
-
-      {/* Sticky Footer */}
+      {/* 17. Sticky Footer (100% Figma MCP Match #5091:8488) */}
       {(showStickyFooter || showFullItineraryModal) && (
-        <div className={`fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] animate-in slide-in-from-bottom duration-300 ${showFullItineraryModal ? 'z-[102]' : 'z-50'}`}>
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-
-              {/* Route & Price Info */}
-              <div className="flex items-center gap-8 flex-1">
-                {/* Route */}
-                <div className="hidden md:block">
-                  <div className="text-sm font-bold text-[#3F3F42]">
-                    {tour.location.startCity} to {tour.location.endCity}
+        <div
+          className={`fixed bottom-0 left-0 right-0 bg-white border-t border-[rgba(26,26,26,0.12)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] animate-in slide-in-from-bottom duration-300 ${
+            showFullItineraryModal ? "z-[102]" : "z-50"
+          }`}
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              {/* Left Info Group */}
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 lg:gap-10">
+                {/* Route & Duration */}
+                <div className="flex flex-col justify-center">
+                  <div className="text-[17px] sm:text-[18px] font-normal text-[#1A1A1A] font-outfit leading-tight">
+                    {tour.location?.startCity && tour.location?.endCity
+                      ? `${tour.location.startCity} to ${tour.location.endCity}`
+                      : tour.name}
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {tour.duration.days} days
+                  <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 leading-tight mt-0.5">
+                    {tour.duration.days} Days
                   </div>
                 </div>
 
-                {/* Price */}
-                <div className="flex items-center gap-4">
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-xs text-gray-500">From</span>
-                      <span className="text-xl font-bold text-[#3F3F42]">
-                        ${discountedPrice.toFixed(0)}
+                {/* Price & Discount Info */}
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-col justify-center">
+                    <span className="text-[10px] font-light text-[#1A1A1A]/70 leading-none mb-0.5">
+                      From
+                    </span>
+                    <div className="flex items-baseline">
+                      <span className="text-[11px] font-semibold text-[#1A1A1A] self-start mt-0.5 mr-0.5">
+                        $
                       </span>
-                      <span className="text-xs font-medium text-[#3F3F42]">USD</span>
+                      <span className="text-[26px] sm:text-[28px] font-bold text-[#1A1A1A] leading-none tracking-tight font-outfit">
+                        {Math.round(discountedPrice)}
+                      </span>
+                      <span className="text-[10px] font-normal text-[#1A1A1A] ml-1 self-end mb-0.5 leading-none">
+                        USD
+                      </span>
                     </div>
-                    {tour.price.amount > discountedPrice && (
-                      <div className="text-xs text-gray-500">
-                        was <span className="line-through">${tour.price.amount.toFixed(0)}</span> per person
-                      </div>
-                    )}
                   </div>
 
-                  {/* Valid Date */}
-                  {sortedDates.length > 0 && (
-                    <div className="hidden lg:block pl-4 border-l border-gray-300">
-                      <div className="text-xs text-gray-500">Valid on</div>
-                      <div className="text-sm font-semibold text-[#3F3F42]">
-                        {new Date(sortedDates[0].startDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </div>
+                  {/* Sale Tag & Was Price */}
+                  {bestDiscount > 0 && (
+                    <div className="flex flex-col justify-center pl-1">
+                      <span className="text-[#FF2B00] text-[10px] font-normal leading-none mb-0.5">
+                        Sale {bestDiscount}%
+                      </span>
+                      <span className="text-[8px] font-light text-[#1A1A1A]/60 leading-none">
+                        was
+                      </span>
+                      <span className="text-[13px] font-normal text-[#1A1A1A] line-through leading-tight">
+                        ${basePrice}
+                      </span>
                     </div>
                   )}
+                </div>
 
-                  {/* Rating */}
-                  <div className="hidden xl:block pl-4 border-l border-gray-300">
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className="text-lg leading-none">
-                          {i < Math.floor(tour.ratingsAverage) ? "★" : "☆"}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {tour.ratingsQuantity} reviews
-                    </div>
-                  </div>
+                {/* Vertical Divider */}
+                <div className="w-[1px] h-[34px] bg-[#E5E5E5] hidden md:block" />
+
+                {/* Valid on Date */}
+                <div className="hidden md:flex flex-col justify-center">
+                  <span className="text-[10px] font-light text-[#1A1A1A]/70 leading-none mb-0.5">
+                    on
+                  </span>
+                  <span className="text-[14px] sm:text-[15px] font-normal text-[#1A1A1A] leading-tight font-outfit">
+                    {dealDepartureDateStr}
+                  </span>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-3 w-full md:w-auto">
+              {/* Right Side: Check Dates And Prices Button */}
+              <div className="w-full sm:w-auto flex justify-end">
                 <button
                   onClick={() => {
-                    const dateStr = sortedDates.length > 0 ? new Date(sortedDates[0].startDate).toISOString().split('T')[0] : '';
-                    router.push(`/trips/${tour.slug}/${tour.tourCode}/hold-spaces?date=${dateStr}`);
+                    const datesSection = document.getElementById(
+                      "check-availability-section",
+                    );
+                    if (datesSection) {
+                      datesSection.scrollIntoView({ behavior: "smooth" });
+                    }
                   }}
-                  className="flex-1 md:flex-none bg-gray-200 hover:bg-gray-300 text-[#3F3F42] font-bold py-3 px-6 rounded transition-colors whitespace-nowrap"
+                  className="w-full sm:w-auto bg-[#1A1A1A] hover:bg-black text-white text-[15px] sm:text-[16px] font-normal px-8 sm:px-10 py-1.5 h-[34px] flex items-center justify-center rounded-[34px] transition cursor-pointer shadow-xs whitespace-nowrap text-center"
                 >
-                  Hold Space
-                </button>
-                <button
-                  onClick={() => router.push(`/trips/${tour.slug}/${tour.tourCode}/checkout`)}
-                  className="flex-1 md:flex-none bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded transition-colors whitespace-nowrap"
-                >
-                  Book Now
-                </button>
-                <button className="w-[48px] h-[48px] shrink-0 border border-gray-300 hover:bg-gray-50 text-[#3F3F42] rounded flex items-center justify-center transition-colors">
-                  <span className="text-xl leading-none pt-0.5">♡</span>
+                  Check Dates And Prices
                 </button>
               </div>
             </div>
@@ -2381,432 +3605,167 @@ export default function TourDetailPage() {
         </div>
       )}
 
-      {/* Hold Space Modal */}
-      {showHoldModal && (
-        <div className="fixed inset-0 bg-[#3F3F42]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowHoldModal(false)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-[80%] w-full overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {/* Header */}
-            <div className="bg-white px-6 py-5 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold flex items-center gap-2 text-[#3F3F42]">
-                    <span>🔒</span> Hold Your Space
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">Reserve your spot for 48 hours — no payment required</p>
-                </div>
-                <button
-                  onClick={() => setShowHoldModal(false)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl leading-none p-1"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            {/* Body */}
-            <div className="p-6">
-              {/* Tour Info */}
-              <div className="flex items-start gap-3 mb-6 pb-4 border-b border-gray-100">
-                {tour?.images?.[0] && (
-                  <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 relative">
-                    <Image
-                      src={tour.images[0].url || "/placeholder-image.jpg"}
-                      alt={tour.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-semibold text-[#3F3F42] text-sm">{tour?.name}</h4>
-                  <p className="text-xs text-gray-500 mt-1">{tour?.duration.days} days • {tour?.location.startCity} to {tour?.location.endCity}</p>
-                </div>
-              </div>
-
-              {/* Date Selection */}
-              <div className="mb-5">
-                <label className="block text-sm font-semibold text-[#3F3F42] mb-3">Select a departure date</label>
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
-                  {sortedDates
-                    .filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date())
-                    .map((date, idx) => {
-                      const discount = getDiscountPercentage(date.discount);
-                      const dateStr = new Date(date.startDate).toISOString().split("T")[0];
-                      
-                      let priceForDate = tour.price.amount;
-                      if (discount > 0) {
-                        priceForDate = priceForDate * (1 - discount / 100);
-                      } else if (date.price?.amount) {
-                        priceForDate = date.price.amount;
-                      } else if ((tour.price.discountPercent ?? 0) > 0) {
-                        priceForDate = priceForDate * (1 - (tour.price.discountPercent ?? 0) / 100);
-                      }
-                      priceForDate = Math.round(priceForDate);
-
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between px-6 py-4 rounded-2xl transition-all bg-[#F1F2F3] border border-transparent"
-                        >
-                          {/* Left: Date */}
-                          <div className="flex flex-col flex-1">
-                            {discount > 0 ? (
-                              <span className="text-[12px] font-medium text-[#FF4835] mb-0.5">On Sale</span>
-                            ) : (
-                              <span className="h-[18px] mb-0.5"></span>
-                            )}
-                            <span className="font-medium text-[#2C3238] text-[16px]">
-                              {new Date(date.startDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })} to {new Date(date.endDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                            </span>
-                          </div>
-
-                          {/* Middle: Seats */}
-                          <div className="flex flex-1 justify-center items-center">
-                            <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-[0px_2px_8px_rgba(0,0,0,0.04)]">
-                              <Armchair size={15} className="text-gray-400" weight="fill" />
-                              <span className="text-[12px] font-medium text-gray-500">{date.availableSpots}+ Seats Available</span>
-                            </div>
-                          </div>
-
-                          {/* Right: Price & Button */}
-                          <div className="flex flex-1 justify-end items-center gap-6">
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-[14px] font-bold text-[#1A1F24] translate-y-[-8px]">$</span>
-                              <span className="text-[34px] font-bold text-[#1A1F24] leading-none tracking-tight">{priceForDate}</span>
-                              <span className="text-[10px] font-bold text-black mt-auto mb-1.5">USD/Per Person</span>
-                            </div>
-
-                            <div className="relative">
-                              {discount > 0 && (
-                                <div className="absolute -top-[30px] right-2 w-[28px] h-[40px] z-10 flex flex-col items-center justify-start pt-1 drop-shadow-sm">
-                                  <svg className="absolute inset-0 w-full h-full text-gray-300" viewBox="0 0 28 40" fill="white" stroke="currentColor" strokeWidth="1">
-                                    <path d="M 3 1 L 25 1 A 2 2 0 0 1 27 3 L 27 39 L 14 32 L 1 39 L 1 3 A 2 2 0 0 1 3 1 Z" strokeLinejoin="round" />
-                                  </svg>
-                                  <div className="relative z-20 flex flex-col items-center mt-[3px]">
-                                    <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">{discount}%</span>
-                                    <span className="text-[9px] leading-[1.1] text-[#2C3238] font-bold">Off</span>
-                                  </div>
-                                </div>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setHoldSelectedDate(dateStr);
-                                  handleHoldSpace(dateStr);
-                                }}
-                                disabled={holdLoading}
-                                className="px-6 py-3 rounded-full font-medium text-[15px] transition text-white bg-[#37414A] hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {holdLoading && holdSelectedDate === dateStr ? (
-                                  <span className="flex items-center justify-center gap-2">
-                                    <span className="animate-spin">⏳</span> Holding...
-                                  </span>
-                                ) : (
-                                  "Hold Space"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-                {sortedDates.filter(d => d.isActive && d.availableSpots > 0 && new Date(d.startDate) > new Date()).length === 0 && (
-                  <p className="text-sm text-gray-500 text-center py-4">No available dates for this trip</p>
-                )}
-              </div>
-
-              {/* Hold Info */}
-              <div className="bg-gray-50 rounded-xl p-4 mb-5 text-sm">
-                <div className="flex items-start gap-2">
-                  <span className="text-[#53319C] mt-0.5">⏱️</span>
-                  <div>
-                    <p className="text-[#3F3F42]">Your space will be held for <strong>48 hours</strong> from confirmation.</p>
-                    <p className="text-gray-500 text-xs mt-1">No payment required. You can convert to a booking or release anytime.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Message */}
-              {holdMessage && (
-                <div className={`mb-4 px-4 py-3 rounded-xl text-sm font-medium ${holdMessage.type === "success"
-                  ? "bg-green-50 text-green-700 border border-green-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
-                  }`}>
-                  {holdMessage.text}
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="flex justify-center mt-6">
-                <button
-                  onClick={() => setShowHoldModal(false)}
-                  className="w-full max-w-xs py-3 px-4 border border-gray-300 text-[#3F3F42] rounded-xl font-semibold text-sm hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hold Auth Modal */}
+      {/* Auth Modal for Hold Space */}
       <AuthModal
         isOpen={showHoldAuthModal}
         onClose={() => setShowHoldAuthModal(false)}
         initialView="login"
         onSuccess={() => {
           setShowHoldAuthModal(false);
-          const url = new URL(window.location.href);
-          const date = url.searchParams.get("date");
-          if (date) {
-            handleHoldSpace(date);
-          } else {
-            handleHoldSpace();
-          }
+          handleHoldSpace();
         }}
       />
-      {/* Full Itinerary Modal */}
-      {showFullItineraryModal && (
-        <div
-          onScroll={handleModalScroll}
-          className="fixed inset-0 z-[100] bg-[#F3F8FF] overflow-y-auto pb-20"
-        >
-          {/* Scrollable Header */}
-          <div className="pt-8 pb-6 px-6 lg:px-10 flex items-center justify-between border-b border-gray-200/50">
-            <div className="flex flex-col">
-              <h1 className="text-[34px] md:text-[44px] lg:text-[48px] font-semibold text-[#3F3F42] leading-[1.2] tracking-tight">
-                {tour.name}
-              </h1>
-              <div className="text-[18px] md:text-[22px] text-[#3F3F42] mt-2">
-                {tour.duration.days} Days, {tour.location.startCity} to {tour.location.endCity}
-              </div>
-              <h2 className="text-[26px] font-semibold text-[#3F3F42] tracking-tight mt-6">
-                Full Itenary
-              </h2>
-            </div>
-            <div className="flex items-center gap-6">
-              <button className="bg-[#3F3F42] text-white pl-4 pr-1.5 py-1.5 rounded-full text-[13px] font-semibold flex items-center gap-2 hover:bg-[#3F3F42] transition hidden sm:flex">
-                <svg className="w-4 h-4 text-white ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span className="ml-1 mr-1">Download Itinerary</span>
-                <span className="bg-[#A855F7] w-7 h-7 rounded-full flex items-center justify-center">
-                  <ArrowUpRight size={14} className="text-white" weight="bold" />
-                </span>
-              </button>
-              <button
-                onClick={() => setShowFullItineraryModal(false)}
-                className="w-12 h-12 bg-[#A855F7] text-white rounded-full flex items-center justify-center hover:bg-[#3F3F42] transition shadow-lg shrink-0"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+
+      {/* Gallery Lightbox Modal */}
+      {showGalleryModal && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col justify-between p-4 sm:p-8">
+          <div className="flex items-center justify-between text-white">
+            <h3 className="text-lg font-medium">
+              {tour.name} Gallery ({activeImageIndex + 1} /{" "}
+              {galleryImages.length})
+            </h3>
+            <button
+              onClick={() => setShowGalleryModal(false)}
+              className="p-2 hover:bg-white/10 rounded-full transition text-white cursor-pointer"
+            >
+              <X size={28} />
+            </button>
           </div>
 
-          <div className="w-full px-6 lg:px-10 mt-8 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_30%] gap-8 items-start">
-              {/* Left Side: Accordion */}
-              <div className="space-y-4">
-                {tour.itinerary.map((day, index) => {
-                  const isExpanded = expandedItineraryDays.includes(day.day);
-                  return (
-                    <div
-                      id={`itinerary-day-${day.day}`}
-                      key={day.day}
-                      className="bg-white border-2 rounded-[24px] overflow-hidden transition-colors"
-                      style={{ borderColor: isExpanded ? '#c7c7c7ff' : '#E5E7EB' }}
-                    >
-                      <div className="p-6">
-                        <div
-                          className="flex items-center justify-between cursor-pointer group"
-                          onClick={() => toggleItineraryDay(day.day)}
-                        >
-                          <div className="flex items-center gap-4">
-                            <span className="border text-[#3F3F42] rounded-full px-4 py-1.5 text-[15px] font-medium" style={{ borderColor: '#c7c7c7ff' }}>Day {day.day}</span>
-                            <h3 className="font-medium text-[20px] text-[#3F3F42] transition-colors">
-                              {day.title || "Itinerary"}
-                            </h3>
-                          </div>
-                          <CaretDown className={`text-[#3F3F42] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                        </div>
+          <div className="relative w-full h-[70vh] flex items-center justify-center my-auto">
+            <Image
+              src={galleryImages[activeImageIndex]}
+              alt={`${tour.name} image ${activeImageIndex + 1}`}
+              fill
+              className="object-contain"
+            />
+          </div>
 
-                        {isExpanded && (
-                          <div className="mt-5 pl-1 pr-4">
-                            {day.importantNote && day.importantNote.trim() && (
-                              <div className="mb-6 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl flex items-start gap-3 shadow-sm">
-                                <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                  <circle cx="12" cy="12" r="10" />
-                                  <line x1="12" y1="8" x2="12" y2="12" />
-                                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                                </svg>
-                                <div>
-                                  <span className="text-[12px] font-bold text-amber-800 uppercase tracking-wider block mb-0.5">Important note</span>
-                                  <p className="text-[14px] font-medium text-amber-900 leading-relaxed">
-                                    {day.importantNote}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
+          <div className="flex items-center justify-between text-white max-w-md mx-auto w-full">
+            <button
+              onClick={() =>
+                setActiveImageIndex((prev) =>
+                  prev > 0 ? prev - 1 : galleryImages.length - 1,
+                )
+              }
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition cursor-pointer text-sm"
+            >
+              <CaretLeft size={18} /> Prev
+            </button>
+            <div className="flex gap-1.5 overflow-x-auto max-w-[200px] py-1">
+              {galleryImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`w-2 h-2 rounded-full transition-all cursor-pointer ${idx === activeImageIndex ? "bg-white scale-125" : "bg-white/40"}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() =>
+                setActiveImageIndex((prev) =>
+                  prev < galleryImages.length - 1 ? prev + 1 : 0,
+                )
+              }
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full transition cursor-pointer text-sm"
+            >
+              Next <CaretRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
 
-                            <p className="text-[#3F3F42] text-[16px] mb-8 leading-relaxed">
-                              {day.description}
-                            </p>
+      {/* Full Itinerary Modal */}
+      {showFullItineraryModal && (
+        <div className="fixed inset-0 z-[105] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="bg-white rounded-[20px] max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#F8F8F7]">
+              <div>
+                <span className="text-[12px] font-medium tracking-wider uppercase text-gray-500">
+                  {tour.tourCode} • {tour.duration?.days} Days
+                </span>
+                <h3 className="text-[24px] font-normal text-[#1A1A1A]">
+                  Full Itinerary:{" "}
+                  <span className="font-medium">{tour.name}</span>
+                </h3>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => window.print()}
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2 border border-gray-300 hover:border-black rounded-full text-[13px] font-medium text-[#1A1A1A] transition cursor-pointer"
+                >
+                  <svg
+                    className="w-4 h-4 text-black"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
+                  </svg>
+                  <span>Print</span>
+                </button>
+                <button
+                  onClick={() => setShowFullItineraryModal(false)}
+                  className="w-10 h-10 rounded-full hover:bg-gray-200/80 flex items-center justify-center transition cursor-pointer text-[#1A1A1A]"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+            </div>
 
-                            {/* Activities */}
-                            {day.activities && day.activities.length > 0 && (
-                              <div className="space-y-6 relative ml-1">
-                                {day.activities.map((act, i) => (
-                                  <div key={i} className="relative pl-6">
-                                    {i !== day.activities.length - 1 && (
-                                      <div className="absolute left-[3px] top-[14px] bottom-[-24px] w-0 border-l-[1.5px] border-dotted border-gray-300"></div>
-                                    )}
-                                    <div className="absolute left-[0px] top-[7px] w-[7px] h-[7px] bg-[#A855F7] rounded-full z-10"></div>
-                                    <div className="flex justify-between items-center">
-                                      <h5 className="font-medium text-[#3F3F42] text-[17px]">
-                                        {act.name || act.title}
-                                      </h5>
-                                      <span className="text-[#3F3F42] text-[14px] shrink-0 ml-4 font-medium">
-                                        {act.placeName || act.location}{act.duration ? `  ${act.duration}hrs` : ''}
-                                      </span>
-                                    </div>
-                                    <p className="text-[#3F3F42] text-[15px] mt-1.5 leading-relaxed max-w-3xl">{act.description}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+            {/* Modal Content - All Days */}
+            <div className="p-6 overflow-y-auto space-y-6 flex-1">
+              {tour.itinerary.map((day) => (
+                <div
+                  key={day.day}
+                  className="bg-[#F8F8F7] rounded-[12px] p-6 space-y-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <h4 className="text-[22px] font-normal text-[#1A1A1A]">
+                      {day.title || `Day ${day.day}`}
+                    </h4>
+                    <span className="px-4 py-1 bg-[#1A1A1A] text-white rounded-full text-[14px] font-normal shrink-0">
+                      Day {day.day}
+                    </span>
+                  </div>
 
-                            {/* Optional Activities */}
-                            {day.optionalActivities && day.optionalActivities.length > 0 && (
-                              <div className="mt-8 border-t border-gray-100 pt-6">
-                                <div className="flex items-center justify-between mb-6 cursor-pointer group" onClick={() => toggleOptionalDay(day.day)}>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-[#3F3F42] flex items-center justify-center text-white text-[14px] font-bold shrink-0">
-                                      +{day.optionalActivities.length}
-                                    </div>
-                                    <h4 className="font-medium text-[#3F3F42] text-[17px]">Optional Activities - Day {day.day}</h4>
-                                  </div>
-                                  <div className="text-[#3F3F42] text-[15px] flex items-center gap-1 transition-colors">
-                                    {expandedOptionalDays.includes(day.day) ? 'Hide' : 'Show'} <CaretDown className={`transition-transform ${expandedOptionalDays.includes(day.day) ? 'rotate-180' : ''}`} />
-                                  </div>
-                                </div>
+                  {day.description && (
+                    <p className="text-[15px] text-[#1A1A1A]/70 font-light leading-relaxed">
+                      {day.description}
+                    </p>
+                  )}
 
-                                {expandedOptionalDays.includes(day.day) && (
-                                  <div className="space-y-6 relative ml-1">
-                                    {day.optionalActivities.map((act, i) => (
-                                      <div key={`opt-${i}`} className="relative pl-6">
-                                        <div className="absolute left-[0px] top-[4px] w-[14px] h-[14px] bg-[#A855F7] rounded-full flex items-center justify-center">
-                                          <Plus className="w-2.5 h-2.5 text-white font-bold" />
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                          <h5 className="font-medium text-[#3F3F42] text-[17px] flex items-center gap-2">
-                                            {act.name || act.title}
-                                            {(() => {
-                                              let priceStr = "";
-                                              if (typeof act.price === "number") {
-                                                priceStr = act.price > 0 ? `+$${Number(act.price).toLocaleString()}` : "";
-                                              } else if (act.price && typeof act.price.amount === "number") {
-                                                priceStr = Number(act.price.amount) > 0
-                                                  ? `+${act.price.currency || "$"}${Number(act.price.amount).toLocaleString()}`
-                                                  : "";
-                                              }
-                                              return priceStr ? <span className="text-[#3F3F42] font-medium text-[17px]">from {priceStr}</span> : null;
-                                            })()}
-                                          </h5>
-                                          <span className="text-[#3F3F42] text-[14px] shrink-0 ml-4 font-medium">
-                                            {(act as any).placeName || (act as any).location || (act as any).place || ""}{act.duration ? `  ${act.duration}hrs` : ''}
-                                          </span>
-                                        </div>
-                                        <p className="text-[#3F3F42] text-[15px] mt-1.5 leading-relaxed max-w-3xl">{act.description}</p>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Accommodation */}
-                            {day.accommodations && day.accommodations.length > 0 && (
-                              <div className="mt-8 border-t border-gray-100 pt-6">
-                                <div className="flex items-center gap-4">
-                                  <div className="w-7 h-7 rounded-full bg-[#3F3F42] flex items-center justify-center text-white shrink-0">
-                                  </div>
-                                  <div className="flex-1 flex justify-between items-center">
-                                    <div>
-                                      <h4 className="font-medium text-[#3F3F42] text-[17px]">Accommodation</h4>
-                                      <p className="text-[#3F3F42] text-[15px] mt-1">{day.accommodations[0].name || day.accommodations[0].type} (Or Similar)</p>
-                                    </div>
-                                    <span className="text-[#3F3F42] text-[14px] font-medium">Hotel</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Meals */}
-                            {day.meals && (
-                              <div className="mt-6 text-[15px] text-[#3F3F42] font-medium">
-                                Meal Included:
-                                {(() => {
-                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                  const m = day.meals as any;
-                                  const mealArray = [];
-                                  if (typeof m === 'string') {
-                                    mealArray.push(...m.split(',').map(s => s.trim()).filter(s => s));
-                                  } else {
-                                    if (m.breakfast) mealArray.push("Breakfast");
-                                    if (m.lunch) mealArray.push("Lunch");
-                                    if (m.dinner) mealArray.push("Dinner");
-                                  }
-                                  return mealArray.length > 0 ? <span className="text-[#3F3F42] ml-1 font-normal">{mealArray.join(" | ")}</span> : <span className="text-[#3F3F42] ml-1 font-normal">None</span>;
-                                })()}
+                  {day.activities && day.activities.length > 0 && (
+                    <div className="pt-2">
+                      <div className="text-[15px] font-medium text-[#1A1A1A] mb-3">
+                        Activities ({day.activities.length})
+                      </div>
+                      <div className="relative pl-[35px] space-y-4">
+                        <div className="absolute left-[12px] top-[6px] bottom-[6px] w-[1px] bg-[#AEAEAD]" />
+                        {day.activities.map((act, aIdx) => (
+                          <div key={aIdx} className="relative">
+                            <div className="absolute -left-[25px] top-[7px] w-[5px] h-[5px] rounded-full bg-[#1A1A1A]" />
+                            <div className="text-[15px] font-normal text-[#1A1A1A]">
+                              {act.name || act.title}
+                            </div>
+                            {act.description && (
+                              <div className="text-[13px] text-[#1A1A1A]/60 font-light mt-0.5">
+                                {act.description}
                               </div>
                             )}
                           </div>
-                        )}
+                        ))}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Right Side: Map and Places Visited */}
-              <div className="space-y-6 lg:sticky lg:top-[120px]">
-                <div className="bg-[#3F3F42] rounded-[20px] overflow-hidden aspect-[16/9] relative shadow-sm">
-                  <Image src={tour.itineraryMapImage || tour.images?.[0]?.url || "/placeholder-image.jpg"} fill className="object-cover opacity-70" alt="Map" />
-                  <div className="absolute inset-0 bg-[#3F3F42]/20"></div>
-                  <div className="absolute bottom-5 left-5 text-white font-bold tracking-widest text-[14px]">
-                    {tour.country?.continent?.name?.toUpperCase() || tour.country?.name?.toUpperCase() || "DESTINATION"}
-                  </div>
+                  )}
                 </div>
-
-                <div className="bg-white border border-gray-200 rounded-[20px] p-6 shadow-sm">
-                  <div className="flex gap-2.5 flex-wrap">
-                    {tour.itinerary.map(d => (
-                      <button
-                        key={d.day}
-                        onClick={() => scrollToModalDay(d.day)}
-                        className={`w-[48px] h-[48px] rounded-[12px] border flex items-center justify-center text-[17px] transition-colors cursor-pointer ${currentDay === d.day
-                          ? 'bg-[#A855F7] text-white border-[#A855F7] font-semibold'
-                          : 'border-gray-200 text-[#3F3F42] bg-white hover:border-black'
-                          }`}
-                      >
-                        {d.day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="px-1 mt-6">
-                  <h4 className="font-semibold text-[#3F3F42] text-[18px]">Places Visited</h4>
-                  <p className="text-[#3F3F42] text-[16px] mt-2 font-medium">
-                    {tour.location.visitedCities && tour.location.visitedCities.length > 0
-                      ? tour.location.visitedCities.join(" | ")
-                      : (tour.country?.name || "")}
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

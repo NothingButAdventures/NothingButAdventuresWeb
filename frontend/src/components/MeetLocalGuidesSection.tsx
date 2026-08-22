@@ -53,18 +53,21 @@ export default function MeetLocalGuidesSection() {
             {/* Top Header Section aligned to 2-column grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-end mb-10">
                 {/* Left Side: 6 Feature Pills (Aligned over Column 1) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-w-xl">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl">
                     {tags.map((tag, idx) => (
-                        <div key={idx} className="flex items-center gap-2 bg-[#F4F4F5] text-[#52525B] px-3.5 py-1.5 rounded-full font-medium text-xs font-outfit shadow-2xs">
-                            <span className="text-[#52525B]">{tag.icon}</span>
-                            <span>{tag.label}</span>
+                        <div 
+                            key={idx} 
+                            className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.75)] rounded-[110px] text-[13px] sm:text-[13.5px] font-normal font-outfit transition-colors hover:bg-[rgba(26,26,26,0.08)] whitespace-nowrap"
+                        >
+                            <span className="text-[#254B02] shrink-0">{tag.icon}</span>
+                            <span className="truncate">{tag.label}</span>
                         </div>
                     ))}
                 </div>
 
-                {/* Right Side: Heading starting at exact start of Column 2 (where 400+ Local Guides image begins) */}
-                <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-[66px] font-normal leading-tight text-[#4F6D38] tracking-tight font-outfit text-left">
-                    Meet Your Local Guides
+                {/* Right Side: Heading (#5091:8213) */}
+                <h2 className="text-3xl sm:text-4xl md:text-[44px] lg:text-[54px] font-normal leading-tight text-[#1A1A1A] tracking-tight font-outfit text-left">
+                    Meet Your <span className="font-gochi text-[#254B02]">Local Guides</span>
                 </h2>
             </div>
 
@@ -85,7 +88,7 @@ export default function MeetLocalGuidesSection() {
                     {/* Text Content */}
                     <div className="flex-1 p-6 sm:p-8 md:p-9 flex flex-col justify-between font-outfit">
                         <div>
-                            <h3 className="text-lg sm:text-xl font-semibold text-[#18181B] mb-3 leading-snug">
+                            <h3 className="text-lg sm:text-xl font-semibold text-[#1A1A1A] mb-3 leading-snug">
                                 Step inside a journey guided by passion and experience
                             </h3>
                             <p className="text-sm sm:text-base text-gray-500 font-normal leading-relaxed mb-6">
@@ -134,8 +137,8 @@ export default function MeetLocalGuidesSection() {
                             <div className="inline-block px-3.5 py-1 bg-[#3B5424] text-white rounded-full text-xs font-medium mb-3">
                                 400+ Local Guides
                             </div>
-                            <p className="text-sm sm:text-base md:text-lg text-[#18181B] font-normal leading-relaxed mb-4">
-                                “Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”
+                            <p className="text-sm sm:text-base md:text-lg text-[#1A1A1A] font-normal leading-relaxed mb-4">
+                                &ldquo;Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.&rdquo;
                             </p>
                         </div>
                         <div className="text-xs sm:text-sm text-gray-400 font-normal">

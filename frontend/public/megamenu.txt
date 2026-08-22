@@ -1,0 +1,601 @@
+NAME: "Nothing but Adventures UI"
+
+GLOBAL_VARS:
+fill_658ab2fa:
+  - '#FFFFFF'
+fill_97d170e1: []
+fill_aaa5ba5c:
+  - '#1A1A1A'
+layout_e6effe9b:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 535
+    height: 186
+ts1:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 76
+  fills:
+    - '#FFFFFF'
+  lineHeight: 0.9em
+ts2:
+  fontFamily: Gochi Hand
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 106
+  fills:
+    - '#D3FA33'
+  lineHeight: 0.9em
+layout_d72b2d8e:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 1280
+    height: 67
+layout_177c5efc:
+  mode: none
+  sizing:
+    horizontal: hug
+    vertical: hug
+ts3:
+  fontFamily: Gochi Hand
+  fills:
+    - '#3B5D1B'
+style_de5fd31a:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 16
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_3ddc570b:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 16
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_1c0dd505:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 101
+    height: 31
+ts4:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 13
+  fills:
+    - '#1A1A1A'
+  lineHeight: 0.87em
+ts5:
+  fontFamily: Gochi Hand
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 20
+  fills:
+    - '#1A1A1A'
+  lineHeight: 0.87em
+fill_a7d6debb:
+  - rgba(181, 185, 177, 0.2)
+layout_28d585f9:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 47
+  dimensions:
+    width: 64
+    height: 26
+style_49d57690:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 12
+  lineHeight: 13px
+  textAlignHorizontal: CENTER
+  textAlignVertical: TOP
+style_94bb004b:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 20
+  lineHeight: 0.9em
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+fill_70decaba:
+  - '#6C114E'
+style_fc256dac:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 14
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_0d98a5e3:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 12
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_25fcdbff:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 14
+  lineHeight: 25.65px
+  letterSpacing: '-0.0294em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+fill_80c0c03b:
+  - rgba(26, 26, 26, 0.6)
+style_38979d82:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10
+  lineHeight: 19.21px
+  letterSpacing: '-0.0144em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_abbd4286:
+  mode: none
+  sizing:
+    horizontal: fixed
+    vertical: fixed
+  dimensions:
+    width: 12.71
+    height: 12.71
+layout_c5efd649:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: -0.2
+    y: -0.13
+  dimensions:
+    width: 15
+    height: 20
+style_6973ef1a:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 7.4566545486450195
+  letterSpacing: '-0.0243em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+layout_86a4a84c:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 72
+    y: 11
+  dimensions:
+    width: 175.81
+    height: 16.78
+layout_50ee40bc:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 33
+    height: 20
+style_47936e50:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.164363861083984
+  lineHeight: 19.21px
+  letterSpacing: '-0.0142em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_141b8a40:
+  - '#6A7282'
+fill_34dc0314:
+  - '#000000'
+
+ELEMENTS:
+EL-20ebb1fd:
+  type: RECTANGLE
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 315
+      height: 72
+  fills: fill_a7d6debb
+  borderRadius: 8px
+EL-08316534:
+  type: RECTANGLE
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 8
+      y: 8
+    dimensions:
+      width: 56
+      height: 56
+  fills: fill_658ab2fa
+  borderRadius: 4px
+EL-2a7c7d4f:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 3.8421220779418945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 58.15
+      height: 19.48
+  borderRadius: 11.55936050415039px
+EL-78f25d1d:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 10.76
+      height: 10.76
+EL-c84e3057:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 19.21
+EL-a2feff38:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 3.8421220779418945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 70.16
+      y: 0
+    dimensions:
+      width: 113.58
+      height: 19.48
+  borderRadius: 11.55936050415039px
+EL-fc547d8d:
+  type: IMAGE-SVG
+  layout: layout_abbd4286
+  componentId: 20:96
+EL-2b5bc621:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 3.3881213665008545px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 195.73
+      y: 0
+    dimensions:
+      width: 37.26
+      height: 19.48
+  borderRadius: 11.55936050415039px
+EL-b163970c:
+  type: STAR
+  layout: layout_abbd4286
+  strokes: fill_80c0c03b
+  strokeWeight: 0.6776242256164551px
+  borderRadius: 0.4235151708126068px
+EL-7e17afa6:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 16.94
+      height: 19.48
+EL-5175dc9c:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 72
+      y: 43
+    dimensions:
+      width: 232.99
+      height: 19.48
+  borderRadius: 11.55936050415039px
+EL-67770ae3:
+  type: TEXT
+  layout: layout_50ee40bc
+  text: 9 Days
+  textStyle: style_47936e50
+  fills: fill_80c0c03b
+EL-ae9948d0:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: -0.18
+      y: -0.15
+    dimensions:
+      width: 73
+      height: 20
+  text: Delhi to Ladakh
+  textStyle: style_47936e50
+  fills: fill_80c0c03b
+EL-6ea21d14:
+  type: TEXT
+  layout: layout_c5efd649
+  text: '4.8 '
+  textStyle: style_47936e50
+  fills: fill_80c0c03b
+EL-82fe544a:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 72
+      y: 29
+    dimensions:
+      width: 118.9
+      height: 11.18
+  text: Departs on May 20, 2026
+  textStyle: style_6973ef1a
+  fills: fill_80c0c03b
+
+COMPONENTS:
+20:77:
+  id: 20:77
+  key: 7835179414ad59929384128ce023350dd33fef68
+  name: Search
+2486:2444:
+  id: 2486:2444
+  key: 8f4b405fed0ba1f043c5f738ea8ae3e5fdbd40a1
+  name: Phone call
+244:965:
+  id: 244:965
+  key: 577425e32e128ce06e6516b4f9604058e2732214
+  name: User
+20:96:
+  id: 20:96
+  key: 414afa18bb625498dcdabc5ee3d3f7e88285ca8d
+  name: location_on
+
+NODES:
+[FRAME] "Adventure Mega Menu" #5341:7191 layout={"mode":"none","sizing":{}} fills=fill_658ab2fa
+  [RECTANGLE] "16ca6425f4b30cb6fed325480e888208-2 2" #5341:7192 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":67},"dimensions":{"width":1280,"height":573}} fills=[{"type":"IMAGE","imageRef":"dac2966adfb221a446dfb5de1d774b02fcdc6759","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1.000123143196106,0,-0.000052778927056351677],[0,0.8529835343360901,0.14746196568012238]],"filenameSuffix":"3560c2"}}]
+  [IMAGE-SVG] #5341:7193 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1059,"y":411.54},"dimensions":{"width":269,"height":273.41}}
+  [RECTANGLE] #5341:7196 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":-2,"y":67},"dimensions":{"width":1284,"height":573}} fills=["rgba(26, 26, 26, 0.3)"]
+  [FRAME] #5341:7197 layout={"mode":"column","padding":"18px 14px 18px 30px","justifyContent":"center","alignItems":"stretch","gap":"10px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":35,"y":612},"dimensions":{"width":1210,"height":55}} fills=fill_658ab2fa effects={"boxShadow":"1px 1px 10px 0px rgba(0, 0, 0, 0.09)"} borderRadius=210px
+    [ELLIPSE] #5341:7198 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1156,"y":2},"dimensions":{"width":51,"height":51}} fills=fill_aaa5ba5c
+    [FRAME] #5341:7199 layout={"mode":"row","alignSelf":"stretch","justifyContent":"space-between","alignItems":"center","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [TEXT] #5341:7200 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":139,"height":30}} fills=["#2F3D44"] opacity=0.6000000238418579 textStyle={"fontFamily":"Avenir Next","fontStyle":"Regular","fontWeight":400,"fontSize":24.18000030517578,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Search Plans"
+    [IMAGE-SVG] "Search" #5341:7201 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1170,"y":16},"dimensions":{"width":24,"height":24}} fills=fill_97d170e1 componentId=20:77
+  [GROUP] #5341:7202 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":65,"y":366},"dimensions":{"width":535,"height":186}} borderRadius="0px 0px 0px 0px"
+    [GROUP] #5341:7203 layout=layout_e6effe9b borderRadius="0px 0px 0px 0px"
+      [TEXT] #5341:7204 layout=layout_e6effe9b fills=fill_658ab2fa textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":18.680498123168945,"lineHeight":"0.9em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts1}Nothing but {/ts1}\\n{ts2}Adventures.{/ts2}"
+  [RECTANGLE] #5341:7205 layout=layout_d72b2d8e fills=fill_658ab2fa
+  [RECTANGLE] #5341:7206 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":1280,"height":832}} fills=["rgba(26, 26, 26, 0.2)"]
+  [FRAME] #5341:7207 layout={"mode":"column","gap":"14px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":36,"y":767},"dimensions":{"width":668}}
+    [FRAME] #5341:7208 layout={"mode":"row","padding":"0px 10px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":130,"height":24}} fills=["rgba(26, 26, 26, 0.05)"] borderRadius=110px
+      [TEXT] #5341:7209 layout=layout_177c5efc fills=["rgba(26, 26, 26, 0.55)"] textStyle={"fontFamily":"Outfit","fontStyle":"Medium","fontWeight":500,"fontSize":14,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Recently Viewed"
+    [TEXT] #5341:7210 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"hug"},"dimensions":{"width":668}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":48,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Still thinking about these? \\n{ts3}So are we.{/ts3}"
+  [FRAME] #5341:7211 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":347,"y":15},"dimensions":{"width":640,"height":39}} fills=fill_658ab2fa borderRadius=12px
+    [TEXT] #5341:7212 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":29,"y":10},"dimensions":{"width":82,"height":20}} fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Destination"
+    [FRAME] #5341:7213 layout={"mode":"row","padding":"9px 25px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":140,"y":3},"dimensions":{"height":33}} borderRadius=9px
+      [TEXT] #5341:7214 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Adventure"
+    [FRAME] #5341:7215 layout={"mode":"row","padding":"9px 25px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":135,"y":3},"dimensions":{"height":33}} fills=fill_aaa5ba5c borderRadius=9px
+      [TEXT] #5341:7216 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_3ddc570b text="Adventure"
+    [TEXT] #5341:7217 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":463,"y":10},"dimensions":{"width":40,"height":20}} fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Deals"
+    [TEXT] #5341:7218 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":559.5,"y":10},"dimensions":{"width":51,"height":20}} fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Why us"
+    [TEXT] #5341:7219 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":284,"y":10},"dimensions":{"width":132,"height":20}} fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Explore by Interest"
+  [RECTANGLE] #5341:7220 layout=layout_d72b2d8e effects={"boxShadow":"0px 1px 75px 0px rgba(0, 0, 0, 0.1)"} opacity=0.8999999761581421
+  [IMAGE-SVG] #5341:7221 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":35,"y":19},"dimensions":{"width":30,"height":30.49}}
+  [IMAGE-SVG] #5341:7224 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1160,"y":23},"dimensions":{"width":85.21,"height":23.67}}
+  [GROUP] #5341:7227 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":73,"y":21},"dimensions":{"width":101,"height":31}} borderRadius="0px 0px 0px 0px"
+    [GROUP] #5341:7228 layout=layout_1c0dd505 borderRadius="0px 0px 0px 0px"
+      [TEXT] #5341:7229 layout=layout_1c0dd505 fills=["#070707"] textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":17.25613784790039,"lineHeight":"0.87em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts4}Nothing but {/ts4}\\n{ts5}Adventures.{/ts5}"
+  [FRAME] "Layer_1" #5341:7230 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":42,"y":458},"dimensions":{"width":18,"height":18}} fills=fill_97d170e1
+  [GROUP] #5341:7231 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":30,"y":55.65},"dimensions":{"width":1210,"height":540.35}} borderRadius="0px 0px 0px 0px"
+    [IMAGE-SVG] #5341:7232 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":1210,"height":540.35}} fills=fill_658ab2fa borderRadius="12px 12px 12px 12px"
+    [RECTANGLE] #5341:7233 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":25,"y":78.35},"dimensions":{"width":95,"height":95}} fills=["#57063C"] borderRadius=12px
+    [RECTANGLE] #5341:7234 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":136,"y":78.35},"dimensions":{"width":95,"height":95}} fills=fill_a7d6debb borderRadius=12px
+    [GROUP] #5341:7235 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":40,"y":89.35},"dimensions":{"width":64,"height":73}}
+      [TEXT] #5341:7236 layout=layout_28d585f9 fills=["#F5F2EB"] textStyle=style_49d57690 text="NBA Originals"
+      [IMAGE-SVG] #5341:7237 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":13,"y":0},"dimensions":{"width":39.35,"height":40}}
+    [GROUP] #5341:7240 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":151,"y":89.35},"dimensions":{"width":64,"height":73}}
+      [TEXT] #5341:7241 layout=layout_28d585f9 fills=fill_aaa5ba5c textStyle=style_49d57690 text="Musical Adventures"
+      [IMAGE-SVG] #5341:7242 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":15,"y":0},"dimensions":{"width":33.85,"height":40}}
+    [RECTANGLE] #5341:7245 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":274,"y":403.35},"dimensions":{"width":584,"height":111}} fills=["rgba(239, 234, 222, 0.6)"] borderRadius=8px
+    [GROUP] #5341:7246 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":290,"y":417.35},"dimensions":{"width":509,"height":84}} borderRadius="0px 0px 0px 0px"
+      [TEXT] #5341:7247 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":144,"height":18}} fills=fill_aaa5ba5c textStyle=style_94bb004b text="Popular Regions"
+      [FRAME] #5341:7248 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":28},"dimensions":{"height":24}} fills=fill_70decaba strokes=fill_70decaba strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7249 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_fc256dac text="India"
+      [FRAME] #5341:7250 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":60},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=25px
+        [TEXT] #5341:7251 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="China"
+      [FRAME] #5341:7252 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":69,"y":28},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7253 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Nepal"
+      [FRAME] #5341:7254 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":75,"y":60},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=25px
+        [TEXT] #5341:7255 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Bhutan"
+      [FRAME] #5341:7256 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":158,"y":60},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=25px
+        [TEXT] #5341:7257 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Afghanistan"
+      [FRAME] #5341:7258 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":272,"y":60},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=25px
+        [TEXT] #5341:7259 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Hong Kong"
+      [FRAME] #5341:7260 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":379,"y":60},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=25px
+        [TEXT] #5341:7261 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Japan"
+      [FRAME] #5341:7262 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":144,"y":28},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7263 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Indonesia"
+      [FRAME] #5341:7264 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":242,"y":28},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7265 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Malaysia"
+      [FRAME] #5341:7266 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":336,"y":28},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7267 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Vietnam"
+      [FRAME] #5341:7268 layout={"mode":"row","padding":"0px 12px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":427,"y":28},"dimensions":{"height":24}} strokes=fill_aaa5ba5c strokeWeight=1px borderRadius=29px
+        [TEXT] #5341:7269 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_fc256dac text="Sri Lanka"
+    [GROUP] #5341:7270 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":477.35},"dimensions":{"width":315,"height":37}} borderRadius=36px
+      [RECTANGLE] #5341:7271 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":315,"height":37}} fills=fill_aaa5ba5c borderRadius=36px
+      [TEXT] #5341:7272 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":115,"y":6},"dimensions":{"width":84,"height":25}} fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":20,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="See More"
+    [RECTANGLE] #5341:7273 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":274,"y":29.35},"dimensions":{"width":584,"height":356}} fills=["rgba(26, 26, 26, 0.25)",{"type":"IMAGE","imageRef":"491bff89be9f1fcfcf11c8e995b9f4262c2c915e","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.99762362241745,0,0.001588959596119821],[0,0.3347446322441101,0.24801728129386902]],"filenameSuffix":"5899b3"}}] borderRadius=10px
+    [FRAME] #5341:7274 layout={"mode":"row","alignItems":"center","gap":"5px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":668,"y":343.35},"dimensions":{"width":175}}
+      [FRAME] #5341:7275 layout={"mode":"row","padding":"6.987500190734863px 13.530000686645508px","justifyContent":"center","alignItems":"center","gap":"5.375px","sizing":{"horizontal":"hug","vertical":"fixed"},"dimensions":{"height":29.03}} fills=fill_658ab2fa borderRadius=37.625px
+        [TEXT] #5341:7276 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_3ddc570b text="Explore all Asia"
+      [FRAME] #5341:7278 layout={"mode":"row","padding":"10.75px 8.0625px","justifyContent":"center","alignItems":"center","gap":"5.375px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":29.03,"height":29.03}}
+        [IMAGE-SVG] #5341:7279 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":29.03,"height":29.03}} borderRadius=37.625px
+        [IMAGE-SVG] #5341:7281 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":6.94,"height":7.72}}
+    [TEXT] #5341:7286 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":293,"y":336.35},"dimensions":{"width":347,"height":36}} fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"Light","fontWeight":300,"fontSize":14,"letterSpacing":"-0.011em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="An unbeatable mix of uncommon experiences, insider access, cultural contact, and all the must-sees and -dos."
+    [LINE] #5341:7287 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":255,"y":21.35},"dimensions":{"width":0,"height":493}} strokes=["rgba(26, 26, 26, 0.15)"] strokeWeight=1px
+    [FRAME] #5341:7288 layout={"mode":"row","padding":"2px 14px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":778,"y":45.35}} strokes=fill_658ab2fa strokeWeight=1px borderRadius=42px
+      [TEXT] #5341:7289 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_0d98a5e3 text="Nature"
+    [FRAME] #5341:7290 layout={"mode":"row","padding":"2px 14px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":698,"y":45.35}} strokes=fill_658ab2fa strokeWeight=1px borderRadius=42px
+      [TEXT] #5341:7291 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_0d98a5e3 text="Popular"
+    [FRAME] #5341:7292 layout={"mode":"row","padding":"2px 14px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":293,"y":45.35}} fills=fill_658ab2fa borderRadius=42px
+      [TEXT] #5341:7293 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":12,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Popular"
+    [TEXT] #5341:7294 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":31.35},"dimensions":{"width":148,"height":18}} fills=fill_aaa5ba5c textStyle=style_94bb004b text="Best selling tours"
+    [FRAME] #5341:7295 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":67.35},"dimensions":{"width":315,"height":72}}
+      [RECTANGLE] #5341:7296 template=EL-20ebb1fd
+      [RECTANGLE] #5341:7297 template=EL-08316534
+      [GROUP] #5341:7298 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":72,"y":10},"dimensions":{"width":232.99,"height":51.48}} borderRadius=11.55936050415039px
+        [TEXT] #5341:7299 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":175.81,"height":16.78}} fills=fill_aaa5ba5c textStyle=style_25fcdbff text="Himalyan Adventure Trek"
+        [GROUP] #5341:7300 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":32},"dimensions":{"width":232.99,"height":19.48}} borderRadius=11.55936050415039px
+          [FRAME] "Container" #5341:7301 template=EL-2a7c7d4f
+            [IMAGE-SVG] "Icon" #5341:7302 template=EL-78f25d1d
+            [FRAME] "Text" #5341:7305 template=EL-c84e3057
+              [TEXT] #5341:7306 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":32,"height":20}} fills=fill_80c0c03b textStyle=style_38979d82 text="9 Days"
+          [FRAME] "Container" #5341:7307 template=EL-a2feff38
+            [IMAGE-SVG] "location_on" #5341:7308 template=EL-fc547d8d
+            [FRAME] "Text" #5341:7309 template=EL-c84e3057
+              [TEXT] #5341:7310 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":-0.18,"y":-0.15},"dimensions":{"width":80,"height":20}} fills=fill_80c0c03b textStyle=style_38979d82 text="Delhi to Himalyas"
+          [FRAME] "Container" #5341:7311 template=EL-2b5bc621
+            [STAR] #5341:7312 template=EL-b163970c
+            [FRAME] "Text" #5341:7313 template=EL-7e17afa6
+              [TEXT] #5341:7314 layout=layout_c5efd649 fills=fill_80c0c03b textStyle=style_38979d82 text="4.8 "
+        [TEXT] #5341:7315 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":18},"dimensions":{"width":118.9,"height":11.18}} fills=fill_80c0c03b textStyle=style_6973ef1a text="Departs on May 20, 2026"
+    [FRAME] #5341:7316 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":155.35},"dimensions":{"width":315,"height":72}}
+      [RECTANGLE] #5341:7317 template=EL-20ebb1fd
+      [RECTANGLE] #5341:7318 template=EL-08316534
+      [TEXT] #5341:7319 layout=layout_86a4a84c fills=fill_aaa5ba5c textStyle=style_25fcdbff text="Ladakh Roadtrip"
+      [GROUP] #5341:7320 template=EL-5175dc9c
+        [FRAME] "Container" #5341:7321 template=EL-2a7c7d4f
+          [IMAGE-SVG] "Icon" #5341:7322 template=EL-78f25d1d
+          [FRAME] "Text" #5341:7325 template=EL-c84e3057
+            [TEXT] #5341:7326 template=EL-67770ae3
+        [FRAME] "Container" #5341:7327 template=EL-a2feff38
+          [IMAGE-SVG] "location_on" #5341:7328 template=EL-fc547d8d
+          [FRAME] "Text" #5341:7329 template=EL-c84e3057
+            [TEXT] #5341:7330 template=EL-ae9948d0
+        [FRAME] "Container" #5341:7331 template=EL-2b5bc621
+          [STAR] #5341:7332 template=EL-b163970c
+          [FRAME] "Text" #5341:7333 template=EL-7e17afa6
+            [TEXT] #5341:7334 template=EL-6ea21d14
+      [TEXT] #5341:7335 template=EL-82fe544a
+    [FRAME] #5341:7336 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":243.35},"dimensions":{"width":315,"height":72}}
+      [RECTANGLE] #5341:7337 template=EL-20ebb1fd
+      [RECTANGLE] #5341:7338 template=EL-08316534
+      [TEXT] #5341:7339 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":72,"y":6},"dimensions":{"width":154,"height":26}} fills=fill_aaa5ba5c textStyle=style_25fcdbff text="Rupin Pass Adventure Trek"
+      [GROUP] #5341:7340 template=EL-5175dc9c
+        [FRAME] "Container" #5341:7341 template=EL-2a7c7d4f
+          [IMAGE-SVG] "Icon" #5341:7342 template=EL-78f25d1d
+          [FRAME] "Text" #5341:7345 template=EL-c84e3057
+            [TEXT] #5341:7346 template=EL-67770ae3
+        [FRAME] "Container" #5341:7347 template=EL-a2feff38
+          [IMAGE-SVG] "location_on" #5341:7348 template=EL-fc547d8d
+          [FRAME] "Text" #5341:7349 template=EL-c84e3057
+            [TEXT] #5341:7350 template=EL-ae9948d0
+        [FRAME] "Container" #5341:7351 template=EL-2b5bc621
+          [STAR] #5341:7352 template=EL-b163970c
+          [FRAME] "Text" #5341:7353 template=EL-7e17afa6
+            [TEXT] #5341:7354 template=EL-6ea21d14
+      [TEXT] #5341:7355 template=EL-82fe544a
+    [FRAME] #5341:7356 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":331.35},"dimensions":{"width":315,"height":72}}
+      [RECTANGLE] #5341:7357 template=EL-20ebb1fd
+      [RECTANGLE] #5341:7358 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":8,"y":9},"dimensions":{"width":56,"height":56}} fills=fill_658ab2fa borderRadius=4px
+      [TEXT] #5341:7359 layout=layout_86a4a84c fills=fill_aaa5ba5c textStyle=style_25fcdbff text="Kashmir Great Lakes Trek"
+      [GROUP] #5341:7360 template=EL-5175dc9c
+        [FRAME] "Container" #5341:7361 template=EL-2a7c7d4f
+          [IMAGE-SVG] "Icon" #5341:7362 template=EL-78f25d1d
+          [FRAME] "Text" #5341:7365 template=EL-c84e3057
+            [TEXT] #5341:7366 template=EL-67770ae3
+        [FRAME] "Container" #5341:7367 template=EL-a2feff38
+          [IMAGE-SVG] "location_on" #5341:7368 template=EL-fc547d8d
+          [FRAME] "Text" #5341:7369 template=EL-c84e3057
+            [TEXT] #5341:7370 template=EL-ae9948d0
+        [FRAME] "Container" #5341:7371 template=EL-2b5bc621
+          [STAR] #5341:7372 template=EL-b163970c
+          [FRAME] "Text" #5341:7373 template=EL-7e17afa6
+            [TEXT] #5341:7374 template=EL-6ea21d14
+      [TEXT] #5341:7375 template=EL-82fe544a
+    [FRAME] #5341:7376 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":877,"y":419.35},"dimensions":{"width":315,"height":42}}
+      [RECTANGLE] #5341:7377 template=EL-20ebb1fd
+      [TEXT] #5341:7378 layout=layout_86a4a84c fills=["#110E19"] textStyle=style_25fcdbff text="Kashmir Great Lakes Trek"
+      [GROUP] #5341:7379 template=EL-5175dc9c
+        [FRAME] "Container" #5341:7380 template=EL-2a7c7d4f
+          [IMAGE-SVG] "Icon" #5341:7381 template=EL-78f25d1d
+          [FRAME] "Text" #5341:7384 template=EL-c84e3057
+            [TEXT] #5341:7385 layout=layout_50ee40bc fills=fill_141b8a40 textStyle=style_47936e50 text="9 Days"
+        [FRAME] "Container" #5341:7386 template=EL-a2feff38
+          [IMAGE-SVG] "location_on" #5341:7387 template=EL-fc547d8d
+          [FRAME] "Text" #5341:7388 template=EL-c84e3057
+            [TEXT] #5341:7389 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":-0.17,"y":-0.15},"dimensions":{"width":73,"height":20}} fills=fill_141b8a40 textStyle=style_47936e50 text="Delhi to Ladakh"
+        [FRAME] "Container" #5341:7390 template=EL-2b5bc621
+          [STAR] #5341:7391 layout=layout_abbd4286 strokes=fill_141b8a40 strokeWeight=0.6776242256164551px borderRadius=0.4235151708126068px
+          [FRAME] "Text" #5341:7392 template=EL-7e17afa6
+            [TEXT] #5341:7393 layout=layout_c5efd649 fills=fill_141b8a40 textStyle=style_47936e50 text="4.8 "
+      [TEXT] #5341:7394 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":72,"y":28},"dimensions":{"width":118.9,"height":11.18}} fills=fill_141b8a40 textStyle=style_6973ef1a text="Departs on May 20, 2026"
+    [ELLIPSE] #5341:7395 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1033,"y":26.35},"dimensions":{"width":29,"height":29}} fills=fill_aaa5ba5c
+    [TEXT] #5341:7396 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1038,"y":31.35},"dimensions":{"width":18,"height":20}} fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":16,"letterSpacing":"-0.0113em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="+8"
+    [RECTANGLE] #5341:7397 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":25,"y":189.35},"dimensions":{"width":95,"height":95}} fills=["#F0F1EF"] borderRadius=12px
+    [RECTANGLE] #5341:7398 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":136,"y":189.35},"dimensions":{"width":95,"height":95}} fills=fill_a7d6debb borderRadius=12px
+    [RECTANGLE] #5341:7399 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":25,"y":300.35},"dimensions":{"width":95,"height":95}} fills=fill_a7d6debb borderRadius=12px
+    [RECTANGLE] #5341:7400 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":136,"y":300.35},"dimensions":{"width":95,"height":95}} fills=fill_a7d6debb borderRadius=12px
+    [GROUP] #5341:7401 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":153,"y":311.35},"dimensions":{"width":61,"height":74.01}}
+      [IMAGE-SVG] #5341:7402 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":14,"y":0},"dimensions":{"width":32.47,"height":40}}
+      [TEXT] #5341:7405 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":48.01},"dimensions":{"width":61,"height":26}} fills=fill_aaa5ba5c textStyle=style_49d57690 text="Soloish \\nAdventures"
+    [GROUP] #5341:7406 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":40,"y":199.35},"dimensions":{"width":64,"height":75}}
+      [TEXT] #5341:7407 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":49},"dimensions":{"width":64,"height":26}} fills=["#151515"] textStyle=style_49d57690 text="Family Adventures"
+      [IMAGE-SVG] #5341:7408 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":16.02,"y":0},"dimensions":{"width":34.22,"height":40}}
+    [GROUP] #5341:7436 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":151,"y":200.35},"dimensions":{"width":64,"height":73}}
+      [TEXT] #5341:7437 layout=layout_28d585f9 fills=fill_aaa5ba5c textStyle=style_49d57690 text="18 to 30 Somethings"
+      [IMAGE-SVG] #5341:7438 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":6.34,"y":0},"dimensions":{"width":52.31,"height":40}}
+    [GROUP] #5341:7449 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":40,"y":311.35},"dimensions":{"width":64,"height":72.5}}
+      [TEXT] #5341:7450 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":46.5},"dimensions":{"width":64,"height":26}} fills=fill_aaa5ba5c textStyle=style_49d57690 text="Active Adventures"
+      [IMAGE-SVG] #5341:7451 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":5.77,"y":0},"dimensions":{"width":52.82,"height":40}}
+    [RECTANGLE] #5341:7458 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":25,"y":411.35},"dimensions":{"width":95,"height":95}} fills=fill_a7d6debb borderRadius=12px
+    [RECTANGLE] #5341:7459 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":136,"y":411.35},"dimensions":{"width":95,"height":95}} fills=["rgba(181, 185, 177, 0.4)"] borderRadius=12px
+    [TEXT] #5341:7460 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":170,"y":417.35},"dimensions":{"width":27,"height":60}} fills=fill_34dc0314 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":48,"textAlignHorizontal":"CENTER","textAlignVertical":"TOP"} text="+"
+    [GROUP] #5341:7461 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":40,"y":423.35},"dimensions":{"width":64,"height":72}}
+      [TEXT] #5341:7462 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":46},"dimensions":{"width":64,"height":26}} fills=fill_aaa5ba5c textStyle=style_49d57690 text="Food Adventures"
+      [IMAGE-SVG] #5341:7463 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":3,"y":0},"dimensions":{"width":58.78,"height":40}}
+  [TEXT] #5341:7467 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":55,"y":88},"dimensions":{"width":166,"height":38}} fills=["#254B02"] textStyle={"fontFamily":"Gochi Hand","fontStyle":"Regular","fontWeight":400,"fontSize":32,"textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Destinations"
+  [TEXT] #5341:7468 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":175,"y":528},"dimensions":{"width":77,"height":26}} fills=fill_34dc0314 textStyle=style_49d57690 text="View all Destinations"
+  [RECTANGLE] #5341:7469 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":907,"y":503},"dimensions":{"width":315,"height":15}} fills=[{"type":"GRADIENT_LINEAR","gradient":"linear-gradient(180deg, rgba(240, 241, 239, 0) 0%, rgba(247, 248, 247, 0.5) 24%, rgba(255, 255, 255, 1) 77%)"}]

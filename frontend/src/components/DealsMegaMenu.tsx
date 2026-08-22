@@ -51,8 +51,8 @@ export default function DealsMegaMenu({ isHovered }: DealsMegaMenuProps) {
 
   // Helper to render skeleton loading cards
   const renderSkeletons = () => (
-    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-4 pb-6 pt-4 md:px-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
-      <div className="mx-auto w-full max-w-[1600px]">
+    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-2 pb-6 pt-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
+      <div className="w-full">
         <div
           className="grid gap-4"
           style={{
@@ -104,8 +104,8 @@ export default function DealsMegaMenu({ isHovered }: DealsMegaMenuProps) {
   const deal4 = discounts[3];
 
   return (
-    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-4 pb-6 pt-4 md:px-8 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
-      <div className="mx-auto w-full max-w-[1600px]">
+    <div className="absolute left-0 top-full z-50 w-full bg-[#f8f9fb] px-2 pb-6 pt-4 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)]">
+      <div className="w-full">
         <div
           className="grid gap-4"
           style={{
@@ -139,9 +139,9 @@ export default function DealsMegaMenu({ isHovered }: DealsMegaMenuProps) {
                     {deal1.name}
                   </h3>
                   {deal1.color && (
-                    <span 
-                      className="w-2.5 h-2.5 rounded-full shrink-0" 
-                      style={{ backgroundColor: deal1.color }} 
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: deal1.color }}
                     />
                   )}
                 </div>
@@ -177,9 +177,9 @@ export default function DealsMegaMenu({ isHovered }: DealsMegaMenuProps) {
                     {deal2.name}
                   </h3>
                   {deal2.color && (
-                    <span 
-                      className="w-2.5 h-2.5 rounded-full shrink-0" 
-                      style={{ backgroundColor: deal2.color }} 
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: deal2.color }}
                     />
                   )}
                 </div>
@@ -215,9 +215,9 @@ export default function DealsMegaMenu({ isHovered }: DealsMegaMenuProps) {
                     {deal3.name}
                   </h3>
                   {deal3.color && (
-                    <span 
-                      className="w-2.5 h-2.5 rounded-full shrink-0" 
-                      style={{ backgroundColor: deal3.color }} 
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: deal3.color }}
                     />
                   )}
                 </div>

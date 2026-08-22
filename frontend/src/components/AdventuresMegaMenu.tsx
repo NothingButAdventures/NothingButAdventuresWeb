@@ -332,8 +332,8 @@ export default function AdventuresMegaMenu({ isHovered }: { isHovered: boolean }
   if (!isHovered) return null;
 
   return (
-    <div className="absolute top-full left-0 w-full bg-white shadow-2xl py-6 px-10 z-50" style={{ height: '80vh' }}>
-      <div className="mx-auto flex gap-5 w-full max-w-[1400px] h-full">
+    <div className="absolute top-full left-0 w-full bg-white shadow-2xl py-6 px-2 z-50" style={{ height: '80vh' }}>
+      <div className="flex gap-5 w-full h-full">
 
         {/* ── Left Panel: Filters ─────────────────────────────────────────────── */}
         <div className="w-[260px] flex-shrink-0 bg-[#f5f5f5] rounded-2xl p-5 flex flex-col justify-between h-full">

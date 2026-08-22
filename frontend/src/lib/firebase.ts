@@ -182,6 +182,9 @@ export const uploadActivityImage = (file: File, onProgress?: (pct: number) => vo
 export const uploadTravelerDocument = (file: File, onProgress?: (pct: number) => void) =>
     uploadToFirebase(file, "traveler-documents", onProgress);
 
+export const uploadResumeDocument = (file: File, onProgress?: (pct: number) => void) =>
+    uploadToFirebase(file, "resumes", onProgress);
+
 /**
  * Delete an image from Firebase Storage by its URL.
  */

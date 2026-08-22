@@ -1,4 +1,4 @@
-// const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+// const API_BASE_URL = "http://localhost:3001/api/v1";
 const API_BASE_URL = "https://api-gi52ugpsnq-uc.a.run.app/api/v1";
 
 export const api = {
@@ -42,10 +42,12 @@ export const api = {
       getById: (id: string) => `/bookings/${id}`,
       update: (id: string) => `/bookings/${id}`,
       cancel: (id: string) => `/bookings/${id}/cancel`,
-      cancellationPreview: (id: string) => `/bookings/${id}/cancellation-preview`,
+      cancellationPreview: (id: string) =>
+        `/bookings/${id}/cancellation-preview`,
       getByTour: (tourId: string) => `/bookings?tour=${tourId}`,
       submitDocuments: (id: string) => `/bookings/${id}/submit-documents`,
-      toggleDocVerification: (id: string) => `/bookings/${id}/toggle-doc-verification`,
+      toggleDocVerification: (id: string) =>
+        `/bookings/${id}/toggle-doc-verification`,
     },
     lifetimeDeposits: {
       getMyDeposits: "/lifetime-deposits/my-deposits",
