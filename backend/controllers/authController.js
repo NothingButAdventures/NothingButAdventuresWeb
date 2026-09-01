@@ -18,7 +18,40 @@ const register = catchAsync(async (req, res, next) => {
     dateOfBirth,
     nationality,
     role,
+    affiliateCode: reqAffCode,
   } = req.body;
+
+  const affiliateCode = reqAffCode || req.cookies?.nba_aff_code;
+  let referredByAffiliateId = null;
+  let referredByCode = null;
+
+  if (affiliateCode) {
+    try {
+      const Affiliate = require("../models/Affiliate");
+      const AffiliateReferral = require("../models/AffiliateReferral");
+      const affiliate = await Affiliate.findOne({
+        affiliateCode: affiliateCode.toUpperCase(),
+        status: "approved",
+      });
+      if (affiliate) {
+        referredByAffiliateId = affiliate._id;
+        referredByCode = affiliate.affiliateCode;
+        affiliate.stats.totalSignups = (affiliate.stats.totalSignups || 0) + 1;
+        await affiliate.save({ validateBeforeSave: false });
+
+        // Update any clicked referral for visitor
+        const visitorId = req.cookies?.nba_visitor_id;
+        if (visitorId) {
+          await AffiliateReferral.updateMany(
+            { affiliate: affiliate._id, visitorId, status: "clicked" },
+            { status: "signed_up", signedUpAt: new Date() }
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Affiliate referral link during signup error:", e.message);
+    }
+  }
 
   // Validate role - only allow user and partner for public registration
   const allowedRoles = ["user", "partner"];
@@ -35,6 +68,8 @@ const register = catchAsync(async (req, res, next) => {
     nationality,
     role: userRole,
     isEmailVerified: false,
+    referredByAffiliate: referredByAffiliateId,
+    referredByCode: referredByCode,
   });
 
   // Generate verification token
@@ -324,6 +359,38 @@ const googleLogin = catchAsync(async (req, res, next) => {
   let user = await User.findOne({ email }).select("+isActive");
 
   if (!user) {
+    // Check affiliate attribution for new Google user
+    const affiliateCode = req.cookies?.nba_aff_code || req.body?.affiliateCode;
+    let referredByAffiliateId = null;
+    let referredByCode = null;
+
+    if (affiliateCode) {
+      try {
+        const Affiliate = require("../models/Affiliate");
+        const AffiliateReferral = require("../models/AffiliateReferral");
+        const affiliate = await Affiliate.findOne({
+          affiliateCode: affiliateCode.toUpperCase(),
+          status: "approved",
+        });
+        if (affiliate) {
+          referredByAffiliateId = affiliate._id;
+          referredByCode = affiliate.affiliateCode;
+          affiliate.stats.totalSignups = (affiliate.stats.totalSignups || 0) + 1;
+          await affiliate.save({ validateBeforeSave: false });
+
+          const visitorId = req.cookies?.nba_visitor_id;
+          if (visitorId) {
+            await AffiliateReferral.updateMany(
+              { affiliate: affiliate._id, visitorId, status: "clicked" },
+              { status: "signed_up", signedUpAt: new Date() }
+            );
+          }
+        }
+      } catch (e) {
+        console.error("Affiliate referral link during Google signup error:", e.message);
+      }
+    }
+
     // Create user if they don't exist
     const randomPassword = crypto.randomBytes(32).toString("hex");
     user = await User.create({
@@ -333,6 +400,8 @@ const googleLogin = catchAsync(async (req, res, next) => {
       passwordConfirm: randomPassword,
       role: "user",
       isEmailVerified: true,
+      referredByAffiliate: referredByAffiliateId,
+      referredByCode: referredByCode,
     });
   } else if (!user.isActive) {
     return next(

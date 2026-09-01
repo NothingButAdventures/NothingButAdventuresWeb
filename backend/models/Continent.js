@@ -17,6 +17,10 @@ const continentSchema = new mongoose.Schema(
             type: String,
             default: "default-continent.jpg",
         },
+        icon: {
+            type: String,
+            default: "",
+        },
         description: {
             type: String,
             trim: true,

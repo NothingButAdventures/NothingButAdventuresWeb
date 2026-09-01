@@ -862,6 +862,277 @@ const sendAbandonedCheckoutEmail = async (to, data) => {
   }
 };
 
+// ─── Affiliate Email Templates ─────────────────────────────────────────────────
+
+/**
+ * Send affiliate application received confirmation email
+ */
+const sendAffiliateApplicationReceivedEmail = async (to, data) => {
+  const { name, type, companyName } = data;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333333 100%); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Application Received! 🎉</h1>
+        <p style="color: #ffffff; opacity: 0.8; margin-top: 10px; font-size: 14px;">Nothing But Adventures Affiliate Program</p>
+      </div>
+      <div style="padding: 30px;">
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">
+          Thank you for applying to the <strong>Nothing But Adventures ${type === "affiliate" ? "Affiliate" : "Rep"} Program</strong>${companyName ? ` on behalf of <strong>${companyName}</strong>` : ""}!
+        </p>
+        <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin: 20px 0;">
+          <h3 style="color: #1A1A1A; margin-top: 0;">What happens next?</h3>
+          <ol style="color: #3F3F42; font-size: 14px; line-height: 1.8; padding-left: 20px;">
+            <li>Our team will review your application within <strong>2-3 business days</strong></li>
+            <li>You'll receive an email with your approval status</li>
+            <li>Once approved, you'll get your unique affiliate code and tracking link</li>
+            <li>Start sharing and earning commissions!</li>
+          </ol>
+        </div>
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          Questions? Reach out to us at <a href="mailto:affiliate@nothingbutadventures.com" style="color: #2563eb;">affiliate@nothingbutadventures.com</a>
+        </p>
+      </div>
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
+        <p style="color: #737373; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${FROM_EMAIL}>`,
+      to,
+      subject: `✅ Affiliate Application Received — ${SITE_NAME}`,
+      html,
+    });
+    console.log(`📧 Affiliate application received email sent to ${to}`);
+  } catch (err) {
+    console.error("Failed to send affiliate application email:", err.message);
+  }
+};
+
+/**
+ * Send affiliate approved email with affiliate code
+ */
+const sendAffiliateApprovedEmail = async (to, data) => {
+  const { name, affiliateCode, commissionRate, type } = data;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">You're Approved! 🎊</h1>
+        <p style="color: #ffffff; opacity: 0.9; margin-top: 10px; font-size: 14px;">Welcome to the ${SITE_NAME} Affiliate Family</p>
+      </div>
+      <div style="padding: 30px;">
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">
+          Great news! Your application to become a <strong>${SITE_NAME} ${type === "affiliate" ? "Affiliate" : "Rep"}</strong> has been approved!
+        </p>
+        <div style="background: linear-gradient(135deg, #1A1A1A 0%, #2d2d2d 100%); border-radius: 12px; padding: 25px; margin: 25px 0; text-align: center;">
+          <p style="color: #ffffff; opacity: 0.7; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">Your Affiliate Code</p>
+          <p style="color: #ffffff; font-size: 32px; font-weight: 800; margin: 0; letter-spacing: 3px;">${affiliateCode}</p>
+          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+            <p style="color: #10b981; font-size: 18px; font-weight: 600; margin: 0;">Commission Rate: ${commissionRate}%</p>
+          </div>
+        </div>
+        <div style="background: #f0fdf4; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #bbf7d0;">
+          <h3 style="color: #059669; margin-top: 0;">🚀 Getting Started</h3>
+          <ol style="color: #3F3F42; font-size: 14px; line-height: 2; padding-left: 20px;">
+            <li>Log in to your <strong>Affiliate Dashboard</strong> on our website</li>
+            <li>Copy your unique referral link</li>
+            <li>Share it on social media, your website, or with your audience</li>
+            <li>Track your clicks, conversions, and commissions in real-time</li>
+            <li>Earn <strong>${commissionRate}%</strong> on every successful booking!</li>
+          </ol>
+        </div>
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          Your referral link format: <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 13px;">nothingbutadventures.com/?ref=${affiliateCode}</code>
+        </p>
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          We're excited to have you on board! Contact us at <a href="mailto:affiliate@nothingbutadventures.com" style="color: #2563eb;">affiliate@nothingbutadventures.com</a> anytime.
+        </p>
+      </div>
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
+        <p style="color: #737373; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${FROM_EMAIL}>`,
+      to,
+      subject: `🎉 Welcome to the ${SITE_NAME} Affiliate Program!`,
+      html,
+    });
+    console.log(`📧 Affiliate approved email sent to ${to}`);
+  } catch (err) {
+    console.error("Failed to send affiliate approved email:", err.message);
+  }
+};
+
+/**
+ * Send affiliate rejected email
+ */
+const sendAffiliateRejectedEmail = async (to, data) => {
+  const { name, reason } = data;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #1A1A1A 0%, #333333 100%); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Application Update</h1>
+        <p style="color: #ffffff; opacity: 0.8; margin-top: 10px; font-size: 14px;">${SITE_NAME} Affiliate Program</p>
+      </div>
+      <div style="padding: 30px;">
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">
+          Thank you for your interest in the ${SITE_NAME} Affiliate Program. After careful review, we're unable to approve your application at this time.
+        </p>
+        ${reason ? `
+          <div style="background: #fef2f2; border-radius: 12px; padding: 20px; margin: 20px 0; border: 1px solid #fecaca;">
+            <p style="color: #991b1b; font-size: 14px; margin: 0;"><strong>Reason:</strong> ${reason}</p>
+          </div>
+        ` : ""}
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          This doesn't mean the door is closed — we encourage you to build your audience and reapply in the future. If you have questions, please contact us at <a href="mailto:affiliate@nothingbutadventures.com" style="color: #2563eb;">affiliate@nothingbutadventures.com</a>.
+        </p>
+      </div>
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
+        <p style="color: #737373; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${FROM_EMAIL}>`,
+      to,
+      subject: `Affiliate Application Update — ${SITE_NAME}`,
+      html,
+    });
+    console.log(`📧 Affiliate rejected email sent to ${to}`);
+  } catch (err) {
+    console.error("Failed to send affiliate rejected email:", err.message);
+  }
+};
+
+/**
+ * Send commission earned notification email
+ */
+const sendAffiliateCommissionEarnedEmail = async (to, data) => {
+  const { name, commissionAmount, bookingReference, tourName, totalEarned, pendingPayout } = data;
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Commission Earned! 💰</h1>
+        <p style="color: #ffffff; opacity: 0.9; margin-top: 10px; font-size: 14px;">A referral just booked a trip</p>
+      </div>
+      <div style="padding: 30px;">
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">
+          Great news! Someone you referred just booked a trip, and you've earned a commission!
+        </p>
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border: 1px solid #bae6fd;">
+          <div style="text-align: center; margin-bottom: 15px;">
+            <p style="color: #0369a1; font-size: 14px; margin: 0 0 5px 0;">Commission Earned</p>
+            <p style="color: #0c4a6e; font-size: 36px; font-weight: 800; margin: 0;">${formatCurrency(commissionAmount)}</p>
+          </div>
+          <div style="border-top: 1px solid #bae6fd; padding-top: 15px;">
+            <table style="width: 100%; font-size: 14px; color: #3F3F42;">
+              <tr><td style="padding: 5px 0;">Tour</td><td style="text-align: right; font-weight: 600;">${tourName}</td></tr>
+              <tr><td style="padding: 5px 0;">Booking Ref</td><td style="text-align: right; font-weight: 600;">${bookingReference}</td></tr>
+              <tr><td style="padding: 5px 0;">Total Earned (All Time)</td><td style="text-align: right; font-weight: 600;">${formatCurrency(totalEarned)}</td></tr>
+              <tr><td style="padding: 5px 0;">Pending Payout</td><td style="text-align: right; font-weight: 600; color: #059669;">${formatCurrency(pendingPayout)}</td></tr>
+            </table>
+          </div>
+        </div>
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          Keep sharing your referral link to earn more! Check your affiliate dashboard for detailed analytics.
+        </p>
+      </div>
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
+        <p style="color: #737373; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${FROM_EMAIL}>`,
+      to,
+      subject: `💰 You earned ${formatCurrency(commissionAmount)} in commission — ${SITE_NAME}`,
+      html,
+    });
+    console.log(`📧 Commission earned email sent to ${to}`);
+  } catch (err) {
+    console.error("Failed to send commission earned email:", err.message);
+  }
+};
+
+/**
+ * Send payout processed email
+ */
+const sendAffiliatePayoutProcessedEmail = async (to, data) => {
+  const { name, amount, method, transactionId, remainingBalance } = data;
+
+  const methodLabels = {
+    bank_transfer: "Bank Transfer",
+    paypal: "PayPal",
+    stripe: "Stripe",
+    manual: "Manual Transfer",
+  };
+
+  const html = `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+      <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 30px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Payout Processed! 🏦</h1>
+        <p style="color: #ffffff; opacity: 0.9; margin-top: 10px; font-size: 14px;">Your commission has been paid</p>
+      </div>
+      <div style="padding: 30px;">
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+        <p style="color: #3F3F42; font-size: 16px; line-height: 1.6;">Your affiliate payout has been processed!</p>
+        <div style="background: #f0fdf4; border-radius: 12px; padding: 25px; margin: 25px 0; border: 1px solid #bbf7d0; text-align: center;">
+          <p style="color: #059669; font-size: 14px; margin: 0 0 5px 0;">Amount Paid</p>
+          <p style="color: #065f46; font-size: 36px; font-weight: 800; margin: 0;">${formatCurrency(amount)}</p>
+          <div style="border-top: 1px solid #bbf7d0; margin-top: 15px; padding-top: 15px;">
+            <table style="width: 100%; font-size: 14px; color: #3F3F42;">
+              <tr><td style="padding: 5px 0;">Payment Method</td><td style="text-align: right; font-weight: 600;">${methodLabels[method] || method}</td></tr>
+              <tr><td style="padding: 5px 0;">Transaction ID</td><td style="text-align: right; font-weight: 600;">${transactionId}</td></tr>
+              <tr><td style="padding: 5px 0;">Remaining Balance</td><td style="text-align: right; font-weight: 600;">${formatCurrency(remainingBalance)}</td></tr>
+            </table>
+          </div>
+        </div>
+        <p style="color: #3F3F42; font-size: 14px; line-height: 1.6;">
+          If you have any questions about this payout, please contact <a href="mailto:affiliate@nothingbutadventures.com" style="color: #2563eb;">affiliate@nothingbutadventures.com</a>.
+        </p>
+      </div>
+      <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e5e5e5;">
+        <p style="color: #737373; font-size: 12px; margin: 0;">© ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  try {
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${SITE_NAME}" <${FROM_EMAIL}>`,
+      to,
+      subject: `💵 Payout of ${formatCurrency(amount)} processed — ${SITE_NAME}`,
+      html,
+    });
+    console.log(`📧 Payout processed email sent to ${to}`);
+  } catch (err) {
+    console.error("Failed to send payout processed email:", err.message);
+  }
+};
+
 module.exports = {
   sendInstallmentActivatedEmail,
   sendInstallmentPaymentEmail,
@@ -878,4 +1149,9 @@ module.exports = {
   sendHoldSpaceReleasedEmail,
   sendBookingConfirmationEmail,
   sendAbandonedCheckoutEmail,
+  sendAffiliateApplicationReceivedEmail,
+  sendAffiliateApprovedEmail,
+  sendAffiliateRejectedEmail,
+  sendAffiliateCommissionEarnedEmail,
+  sendAffiliatePayoutProcessedEmail,
 };

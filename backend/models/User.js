@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin", "partner", "copywriter"],
+      enum: ["user", "admin", "partner", "copywriter", "affiliate"],
       default: "user",
     },
     avatar: {
@@ -109,6 +109,15 @@ const userSchema = new mongoose.Schema(
       default: 0,
     },
     walletExpiresAt: Date,
+    referredByAffiliate: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Affiliate",
+    },
+    referredByCode: {
+      type: String,
+      uppercase: true,
+      trim: true,
+    },
   },
   {
     timestamps: true,
@@ -120,6 +129,7 @@ const userSchema = new mongoose.Schema(
 // Indexes (email already indexed via unique constraint)
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ referredByAffiliate: 1 });
 
 // Virtual populate for user's bookings
 userSchema.virtual("bookings", {

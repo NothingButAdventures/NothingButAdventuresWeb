@@ -121,12 +121,18 @@ export default function AuthModal({
     }
 
     try {
+      const storedAffCode = typeof window !== 'undefined' ? localStorage.getItem('nba_aff_code') : null;
+      const payload = {
+        ...registerData,
+        affiliateCode: storedAffCode || undefined,
+      };
+
       const response = await fetch(`${api.baseURL}${api.endpoints.auth.register}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(registerData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();

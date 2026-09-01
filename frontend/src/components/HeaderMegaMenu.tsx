@@ -32,6 +32,7 @@ interface Interest {
   name: string;
   slug?: string;
   url?: string;
+  icon?: string;
   image?: string;
   description?: string;
   shortDescription?: string;
@@ -44,6 +45,7 @@ interface TravelStyle {
   name: string;
   slug?: string;
   url?: string;
+  icon?: string;
   image?: string;
   description?: string;
   shortDescription?: string;
@@ -76,6 +78,7 @@ interface Continent {
   _id: string;
   name: string;
   slug: string;
+  icon?: string;
   description?: string;
   image?: string;
   countries?: Country[];
@@ -270,17 +273,15 @@ export default function HeaderMegaMenu({
     return [...rawList];
   }, [isDestination, isAdventure, continents, travelStyles, interests]);
 
-  const selectedIndex = isDestination
-    ? selectedContinentIndex
-    : isAdventure
-      ? selectedStyleIndex
-      : selectedInterestIndex;
+  const [lockedIndex, setLockedIndex] = useState<number | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number>(0);
 
-  const setSelectedIndex = isDestination
-    ? setSelectedContinentIndex
-    : isAdventure
-      ? setSelectedStyleIndex
-      : setSelectedInterestIndex;
+  useEffect(() => {
+    setLockedIndex(null);
+    setHoveredIndex(0);
+  }, [activeMenu]);
+
+  const selectedIndex = lockedIndex !== null ? lockedIndex : hoveredIndex;
 
   const activeCategory =
     currentCategories[selectedIndex] || currentCategories[0];
@@ -509,64 +510,93 @@ export default function HeaderMegaMenu({
         >
           <div className="flex flex-col lg:flex-row gap-6 items-stretch min-h-[500px]">
             {/* ═══════════════ LEFT COLUMN: 2-Column Square Categories (Width ~225px) ═══════════════ */}
-            <div className="w-full lg:w-[225px] shrink-0 flex flex-col justify-between border-r border-[rgba(26,26,26,0.15)] pr-5">
-              <div>
-                {/* Section Title */}
-                <h2 className="font-gochi text-[32px] font-normal text-[#254B02] leading-tight mb-4">
-                  {leftHeading}
-                </h2>
+            <div className="w-full lg:w-[225px] shrink-0 flex flex-col h-full border-r border-[rgba(26,26,26,0.15)] pr-5">
+              {/* Section Title */}
+              <h2 className="font-gochi text-[32px] font-normal text-[#254B02] leading-tight mb-4">
+                {leftHeading}
+              </h2>
 
-                {/* 2-Column Grid of 95x95px Cards (#5341:7233 - #5341:7463) */}
-                <div className="grid grid-cols-2 gap-2.5 max-h-[400px] overflow-y-auto pr-1">
-                  {currentCategories.map((cat, idx) => {
-                    const isActive = idx === selectedIndex;
-                    const IconComponent = getCategoryIcon(cat.name);
+              {/* 2-Column Grid of 95x95px Cards (#5341:7233 - #5341:7463) */}
+              <div className="grid grid-cols-2 gap-2.5 flex-1 overflow-y-auto pr-1">
+                {currentCategories.map((cat, idx) => {
+                  const isLocked = lockedIndex === idx;
+                  const isHoverActive = selectedIndex === idx && !isLocked;
+                  const IconComponent = getCategoryIcon(cat.name);
+                  const hasCustomIcon = Boolean(
+                    cat.icon && cat.icon.trim() !== "",
+                  );
 
-                    return (
-                      <button
-                        key={cat._id || idx}
-                        type="button"
-                        onMouseEnter={() => setSelectedIndex(idx)}
-                        onClick={() => setSelectedIndex(idx)}
-                        className={`w-[95px] h-[95px] rounded-[12px] p-2 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
-                          isActive
-                            ? "bg-[#57063C] text-[#F5F2EB] shadow-xs"
-                            : "bg-[rgba(181,185,177,0.2)] text-[#1A1A1A] hover:bg-[#57063C] hover:text-white"
-                        }`}
-                      >
-                        <IconComponent
-                          className={`w-[36px] h-[36px] mb-1.5 shrink-0 transition-colors ${isActive ? "text-[#F5F2EB]" : "text-[#1A1A1A]"}`}
-                        />
-                        <span className="text-[12px] font-normal leading-[13px] line-clamp-2 px-0.5">
-                          {cat.name}
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  {/* Plus Box if categories < 8 */}
-                  {currentCategories.length < 8 && (
-                    <Link
-                      href={isDestination ? "/destinations" : "/trips"}
-                      onClick={closeMenu}
-                      className="w-[95px] h-[95px] rounded-[12px] bg-[rgba(181,185,177,0.4)] hover:bg-[#57063C] hover:text-white text-[#1A1A1A] flex items-center justify-center text-[48px] font-normal transition-all"
+                  return (
+                    <button
+                      key={cat._id || idx}
+                      type="button"
+                      onMouseEnter={() => {
+                        if (lockedIndex === null) {
+                          setHoveredIndex(idx);
+                        }
+                      }}
+                      onClick={() => {
+                        if (lockedIndex === idx) {
+                          setLockedIndex(null);
+                        } else {
+                          setLockedIndex(idx);
+                          setHoveredIndex(idx);
+                        }
+                      }}
+                      className={`w-[95px] h-[95px] rounded-[12px] p-2 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ${
+                        isLocked
+                          ? "bg-[#57063C] text-[#F5F2EB] shadow-xs"
+                          : isHoverActive
+                            ? "bg-[rgba(181,185,177,0.5)] text-[#1A1A1A] shadow-xs"
+                            : "bg-[rgba(181,185,177,0.2)] text-[#1A1A1A] hover:bg-[rgba(181,185,177,0.35)]"
+                      }`}
                     >
-                      +
-                    </Link>
-                  )}
-                </div>
-              </div>
+                      {hasCustomIcon ? (
+                        <div className="w-[36px] h-[36px] mb-1.5 shrink-0 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={cat.icon}
+                            alt={cat.name}
+                            className={`w-full h-full object-contain ${
+                              isLocked ? "brightness-0 invert" : ""
+                            }`}
+                          />
+                        </div>
+                      ) : (
+                        <IconComponent
+                          className={`w-[36px] h-[36px] mb-1.5 shrink-0 transition-colors ${
+                            isLocked ? "text-[#F5F2EB]" : "text-[#1A1A1A]"
+                          }`}
+                        />
+                      )}
+                      <span className="text-[12px] font-normal leading-[13px] line-clamp-2 px-0.5">
+                        {cat.name}
+                      </span>
+                    </button>
+                  );
+                })}
 
-              {/* View All Link at Bottom (#5341:7468) */}
-              <Link
-                href={isDestination ? "/destinations" : "/trips"}
-                onClick={closeMenu}
-                className="text-[12px] text-[#1A1A1A] hover:underline font-normal text-center mt-3 pt-2 block"
-              >
-                {isDestination
-                  ? "View all Destinations"
-                  : "View all Destinations"}
-              </Link>
+                {/* View All Card if categories < 8 */}
+                {currentCategories.length < 8 && (
+                  <Link
+                    href={
+                      isDestination
+                        ? "/destinations"
+                        : isAdventure
+                          ? "/travel-styles"
+                          : "/trips"
+                    }
+                    onClick={closeMenu}
+                    className="w-[95px] h-[95px] rounded-[12px] p-2 bg-[rgba(181,185,177,0.25)] hover:bg-[rgba(181,185,177,0.5)] text-[#1A1A1A] flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 group/viewall"
+                  >
+                    <ArrowUpRight className="w-5 h-5 mb-1 text-current transition-transform group-hover/viewall:translate-x-0.5 group-hover/viewall:-translate-y-0.5 shrink-0" />
+                    <span className="text-[11px] font-medium leading-[13px] line-clamp-2 px-0.5">
+                      {isDestination
+                        ? "View all Destinations"
+                        : "View all Adventures"}
+                    </span>
+                  </Link>
+                )}
+              </div>
             </div>
 
             {/* ═══════════════ MIDDLE COLUMN: Hero Image & Popular Regions (Width ~584px) ═══════════════ */}
@@ -605,15 +635,21 @@ export default function HeaderMegaMenu({
 
                 {/* Bottom Overlay */}
                 <div className="absolute inset-x-0 bottom-0 z-10 p-5 flex items-end justify-between gap-3 bg-gradient-to-t from-black/85 via-black/40 to-transparent">
-                  <p className="text-[14px] font-light leading-snug text-white max-w-[347px] font-outfit">
-                    An unbeatable mix of uncommon experiences, insider access,
-                    cultural contact, and all the must-sees and -dos.
+                  <p className="text-[14px] font-light leading-snug text-white max-w-[347px] font-outfit line-clamp-3">
+                    {(activeCategory as any)?.shortDescription ||
+                      (activeCategory as any)?.description ||
+                      (activeCategory as any)?.summary ||
+                      (isDestination
+                        ? `An unbeatable mix of uncommon experiences, insider access, and must-sees across ${activeCategory?.name || "the region"}.`
+                        : `An unbeatable mix of uncommon experiences, insider access, cultural contact, and all the must-sees and -dos.`)}
                   </p>
                   <Link
                     href={
                       isDestination
                         ? `/destinations/${activeCategory?.slug || ""}`
-                        : "/trips"
+                        : activeCategory?.slug
+                          ? `/travel-styles/${activeCategory.slug}`
+                          : "/trips"
                     }
                     onClick={closeMenu}
                     className="shrink-0 flex items-center gap-1.5 group/btn"

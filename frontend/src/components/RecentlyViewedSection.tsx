@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import TourCard from "@/components/TourCard";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react";
+import { api } from "@/lib/api";
 
 export default function RecentlyViewedSection() {
   const [tours, setTours] = useState<any[]>([]);
@@ -23,65 +24,18 @@ export default function RecentlyViewedSection() {
       console.error("Failed to read recently viewed tours:", err);
     }
 
-    // Fallback tours for preview when localStorage is empty
-    setTours([
-      {
-        _id: "demo-1",
-        title: "Purani Dilli Adventure Full Name",
-        durationDays: 12,
-        slug: "purani-dilli-adventure",
-        tourCode: "DEL123",
-        pricing: { startingPrice: 2399, currency: "USD" },
-        startLocation: { name: "Delhi" },
-        endLocation: { name: "Jaipur" },
-        destinationsCount: 3,
-        travelStyle: { name: "Classic" },
-        images: ["/mountain_hikers.png"],
-        nextDepartureDate: "2026-08-29",
-      },
-      {
-        _id: "demo-2",
-        title: "Purani Dilli Adventure Full Name",
-        durationDays: 12,
-        slug: "purani-dilli-adventure-2",
-        tourCode: "DEL124",
-        pricing: { startingPrice: 2399, currency: "USD" },
-        startLocation: { name: "Delhi" },
-        endLocation: { name: "Jaipur" },
-        destinationsCount: 3,
-        travelStyle: { name: "Classic" },
-        images: ["/mountain_hikers.png"],
-        nextDepartureDate: "2026-08-29",
-      },
-      {
-        _id: "demo-3",
-        title: "Purani Dilli Adventure Full Name",
-        durationDays: 12,
-        slug: "purani-dilli-adventure-3",
-        tourCode: "DEL125",
-        pricing: { startingPrice: 2399, currency: "USD" },
-        startLocation: { name: "Delhi" },
-        endLocation: { name: "Jaipur" },
-        destinationsCount: 3,
-        travelStyle: { name: "Classic" },
-        images: ["/mountain_hikers.png"],
-        nextDepartureDate: "2026-08-29",
-      },
-      {
-        _id: "demo-4",
-        title: "Purani Dilli Adventure Full Name",
-        durationDays: 12,
-        slug: "purani-dilli-adventure-4",
-        tourCode: "DEL126",
-        pricing: { startingPrice: 2399, currency: "USD" },
-        startLocation: { name: "Delhi" },
-        endLocation: { name: "Jaipur" },
-        destinationsCount: 3,
-        travelStyle: { name: "Classic" },
-        images: ["/mountain_hikers.png"],
-        nextDepartureDate: "2026-08-29",
-      },
-    ]);
+    // Fetch real tours from DB when localStorage is empty
+    fetch(`${api.baseURL}${api.endpoints.tours.getAll}?limit=6`)
+      .then((res) => res.json())
+      .then((data) => {
+        const fetchedTours = data?.data?.tours || data?.data || [];
+        if (fetchedTours.length > 0) {
+          setTours(fetchedTours);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch tours for recently viewed section:", err);
+      });
   }, []);
 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -136,60 +90,158 @@ export default function RecentlyViewedSection() {
   if (tours.length === 0) return null;
 
   return (
-    <section className="mx-auto mt-20 sm:mt-24 mb-16 relative font-outfit">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8">
-        <div>
-          <div className="inline-flex items-center justify-center px-3.5 py-1 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[110px] text-[14px] font-medium tracking-normal mb-3 font-outfit">
-            Recently Viewed
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-[44px] lg:text-[48px] font-normal leading-tight text-[#1A1A1A] tracking-tight font-outfit">
-            Still thinking about these? <br className="hidden sm:inline" />
-            <span className="font-gochi text-[#254B02]">So are we.</span>
-          </h2>
+    <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-20 xl:mt-[127px] mb-12 sm:mb-20">
+      {/* Mobile Header Area (#5640:5888) */}
+      <div className="block md:hidden mb-6">
+        {/* Badge (#5640:5890, width: 82.46px, height: 17.52px) */}
+        <div className="inline-flex items-center justify-center w-[82.46px] h-[17.52px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[69.54px] text-[8.85px] font-medium tracking-normal mb-[10px] font-outfit">
+          Recently Viewed
         </div>
 
-        {/* View All & Controls Top Right */}
-        <div className="flex flex-col items-start md:items-end gap-2.5 mt-4 md:mt-0">
+        {/* Title (#5640:5892, 30.34px font size, Outfit + Gochi Hand) */}
+        <h2 className="text-[30.34px] font-normal leading-[1.12] text-[#1A1A1A] tracking-normal font-outfit mb-[18px]">
+          Still thinking about these? <br />
+          <span className="font-gochi text-[#254B02]">So are we.</span>
+        </h2>
+
+        {/* Action Bar with View All Trips & Nav Controls (#5640:5893, height: 30px) */}
+        <div className="flex items-center justify-between w-full">
           <Link
             href="/trips"
-            className="text-[15px] sm:text-[16px] font-normal text-[#1A1A1A] underline underline-offset-4 hover:opacity-80 transition font-outfit"
+            className="inline-flex items-center justify-center w-[108px] h-[30px] bg-[#1A1A1A] hover:bg-black text-white rounded-[40px] text-[14px] font-normal tracking-[-0.0137em] font-outfit transition-colors"
           >
             View All Trips
           </Link>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-[5px]">
             <button
               onClick={scrollPrev}
               disabled={!canScrollLeft}
-              className={`w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 canScrollLeft
-                  ? "bg-[#9C9C9C] hover:bg-[#7E7E7E] text-white"
-                  : "bg-[#9C9C9C]/70 text-white/80 cursor-not-allowed"
+                  ? "bg-[#1A1A1A] hover:bg-black text-white"
+                  : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
               }`}
               aria-label="Previous tours"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.6}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.6}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <button
               onClick={scrollNext}
               disabled={!canScrollRight}
-              className={`w-[30px] h-[30px] sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 canScrollRight
                   ? "bg-[#1A1A1A] hover:bg-black text-white"
-                  : "bg-[#1A1A1A]/70 text-white/80 cursor-not-allowed"
+                  : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
               }`}
               aria-label="Next tours"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.6}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.6}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
             </button>
           </div>
         </div>
       </div>
 
+      {/* Desktop Header Area (#5091:7222) */}
+      <div className="hidden md:flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-9 md:mb-10">
+        <div>
+          {/* Badge (EL-36f1c12d, width: 130px, height: 24px) */}
+          <div className="inline-flex items-center justify-center w-[130px] h-[24px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[110px] text-[14px] font-medium tracking-normal mb-[14px] font-outfit">
+            Recently Viewed
+          </div>
+          {/* Title (#5091:7225, 48px Outfit + Gochi Hand) */}
+          <h2 className="text-[32px] sm:text-[38px] md:text-[44px] xl:text-[48px] font-normal leading-[1.15] xl:leading-[56px] text-[#1A1A1A] tracking-normal font-outfit">
+            Still thinking about these? <br className="hidden sm:inline" />
+            <span className="font-gochi text-[#254B02]">So are we.</span>
+          </h2>
+        </div>
+
+        {/* View All & Controls Top Right (#5091:8226) */}
+        <div className="flex flex-col items-start md:items-end gap-2.5 mt-4 md:mt-0">
+          <Link
+            href="/trips"
+            className="text-[16px] font-normal text-[#1A1A1A] underline underline-offset-4 hover:opacity-80 transition font-outfit"
+          >
+            View All Trips
+          </Link>
+          <div className="flex items-center gap-[5px]">
+            <button
+              onClick={scrollPrev}
+              disabled={!canScrollLeft}
+              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                canScrollLeft
+                  ? "bg-[#1A1A1A] hover:bg-black text-white"
+                  : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
+              }`}
+              aria-label="Previous tours"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.6}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={scrollNext}
+              disabled={!canScrollRight}
+              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                canScrollRight
+                  ? "bg-[#1A1A1A] hover:bg-black text-white"
+                  : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
+              }`}
+              aria-label="Next tours"
+            >
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.6}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards Slider (#5091:7226 / #5640:5908, 262px on mobile / 309px on desktop) */}
       <div className="relative group">
         <style
           dangerouslySetInnerHTML={{
@@ -207,12 +259,12 @@ export default function RecentlyViewedSection() {
 
         <div
           ref={scrollContainerRef}
-          className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory -mx-4 px-4 md:mx-0 md:px-0"
+          className="flex gap-3 sm:gap-5 md:gap-[22px] overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory"
         >
           {tours.map((tour: any) => (
             <div
               key={tour._id}
-              className="w-[calc((100%-16px)/1.3)] sm:w-[calc((100%-32px)/2.3)] md:w-[calc((100%-72px)/3.6)] snap-start shrink-0"
+              className="w-[262px] sm:w-[300px] md:w-[309px] xl:w-[309px] min-w-[262px] sm:min-w-[300px] md:min-w-[309px] snap-start shrink-0"
             >
               <TourCard tour={tour} />
             </div>

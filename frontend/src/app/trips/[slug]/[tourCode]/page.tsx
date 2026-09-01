@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -39,10 +39,11 @@ interface Tour {
   itineraryMapImage?: string;
   whatsIncluded?: string;
   transportation?: string;
+  transport?: string;
   staffExperts?: string;
   meals?: string;
   accommodation?: string;
-  ownRoomAvailable: boolean;
+  ownRoomAvailable?: boolean;
   wifiAvailable?: boolean;
   interests?: string[];
   price: {
@@ -158,6 +159,22 @@ interface Tour {
     accommodation?: string;
     joiningPoint?: string;
   };
+  preTripHotel?: {
+    _id: string;
+    name: string;
+    location: string;
+    privateRoomPrice: number;
+    sharedRoomPrice?: number;
+    image?: string;
+  };
+  postTripHotel?: {
+    _id: string;
+    name: string;
+    location: string;
+    privateRoomPrice: number;
+    sharedRoomPrice?: number;
+    image?: string;
+  };
   hotel?: {
     _id: string;
     name: string;
@@ -170,7 +187,7 @@ interface Tour {
 
 const physicalRatings = [
   { level: 1, name: "Easy" },
-  { level: 2, name: "Moderate" },
+  { level: 2, name: "Light" },
   { level: 3, name: "Average" },
   { level: 4, name: "Demanding" },
   { level: 5, name: "Challenging" },
@@ -286,7 +303,25 @@ export default function TourDetailPage() {
         const res = await fetch(`${api.baseURL}/tours/${slug}`);
         if (!res.ok) throw new Error("Tour not found");
         const json = await res.json();
-        setTour(json.data?.tour || json.data || json.tour || json);
+        const loadedTour = json.data?.tour || json.data || json.tour || json;
+        setTour(loadedTour);
+
+        // Save to recently viewed tours in localStorage
+        try {
+          if (loadedTour && (loadedTour._id || loadedTour.tourCode || loadedTour.slug)) {
+            const rawStored = localStorage.getItem("nba-recently-viewed");
+            const existing: any[] = rawStored ? JSON.parse(rawStored) : [];
+            const filtered = existing.filter(
+              (t) => (t._id && t._id !== loadedTour._id) && (t.tourCode && t.tourCode !== loadedTour.tourCode) && (t.slug && t.slug !== loadedTour.slug)
+            );
+            localStorage.setItem(
+              "nba-recently-viewed",
+              JSON.stringify([loadedTour, ...filtered].slice(0, 10))
+            );
+          }
+        } catch (e) {
+          console.error("Failed to save recently viewed tour", e);
+        }
 
         // Fetch related/all tours
         try {
@@ -391,7 +426,10 @@ export default function TourDetailPage() {
     return 0;
   };
 
-  const formatMeals = (mealsVal: any, defaultText: string = "Breakfast | Dinner"): string => {
+  const formatMeals = (
+    mealsVal: any,
+    defaultText: string = "Breakfast | Dinner",
+  ): string => {
     if (!mealsVal) return defaultText;
     if (typeof mealsVal === "string") return mealsVal;
     if (typeof mealsVal === "object") {
@@ -511,7 +549,7 @@ export default function TourDetailPage() {
     (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
   );
 
-  let bestDiscount = tour.price?.discountPercent || 20;
+  let bestDiscount = tour.price?.discountPercent || 0;
   let bestDealDate = sortedDates[0];
 
   sortedDates.forEach((d) => {
@@ -543,71 +581,11 @@ export default function TourDetailPage() {
   const promoCodeStr = tour.tourCode ? `NBA${tour.tourCode}` : "NBA2608LA20";
 
   // Dynamic months & departure filtering for Check Availability
-  const currentYr = new Date().getFullYear();
-  const displayYr = currentYr < 2027 ? 2027 : currentYr;
-  const rawStartDates = (tour.startDates || []).filter((d) => d.startDate);
-  const validStartDates =
-    rawStartDates.length >= 4
-      ? rawStartDates
-      : [
-          ...rawStartDates,
-          {
-            _id: "dep-figma-1",
-            startDate: new Date(displayYr, 2, 9).toISOString(),
-            endDate: new Date(displayYr, 2, 13).toISOString(),
-            price: { amount: 449, currency: "USD" },
-            discount: { percentage: 20, active: true },
-            availableSpots: 14,
-          },
-          {
-            _id: "dep-figma-2",
-            startDate: new Date(displayYr, 2, 23).toISOString(),
-            endDate: new Date(displayYr, 2, 27).toISOString(),
-            price: { amount: 467, currency: "USD" },
-            discount: { percentage: 10, active: true },
-            availableSpots: 14,
-          },
-          {
-            _id: "dep-figma-3",
-            startDate: new Date(displayYr, 3, 16).toISOString(),
-            endDate: new Date(displayYr, 3, 24).toISOString(),
-            price: { amount: 599, currency: "USD" },
-            discount: { percentage: 0, active: false },
-            availableSpots: 14,
-          },
-          {
-            _id: "dep-figma-4",
-            startDate: new Date(displayYr, 3, 21).toISOString(),
-            endDate: new Date(displayYr, 3, 26).toISOString(),
-            price: { amount: 599, currency: "USD" },
-            discount: { percentage: 0, active: false },
-            availableSpots: 14,
-          },
-        ];
+  const validStartDates = (tour.startDates || []).filter((d) => d.startDate);
 
   const monthsMap: {
     [key: string]: { key: string; label: string; minPrice: number; date: Date };
   } = {};
-  const startMonthBase = validStartDates[0]?.startDate
-    ? new Date(validStartDates[0].startDate)
-    : new Date(displayYr, 1, 1);
-  for (let i = 0; i < 8; i++) {
-    const d = new Date(
-      startMonthBase.getFullYear(),
-      startMonthBase.getMonth() + i,
-      1,
-    );
-    const key = d.toLocaleDateString("en-US", {
-      month: "short",
-      year: "numeric",
-    });
-    monthsMap[key] = {
-      key,
-      label: key,
-      minPrice: basePrice ? Math.round(basePrice * (1 + (i % 3) * 0.05)) : 3260,
-      date: d,
-    };
-  }
 
   validStartDates.forEach((d) => {
     const dateObj = new Date(d.startDate);
@@ -623,9 +601,15 @@ export default function TourDetailPage() {
     if (monthsMap[key]) {
       monthsMap[key].minPrice = Math.min(monthsMap[key].minPrice, effective);
     } else {
-      monthsMap[key] = { key, label: key, minPrice: effective, date: dateObj };
+      monthsMap[key] = {
+        key,
+        label: key,
+        minPrice: effective,
+        date: new Date(dateObj.getFullYear(), dateObj.getMonth(), 1),
+      };
     }
   });
+
   const availableMonths = Object.values(monthsMap).sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
@@ -672,79 +656,144 @@ export default function TourDetailPage() {
     "/mountain_hikers.png",
   ];
 
-  // Moments that'll make you call Really? 10 demo items
-  const momentsData = [
-    {
-      tag: "Classic",
-      title: "Red Tour of Dessert",
-      desc: "Experience the beauty of Nothing but Adventures as the sun sets behind desert cliffs. No sidelines, nothing but adventures here.",
-      image:
+  // Dynamic Moments derived from tour itinerary activities (deduplicated)
+  const momentsData: Array<{
+    day: number;
+    tag: string;
+    title: string;
+    desc: string;
+    image: string;
+  }> = (() => {
+    if (!tour?.itinerary || tour.itinerary.length === 0) return [];
+
+    const extracted: Array<{
+      day: number;
+      tag: string;
+      title: string;
+      desc: string;
+      image: string;
+    }> = [];
+    const seenTitles = new Set<string>();
+
+    const defaultImages = [
+      tour.descriptionImage ||
+        tour.images?.[0]?.url ||
         "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Photo Walk",
-      title: "Photo Walk in Nature",
-      desc: "Small groups means deeper connections. Meet travellers from around the world and make every adventure feel like a shared passport stamp.",
-      image:
-        "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Guided Tour",
-      title: "Guided Tour of Sarnath",
-      desc: "Small groups means deeper connections. Meet travellers from around the world and make every adventure feel like a shared passport stamp.",
-      image:
-        "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Sightseeing",
-      title: "Sightseeing at nearby Hill",
-      desc: "Choose to roam along with group or explore at your own pace, your choice. No sidelines, nothing but adventures here.",
-      image:
-        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Cultural",
-      title: "Ancient Temple Rituals",
-      desc: "Witness traditional candle lighting and sacred chant ceremonies along the river banks at twilight.",
-      image:
-        "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Wildlife",
-      title: "Safari in Golden Valley",
-      desc: "Spot indigenous wildlife across untouched nature reserves guided by local wildlife trackers.",
-      image:
-        "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Culinary",
-      title: "Secret Spice Cooking Class",
-      desc: "Cook traditional family recipes with local home chefs using fresh mountain herbs and spices.",
-      image:
-        "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Trekking",
-      title: "Himalayan Ridge Sunrise",
-      desc: "Early morning hike to high viewpoints to see first light paint snowy peaks in gold and crimson.",
-      image:
-        "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Stargazing",
-      title: "Midnight Camp under Milky Way",
-      desc: "Unpolluted night skies with crystal clear constellations, acoustic music, and campfire stories.",
-      image:
-        "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      tag: "Adventure",
-      title: "White Water River Rafting",
-      desc: "Navigate exhilarating rapids through steep pine-covered gorges with expert certified captains.",
-      image:
-        "https://images.unsplash.com/photo-1530866495561-507c9faab2ed?q=80&w=800&auto=format&fit=crop",
-    },
-  ];
+      "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800&auto=format&fit=crop",
+    ];
+
+    tour.itinerary.forEach((dayItem) => {
+      const dayNum = dayItem.day || 1;
+      const dayImages = (dayItem as any).images || [];
+
+      // 1. Add all activities from this day
+      if (Array.isArray(dayItem.activities) && dayItem.activities.length > 0) {
+        dayItem.activities.forEach((act: any, actIdx: number) => {
+          const title = (
+            act.title ||
+            act.name ||
+            `Day ${dayNum} Adventure`
+          ).trim();
+          const normKey = title.toLowerCase();
+          if (seenTitles.has(normKey)) return;
+          seenTitles.add(normKey);
+
+          const desc =
+            act.description ||
+            dayItem.description ||
+            "Experience an unforgettable adventure highlight on this tour.";
+          const img =
+            act.coverImage ||
+            act.image ||
+            (Array.isArray(act.images) && act.images[0]) ||
+            dayImages[actIdx] ||
+            dayImages[0] ||
+            tour.images?.[extracted.length % (tour.images?.length || 1)]?.url ||
+            defaultImages[extracted.length % defaultImages.length];
+
+          extracted.push({
+            day: dayNum,
+            tag: act.location || dayItem.title || "Included",
+            title,
+            desc,
+            image: img,
+          });
+        });
+      }
+
+      // 2. Also add optional activities if any
+      if (
+        Array.isArray(dayItem.optionalActivities) &&
+        dayItem.optionalActivities.length > 0
+      ) {
+        dayItem.optionalActivities.forEach((act: any, actIdx: number) => {
+          const title = (
+            act.title ||
+            act.name ||
+            `Day ${dayNum} Optional Activity`
+          ).trim();
+          const normKey = title.toLowerCase();
+          if (seenTitles.has(normKey)) return;
+          seenTitles.add(normKey);
+
+          const desc =
+            act.description ||
+            dayItem.description ||
+            "Optional curated experience to elevate your journey.";
+          const img =
+            act.coverImage ||
+            act.image ||
+            dayImages[actIdx] ||
+            dayImages[0] ||
+            tour.images?.[extracted.length % (tour.images?.length || 1)]?.url ||
+            defaultImages[extracted.length % defaultImages.length];
+
+          extracted.push({
+            day: dayNum,
+            tag: act.place || "Add-on",
+            title,
+            desc,
+            image: img,
+          });
+        });
+      }
+
+      // 3. If day has no activities array, extract the day itself
+      if (
+        (!dayItem.activities || dayItem.activities.length === 0) &&
+        (!dayItem.optionalActivities ||
+          dayItem.optionalActivities.length === 0) &&
+        (dayItem.title || dayItem.description)
+      ) {
+        const title = (dayItem.title || `Day ${dayNum} Highlights`).trim();
+        const normKey = title.toLowerCase();
+        if (!seenTitles.has(normKey)) {
+          seenTitles.add(normKey);
+          const desc =
+            dayItem.description ||
+            "Immerse yourself in authentic local experiences and breathtaking sights.";
+          const img =
+            dayImages[0] ||
+            tour.images?.[extracted.length % (tour.images?.length || 1)]?.url ||
+            defaultImages[extracted.length % defaultImages.length];
+
+          extracted.push({
+            day: dayNum,
+            tag: "Highlight",
+            title,
+            desc,
+            image: img,
+          });
+        }
+      }
+    });
+
+    return extracted;
+  })();
 
   // Split title so top line has max 50% width and remaining words flow into the subtitle line below
   const getTitleAndSubtitle = () => {
@@ -803,9 +852,9 @@ export default function TourDetailPage() {
   return (
     <div className="min-h-screen bg-white font-outfit text-[#1A1A1A]">
       {/* 1. Header Bar & Title Section */}
-      <div className="w-full px-4 sm:px-6 lg:px-10 pt-6 pb-2">
+      <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 xl:px-[35px] pt-6 pb-2">
         {/* Breadcrumbs */}
-        <nav className="mb-4 flex items-center space-x-2 text-[13px] text-[#1A1A1A]/80 font-light">
+        <nav className="mb-4 flex items-center space-x-2 text-[13px] text-[#1A1A1A]/80 font-light font-outfit">
           <Link href="/" className="hover:text-black transition-colors">
             Home
           </Link>
@@ -840,16 +889,16 @@ export default function TourDetailPage() {
           </span>
         </nav>
 
-        {/* Title Header with Share & Wishlist Icons */}
+        {/* Title Header with Share & Wishlist Icons (#5295:6937) */}
         <div className="flex items-start justify-between gap-6 mb-6">
-          <div className="w-full">
+          <div className="w-full max-w-[760px]">
             <h1
-              className="text-[36px] sm:text-[44px] lg:text-[48px] font-normal text-[#000000] tracking-tight max-w-full md:max-w-[50%] break-words"
-              style={{ lineHeight: "1.05" }}
+              className="text-[40px] sm:text-[50px] md:text-[56px] xl:text-[64px] font-normal text-[#000000] tracking-[-0.02em] font-outfit break-words"
+              style={{ lineHeight: "1.02" }}
             >
               {mainTitle}
             </h1>
-            <p className="text-[17px] sm:text-[20px] text-[#000000]/80 font-light mt-1.5">
+            <p className="text-[18px] sm:text-[20px] text-[#000000]/80 font-light mt-1.5 font-outfit tracking-normal">
               {subtitleLine}
             </p>
           </div>
@@ -889,7 +938,7 @@ export default function TourDetailPage() {
         </div>
 
         {/* 2, 3, 4. Hero Section + Tour Intro + Your Adventure at a Glance with Sticky Right Price/Booking Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-6 lg:gap-8 items-start mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] xl:grid-cols-[853px_316px] gap-6 xl:gap-[41px] items-start mb-16">
           {/* Left Column: Hero Image + Tour Intro + Your Adventure at a Glance */}
           <div className="space-y-10 w-full">
             {/* Left Hero Image */}
@@ -941,9 +990,9 @@ export default function TourDetailPage() {
 
               return (
                 <div>
-                  <h2 className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] mb-5 leading-snug">
+                  <h2 className="text-[26px] sm:text-[30px] md:text-[32px] font-normal text-[#1A1A1A] mb-5 leading-snug font-outfit">
                     A fast, fun, Action-filled{" "}
-                    <span className="font-gochi text-[#3B5D1B] text-[32px] sm:text-[36px]">
+                    <span className="font-gochi text-[#254B02] text-[26px] sm:text-[30px] md:text-[32px]">
                       Intro to{" "}
                       {tour.country?.name ||
                         tour.location?.startCity ||
@@ -951,8 +1000,8 @@ export default function TourDetailPage() {
                     </span>
                   </h2>
 
-                  {/* Description Paragraphs in 2 Columns */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-[16px] font-light text-[#1A1A1A] leading-[28px]">
+                  {/* Description Paragraphs in 2 Columns (#5295:7605 & #5295:7606) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-[14px] sm:text-[15px] font-light text-[#1A1A1A]/80 leading-[26px] font-outfit">
                     <p className="whitespace-pre-line">{col1}</p>
                     {col2 ? (
                       <p className="whitespace-pre-line">{col2}</p>
@@ -962,16 +1011,16 @@ export default function TourDetailPage() {
               );
             })()}
 
-            {/* 4. "Your Adventure at a Glance" Box (100% Figma MCP Match #5091:9006) */}
+            {/* 4. "Your Adventure at a Glance" Box (#5295:7540) */}
             <div
-              className="w-full relative rounded-[12px] p-6 sm:px-8 sm:py-7 overflow-hidden shadow-xs"
+              className="w-full relative rounded-[12px] p-6 sm:p-7 xl:p-[28px] overflow-hidden shadow-xs"
               style={{
                 backgroundColor: "rgba(181, 185, 177, 0.2)",
                 minHeight: "318px",
               }}
             >
-              {/* Top-Right Decorative Watermark in Pure White (#5091:9045) */}
-              <div className="absolute -top-24 -right-14 w-[300px] pointer-events-none select-none">
+              {/* Top-Right Decorative Watermark in Pure White (#5295:7574) */}
+              <div className="absolute -top-24 -right-14 w-[260px] pointer-events-none select-none">
                 <Image
                   src="/nba_logo1.svg"
                   alt="Watermark"
@@ -981,13 +1030,13 @@ export default function TourDetailPage() {
                 />
               </div>
 
-              {/* Title (#5091:9008 - Gochi Hand 32px) */}
-              <h3 className="font-gochi text-[30px] sm:text-[32px] text-[#3B5D1B] font-normal mb-7 relative z-10 leading-[0.9em]">
+              {/* Title (#5295:7542 - Gochi Hand 32px) */}
+              <h3 className="font-gochi text-[28px] sm:text-[32px] text-[#254B02] font-normal mb-7 relative z-10 leading-[0.9em]">
                 Your Adventure at a Glance
               </h3>
 
               {/* 6 Key Attributes Grid (2 Columns x 3 Rows - Exact Figma Match #5295:7540) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-6 relative z-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 xl:gap-x-12 gap-y-6 relative z-10">
                 {/* 1. Tour Duration (#5295:7543) */}
                 <div className="flex items-center gap-3.5">
                   <Image
@@ -998,10 +1047,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Tour Duration
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       {tour.duration.days} Days
                     </div>
                   </div>
@@ -1017,10 +1066,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Trip Type
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       {tour.travelStyle || "Small Group"}
                     </div>
                   </div>
@@ -1036,10 +1085,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Group Size
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       Max {tour.maxGroupSize} People
                     </div>
                   </div>
@@ -1055,10 +1104,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Service Level
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       {tour.serviceLevel || "Standard"}
                     </div>
                   </div>
@@ -1074,10 +1123,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Physical Rating
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       {tour.physicalRating?.level || 1}/5
                     </div>
                   </div>
@@ -1093,10 +1142,10 @@ export default function TourDetailPage() {
                     className="w-[51px] h-[51px] shrink-0 object-contain rounded-[8px]"
                   />
                   <div>
-                    <div className="text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
+                    <div className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] leading-tight font-outfit">
                       Minimum Age
                     </div>
-                    <div className="text-[16px] font-normal text-[#1A1A1A]/80 mt-0.5 font-outfit">
+                    <div className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/80 mt-0.5 font-outfit">
                       {tour.ageRequirement?.min || 12}+ Years
                     </div>
                   </div>
@@ -1110,58 +1159,55 @@ export default function TourDetailPage() {
             ref={bookingPanelRef}
             className="w-full flex flex-col lg:sticky lg:top-24"
           >
-            {/* Main Price / Booking Card (#5091:8445) */}
+            {/* Main Price / Booking Card (#5295:6968) */}
             <div
-              className="rounded-[13px] p-4 sm:p-5 flex flex-col gap-3 w-full shadow-xs"
+              className="rounded-[13px] p-3.5 sm:p-[13px] flex flex-col gap-3 w-full shadow-xs font-outfit"
               style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
             >
-              {/* Top Badges Row (#5091:8452 - #5091:8455) */}
+              {/* Top Badges Row (#5303:8783) */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-[#F73D0A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-[27px]">
+                  <span className="bg-[#F73D0A] text-white text-[10px] sm:text-[10.86px] font-normal px-2.5 py-[2px] rounded-[27px] leading-none inline-flex items-center justify-center">
                     Bestseller
                   </span>
-                  <span className="bg-[#1A1A1A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-[27px]">
+                  <span className="bg-[#1A1A1A] text-white text-[10px] sm:text-[10.86px] font-normal px-2.5 py-[2px] rounded-[27px] leading-none inline-flex items-center justify-center">
                     Sale {bestDiscount}%
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-[#1A1A1A]/70">
+                <span className="text-[10px] font-medium text-[#1A1A1A]/80 text-right leading-none">
                   Trip Code: {tour.tourCode || "UCOOS"}
                 </span>
               </div>
 
-              {/* Duration in Gochi Hand + Route (#5091:8456) */}
+              {/* Duration in Gochi Hand (#5295:6980) */}
               <div className="pt-0.5">
-                <div className="font-gochi text-[32px] text-[#3B5D1B] leading-none mb-1">
+                <div className="font-gochi text-[32px] text-[#254B02] leading-none">
                   {tour.duration.days} Days
-                </div>
-                <div className="text-[12px] font-normal text-[#1A1A1A]">
-                  {tour.location.startCity} to {tour.location.endCity}
                 </div>
               </div>
 
-              {/* Price section (#5091:8457) */}
-              <div className="pt-0.5">
+              {/* Price section (#5295:6981) */}
+              <div className="pt-0.5 font-outfit">
                 <div className="flex items-end justify-between gap-2">
                   {/* Left: From + $ 599 USD + Valid on Date */}
                   <div>
-                    <div className="text-[10px] font-normal text-[#1A1A1A]/70 mb-0.5">
+                    <div className="text-[10px] font-light text-[#1A1A1A] leading-none mb-1">
                       From
                     </div>
-                    <div className="flex items-start gap-1">
-                      <span className="text-[14px] font-normal text-[#1A1A1A] leading-none pt-0.5">
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-[10px] font-semibold text-[#1A1A1A] leading-none mr-0.5">
                         $
                       </span>
-                      <span className="text-[26px] sm:text-[28px] font-semibold text-[#1A1A1A] leading-none">
+                      <span className="text-[32px] font-semibold text-[#1A1A1A] leading-none tracking-tight font-outfit">
                         {Math.round(discountedPrice)}
                       </span>
-                      <span className="text-[11px] font-normal text-[#1A1A1A] leading-none pt-0.5 ml-0.5">
+                      <span className="text-[10px] font-semibold text-[#1A1A1A] leading-none ml-1">
                         USD
                       </span>
                     </div>
-                    <div className="text-[10px] font-light text-[#1A1A1A]/70 mt-1">
+                    <div className="text-[10px] font-light text-[#1A1A1A] mt-1.5">
                       Valid on{" "}
-                      <strong className="font-semibold text-[#1A1A1A]">
+                      <strong className="font-medium text-[#1A1A1A]">
                         {bestDealDate
                           ? new Date(bestDealDate.startDate).toLocaleDateString(
                               "en-US",
@@ -1176,13 +1222,13 @@ export default function TourDetailPage() {
                     </div>
                   </div>
 
-                  {/* Right: was $1499 (aligned to bottom, no strikethrough) */}
+                  {/* Right: was $1499 (aligned to bottom, no strikethrough per #5295:6987) */}
                   <div className="text-right pb-0.5">
-                    <div className="text-[13px] font-normal text-[#1A1A1A]/80">
-                      <span className="text-[10px] font-light text-[#1A1A1A]/70 mr-1">
+                    <div className="text-[13px] font-normal text-[#1A1A1A]">
+                      <span className="text-[10px] font-light text-[#1A1A1A] mr-1">
                         was
                       </span>
-                      <span className="text-[15px] font-normal">
+                      <span className="text-[16px] font-normal text-[#1A1A1A]">
                         ${basePrice}
                       </span>
                     </div>
@@ -1190,8 +1236,8 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* Adventure Deposit Card (#5091:8465) */}
-              <div className="bg-white rounded-[8px] p-2.5 sm:px-3 sm:py-2 flex items-center justify-between my-0.5">
+              {/* Adventure Deposit Card (#5295:6989) */}
+              <div className="bg-white rounded-[8px] px-3 py-2 flex items-center justify-between my-0.5 shadow-2xs font-outfit">
                 <div>
                   <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#1A1A1A]">
                     <Image
@@ -1203,33 +1249,33 @@ export default function TourDetailPage() {
                     />
                     <span>Adventure Deposit</span>
                   </div>
-                  <div className="text-[9px] font-light text-[#1A1A1A]/70 mt-0.5 pl-[19px]">
+                  <div className="text-[8.7px] font-light text-[#1A1A1A]/70 mt-0.5 pl-[19px]">
                     Book your spot Now
                   </div>
                 </div>
-                <div className="text-[12px] font-semibold text-[#1A1A1A]">
+                <div className="text-[10px] font-medium text-[#1A1A1A]">
                   ${depositAmount.toFixed(2)}
                 </div>
               </div>
 
-              {/* Star Rating Row (#5091:8477) */}
+              {/* Star Rating Row (#5295:7001) */}
               <div className="flex items-center gap-1.5 pt-0.5">
-                <div className="flex items-center gap-0.5 text-[#3B5D1B]">
+                <div className="flex items-center gap-0.5 text-[#254B02]">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
                       size={14}
                       weight="fill"
-                      className="text-[#3B5D1B]"
+                      className="text-[#254B02]"
                     />
                   ))}
                 </div>
-                <span className="text-[13px] text-[#1A1A1A] font-normal ml-1">
+                <span className="text-[13.5px] text-[#1A1A1A] font-normal ml-1">
                   ({tour.ratingsQuantity || 56} reviews)
                 </span>
               </div>
 
-              {/* CTA Button (#5091:8486) */}
+              {/* CTA Button (#5295:7010) */}
               <button
                 onClick={() => {
                   const datesSection = document.getElementById(
@@ -1239,38 +1285,32 @@ export default function TourDetailPage() {
                     datesSection.scrollIntoView({ behavior: "smooth" });
                   }
                 }}
-                className="w-full bg-[#1A1A1A] hover:bg-black text-white text-[17px] font-normal py-2.5 px-4 rounded-[34px] text-center transition cursor-pointer mt-1 shadow-xs"
+                className="w-full bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-light py-2.5 px-4 rounded-[34px] text-center transition cursor-pointer mt-1 shadow-xs font-outfit"
               >
                 Check Dates And Prices
               </button>
             </div>
 
-            {/* Deal & Offers Below Widget (#5091:8489) */}
-            <div className="mt-3 space-y-2">
+            {/* Deal & Offers Below Widget (#5295:7013 - #5295:7029) */}
+            <div className="mt-3 space-y-2 font-outfit">
               <div className="flex justify-start">
-                <span className="bg-[#F73D0A] text-white text-[10px] font-normal px-2.5 py-0.5 rounded-full">
+                <span className="bg-[#F73D0A] text-white text-[10.86px] font-normal px-2.5 py-[2px] rounded-[27px] leading-none inline-flex items-center justify-center">
                   Deal &amp; Offers
                 </span>
               </div>
 
-              {/* Row 1: Save X% Departure Date */}
-              <div
-                className="rounded-[10px] py-2 px-3 flex items-center justify-center gap-2 text-center shadow-2xs"
-                style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
-              >
-                <span className="bg-[#1A1A1A] text-white px-2.5 py-0.5 rounded-full text-[10px] font-medium shrink-0">
+              {/* Row 1: Save X% Departure Date (#5295:7013) */}
+              <div className="bg-[#F6F7F6] rounded-[13px] py-2 px-3 flex items-center justify-between text-[10.86px] font-light text-[#1A1A1A]/80 border border-[rgba(26,26,26,0.06)] shadow-2xs">
+                <span className="bg-[rgba(26,26,26,0.6)] text-white px-2 py-0.5 rounded-[13px] text-[8.7px] font-normal shrink-0">
                   Save {dealDiscountPercent}%
                 </span>
-                <span className="text-[11px] font-normal text-[#1A1A1A]">
+                <span className="text-[10.86px] font-light text-[#1A1A1A]/80">
                   Departure {dealDepartureDateStr}
                 </span>
               </div>
 
-              {/* Row 2: Expires in X days | Promo Code */}
-              <div
-                className="rounded-[10px] py-2 px-3 text-[11px] font-normal text-[#1A1A1A] text-center flex items-center justify-center gap-1.5 shadow-2xs"
-                style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
-              >
+              {/* Row 2: Expires in X days | Promo Code (#5295:7022) */}
+              <div className="bg-[#F6F7F6] rounded-[13px] py-2 px-3 text-[10.86px] font-light text-[#1A1A1A]/80 text-center flex items-center justify-center gap-1.5 border border-[rgba(26,26,26,0.06)] shadow-2xs">
                 <span>Expires in 18 days</span>
                 <span className="text-[#1A1A1A]/40">|</span>
                 <span>
@@ -1284,140 +1324,168 @@ export default function TourDetailPage() {
           </aside>
         </div>
 
-        {/* 5. "Moments that'll make you call Really?" (100% Figma MCP Match #5091:9236) */}
+        {/* 5. "Moments that'll make you call Really?" (100% Figma MCP Match #5295:7976) */}
         <div
           ref={momentsSectionRef}
-          className="relative h-[250vh] -mx-4 sm:-mx-6 lg:-mx-10 mb-16"
+          className="relative h-[260vh] w-full max-w-[1280px] mx-auto mb-16"
         >
-          <div className="sticky top-0 h-screen max-h-[850px] flex flex-col justify-center overflow-hidden py-8">
-            {/* Centered Heading (48px + 56px Gochi Hand) */}
-            <h2 className="text-center text-[38px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[54px] mb-10 shrink-0">
+          <div className="sticky top-0 h-screen max-h-[850px] w-full flex flex-col justify-center overflow-hidden py-8">
+            {/* Centered Heading (#5295:7977 - 48px Outfit + 56px Gochi Hand) */}
+            <h2 className="text-center text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#1A1A1A] font-outfit leading-[1.1] mb-10 shrink-0">
               Moments that’ll make you call <br />
-              <span className="font-gochi text-[#3B5D1B] text-[46px] sm:text-[56px] leading-[54px]">
+              <span className="font-gochi text-[#254B02] text-[44px] sm:text-[52px] xl:text-[56px] leading-[54px]">
                 Really?
               </span>
             </h2>
 
             {/* Horizontal Pinned Sliding Track */}
-            <div className="relative w-full overflow-visible py-8">
-              <div
-                className="flex items-center gap-10 sm:gap-12 will-change-transform"
-                style={{
-                  transform: `translateX(${windowWidth / 2 - 142 - momentsProgress * (momentsData.length - 1) * 333}px)`,
-                }}
-              >
-                {momentsData.map((m, idx) => {
-                  const currentCenterFloat =
-                    momentsProgress * (momentsData.length - 1);
-                  const distance = Math.abs(idx - currentCenterFloat);
-                  // Only the active middle card scales bigger; all other surrounding cards stay at uniform base scale
-                  const factor =
-                    distance < 0.5
-                      ? Math.cos((distance / 0.5) * (Math.PI / 2))
-                      : 0;
-                  const scale = 0.95 + 0.18 * factor;
-                  const isFocus = distance < 0.5;
-                  const zIndex = isFocus ? 20 : 1;
+            {(() => {
+              // Circular data array: start on card 3 (index 2), loop around to card 1 & 2 at the end, and keep trailing cards on right
+              const circularMoments =
+                momentsData.length >= 3
+                  ? [
+                      ...momentsData,
+                      ...momentsData.slice(0, Math.min(5, momentsData.length)),
+                    ]
+                  : momentsData;
+              const startIdx = momentsData.length >= 3 ? 2 : 0;
+              // Center on Card 1 / Card 2 at the end, leaving trailing cards 3, 4, 5 on the right
+              const endIdx =
+                momentsData.length >= 3
+                  ? momentsData.length + 1
+                  : circularMoments.length - 1;
+              const currentCenterFloat =
+                startIdx + momentsProgress * (endIdx - startIdx);
+              const cardWidth = 277;
+              const cardGap = 36;
+              const step = cardWidth + cardGap;
 
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => {
-                        if (momentsSectionRef.current) {
-                          const targetScroll =
-                            momentsSectionRef.current.offsetTop +
-                            (idx / (momentsData.length - 1)) *
-                              (momentsSectionRef.current.offsetHeight -
-                                window.innerHeight);
-                          window.scrollTo({
-                            top: targetScroll,
-                            behavior: "smooth",
-                          });
-                        }
-                      }}
-                      className="w-[270px] sm:w-[285px] shrink-0 flex flex-col group cursor-pointer origin-center select-none"
-                      style={{
-                        transform: `scale(${scale})`,
-                        zIndex,
-                      }}
-                    >
-                      {/* Top Image Box (228px) */}
-                      <div className="relative w-full h-[200px] sm:h-[228px] rounded-t-[8px] overflow-hidden shrink-0">
-                        <Image
-                          src={m.image}
-                          alt={m.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
+              return (
+                <div className="relative w-full overflow-visible py-8">
+                  <div
+                    className="flex items-center gap-[36px] will-change-transform"
+                    style={{
+                      transform: `translateX(calc(50% - ${cardWidth / 2}px - ${currentCenterFloat * step}px))`,
+                    }}
+                  >
+                    {circularMoments.map((m: any, idx: number) => {
+                      const distance = Math.abs(idx - currentCenterFloat);
+                      const isFocus = distance < 0.5;
+                      const factor =
+                        distance < 0.6
+                          ? Math.cos((distance / 0.6) * (Math.PI / 2))
+                          : 0;
+                      const scale = 0.82 + 0.18 * factor;
+                      const zIndex = isFocus
+                        ? 20
+                        : 10 - Math.min(9, Math.round(distance));
+                      const dayNumber = (idx % momentsData.length) + 1;
 
-                      {/* Bottom Content Box (#5091:9243) */}
-                      <div
-                        className="bg-white rounded-b-[8px] p-4 flex flex-col justify-between min-h-[118px] transition-shadow duration-300"
-                        style={{
-                          boxShadow: isFocus
-                            ? "0px 2px 20px 2px rgba(0, 0, 0, 0.08)"
-                            : "0px 1px 16px 1px rgba(0, 0, 0, 0.04)",
-                        }}
-                      >
-                        <div>
-                          {/* Day Pill Badge */}
-                          <span className="inline-block px-2.5 py-0.5 bg-[#1A1A1A] text-white text-[10px] font-normal rounded-full mb-1.5 self-start">
-                            Included in Day {idx + 1}
-                          </span>
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            if (momentsSectionRef.current) {
+                              const targetProgress =
+                                endIdx > startIdx
+                                  ? Math.max(
+                                      0,
+                                      Math.min(
+                                        1,
+                                        (idx - startIdx) / (endIdx - startIdx),
+                                      ),
+                                    )
+                                  : 0;
+                              const targetScroll =
+                                momentsSectionRef.current.offsetTop +
+                                targetProgress *
+                                  (momentsSectionRef.current.offsetHeight -
+                                    window.innerHeight);
+                              window.scrollTo({
+                                top: targetScroll,
+                                behavior: "smooth",
+                              });
+                            }
+                          }}
+                          className="w-[277px] shrink-0 flex flex-col group cursor-pointer origin-center select-none transition-transform duration-150 ease-out"
+                          style={{
+                            transform: `scale(${scale})`,
+                            zIndex,
+                          }}
+                        >
+                          {/* Top Image Box (#5295:7981, 277px x 229px) */}
+                          <div className="relative w-full h-[229px] rounded-t-[7.85px] overflow-hidden shrink-0 bg-gray-100">
+                            <Image
+                              src={m.image}
+                              alt={m.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
 
-                          {/* Highlight Title */}
-                          <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] tracking-[-0.0156em] leading-tight mb-1 truncate">
-                            {m.title}
-                          </h4>
+                          {/* Bottom Content Box (#5295:7983, 277px x 97px) */}
+                          <div
+                            className="bg-white rounded-b-[7.85px] p-3.5 sm:p-4 flex flex-col justify-between min-h-[97px] transition-shadow duration-300 font-outfit"
+                            style={{
+                              boxShadow: isFocus
+                                ? "0px 2px 20px 2px rgba(0, 0, 0, 0.08)"
+                                : "0px 1px 16px 1px rgba(0, 0, 0, 0.04)",
+                            }}
+                          >
+                            <div>
+                              {/* Day Pill Badge (#5295:7987) */}
+                              <span className="inline-block px-2.5 py-0.5 bg-[#1A1A1A] text-white text-[9px] font-normal rounded-full mb-1.5 self-start font-outfit">
+                                Included in Day {m.day || dayNumber}
+                              </span>
 
-                          {/* Description */}
-                          <p className="text-[12px] font-light text-[#1A1A1A]/70 tracking-[-0.0177em] leading-relaxed line-clamp-2">
-                            {m.desc}
-                          </p>
+                              {/* Highlight Title (#5295:7991) */}
+                              <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] tracking-[-0.0156em] leading-tight mb-1 truncate font-outfit">
+                                {m.title}
+                              </h4>
+
+                              {/* Description (#5295:7990) */}
+                              <p className="text-[12px] font-light text-[#1A1A1A]/70 tracking-[-0.0177em] leading-relaxed line-clamp-2 font-outfit">
+                                {m.desc}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
-        {/* 6. "Why this Trip" Full Width Edge-to-Edge Section */}
+        {/* 6. "Why this Trip" (100% Figma MCP Match #5295:7398) */}
         <div
-          className="-mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-12 sm:py-16 mb-20"
+          className="-mx-4 sm:-mx-6 md:-mx-8 xl:-mx-[35px] px-4 sm:px-6 md:px-8 xl:px-[35px] py-10 sm:py-12 xl:py-[42px] mb-16 rounded-[12px]"
           style={{ backgroundColor: "rgba(244, 236, 217, 0.2)" }}
         >
-          <div className="max-w-7xl mx-auto">
-            <h2
-              className="text-[40px] sm:text-[48px] font-normal text-[#1A1A1A] mb-8"
-              style={{ lineHeight: "1.1" }}
-            >
-              Why <span className="font-gochi text-[#3B5D1B]">this Trip</span>
+          <div className="w-full max-w-[1210px] mx-auto">
+            <h2 className="text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#1A1A1A] font-outfit mb-8 leading-tight">
+              Why <span className="font-gochi text-[#254B02]">this Trip</span>
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Card 1 */}
-              <div
-                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
-                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
-              >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 xl:gap-[28px]">
+              {/* Card 1 (#5295:7403) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 xl:p-[22px] flex flex-col justify-between min-h-[230px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
                 <div className="h-[85px] mb-4 flex items-center justify-start">
                   <Image
                     src="/wwww1.svg"
                     alt="Small Groups"
-                    width={78}
-                    height={85}
-                    className="h-[85px] w-auto object-contain object-left"
+                    width={77}
+                    height={84}
+                    className="h-[84px] w-auto object-contain object-left"
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                  <h3 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1 tracking-[-0.0234em] leading-snug font-outfit">
                     Small Groups, Big Adventure
-                  </h4>
-                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                  </h3>
+                  <p className="text-[13px] sm:text-[14px] text-[#1A1A1A]/70 font-light leading-[20px] tracking-[-0.0203em] font-outfit">
                     Small groups means deeper connections. Meet travellers from
                     around the world and make every adventure feel like a shared
                     passport stamp.
@@ -1425,50 +1493,44 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* Card 2 */}
-              <div
-                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
-                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
-              >
+              {/* Card 2 (#5295:7447) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 xl:p-[22px] flex flex-col justify-between min-h-[230px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
                 <div className="h-[85px] mb-4 flex items-center justify-start">
                   <Image
                     src="/wwww2.svg"
                     alt="Solo or Sociable"
-                    width={58}
-                    height={85}
-                    className="h-[85px] w-auto object-contain object-left"
+                    width={57}
+                    height={84}
+                    className="h-[84px] w-auto object-contain object-left"
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                  <h3 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1 tracking-[-0.0234em] leading-snug font-outfit">
                     Solo or Sociable, your Choice
-                  </h4>
-                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                  </h3>
+                  <p className="text-[13px] sm:text-[14px] text-[#1A1A1A]/70 font-light leading-[20px] tracking-[-0.0203em] font-outfit">
                     Choose to roam along with group or explore at your own pace,
                     your choice. No sidelines, nothing but adventures here.
                   </p>
                 </div>
               </div>
 
-              {/* Card 3 */}
-              <div
-                className="bg-white rounded-[8px] p-6 sm:p-7 flex flex-col justify-between min-h-[230px]"
-                style={{ boxShadow: "0px 1px 15px -2px rgba(0, 0, 0, 0.08)" }}
-              >
+              {/* Card 3 (#5295:7476) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 xl:p-[22px] flex flex-col justify-between min-h-[230px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
                 <div className="h-[85px] mb-4 flex items-center justify-start">
                   <Image
                     src="/wwww3.svg"
                     alt="Adventure Captains"
-                    width={65}
+                    width={60}
                     height={85}
                     className="h-[85px] w-auto object-contain object-left"
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#1A1A1A] mb-2 tracking-[-0.0234em]">
+                  <h3 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1 tracking-[-0.0234em] leading-snug font-outfit">
                     They are called Adventure Captains
-                  </h4>
-                  <p className="text-[16px] text-[#1A1A1A] font-light leading-relaxed tracking-[-0.0203em]">
+                  </h3>
+                  <p className="text-[13px] sm:text-[14px] text-[#1A1A1A]/70 font-light leading-[20px] tracking-[-0.0203em] font-outfit">
                     Choose to roam along with group or explore at your own pace,
                     your choice. No sidelines, nothing but adventures here.
                   </p>
@@ -1478,25 +1540,22 @@ export default function TourDetailPage() {
           </div>
         </div>
 
-        {/* 7 & 8. "What's Included" + "Your Adventure Story" (Unified 100% Figma Match #5207:8129, #5207:8195, #5207:7723) */}
+        {/* 7 & 8. "What's Included" + "Your Adventure Story" (Unified 100% Figma Match #5295:8115, #5295:8202, #5295:8248) */}
         <div className="mb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
-            {/* Left Column (852px / 1fr): What's Included + Your Adventure Story */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] xl:grid-cols-[853px_316px] gap-6 xl:gap-[41px] items-start">
+            {/* Left Column (853px / 1fr): What's Included + Your Adventure Story */}
             <div className="space-y-16 w-full min-w-0">
-              {/* 7. "What's Included" */}
+              {/* 7. "What's Included" (#5295:8115) */}
               <div>
-                <h2
-                  className="text-[40px] sm:text-[48px] font-normal text-[#1A1A1A] mb-6"
-                  style={{ lineHeight: "36px" }}
-                >
+                <h2 className="text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#060F23] font-outfit mb-6 leading-tight">
                   What’s Included
                 </h2>
 
-                {/* What's Included Card (Main 853px) */}
-                <div className="border border-[#D9D9E4] rounded-[13px] overflow-hidden bg-white shadow-xs flex flex-col justify-between">
-                  {/* Categories Tab Bar */}
+                {/* What's Included Card (Main 853px #5295:8178) */}
+                <div className="border border-[#D9D9E4] rounded-[13px] overflow-hidden bg-white shadow-xs flex flex-col justify-between font-outfit">
+                  {/* Categories Tab Bar (#5295:8116) */}
                   <div
-                    className="px-6 sm:px-10 h-[135px] flex items-center justify-between overflow-x-auto gap-4 border-b border-[#D9D9E4]"
+                    className="px-4 sm:px-6 xl:px-8 h-[135px] flex items-center justify-between overflow-x-auto gap-3 border-b border-[#D9D9E4]"
                     style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
                   >
                     {[
@@ -1515,30 +1574,32 @@ export default function TourDetailPage() {
                         <button
                           key={tab.id}
                           onClick={() => setIncludedTab(tab.id as any)}
-                          className="relative flex flex-col items-center justify-center gap-2.5 h-full px-4 min-w-[90px] transition-colors cursor-pointer group"
+                          className="relative flex flex-col items-center justify-center gap-2.5 h-full px-3 min-w-[85px] transition-colors cursor-pointer group font-outfit"
                         >
-                          <div className="w-[47px] h-[47px] flex items-center justify-center transition-transform group-hover:scale-105">
+                          <div className="w-[46px] h-[46px] flex items-center justify-center transition-transform group-hover:scale-105">
                             <Image
                               src={tab.icon}
                               alt={tab.label}
                               width={46}
                               height={46}
                               className={`w-[46px] h-[46px] object-contain transition-all ${
-                                isActive ? "opacity-100" : "opacity-75"
+                                isActive
+                                  ? "opacity-100"
+                                  : "opacity-70 group-hover:opacity-100"
                               }`}
                             />
                           </div>
                           <span
-                            className={`text-[15px] sm:text-[16px] tracking-wider uppercase transition-colors ${
+                            className={`text-[14px] sm:text-[16px] font-outfit tracking-wider uppercase transition-colors text-center ${
                               isActive
-                                ? "text-[#6C114E] font-medium"
-                                : "text-[#1A1A1A] font-normal hover:text-[#6C114E]"
+                                ? "text-[#254B02] font-semibold"
+                                : "text-[#1A1A1A] font-normal group-hover:text-[#254B02]"
                             }`}
                           >
                             {tab.label}
                           </span>
                           {isActive && (
-                            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#6C114E] rounded-t-sm" />
+                            <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#254B02] rounded-t-sm" />
                           )}
                         </button>
                       );
@@ -1546,32 +1607,22 @@ export default function TourDetailPage() {
                   </div>
 
                   {/* Tab Body Content */}
-                  <div className="p-8 sm:p-10 flex-1 bg-white">
+                  <div className="p-6 sm:p-7 xl:p-[28px] flex-1 bg-white min-h-[190px] font-outfit">
                     {includedTab === "nba" && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                        {/* Left Sub-column: Included Activities */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 xl:gap-x-12 gap-y-6">
+                        {/* Left Sub-column: Included Activities (#5295:8179) */}
                         <div>
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
-                              <svg
-                                className="w-3.5 h-3.5 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M5 13l4 4L19 7"
-                                />
-                              </svg>
-                            </div>
-                            <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                          <div className="flex items-center gap-2.5 mb-3">
+                            <img
+                              src="/tickpp.svg"
+                              alt="Included"
+                              className="w-[20px] h-[20px] shrink-0"
+                            />
+                            <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                               Included Activities
                             </h4>
                           </div>
-                          <ul className="space-y-3 pl-9">
+                          <ul className="space-y-1.5 pl-[28px]">
                             {tour.itinerary &&
                             tour.itinerary.length > 0 &&
                             tour.itinerary.some(
@@ -1594,23 +1645,23 @@ export default function TourDetailPage() {
                                 .map((act, i) => (
                                   <li
                                     key={i}
-                                    className="text-[16px] text-[#191919] font-light leading-[18.6px]"
+                                    className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit"
                                   >
                                     {act}
                                   </li>
                                 ))
                             ) : (
                               <>
-                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                   Senso-Ji Temple
                                 </li>
-                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                   Ropeway Cable Cart
                                 </li>
-                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                   Tea Ceremony
                                 </li>
-                                <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                   Osaka Castle &amp; Dotonbori
                                 </li>
                               </>
@@ -1618,43 +1669,42 @@ export default function TourDetailPage() {
                           </ul>
                         </div>
 
-                        {/* Right Sub-column: Premium Inclusions & Add-on Activities */}
-                        <div className="space-y-7">
+                        {/* Right Sub-column: Premium Inclusions & Add-on Activities (#5295:8184 & #5295:8189) */}
+                        <div className="space-y-5">
                           {/* Premium Inclusions */}
                           <div>
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
-                                <svg
-                                  className="w-3.5 h-3.5 text-white fill-white"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                                </svg>
-                              </div>
-                              <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            <div className="flex items-center gap-2.5 mb-2.5">
+                              <img
+                                src="/tickpp.svg"
+                                alt="Included"
+                                className="w-[20px] h-[20px] shrink-0"
+                              />
+                              <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                                 Premium Inclusions
                               </h4>
                             </div>
-                            <ul className="space-y-2 pl-9">
-                              <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                            <div className="pl-[28px]">
+                              <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                 {tour.highlights && tour.highlights.length > 0
                                   ? tour.highlights[0]
                                   : "Shinjuku, Omoide Yokocho and Golden Gai"}
-                              </li>
-                            </ul>
+                              </p>
+                            </div>
                           </div>
 
                           {/* Add-on Activities */}
                           <div>
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
-                                <div className="w-[12px] h-[12px] rounded-full border-[2.5px] border-white" />
-                              </div>
-                              <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                            <div className="flex items-center gap-2.5 mb-2.5">
+                              <img
+                                src="/tickpp.svg"
+                                alt="Add-on Activities"
+                                className="w-[20px] h-[20px] shrink-0"
+                              />
+                              <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                                 Add-on Activities
                               </h4>
                             </div>
-                            <ul className="space-y-2 pl-9">
+                            <ul className="space-y-1.5 pl-[28px]">
                               {tour.itinerary &&
                               tour.itinerary.some(
                                 (d) =>
@@ -1677,17 +1727,17 @@ export default function TourDetailPage() {
                                   .map((act, i) => (
                                     <li
                                       key={i}
-                                      className="text-[16px] text-[#191919] font-light leading-[18.6px]"
+                                      className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit"
                                     >
                                       {act}
                                     </li>
                                   ))
                               ) : (
                                 <>
-                                  <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                     Kinkaku-Ji Visit (Rokuon-Ji)
                                   </li>
-                                  <li className="text-[16px] text-[#191919] font-light leading-[18.6px]">
+                                  <li className="text-[14px] text-[#1A1A1A]/80 font-light leading-[22px] font-outfit">
                                     Hiroshima Peace Museum
                                   </li>
                                 </>
@@ -1700,10 +1750,10 @@ export default function TourDetailPage() {
 
                     {includedTab === "leader" && (
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
                             <svg
-                              className="w-3.5 h-3.5 text-white"
+                              className="w-3 h-3 text-white"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.5"
@@ -1716,11 +1766,11 @@ export default function TourDetailPage() {
                               />
                             </svg>
                           </div>
-                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                          <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Tour Leader &amp; Expert Guides
                           </h4>
                         </div>
-                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                        <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed pl-[28px] font-outfit">
                           {tour.staffExperts ||
                             "English-speaking local CEO (Chief Experience Officer) & experienced local guides throughout the trip."}
                         </p>
@@ -1729,10 +1779,10 @@ export default function TourDetailPage() {
 
                     {includedTab === "transport" && (
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
                             <svg
-                              className="w-3.5 h-3.5 text-white"
+                              className="w-3 h-3 text-white"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.5"
@@ -1741,27 +1791,28 @@ export default function TourDetailPage() {
                               <path
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
-                                d="M8 7h8m-8 5h8m-4 5v3m-5-3h10a2 2 0 002-2V6a2 2 0 00-2-2H7a2 2 0 00-2 2v9a2 2 0 002 2z"
+                                d="M8 7h8m-8 4h8m-8 4h4"
                               />
                             </svg>
                           </div>
-                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
-                            Transportation Included
+                          <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
+                            Transport
                           </h4>
                         </div>
-                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                        <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed pl-[28px] font-outfit">
                           {tour.transportation ||
-                            "Private air-conditioned bus, scenic train routes, and local ferries."}
+                            tour.transport ||
+                            "Air-conditioned private overland safari vehicle, 4x4 safari vehicles for game drives, and airport transfers."}
                         </p>
                       </div>
                     )}
 
                     {includedTab === "accommodation" && (
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
                             <svg
-                              className="w-3.5 h-3.5 text-white"
+                              className="w-3 h-3 text-white"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.5"
@@ -1774,23 +1825,23 @@ export default function TourDetailPage() {
                               />
                             </svg>
                           </div>
-                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
-                            Accommodation Included
+                          <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
+                            Accommodation
                           </h4>
                         </div>
-                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                        <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed pl-[28px] font-outfit">
                           {tour.accommodation ||
-                            "Handpicked comfortable boutique hotels, authentic guest lodges, and shared twin rooms."}
+                            "Comfortable twin-share safari lodges, luxury tented camps, and standard tourist hotels with private en-suite facilities."}
                         </p>
                       </div>
                     )}
 
                     {includedTab === "meals" && (
                       <div>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="w-[27px] h-[27px] rounded-full bg-[#1A1A1A]/80 flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
                             <svg
-                              className="w-3.5 h-3.5 text-white"
+                              className="w-3 h-3 text-white"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.5"
@@ -1803,11 +1854,11 @@ export default function TourDetailPage() {
                               />
                             </svg>
                           </div>
-                          <h4 className="text-[20px] font-normal text-[#1A1A1A]">
+                          <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Meals Included
                           </h4>
                         </div>
-                        <p className="text-[16px] text-[#191919] font-light leading-relaxed pl-9">
+                        <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed pl-[28px] font-outfit">
                           {formatMeals(
                             tour.meals,
                             "Daily authentic breakfasts, welcome dinners, and curated local culinary tastings.",
@@ -1819,19 +1870,19 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* 8. "Your Adventure Story" (Itinerary - 100% Figma Match #5207:8195) */}
+              {/* 8. "Your Adventure Story" (Itinerary - 100% Figma Match #5295:8202 - #5295:8247) */}
               <div ref={itinerarySectionRef} id="itinerary-section">
                 {/* Header Row: Title Left + Full Itinerary Button Right (aligned to right edge of the 852px itinerary cards) */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                  <h2 className="text-[36px] sm:text-[48px] font-normal text-[#1A1A1A] leading-tight sm:leading-[36px]">
+                  <h2 className="text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#000000] font-outfit leading-tight">
                     Your{" "}
-                    <span className="font-gochi text-[#3B5D1B]">
+                    <span className="font-gochi text-[#254B02]">
                       Adventure Story
                     </span>
                   </h2>
                   <button
                     onClick={() => setShowFullItineraryModal(true)}
-                    className="h-[26px] px-[25px] py-[2px] bg-[#1A1A1A] hover:bg-black text-[#FFFFFF] rounded-[44px] flex items-center justify-center gap-[7px] text-[16px] font-normal transition-colors cursor-pointer w-fit shrink-0"
+                    className="h-[26px] px-[16px] py-[2px] bg-[#1A1A1A] hover:bg-black text-[#FFFFFF] rounded-[44px] flex items-center justify-center gap-[7px] text-[16px] font-normal font-outfit transition-colors cursor-pointer w-fit shrink-0"
                   >
                     <svg
                       className="w-[19px] h-[19px] text-white"
@@ -1866,12 +1917,12 @@ export default function TourDetailPage() {
                           onClick={() => toggleItineraryDay(day.day)}
                           className="w-full min-h-[50px] bg-[#F8F8F7] hover:bg-[#F0F0EE] rounded-full px-6 py-3 flex items-center justify-between cursor-pointer transition-colors select-none shadow-2xs"
                         >
-                          <span className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] font-outfit truncate pr-4">
+                          <span className="text-[18px] font-normal text-[#000000] font-outfit truncate pr-4">
                             {day.title ||
                               `${tour.location?.startCity || "Day"} to ${tour.location?.endCity || "Next Destination"}`}
                           </span>
                           <div className="w-[73px] h-[26px] bg-[#1A1A1A] rounded-[44px] flex items-center justify-center shrink-0">
-                            <span className="text-[15px] font-normal text-white font-outfit leading-none">
+                            <span className="text-[16px] font-normal text-white font-outfit leading-none">
                               Day {day.day}
                             </span>
                           </div>
@@ -1886,13 +1937,13 @@ export default function TourDetailPage() {
                         ref={(el) => {
                           if (el) dayRefs.current[day.day] = el;
                         }}
-                        className="w-full bg-[#F8F8F7] rounded-[12px] p-6 sm:p-7 shadow-2xs"
+                        className="w-full bg-[#F8F8F7] rounded-[12px] p-6 sm:p-7 shadow-2xs font-outfit"
                       >
-                        {/* Top Row: Destination Title Left + Day Pill Right */}
+                        {/* Top Row: Destination Title Left + Day Pill Right (#5295:8210 & #5295:8218) */}
                         <div className="flex items-start justify-between gap-4 mb-2">
                           <h3
                             onClick={() => toggleItineraryDay(day.day)}
-                            className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] leading-tight font-outfit cursor-pointer hover:opacity-85 transition-opacity"
+                            className="text-[28px] sm:text-[32px] font-normal text-[#000000] leading-tight font-outfit cursor-pointer hover:opacity-85 transition-opacity"
                           >
                             {day.title ||
                               `${tour.location?.startCity || "Destination"}`}
@@ -1900,17 +1951,17 @@ export default function TourDetailPage() {
                           <button
                             type="button"
                             onClick={() => toggleItineraryDay(day.day)}
-                            className="w-[73px] h-[26px] bg-[#601444] hover:bg-[#4d0f36] rounded-[44px] flex items-center justify-center shrink-0 cursor-pointer transition-colors"
+                            className="w-[73px] h-[26px] bg-[#1A1A1A] hover:bg-black rounded-[44px] flex items-center justify-center shrink-0 cursor-pointer transition-colors"
                           >
-                            <span className="text-[15px] font-normal text-white font-outfit leading-none">
+                            <span className="text-[16px] font-normal text-white font-outfit leading-none">
                               Day {day.day}
                             </span>
                           </button>
                         </div>
 
-                        {/* Day Description */}
+                        {/* Day Description (#5295:8211) */}
                         {day.description && (
-                          <p className="text-[16px] text-[#1A1A1A]/70 font-light leading-normal font-outfit mb-6">
+                          <p className="text-[16px] text-[#000000]/60 font-light leading-relaxed font-outfit mt-2 mb-6">
                             {day.description}
                           </p>
                         )}
@@ -1918,13 +1969,16 @@ export default function TourDetailPage() {
                         {/* Activities Section (#5295:8221) */}
                         {day.activities && day.activities.length > 0 && (
                           <div className="mt-4 pt-2">
-                            {/* Activities Subheader */}
+                            {/* Activities Subheader (#5295:8222) */}
                             <div className="flex items-center justify-between mb-5">
                               <div className="flex items-center gap-3">
-                                <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[14px] font-medium font-outfit shrink-0">
-                                  {String(day.activities.length).padStart(2, "0")}
+                                <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[16px] font-medium font-outfit shrink-0">
+                                  {String(day.activities.length).padStart(
+                                    2,
+                                    "0",
+                                  )}
                                 </div>
-                                <h4 className="text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                <h4 className="text-[20px] font-normal text-[#000000] font-outfit">
                                   Activities
                                 </h4>
                               </div>
@@ -1934,7 +1988,7 @@ export default function TourDetailPage() {
                                   e.stopPropagation();
                                   togglePremiumDay(day.day);
                                 }}
-                                className="text-[15px] font-light text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors cursor-pointer font-outfit"
+                                className="text-[14px] font-normal text-[#000000]/60 hover:text-[#000000] transition-colors cursor-pointer font-outfit"
                               >
                                 {expandedPremiumDays.includes(day.day)
                                   ? "Hide"
@@ -1946,18 +2000,21 @@ export default function TourDetailPage() {
                             {expandedPremiumDays.includes(day.day) && (
                               <div className="space-y-4">
                                 {day.activities.map((act, aIdx) => (
-                                  <div key={aIdx} className="flex items-start gap-3.5">
+                                  <div
+                                    key={aIdx}
+                                    className="flex items-start gap-3.5"
+                                  >
                                     {/* White Circle Badge (Figma #5295:8225, #5295:8226) */}
-                                    <div className="w-[21px] h-[21px] rounded-full bg-white shadow-2xs shrink-0 mt-0.5" />
+                                    <div className="w-[21px] h-[21px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] shrink-0 mt-0.5" />
 
-                                    {/* Activity Content */}
+                                    {/* Activity Content (#5295:8212 & #5295:8215) */}
                                     <div className="flex-1">
-                                      <h5 className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-snug">
+                                      <h5 className="text-[16px] font-normal text-[#000000] font-outfit leading-snug">
                                         {act.name || act.title}
                                       </h5>
 
                                       {act.description && (
-                                        <p className="text-[14px] text-[#1A1A1A]/60 font-light leading-relaxed font-outfit mt-1">
+                                        <p className="text-[14px] text-[#000000]/60 font-light leading-relaxed font-outfit mt-1">
                                           {act.description}
                                         </p>
                                       )}
@@ -1969,16 +2026,18 @@ export default function TourDetailPage() {
                           </div>
                         )}
 
-                        {/* Optional Activities Section (#5303:8814 - No Border) */}
+                        {/* Optional Activities Section (#5303:8814) */}
                         {day.optionalActivities &&
                           day.optionalActivities.length > 0 && (
                             <div className="mt-7">
                               <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[14px] font-medium font-outfit shrink-0">
-                                    {String(day.optionalActivities.length).padStart(2, "0")}
+                                  <div className="w-[32px] h-[32px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[16px] font-medium font-outfit shrink-0">
+                                    {String(
+                                      day.optionalActivities.length,
+                                    ).padStart(2, "0")}
                                   </div>
-                                  <h4 className="text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                  <h4 className="text-[20px] font-normal text-[#000000] font-outfit">
                                     Optional Activities
                                   </h4>
                                 </div>
@@ -1988,7 +2047,7 @@ export default function TourDetailPage() {
                                     e.stopPropagation();
                                     toggleOptionalDay(day.day);
                                   }}
-                                  className="text-[15px] font-light text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors cursor-pointer font-outfit"
+                                  className="text-[14px] font-normal text-[#000000]/60 hover:text-[#000000] transition-colors cursor-pointer font-outfit"
                                 >
                                   {expandedOptionalDays.includes(day.day)
                                     ? "Hide"
@@ -1999,29 +2058,32 @@ export default function TourDetailPage() {
                               {expandedOptionalDays.includes(day.day) && (
                                 <div className="space-y-4">
                                   {day.optionalActivities.map((opt, oIdx) => (
-                                    <div key={oIdx} className="flex items-start gap-3.5">
+                                    <div
+                                      key={oIdx}
+                                      className="flex items-start gap-3.5"
+                                    >
                                       {/* White Circle Badge (Figma #5303:8818, #5303:8819) */}
-                                      <div className="w-[21px] h-[21px] rounded-full bg-white shadow-2xs shrink-0 mt-0.5" />
+                                      <div className="w-[21px] h-[21px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.1)] shrink-0 mt-0.5" />
 
                                       {/* Optional Activity Content */}
                                       <div className="flex-1">
                                         <div className="flex items-center justify-between gap-2">
-                                          <h5 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
+                                          <h5 className="text-[16px] font-normal text-[#000000] font-outfit">
                                             {opt.name || opt.title}
                                           </h5>
                                           {typeof opt.price === "number" ? (
-                                            <span className="text-[14px] font-medium text-[#1A1A1A] font-outfit">
+                                            <span className="text-[14px] font-normal text-[#000000] font-outfit">
                                               +${opt.price}
                                             </span>
                                           ) : typeof opt.price === "object" &&
                                             opt.price?.amount ? (
-                                            <span className="text-[14px] font-medium text-[#1A1A1A] font-outfit">
+                                            <span className="text-[14px] font-normal text-[#000000] font-outfit">
                                               +${opt.price.amount}
                                             </span>
                                           ) : null}
                                         </div>
                                         {opt.description && (
-                                          <p className="text-[14px] text-[#1A1A1A]/60 font-light leading-relaxed font-outfit mt-1">
+                                          <p className="text-[14px] text-[#000000]/60 font-light leading-relaxed font-outfit mt-1">
                                             {opt.description}
                                           </p>
                                         )}
@@ -2033,9 +2095,9 @@ export default function TourDetailPage() {
                             </div>
                           )}
 
-                        {/* Bottom Row: Accommodation & Meals Included (#5303:8822 & #5303:8832 - No Border) */}
+                        {/* Bottom Row: Accommodation & Meals Included (#5303:8822 & #5303:8832) */}
                         <div className="mt-8 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                          {/* Accommodation */}
+                          {/* Accommodation (#5303:8822) */}
                           <div className="flex items-start gap-3">
                             <div className="w-[24px] h-[21px] flex items-center justify-center shrink-0 mt-0.5">
                               <Image
@@ -2047,10 +2109,10 @@ export default function TourDetailPage() {
                               />
                             </div>
                             <div>
-                              <div className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-tight">
+                              <div className="text-[16px] font-normal text-[#1A1A1A] font-outfit leading-tight">
                                 Accommodation
                               </div>
-                              <div className="text-[14px] font-light text-[#1A1A1A]/75 font-outfit mt-1 leading-snug">
+                              <div className="text-[14px] font-light text-[#1A1A1A]/70 font-outfit mt-1 leading-snug">
                                 {day.accommodations?.[0]?.name ||
                                   (day as any).accommodation ||
                                   tour.accommodation ||
@@ -2059,7 +2121,7 @@ export default function TourDetailPage() {
                             </div>
                           </div>
 
-                          {/* Meals Included */}
+                          {/* Meals Included (#5303:8832) */}
                           <div className="flex items-start gap-3">
                             <div className="w-[23px] h-[22px] flex items-center justify-center shrink-0 mt-0.5">
                               <Image
@@ -2071,10 +2133,10 @@ export default function TourDetailPage() {
                               />
                             </div>
                             <div>
-                              <div className="text-[16px] font-medium text-[#1A1A1A] font-outfit leading-tight">
+                              <div className="text-[16px] font-normal text-[#1A1A1A] font-outfit leading-tight">
                                 Meals Included
                               </div>
-                              <div className="text-[14px] font-light text-[#1A1A1A]/75 font-outfit mt-1 leading-snug">
+                              <div className="text-[16px] font-light text-[#1A1A1A]/70 font-outfit mt-1 leading-snug">
                                 {formatMeals((day as any).meals || tour.meals)}
                               </div>
                             </div>
@@ -2088,10 +2150,10 @@ export default function TourDetailPage() {
             </div>
 
             {/* Right Sticky Column (316px #5207:7723): Destination Card + Day Overview */}
-            <div className="space-y-6 lg:sticky lg:top-24 pt-0 lg:pt-[60px]">
+            <div className="space-y-6 lg:sticky lg:top-24 pt-0 lg:pt-[80px]">
               {/* Destination Photo & Map Card (#5207:7727) */}
               <div className="w-full">
-                <div className="rounded-[16px] overflow-hidden aspect-[316/215] w-full relative shadow-xs bg-gray-100 group">
+                <div className="rounded-[13px] overflow-hidden aspect-[316/215] w-full relative shadow-xs bg-gray-100 group">
                   <Image
                     src={
                       tour.itineraryMapImage ||
@@ -2163,182 +2225,206 @@ export default function TourDetailPage() {
           </div>
         </div>
 
-        {/* 9. "Available Extras (Optional)" & "Continue Your Journey" (100% Figma MCP Match #5091:8832) */}
+        {/* 9. "Available Extras (Optional)" & "Continue Your Journey" (100% Figma MCP Match #5295:7334 - #5295:7397) */}
         <div className="mb-20">
           <div className="mb-6">
-            <h2 className="text-[36px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[36px]">
+            <h2 className="text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#1A1A1A] font-outfit leading-tight">
               Available Extras{" "}
-              <span className="text-[20px] text-[rgba(26,26,26,0.6)] font-light">
+              <span className="text-[20px] sm:text-[24px] text-[#1A1A1A] font-normal font-outfit">
                 (Optional)
               </span>
             </h2>
-            <p className="text-[16px] text-[#1A1A1A] font-light mt-3">
+            <p className="text-[16px] text-[#1A1A1A] font-light font-outfit mt-2">
               Add this to your tour when you book
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
-            {/* Extras Options Container Left (matches Itinerary width above) */}
-            <div className="w-full min-w-0 border-[1.5px] border-[rgba(26,26,26,0.12)] rounded-[12px] overflow-hidden bg-white shadow-xs">
-              {/* Category 1: Stay Your Way Header */}
-              <div
-                className="px-6 py-3.5 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
-                style={{
-                  backgroundColor: "rgba(181, 185, 177, 0.2)",
-                  minHeight: "70px",
-                }}
-              >
-                <div className="text-[20px] font-normal text-[#1A1A1A] leading-[0.9em]">
-                  Stay Your Way
-                </div>
-                <div className="text-[16px] text-[#1A1A1A] font-light mt-1">
-                  For travellers who value private space.
-                </div>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] xl:grid-cols-[853px_316px] gap-6 xl:gap-[41px] items-start">
+            {/* Extras Options Container Left (853px #5295:7359 - #5295:7397) */}
+            {(() => {
+              const privateRoomPrice =
+                (tour.ownRoomAvailable && tour.price?.ownRoomPrice && tour.price.ownRoomPrice > 0)
+                  ? tour.price.ownRoomPrice
+                  : (tour.hotel?.privateRoomPrice && tour.hotel.privateRoomPrice > 0)
+                    ? tour.hotel.privateRoomPrice
+                    : (tour.price?.ownRoomPrice && tour.price.ownRoomPrice > 0)
+                      ? tour.price.ownRoomPrice
+                      : 0;
+              const hasPrivateRoom = Boolean(privateRoomPrice > 0);
 
-              {/* Item 1: Private Room Upgrades */}
-              <div className="px-6 py-5 flex items-center justify-between gap-4 border-b border-[rgba(26,26,26,0.1)]">
-                <div className="flex items-start gap-4">
-                  {/* 31px Plus Circle Button */}
-                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
-                    +
-                  </div>
-                  <div>
-                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
-                      Private Room Upgrades
+              const preHotelPrice =
+                tour.preTripHotel?.sharedRoomPrice || tour.preTripHotel?.privateRoomPrice || 0;
+              const postHotelPrice =
+                tour.postTripHotel?.sharedRoomPrice || tour.postTripHotel?.privateRoomPrice || 0;
+              const mainHotelNightPrice =
+                tour.hotel?.sharedRoomPrice || tour.hotel?.privateRoomPrice || 0;
+              const hotelNightPrices = [preHotelPrice, postHotelPrice, mainHotelNightPrice].filter(
+                (p) => p > 0
+              );
+              const minExtraNightPrice =
+                hotelNightPrices.length > 0 ? Math.min(...hotelNightPrices) : 0;
+              const hasExtraNights = Boolean(
+                (tour.preTripHotel || tour.postTripHotel || tour.hotel) && minExtraNightPrice > 0
+              );
+
+              const hasAnyExtras = hasPrivateRoom || hasExtraNights;
+
+              return (
+                <div className="w-full min-w-0 border border-[rgba(26,26,26,0.12)] rounded-[12px] overflow-hidden bg-white shadow-2xs font-outfit">
+                  {hasAnyExtras ? (
+                    <>
+                      {/* Category 1: Stay Your Way (Private Room) */}
+                      {hasPrivateRoom && (
+                        <>
+                          <div
+                            className="px-5 sm:px-6 py-3.5 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
+                            style={{
+                              backgroundColor: "rgba(181, 185, 177, 0.1)",
+                              minHeight: "70px",
+                            }}
+                          >
+                            <div className="text-[20px] font-normal text-[#000000] leading-[0.9em] font-outfit">
+                              Stay Your Way
+                            </div>
+                            <div className="text-[16px] text-[#000000] font-light font-outfit mt-1">
+                              For travellers who value private space.
+                            </div>
+                          </div>
+
+                          <div
+                            className={`px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4 ${
+                              hasExtraNights ? "border-b border-[rgba(26,26,26,0.1)]" : ""
+                            }`}
+                          >
+                            <div className="flex items-start gap-4">
+                              <div className="w-[21px] h-[21px] rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center text-[15px] font-normal leading-none shrink-0 mt-0.5 select-none cursor-pointer transition-colors">
+                                +
+                              </div>
+                              <div>
+                                <div className="text-[16px] font-normal text-[#1A1A1A] font-outfit mb-0.5">
+                                  Private Room Upgrades
+                                </div>
+                                <p className="text-[14px] sm:text-[16px] text-[#1A1A1A]/70 font-light font-outfit leading-relaxed max-w-xl">
+                                  Enjoy single-room privacy and personal space throughout
+                                  your adventure hotels and stays.
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-[14px] text-[#1A1A1A] font-light font-outfit mr-1.5">
+                                From
+                              </span>
+                              <span className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                ${privateRoomPrice}
+                              </span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Category 2: Pre and Post Tour Extras */}
+                      {hasExtraNights && (
+                        <>
+                          <div
+                            className={`px-5 sm:px-6 py-3.5 ${
+                              hasPrivateRoom ? "border-t" : ""
+                            } border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center`}
+                            style={{
+                              backgroundColor: "rgba(181, 185, 177, 0.1)",
+                              minHeight: "70px",
+                            }}
+                          >
+                            <div className="text-[20px] font-normal text-[#000000] leading-[0.9em] font-outfit">
+                              Pre and Post Tour Extras
+                            </div>
+                            <div className="text-[16px] text-[#000000] font-light font-outfit mt-1">
+                              Keep discovering
+                            </div>
+                          </div>
+
+                          <div className="px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between gap-4">
+                            <div className="flex items-start gap-4">
+                              <div className="w-[21px] h-[21px] rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center text-[15px] font-normal leading-none shrink-0 mt-0.5 select-none cursor-pointer transition-colors">
+                                +
+                              </div>
+                              <div>
+                                <div className="text-[16px] font-normal text-[#1A1A1A] font-outfit mb-0.5">
+                                  Extra Nights
+                                </div>
+                                <p className="text-[14px] sm:text-[16px] text-[#1A1A1A]/70 font-light font-outfit leading-relaxed max-w-xl">
+                                  Arrive earlier or extend your stay with additional hotel
+                                  nights at our partner accommodations.
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <div>
+                                <span className="text-[14px] text-[#1A1A1A] font-light font-outfit mr-1.5">
+                                  From
+                                </span>
+                                <span className="text-[18px] sm:text-[20px] font-medium text-[#1A1A1A] font-outfit">
+                                  ${minExtraNightPrice}
+                                </span>
+                              </div>
+                              <div className="text-[13px] text-gray-500 font-light font-outfit">
+                                / Night
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <div className="py-12 px-6 text-center text-gray-500 font-light font-outfit">
+                      No available extras currently scheduled for this tour.
                     </div>
-                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
-                      Enjoy single-room privacy and personal space throughout
-                      your adventure hotels and stays.
-                    </p>
-                  </div>
+                  )}
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
-                    From
-                  </span>
-                  <span className="text-[20px] font-medium text-[#1A1A1A]">
-                    $49
-                  </span>
-                </div>
-              </div>
+              );
+            })()}
 
-              {/* Category 2: Pre and Post Tour Extras Header */}
-              <div
-                className="px-6 py-3.5 border-t border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
-                style={{
-                  backgroundColor: "rgba(181, 185, 177, 0.2)",
-                  minHeight: "70px",
-                }}
-              >
-                <div className="text-[20px] font-normal text-[#1A1A1A] leading-[0.9em]">
-                  Pre and Post Tour Extras
-                </div>
-                <div className="text-[16px] text-[#1A1A1A] font-light mt-1">
-                  Keep discovering
-                </div>
-              </div>
-
-              {/* Item 2: Extra Nights */}
-              <div className="px-6 py-5 flex items-center justify-between gap-4 border-b border-[rgba(26,26,26,0.1)]">
-                <div className="flex items-start gap-4">
-                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
-                    +
-                  </div>
-                  <div>
-                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
-                      Extra Nights
-                    </div>
-                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
-                      Arrive earlier or extend your stay with additional hotel
-                      nights at our partner accommodations.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div>
-                    <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
-                      From
-                    </span>
-                    <span className="text-[20px] font-medium text-[#1A1A1A]">
-                      $49
-                    </span>
-                  </div>
-                  <div className="text-[14px] text-gray-500 font-light">
-                    / Night
-                  </div>
-                </div>
-              </div>
-
-              {/* Item 3: Transfers */}
-              <div className="px-6 py-5 flex items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-[31px] h-[31px] rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[22px] font-normal shrink-0 mt-0.5 select-none">
-                    +
-                  </div>
-                  <div>
-                    <div className="text-[20px] font-normal text-[#1A1A1A] leading-[17.12px] mb-1.5">
-                      Transfers
-                    </div>
-                    <p className="text-[16px] text-[#1A1A1A] font-light leading-normal max-w-xl">
-                      Seamless private airport pickup and drop-off to and from
-                      your tour hotel.
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <span className="text-[16px] text-[#1A1A1A] font-light mr-1.5">
-                    From
-                  </span>
-                  <span className="text-[20px] font-medium text-[#1A1A1A]">
-                    $49
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Continue Your Journey Card Right (316px) */}
+            {/* Continue Your Journey Card Right (316px #5295:7335 - #5295:7358) */}
             <div
-              className="rounded-[12px] p-6 border border-[rgba(26,26,26,0.12)] shadow-xs flex flex-col justify-between"
+              className="w-full xl:w-[316px] rounded-[13.4px] p-5 border border-[rgba(26,26,26,0.2)] shadow-2xs flex flex-col justify-between font-outfit"
               style={{
-                backgroundColor: "rgba(181, 185, 177, 0.12)",
-                minHeight: "300px",
+                backgroundColor: "rgba(181, 185, 177, 0.1)",
+                minHeight: "282px",
               }}
             >
               <div>
-                <h3 className="font-gochi text-[26px] text-[#3B5D1B] leading-tight mb-2">
+                <h3 className="font-gochi text-[24px] text-[#254B02] leading-tight mb-2">
                   Continue Your Journey
                 </h3>
-                <p className="text-[14px] text-[#1A1A1A]/80 font-light leading-relaxed mb-6 border-b border-[rgba(26,26,26,0.1)] pb-5">
+                <p className="text-[12px] text-[#1A1A1A]/70 font-light font-outfit leading-relaxed mb-4 border-b border-[rgba(26,26,26,0.2)] pb-4">
                   Your adventure doesn’t have to end here—discover another tour
                   starting right after, from the same destination. Seamlessly
                   extend your travel with handpicked experiences nearby.
                 </p>
 
-                <div className="mb-6">
-                  <div className="text-[16px] font-normal text-[#1A1A1A] mb-1">
+                <div className="mb-4">
+                  <div className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] font-outfit leading-snug mb-1">
                     Next Tour: Kathmandu to Pokhara Escape
                   </div>
-                  <div className="text-[13px] text-gray-500 font-light">
+                  <div className="text-[12px] text-[#1A1A1A]/70 font-light font-outfit">
                     Duration: 3 Days • Scenic drive • Lakeside stay
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 pt-2">
                 <button
                   onClick={() => router.push("/trips")}
-                  className="bg-[#1A1A1A] hover:bg-black text-white text-[15px] font-medium px-6 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
+                  className="bg-[#1A1A1A] hover:bg-black text-white text-[14px] sm:text-[15px] font-medium font-outfit px-5 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
                 >
                   Start Exploring
                 </button>
                 <button
                   onClick={() => router.push("/trips")}
-                  className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs"
+                  className="w-[35px] h-[35px] rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs shrink-0"
                   aria-label="Start Exploring"
                 >
                   <ArrowUpRight
-                    size={16}
+                    size={15}
                     className="text-white"
                     weight="bold"
                   />
@@ -2486,56 +2572,48 @@ export default function TourDetailPage() {
           </div>
         </div>
 
-        {/* 11. "The Good you’re doing" (100% Figma MCP Match #5091:8414) */}
+        {/* 11. "The Good you’re doing" (100% Figma MCP Match #5295:6938 - #5295:6949) */}
         <div
-          className="rounded-[12px] p-6 sm:p-9 flex flex-col md:flex-row items-center gap-8 mb-20 shadow-xs"
+          className="w-full max-w-[1210px] mx-auto rounded-[12px] p-6 sm:p-7 xl:p-[38px] flex flex-col md:flex-row items-center gap-6 sm:gap-8 mb-20 shadow-2xs font-outfit"
           style={{
-            backgroundColor: "rgba(181, 185, 177, 0.2)",
+            backgroundColor: "rgba(181, 185, 177, 0.1)",
             minHeight: "205px",
           }}
         >
           {/* Nature Graphic Box Left (183px x 130px) */}
-          <div className="w-[183px] h-[130px] rounded-[8px] overflow-hidden relative shrink-0 shadow-xs hidden sm:block">
+          <div className="w-[183px] h-[130px] rounded-[10px] overflow-hidden relative shrink-0 shadow-xs hidden sm:block">
             <Image
-              src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop"
+              src="/why_we_love_trees.png"
               alt="Forest and Trees"
               fill
               className="object-cover"
             />
           </div>
 
-          {/* Right Text, Stats & Button Area */}
+          {/* Right Text, Stats & Button Area (#5295:6940) */}
           <div className="flex-1 flex flex-col justify-between w-full">
-            {/* Title */}
-            <h3
-              className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] mb-2.5 leading-tight tracking-tight"
-              style={{ lineHeight: "0.9em" }}
-            >
+            {/* Title (#5295:6941) */}
+            <h3 className="text-[26px] sm:text-[30px] xl:text-[32px] font-normal text-[#1A1A1A] mb-2 leading-tight font-outfit">
               The Good you’re doing
             </h3>
 
-            {/* Description */}
-            <p className="text-[15px] sm:text-[16px] font-light text-[#1A1A1A] leading-relaxed mb-3.5 max-w-4xl">
+            {/* Description (#5295:6944) */}
+            <p className="text-[14px] sm:text-[16px] font-normal text-[#1A1A1A]/70 leading-relaxed mb-2 max-w-4xl font-outfit">
               Our Adventures gives you more opportunities to do Nothing But Good
               to support important causes in destinations you visit and around
               the world
             </p>
 
-            {/* Bottom Row: Stats & Learn More Button */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex flex-wrap items-center gap-6 sm:gap-8 text-[15px] sm:text-[16px] font-normal text-[#1A1A1A]">
-                <span>
-                  Trees Planted this trip :{" "}
-                  <span className="font-normal">08</span>
-                </span>
-                <span>
-                  Tours Gifted : <span className="font-normal">12</span>
-                </span>
+            {/* Bottom Row: Stats & Learn More Button (#5295:6945 - #5295:6949) */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="flex flex-col gap-1.5 text-[15px] sm:text-[16px] font-normal text-[#1A1A1A] font-outfit">
+                <span>Trees Planted this trip : 08</span>
+                <span>Tours Gifted : 12</span>
               </div>
 
               <Link
                 href="/tree-planting"
-                className="bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-normal px-7 py-1 rounded-[34px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto shadow-xs"
+                className="h-[26px] bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-normal font-outfit px-[35px] rounded-[34px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto shadow-xs"
               >
                 Learn More
               </Link>
@@ -2543,26 +2621,26 @@ export default function TourDetailPage() {
           </div>
         </div>
 
-        {/* 12. "Plans Change. Adventure Continues." (100% Figma MCP Match #5091:9308) */}
+        {/* 12. "Plans Change. Adventure Continues." (100% Figma MCP Match #5295:8047 - #5295:8114) */}
         <div
-          className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-14 sm:py-16 mb-20"
+          className="-mx-4 sm:-mx-6 md:-mx-8 xl:-mx-[35px] px-4 sm:px-6 md:px-8 xl:px-[35px] py-10 sm:py-12 xl:py-[42px] mb-20 rounded-[12px]"
           style={{ backgroundColor: "rgba(244, 236, 217, 0.2)" }}
         >
-          <div className="max-w-7xl mx-auto">
-            {/* Header Row */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div className="w-full max-w-[1210px] mx-auto">
+            {/* Header Row (#5295:8049 & #5295:8053) */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-10">
               <div>
-                <span className="inline-block text-[14px] font-medium text-[rgba(26,26,26,0.55)] bg-[rgba(26,26,26,0.05)] px-3.5 py-1 rounded-[110px] mb-3">
+                <span className="inline-block text-[13px] font-normal text-[#1A1A1A]/70 bg-[rgba(26,26,26,0.06)] px-3 py-1 rounded-[110px] mb-3 font-outfit">
                   Tours Snippets
                 </span>
-                <h2 className="text-[38px] sm:text-[48px] font-normal text-[#1A1A1A] leading-[1.12]">
+                <h2 className="text-[34px] sm:text-[42px] xl:text-[48px] font-normal text-[#1A1A1A] font-outfit leading-tight">
                   Plans Change. <br />
-                  <span className="font-gochi text-[#3B5D1B]">
+                  <span className="font-gochi text-[#254B02]">
                     Adventure Continues.
                   </span>
                 </h2>
               </div>
-              <p className="text-[15px] sm:text-[17px] font-light text-[#6C114E] max-w-md md:text-right leading-[1.35] font-outfit">
+              <p className="text-[14px] sm:text-[16px] font-light text-[#6C114E] max-w-md md:text-right leading-[1.4] font-outfit">
                 We organize{" "}
                 <span className="font-normal">
                   guided trips, scenic routes, and local experiences
@@ -2572,10 +2650,10 @@ export default function TourDetailPage() {
             </div>
 
             {/* 4 White Feature Cards (Figma 100% Match #5295:8054 - #5295:8096) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-              {/* Card 1 */}
-              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
-                <div className="h-[65px] mb-6 flex items-center justify-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 xl:gap-[36px]">
+              {/* Card 1 (#5295:8054) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 flex flex-col justify-between min-h-[225px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
+                <div className="h-[65px] mb-3.5 flex items-center justify-start">
                   <Image
                     src="/gggg1.svg"
                     alt="Free Date Change"
@@ -2585,18 +2663,18 @@ export default function TourDetailPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                  <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1.5 leading-snug font-outfit">
                     Free Date Change
                   </h4>
-                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                  <p className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/70 leading-[20px] font-outfit">
                     Free date change options where applicable.
                   </p>
                 </div>
               </div>
 
-              {/* Card 2 */}
-              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
-                <div className="h-[65px] mb-6 flex items-center justify-start">
+              {/* Card 2 (#5295:8075) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 flex flex-col justify-between min-h-[225px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
+                <div className="h-[65px] mb-3.5 flex items-center justify-start">
                   <Image
                     src="/gggg2.svg"
                     alt="Adventure Credit"
@@ -2606,10 +2684,10 @@ export default function TourDetailPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                  <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1.5 leading-snug font-outfit">
                     Adventure Credit
                   </h4>
-                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                  <p className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/70 leading-[20px] font-outfit">
                     Because sometimes life changes.
                     <br />
                     Your adventure should still be waiting.
@@ -2617,9 +2695,9 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* Card 3 */}
-              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
-                <div className="h-[64px] mb-6 flex items-center justify-start">
+              {/* Card 3 (#5295:8086) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 flex flex-col justify-between min-h-[225px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
+                <div className="h-[65px] mb-3.5 flex items-center justify-start">
                   <Image
                     src="/gggg3.svg"
                     alt="Hold My Adventure"
@@ -2629,10 +2707,10 @@ export default function TourDetailPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                  <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1.5 leading-snug font-outfit">
                     Hold My Adventure
                   </h4>
-                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                  <p className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/70 leading-[20px] font-outfit">
                     Not ready to decide today?
                     <br />
                     Reserve your place while you prepare.
@@ -2640,9 +2718,9 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* Card 4 */}
-              <div className="bg-white rounded-[12px] p-6 flex flex-col justify-between min-h-[238px]">
-                <div className="h-[65px] mb-6 flex items-center justify-start">
+              {/* Card 4 (#5295:8096) */}
+              <div className="bg-white rounded-[12px] p-5 sm:p-6 flex flex-col justify-between min-h-[225px] shadow-[0_2px_12px_rgba(0,0,0,0.05)] font-outfit">
+                <div className="h-[65px] mb-3.5 flex items-center justify-start">
                   <Image
                     src="/gggg4.svg"
                     alt="Pay Your Way"
@@ -2652,10 +2730,10 @@ export default function TourDetailPage() {
                   />
                 </div>
                 <div>
-                  <h4 className="text-[20px] font-normal text-[#2F3D44] tracking-[-0.0234em] mb-2 font-outfit">
+                  <h4 className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] mb-1.5 leading-snug font-outfit">
                     Pay Your Way
                   </h4>
-                  <p className="text-[14px] font-light text-[#1A1A1A]/70 leading-relaxed font-outfit">
+                  <p className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/70 leading-[20px] font-outfit">
                     Make meaningful travel easier to plan.
                   </p>
                 </div>
@@ -2664,14 +2742,14 @@ export default function TourDetailPage() {
           </div>
         </div>
 
-        {/* 12 & 13. Adventure Deposit & Check Availability with Sticky Right "Book Privately" Panel (100% Figma MCP Match #5207:7755, #5207:7775, #5207:8242) */}
+        {/* 12 & 13. Adventure Deposit & Check Availability with Sticky Right "Book Privately" Panel (100% Figma MCP Match #5295:7697, #5295:7717, #5295:8248) */}
         <div id="check-availability-section" className="mb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] gap-8 items-start">
-            {/* Left Column (1fr): Adventure Deposit + Check Availability */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_316px] xl:grid-cols-[853px_316px] gap-6 xl:gap-[41px] items-start">
+            {/* Left Column (853px / 1fr): Adventure Deposit + Check Availability */}
             <div className="space-y-8 w-full min-w-0">
               {/* Adventure Deposit Card (100% Screenshot & Figma Exact Match #5295:7697) */}
               <div
-                className="w-full rounded-[12px] border border-[rgba(26,26,26,0.2)] p-6 relative overflow-hidden"
+                className="w-full rounded-[12px] border border-[rgba(26,26,26,0.12)] p-5 sm:p-6 relative overflow-hidden font-outfit shadow-2xs"
                 style={{ backgroundColor: "rgba(181, 185, 177, 0.1)" }}
               >
                 {/* Right background graphic shape */}
@@ -2701,21 +2779,21 @@ export default function TourDetailPage() {
                         className="w-[23px] h-[24px] object-contain"
                       />
                     </div>
-                    <h3 className="text-[32px] font-normal text-[#1A1A1A] tracking-[-0.0143em] leading-tight">
+                    <h3 className="text-[26px] sm:text-[32px] font-normal text-[#1A1A1A] font-outfit tracking-[-0.0143em] leading-tight">
                       Adventure Deposit
                     </h3>
                   </div>
 
                   {/* Description & Learn More Button */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-1">
-                    <p className="text-[16px] font-light text-[#1A1A1A]/70 tracking-[-0.0286em] leading-[23.4px] max-w-[692px]">
+                    <p className="text-[14px] sm:text-[16px] font-light text-[#1A1A1A]/70 font-outfit tracking-[-0.0286em] leading-relaxed max-w-[692px]">
                       Lock in your Trip with a small &quot;Deposit amount&quot;
                       Adventure Deposit if it departs 60+ days from now.
                     </p>
 
                     <Link
                       href="/why-nba"
-                      className="bg-[#1A1A1A] hover:bg-black text-white text-[16px] font-medium px-5 py-1 rounded-[19px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto min-w-[112px] h-[28px] text-center shadow-xs"
+                      className="bg-[#1A1A1A] hover:bg-black text-white text-[14px] sm:text-[16px] font-medium font-outfit px-5 py-1 rounded-[19px] transition whitespace-nowrap inline-flex items-center justify-center shrink-0 self-start sm:self-auto min-w-[112px] h-[28px] text-center shadow-xs"
                     >
                       Learn More
                     </Link>
@@ -2723,27 +2801,27 @@ export default function TourDetailPage() {
                 </div>
               </div>
 
-              {/* 13. "Check Availability" (Exact 100% Figma MCP Flow #5295:7717) */}
-              <div className="w-full border border-[rgba(47,61,68,0.3)] rounded-[12px] overflow-hidden bg-white shadow-xs">
-                {/* Top Header Bar (#5295:7719) */}
+              {/* 13. "Check Availability" (Exact 100% Figma MCP Flow #5295:7717 - #5295:7970) */}
+              <div className="w-full border border-[rgba(47,61,68,0.3)] rounded-[12px] overflow-hidden bg-white shadow-2xs font-outfit">
+                {/* Top Header Bar (#5295:7719 - #5295:7723) */}
                 <div
-                  className="px-7 py-6 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
+                  className="px-6 sm:px-8 py-6 border-b border-[rgba(26,26,26,0.1)] flex flex-col justify-center"
                   style={{
                     backgroundColor: "rgba(181, 185, 177, 0.1)",
                     minHeight: "104px",
                   }}
                 >
-                  <h2 className="text-[32px] font-normal text-[#1A1A1A] tracking-[-0.0143em] mb-1 leading-[23.4px]">
+                  <h2 className="text-[28px] sm:text-[32px] font-normal text-[#1A1A1A] font-outfit tracking-[-0.0143em] leading-tight">
                     Check Availability
                   </h2>
-                  <p className="text-[16px] font-light text-[#1A1A1A]/70 tracking-[-0.0286em]">
+                  <p className="text-[15px] sm:text-[16px] font-light text-[#1A1A1A]/70 font-outfit tracking-[-0.0286em] mt-1">
                     Select Your Preferred dates and secure your spot on this
                     Tour.
                   </p>
                 </div>
 
-                {/* Dual Month Calendar Widget Container (#5295:7741) */}
-                <div className="py-6 px-6 sm:py-7 sm:px-10 lg:px-12 bg-white">
+                {/* Dual Month Calendar Widget Container (#5295:7741 - #5295:7884) */}
+                <div className="py-7 px-5 sm:px-8 lg:px-10 bg-white">
                   {(() => {
                     const activeDep =
                       displayedDepartures[activeDepartureIndex] ||
@@ -2782,6 +2860,7 @@ export default function TourDetailPage() {
                     ) => {
                       const monthName = targetDate.toLocaleDateString("en-US", {
                         month: "short",
+                        year: "numeric",
                       });
                       const year = targetDate.getFullYear();
                       const monthIdx = targetDate.getMonth();
@@ -2820,7 +2899,6 @@ export default function TourDetailPage() {
                         return t > s && t < e;
                       };
 
-                      // Grid cells: blank for leading empty days, then 1..daysInMonth, then trailing next month days
                       const cells: Array<{
                         day?: number;
                         isCurrent: boolean;
@@ -2842,7 +2920,6 @@ export default function TourDetailPage() {
                         cells.push({ day: i, isCurrent: false });
                       }
 
-                      // Active departure date calculations
                       const depStart = activeDep?.startDate
                         ? new Date(activeDep.startDate)
                         : null;
@@ -2856,7 +2933,7 @@ export default function TourDetailPage() {
                           : null;
 
                       return (
-                        <div className="border border-[#E5E5E5] rounded-[16px] p-5 sm:p-6 bg-white shadow-2xs">
+                        <div className="border border-[#E5E5E5] rounded-[16px] p-5 sm:p-6 bg-white shadow-2xs font-outfit">
                           {/* Calendar Header with Navigation */}
                           <div className="flex items-center justify-between mb-4 px-1">
                             <button
@@ -2867,7 +2944,7 @@ export default function TourDetailPage() {
                               <CaretLeft size={20} weight="bold" />
                             </button>
 
-                            <span className="text-[20px] font-normal text-[#1A1A1A] font-outfit">
+                            <span className="text-[18px] sm:text-[20px] font-normal text-[#1A1A1A] font-outfit">
                               {monthName}
                             </span>
 
@@ -2880,7 +2957,7 @@ export default function TourDetailPage() {
                             </button>
                           </div>
 
-                          {/* Day of Week Header */}
+                          {/* Day of Week Header (#5295:7744) */}
                           <div className="grid grid-cols-7 text-center text-[13px] font-normal text-[#8E8E93] mb-2.5 font-outfit">
                             <span>Su</span>
                             <span>Mo</span>
@@ -2911,7 +2988,7 @@ export default function TourDetailPage() {
 
                               const currentDate = cell.date;
 
-                              // Check if matches active selected departure (Maroon / Plum)
+                              // Check if matches active selected departure (#57063C #5295:7841)
                               const isStart =
                                 depStart && isSameDay(currentDate, depStart);
                               const isEnd =
@@ -2933,7 +3010,7 @@ export default function TourDetailPage() {
                                     {disc > 0 && (
                                       <span className="absolute top-[2px] left-[2px] w-[8px] h-[8px] rounded-full bg-[#FF3B30] z-10 shadow-xs pointer-events-none" />
                                     )}
-                                    <div className="w-[42px] h-[42px] rounded-full bg-[#5C0D3E] text-white flex flex-col items-center justify-center shadow-xs select-none">
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[#57063C] text-white flex flex-col items-center justify-center shadow-xs select-none">
                                       <span className="text-[15px] font-medium leading-none">
                                         {cell.day}
                                       </span>
@@ -2951,7 +3028,7 @@ export default function TourDetailPage() {
                                     key={cIdx}
                                     className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer"
                                   >
-                                    <div className="w-[42px] h-[42px] rounded-full bg-[#5C0D3E] text-white flex items-center justify-center shadow-xs select-none">
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[#57063C] text-white flex items-center justify-center shadow-xs select-none">
                                       <span className="text-[15px] font-medium leading-none">
                                         {cell.day}
                                       </span>
@@ -2966,7 +3043,7 @@ export default function TourDetailPage() {
                                     key={cIdx}
                                     className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer"
                                   >
-                                    <div className="w-[42px] h-[42px] rounded-full bg-[rgba(92,13,62,0.08)] text-[#5C0D3E] flex items-center justify-center select-none">
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[rgba(87,6,60,0.08)] text-[#57063C] flex items-center justify-center select-none">
                                       <span className="text-[15px] font-medium leading-none">
                                         {cell.day}
                                       </span>
@@ -2975,7 +3052,7 @@ export default function TourDetailPage() {
                                 );
                               }
 
-                              // Check if matches other unselected departures in the list (Charcoal / Slate Gray)
+                              // Check if matches other unselected departures
                               const otherDepIdx = displayedDepartures.findIndex(
                                 (dep, idx) => {
                                   if (idx === activeDepartureIndex)
@@ -3004,27 +3081,9 @@ export default function TourDetailPage() {
                                 const otherDep =
                                   displayedDepartures[otherDepIdx];
                                 const otherStart = new Date(otherDep.startDate);
-                                const otherEnd = otherDep.endDate
-                                  ? new Date(otherDep.endDate)
-                                  : new Date(
-                                      otherStart.getTime() +
-                                        (tour.duration.days - 1) * 86400000,
-                                    );
                                 const isOtherStart = isSameDay(
                                   currentDate,
                                   otherStart,
-                                );
-                                const isOtherEnd = isSameDay(
-                                  currentDate,
-                                  otherEnd,
-                                );
-                                const isOtherBetween = isBetweenDays(
-                                  currentDate,
-                                  otherStart,
-                                  otherEnd,
-                                );
-                                const otherDisc = getDiscountPercentage(
-                                  otherDep.discount,
                                 );
 
                                 if (isOtherStart) {
@@ -3036,9 +3095,6 @@ export default function TourDetailPage() {
                                       }
                                       className="relative w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
                                     >
-                                      {otherDisc > 0 && (
-                                        <span className="absolute top-[2px] left-[2px] w-[8px] h-[8px] rounded-full bg-[#FF3B30] z-10 shadow-xs pointer-events-none" />
-                                      )}
                                       <div className="w-[42px] h-[42px] rounded-full bg-[#585C60] text-white flex flex-col items-center justify-center shadow-xs transition group-hover:bg-[#4A4E51] select-none">
                                         <span className="text-[15px] font-medium leading-none">
                                           {cell.day}
@@ -3051,41 +3107,21 @@ export default function TourDetailPage() {
                                   );
                                 }
 
-                                if (isOtherEnd) {
-                                  return (
-                                    <div
-                                      key={cIdx}
-                                      onClick={() =>
-                                        setActiveDepartureIndex(otherDepIdx)
-                                      }
-                                      className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
-                                    >
-                                      <div className="w-[42px] h-[42px] rounded-full bg-[#585C60] text-white flex items-center justify-center shadow-xs transition group-hover:bg-[#4A4E51] select-none">
-                                        <span className="text-[15px] font-medium leading-none">
-                                          {cell.day}
-                                        </span>
-                                      </div>
+                                return (
+                                  <div
+                                    key={cIdx}
+                                    onClick={() =>
+                                      setActiveDepartureIndex(otherDepIdx)
+                                    }
+                                    className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
+                                  >
+                                    <div className="w-[42px] h-[42px] rounded-full bg-[#EAEAEA] text-[#1A1A1A] flex items-center justify-center transition group-hover:bg-[#E0E0E0] select-none">
+                                      <span className="text-[15px] font-normal leading-none">
+                                        {cell.day}
+                                      </span>
                                     </div>
-                                  );
-                                }
-
-                                if (isOtherBetween) {
-                                  return (
-                                    <div
-                                      key={cIdx}
-                                      onClick={() =>
-                                        setActiveDepartureIndex(otherDepIdx)
-                                      }
-                                      className="w-[42px] h-[42px] flex items-center justify-center cursor-pointer group"
-                                    >
-                                      <div className="w-[42px] h-[42px] rounded-full bg-[#EAEAEA] text-[#1A1A1A] flex items-center justify-center transition group-hover:bg-[#E0E0E0] select-none">
-                                        <span className="text-[15px] font-normal leading-none">
-                                          {cell.day}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  );
-                                }
+                                  </div>
+                                );
                               }
 
                               // Regular Day
@@ -3122,9 +3158,9 @@ export default function TourDetailPage() {
                   })()}
                 </div>
 
-                {/* Month Selector Tabs & Filter Header (#5295:7939) */}
+                {/* Month Selector Tabs & Filter Header (#5295:7939 - #5295:7967) */}
                 <div
-                  className="px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-t border-b border-[rgba(181,185,177,0.2)]"
+                  className="px-4 sm:px-6 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-t border-b border-[rgba(181,185,177,0.2)] font-outfit"
                   style={{
                     backgroundColor: "rgba(181, 185, 177, 0.1)",
                     minHeight: "74px",
@@ -3132,7 +3168,7 @@ export default function TourDetailPage() {
                 >
                   {/* Left: Month Tabs with Smooth Scroll & Dynamic Black/Gray Arrows */}
                   <div className="flex items-center gap-2 sm:gap-2.5 max-w-full">
-                    {/* Left Arrow Button (Black when scrolled, Gray at start) */}
+                    {/* Left Arrow Button */}
                     <button
                       onClick={() => handleScrollMonths("left")}
                       disabled={!canScrollLeft}
@@ -3146,7 +3182,7 @@ export default function TourDetailPage() {
                       <CaretLeft size={16} weight="bold" />
                     </button>
 
-                    {/* Smooth Scrollable Months Container: exactly 3 full cards + half 4th card */}
+                    {/* Smooth Scrollable Months Container */}
                     <div
                       ref={monthScrollRef}
                       onScroll={updateScrollButtons}
@@ -3167,7 +3203,7 @@ export default function TourDetailPage() {
                             }}
                             className={`min-w-[114px] w-[114px] h-[54px] px-3.5 py-1.5 rounded-[12px] flex flex-col justify-center text-left transition cursor-pointer shrink-0 shadow-xs border-0 ${
                               isSelected
-                                ? "bg-[#601444] text-white"
+                                ? "bg-[#57063C] text-white"
                                 : "bg-white text-[#1A1A1A] hover:bg-gray-50"
                             }`}
                           >
@@ -3184,7 +3220,7 @@ export default function TourDetailPage() {
                       })}
                     </div>
 
-                    {/* Right Arrow Button (Black when can scroll right, Gray at end) */}
+                    {/* Right Arrow Button */}
                     <button
                       onClick={() => handleScrollMonths("right")}
                       disabled={!canScrollRight}
@@ -3199,14 +3235,14 @@ export default function TourDetailPage() {
                     </button>
                   </div>
 
-                  {/* Right: Filter Dropdown Buttons (Borderless, Pure White) */}
-                  <div className="flex items-center gap-3 shrink-0 self-start lg:self-center">
+                  {/* Right: Filter Dropdown Buttons (#5295:7960, #5295:7964) */}
+                  <div className="flex items-center gap-3 shrink-0 self-start lg:self-center font-outfit">
                     {/* Deals Filter Toggle */}
                     <button
                       onClick={() => setFilterDealsOnly(!filterDealsOnly)}
-                      className={`rounded-[10px] px-4 h-[42px] text-[15px] font-normal flex items-center gap-2.5 shadow-xs transition cursor-pointer border-0 ${
+                      className={`rounded-[10px] px-4 h-[42px] text-[15px] font-normal font-outfit flex items-center gap-2.5 shadow-xs transition cursor-pointer border-0 ${
                         filterDealsOnly
-                          ? "bg-[#601444] text-white shadow-xs"
+                          ? "bg-[#57063C] text-white shadow-xs"
                           : "bg-white text-[#1A1A1A] hover:bg-gray-50"
                       }`}
                     >
@@ -3228,7 +3264,7 @@ export default function TourDetailPage() {
                             : "low-to-high",
                         )
                       }
-                      className="bg-white rounded-[10px] px-4 h-[42px] text-[15px] font-normal text-[#1A1A1A] flex items-center gap-2.5 shadow-xs hover:bg-gray-50 border-0 transition cursor-pointer"
+                      className="bg-white rounded-[10px] px-4 h-[42px] text-[15px] font-normal font-outfit text-[#1A1A1A] flex items-center gap-2.5 shadow-xs hover:bg-gray-50 border-0 transition cursor-pointer"
                       title="Toggle Price Sorting"
                     >
                       <span>
@@ -3243,14 +3279,14 @@ export default function TourDetailPage() {
                   </div>
                 </div>
 
-                {/* Departure Rows Container (#5295:7720) */}
-                <div className="p-5 sm:p-7 space-y-3 bg-white">
+                {/* Departure Rows Container (#5295:7720 - #5295:7938) */}
+                <div className="p-5 sm:p-7 space-y-3 bg-white font-outfit">
                   {/* Sub-header row (#5295:7720, #5295:7721) */}
-                  <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center justify-between mb-3 px-1 font-outfit">
                     <h4 className="text-[20px] font-normal text-[#1A1A1A] font-outfit tracking-[-0.02em]">
                       All Available Dates
                     </h4>
-                    <span className="text-[16px] font-light text-[#1A1A1A] font-outfit opacity-80">
+                    <span className="text-[16px] font-light text-[#1A1A1A]/80 font-outfit hover:underline cursor-pointer">
                       Do you want Sooner dates?
                     </span>
                   </div>
@@ -3290,17 +3326,17 @@ export default function TourDetailPage() {
                           onClick={() => setActiveDepartureIndex(index)}
                           style={{
                             border: isSelected
-                              ? "1.5px solid #601444"
+                              ? "1.5px solid #57063C"
                               : "1.5px solid transparent",
                             backgroundColor: isSelected
-                              ? "rgba(58, 28, 54, 0.08)"
+                              ? "rgba(87, 6, 60, 0.08)"
                               : "rgba(181, 185, 177, 0.15)",
                           }}
-                          className="rounded-[12px] px-4 sm:px-5 min-h-[62px] h-auto sm:h-[62px] py-3 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-2 relative transition-all cursor-pointer"
+                          className="rounded-[12px] px-4 sm:px-5 min-h-[62px] h-auto sm:h-[62px] py-3 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-2 relative transition-all cursor-pointer font-outfit"
                         >
                           {/* Left: Date & Status Tag + Spots Left Pill */}
                           <div className="flex items-center gap-4 sm:gap-6 min-w-[260px] sm:min-w-[280px]">
-                            {/* Date column (aligned width) */}
+                            {/* Date column */}
                             <div className="w-[130px] sm:w-[145px] flex flex-col justify-center shrink-0">
                               {disc > 0 && (
                                 <span className="text-[#FF2B00] text-[10px] font-normal tracking-tight leading-none mb-0.5">
@@ -3313,8 +3349,8 @@ export default function TourDetailPage() {
                             </div>
 
                             {/* Spots Left Tag (#5295:7729) */}
-                            <div className="bg-white rounded-[25px] px-3.5 py-1 flex items-center justify-center shrink-0">
-                              <span className="text-[12px] text-[#1A1A1A] font-normal opacity-85 leading-none whitespace-nowrap">
+                            <div className="bg-white rounded-[25px] px-3.5 py-1 flex items-center justify-center shrink-0 shadow-2xs">
+                              <span className="text-[12px] text-[#1A1A1A] font-normal opacity-85 leading-none whitespace-nowrap font-outfit">
                                 {d.availableSpots ??
                                   (d as any).remainingSpots ??
                                   (d as any).spotsLeft ??
@@ -3325,29 +3361,29 @@ export default function TourDetailPage() {
                           </div>
 
                           {/* Center: Price (#5295:7732, #5295:7891) */}
-                          <div className="flex items-baseline gap-0.5 shrink-0 sm:ml-4">
-                            <span className="text-[11px] font-semibold text-[#1A1A1A] self-start mt-1 mr-0.5">
+                          <div className="flex items-baseline gap-0.5 shrink-0 sm:ml-4 font-outfit">
+                            <span className="text-[11px] font-semibold text-[#1A1A1A] self-start mt-1 mr-0.5 font-outfit">
                               $
                             </span>
                             <span className="text-[32px] font-bold text-[#1A1A1A] tracking-tight leading-none font-outfit">
                               {price}
                             </span>
-                            <span className="text-[10px] font-medium text-[#1A1A1A] ml-1.5 self-end mb-1 leading-none whitespace-nowrap">
+                            <span className="text-[10px] font-medium text-[#1A1A1A] ml-1.5 self-end mb-1 leading-none whitespace-nowrap font-outfit">
                               USD/Per Person
                             </span>
                           </div>
 
                           {/* Right: Action Buttons (#5295:7736, #5295:7739) */}
-                          <div className="flex items-center gap-3 shrink-0 sm:ml-auto mr-0">
+                          <div className="flex items-center gap-3 shrink-0 sm:ml-auto mr-0 font-outfit">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setHoldSelectedDate(isoDateStr);
                                 handleHoldSpace(isoDateStr);
                               }}
-                              className={`h-[32px] px-4 sm:px-5 text-[14px] font-normal transition cursor-pointer flex items-center justify-center min-w-[125px] sm:min-w-[136px] ${
+                              className={`h-[32px] px-4 sm:px-5 text-[14px] font-normal transition cursor-pointer flex items-center justify-center min-w-[125px] sm:min-w-[136px] font-outfit ${
                                 isSelected
-                                  ? "bg-[rgba(58,28,54,0.2)] hover:bg-[rgba(58,28,54,0.3)] text-[#1A1A1A] rounded-[27px]"
+                                  ? "bg-[rgba(87,6,60,0.2)] hover:bg-[rgba(87,6,60,0.3)] text-[#1A1A1A] rounded-[27px]"
                                   : "bg-[rgba(26,26,26,0.1)] hover:bg-[rgba(26,26,26,0.18)] text-[#1A1A1A] rounded-[31px]"
                               }`}
                             >
@@ -3363,16 +3399,16 @@ export default function TourDetailPage() {
                                     `/trips/${tour.slug}/${tour.tourCode}/checkout?date=${isoDateStr}`,
                                   );
                                 }}
-                                className={`h-[32px] px-5 sm:px-6 text-[14px] font-normal transition cursor-pointer shadow-xs flex items-center justify-center min-w-[115px] sm:min-w-[125px] text-white ${
+                                className={`h-[32px] px-5 sm:px-6 text-[14px] font-normal transition cursor-pointer shadow-xs flex items-center justify-center min-w-[115px] sm:min-w-[125px] text-white font-outfit ${
                                   isSelected
-                                    ? "bg-[#601444] hover:bg-[#4d0f36] rounded-[27px]"
+                                    ? "bg-[#57063C] hover:bg-[#43042e] rounded-[27px]"
                                     : "bg-[#696969] hover:bg-[#1A1A1A] rounded-[31px]"
                                 }`}
                               >
                                 Book Now
                               </button>
 
-                              {/* Bookmark Discount Ribbon Attached Directly Over Book Now Right Side */}
+                              {/* Bookmark Discount Ribbon Attached Directly Over Book Now Right Side (#5295:7904) */}
                               {disc > 0 && (
                                 <div className="absolute -top-[17px] right-[5px] flex flex-col items-center z-20 select-none pointer-events-none">
                                   <svg
@@ -3387,15 +3423,15 @@ export default function TourDetailPage() {
                                       d="M0 4C0 1.79086 1.79086 0 4 0H21C23.2091 0 25 1.79086 25 4V40L12.5 30L0 40V4Z"
                                       fill="#FFFFFF"
                                       stroke={
-                                        isSelected ? "#601444" : "#D1D1D6"
+                                        isSelected ? "#57063C" : "#D1D1D6"
                                       }
                                       strokeWidth="1"
                                     />
                                   </svg>
                                   <span
-                                    className={`absolute top-1 text-[9px] font-bold leading-[1.05] text-center ${
+                                    className={`absolute top-1 text-[9px] font-bold leading-[1.05] text-center font-outfit ${
                                       isSelected
-                                        ? "text-[#601444]"
+                                        ? "text-[#57063C]"
                                         : "text-[#1A1A1A]"
                                     }`}
                                   >
@@ -3410,8 +3446,8 @@ export default function TourDetailPage() {
                       );
                     })
                   ) : (
-                    <div className="py-10 text-center text-gray-500 font-light">
-                      <p className="text-[16px] text-[#1A1A1A] mb-2">
+                    <div className="py-10 text-center text-gray-500 font-light font-outfit">
+                      <p className="text-[16px] text-[#1A1A1A] mb-2 font-outfit">
                         No departures found for the selected filters.
                       </p>
                       <button
@@ -3420,7 +3456,7 @@ export default function TourDetailPage() {
                           setFilterDealsOnly(false);
                           setActiveDepartureIndex(0);
                         }}
-                        className="text-[#601444] font-medium underline text-[14px] cursor-pointer"
+                        className="text-[#57063C] font-medium underline text-[14px] cursor-pointer font-outfit"
                       >
                         Reset filters
                       </button>
@@ -3436,7 +3472,7 @@ export default function TourDetailPage() {
                         setPriceSortOrder("low-to-high");
                         setActiveDepartureIndex(0);
                       }}
-                      className="text-[#601444] hover:underline text-[16px] font-normal cursor-pointer"
+                      className="text-[#57063C] hover:underline text-[16px] font-normal cursor-pointer font-outfit"
                     >
                       Clear date
                     </button>
@@ -3445,46 +3481,46 @@ export default function TourDetailPage() {
               </div>
             </div>
 
-            {/* Right Sticky Column (316px #5207:8242): "Book Privately" Card (Matching Continue Your Journey sizing) */}
-            <div className="w-full lg:sticky lg:top-24 space-y-4">
-              <div className="w-full bg-white border border-[rgba(47,61,68,0.2)] rounded-[12px] overflow-hidden shadow-xs flex flex-col">
-                {/* Top Photo (#5207:8261) */}
-                <div className="w-full h-[169px] relative bg-gray-900">
+            {/* Right Sticky Column (316px #5295:8248): "Book Privately" Card (Matching Continue Your Journey sizing) */}
+            <div className="w-full xl:w-[316px] lg:sticky lg:top-24 space-y-4 font-outfit">
+              <div className="w-full bg-white border border-[rgba(26,26,26,0.15)] rounded-[12px] overflow-hidden shadow-2xs flex flex-col font-outfit">
+                {/* Top Photo (#5295:8267) */}
+                <div className="w-full h-[169px] relative bg-gray-900 overflow-hidden">
                   <Image
                     src={tour.images?.[1]?.url || "/mountain_hikers.png"}
                     alt="Book Privately"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute inset-0 bg-black/5" />
                 </div>
 
-                {/* Card Content (#5207:8246) */}
-                <div className="p-6 flex flex-col justify-between flex-1">
+                {/* Card Content (#5295:8252) */}
+                <div className="p-5 flex flex-col justify-between flex-1 font-outfit">
                   <div>
-                    <h4 className="text-[24px] font-normal text-[#1A1A1A] leading-tight mb-2">
+                    <h4 className="text-[22px] sm:text-[24px] font-normal text-[#1A1A1A] font-outfit leading-tight mb-1.5">
                       Book Privately
                     </h4>
-                    <p className="text-[14px] font-light text-[#1A1A1A]/80 leading-relaxed mb-6">
+                    <p className="text-[13px] sm:text-[14px] font-light text-[#1A1A1A]/70 font-outfit leading-relaxed mb-2.5">
                       Enjoy your journey with added privacy, comfort, and
                       exclusive personal space.
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex items-center gap-2">
                     <Link
                       href={`/contact?subject=Private%20Booking%20for%20${encodeURIComponent(tour.name)}`}
-                      className="bg-[#1A1A1A] hover:bg-black text-white text-[15px] font-medium px-6 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
+                      className="bg-[#1A1A1A] hover:bg-black text-white text-[14px] font-medium font-outfit px-5 py-2 rounded-full flex items-center gap-2 transition cursor-pointer shadow-xs"
                     >
                       Start Exploring
                     </Link>
                     <Link
                       href={`/contact?subject=Private%20Booking%20for%20${encodeURIComponent(tour.name)}`}
-                      className="w-9 h-9 rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs"
+                      className="w-[35px] h-[35px] rounded-full bg-[#1A1A1A] hover:bg-black text-white flex items-center justify-center cursor-pointer transition shadow-xs shrink-0"
                       aria-label="Start Exploring"
                     >
                       <ArrowUpRight
-                        size={16}
+                        size={15}
                         className="text-white"
                         weight="bold"
                       />

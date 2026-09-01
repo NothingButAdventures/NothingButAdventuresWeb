@@ -21,6 +21,7 @@ interface Continent {
     id: string;
     name: string;
     slug: string;
+    icon?: string;
     image?: string;
     description?: string;
 }
@@ -55,10 +56,12 @@ export default function EditContinentPage() {
 
     // Form State
     const [name, setName] = useState("");
+    const [icon, setIcon] = useState("");
     const [image, setImage] = useState("");
     const [uploadingImage, setUploadingImage] = useState(false);
     const [uploadingEditorImage, setUploadingEditorImage] = useState(false);
     const [showImagePicker, setShowImagePicker] = useState(false);
+    const [showIconPicker, setShowIconPicker] = useState(false);
 
     // TipTap Editor
     const editor = useEditor({
@@ -109,6 +112,7 @@ export default function EditContinentPage() {
                 const cont = data.data.continent;
                 setContinent(cont);
                 setName(cont.name);
+                setIcon(cont.icon || "");
                 setImage(cont.image || "");
                 editor?.commands.setContent(cont.description || "");
             }
@@ -158,6 +162,7 @@ export default function EditContinentPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name,
+                    icon: icon.trim() || undefined,
                     image,
                     description: editor?.getHTML() || "",
                 }),
@@ -226,6 +231,39 @@ export default function EditContinentPage() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm placeholder:text-gray-400"
+                                />
+                            </div>
+
+                            {/* Continent Icon */}
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Continent Icon</label>
+                                <div className="mt-1 flex items-center gap-4">
+                                    {icon ? (
+                                        <div className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center shadow-sm group">
+                                            <img src={icon} alt="Icon Preview" className="w-full h-full object-contain p-1.5" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setIcon("")}
+                                                className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity font-medium text-xs border-none cursor-pointer"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ) : null}
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowIconPicker(true)}
+                                        className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md transition shadow-sm text-xs font-semibold cursor-pointer"
+                                    >
+                                        {icon ? "Change Icon" : "Select/Upload Icon"}
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={icon}
+                                    onChange={(e) => setIcon(e.target.value)}
+                                    className="w-full mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-xs focus:outline-none focus:border-zinc-400 transition placeholder:text-gray-400 text-zinc-700"
+                                    placeholder="Or paste icon image URL..."
                                 />
                             </div>
 
@@ -317,6 +355,17 @@ export default function EditContinentPage() {
                     if (urls.length > 0) setImage(urls[0]);
                 }}
                 multiple={false}
+                folder="continent-images"
+            />
+            <ImagePickerModal
+                isOpen={showIconPicker}
+                onClose={() => setShowIconPicker(false)}
+                onSelect={(urls) => {
+                    if (urls.length > 0) setIcon(urls[0]);
+                    setShowIconPicker(false);
+                }}
+                multiple={false}
+                folder="continent-images"
             />
         </div>
     );

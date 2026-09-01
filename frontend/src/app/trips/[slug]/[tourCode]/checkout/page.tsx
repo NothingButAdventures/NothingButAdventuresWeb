@@ -1123,7 +1123,8 @@ export default function CheckoutPage() {
                     method: 'credit_card',
                     status: 'pending',
                     transactions: []
-                }
+                },
+                affiliateCode: typeof window !== 'undefined' ? localStorage.getItem('nba_aff_code') || undefined : undefined
             };
 
             const response = await fetch(`${api.baseURL}/bookings`, {

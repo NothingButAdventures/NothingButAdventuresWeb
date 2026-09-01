@@ -148,35 +148,54 @@ export default function Header() {
             setShow(false);
           }
         }}
-        className={`relative z-50 font-outfit px-4 sm:px-6 md:px-8 lg:px-[35px] transition-all duration-300 transform ${isMenuOpenAtTop ? "" : "sticky top-0"
+        className={`relative z-50 font-outfit transition-all duration-300 transform ${isMenuOpenAtTop ? "" : "sticky top-0"
           } ${show ? "translate-y-0" : "-translate-y-full"
-          } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white"}`}
+          } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white md:bg-white/90 md:backdrop-blur-md"} shadow-[0px_1px_24px_0px_rgba(0,0,0,0.04)] md:shadow-[0px_1px_75px_0px_rgba(0,0,0,0.1)]`}
       >
         {/* Header-level dark overlay — dims header bar but nav (z-[60]) and mega menu (z-[60]) sit above it */}
         {activeMenu && (
           <div className="absolute inset-0 bg-black/25 z-[55] pointer-events-none transition-opacity duration-300 rounded-none" />
         )}
-        <div>
-          <div className="flex justify-between items-center md:grid md:grid-cols-[1fr_auto_1fr] py-4">
-            {/* Logo */}
-            <div className="flex items-center justify-start">
-              <Link href="/" className="flex items-center space-x-3">
+        <div className="w-full max-w-[1280px] mx-auto px-[20.62px] sm:px-6 md:px-8 xl:px-[35px] h-[63px] md:h-[67px]">
+          <div className="flex justify-between items-center h-full">
+            {/* Desktop Logo: 139px x 31px (Icon 30px x 30.5px, Text 101px x 31px, Gap 8px) */}
+            <div className="hidden md:flex items-center justify-start shrink-0">
+              <Link href="/" className="flex items-center gap-[8px]">
                 <img
                   src="/nba_logo1.svg"
                   alt="Nothing But Adventures Icon"
-                  className="h-10 md:h-10 w-auto object-contain transition-all duration-300"
+                  className="w-[30px] h-[30.5px] object-contain transition-all duration-300"
                 />
                 <img
                   src="/new_ssss.svg"
                   alt="Nothing But Adventures"
-                  className="h-10 md:h-10 w-auto object-contain transition-all duration-300"
+                  className="w-[101px] h-[31px] object-contain transition-all duration-300"
                 />
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex justify-center">
-              <nav className={`relative z-[60] flex items-stretch rounded-xl overflow-hidden transition-colors duration-200 ${activeMenu ? "bg-white" : "bg-[#f5f5f5]"}`}>
+            {/* Mobile Logo: 105.44px x 23.52px (Icon 22.76px x 23.13px, Text 76.62px x 23.52px, Gap 6.06px) */}
+            <div className="flex md:hidden items-center justify-start shrink-0">
+              <Link href="/" className="flex items-center gap-[6.06px]">
+                <img
+                  src="/nba_logo1.svg"
+                  alt="Nothing But Adventures Icon"
+                  className="w-[22.76px] h-[23.13px] object-contain"
+                />
+                <div className="flex flex-col justify-center select-none text-left">
+                  <span className="font-outfit font-normal text-[9.86px] text-[#1A1A1A] leading-[0.87em] tracking-[-0.01em]">
+                    Nothing but
+                  </span>
+                  <span className="font-gochi font-normal text-[15.17px] text-[#1A1A1A] leading-[0.87em]">
+                    Adventures.
+                  </span>
+                </div>
+              </Link>
+            </div>
+
+            {/* Desktop Navigation: 38px pill with uniform 2.5px padding, matching x and y gaps, and fixed button width on hover */}
+            <div className="hidden md:flex justify-center items-center">
+              <nav className={`relative z-[60] flex items-center h-[38px] rounded-[12px] p-[2.5px] gap-0.5 xl:gap-1 transition-colors duration-200 ${activeMenu ? "bg-white shadow-xs" : "bg-[rgba(181,185,177,0.15)]"}`}>
                 <button
                   type="button"
                   onMouseEnter={() => handleMenuEnter("destinations")}
@@ -184,9 +203,9 @@ export default function Header() {
                     setActiveMenu("destinations");
                   }}
                   aria-expanded={activeMenu === "destinations"}
-                  className={`flex items-center justify-center px-6 py-2.5 transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "destinations"
-                    ? "bg-[#1A1A1A] text-white font-medium"
-                    : "text-[#3F3F42] hover:bg-[#1A1A1A] hover:text-white"
+                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "destinations"
+                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                    : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
                 >
                   <span>Destination</span>
@@ -198,9 +217,9 @@ export default function Header() {
                     setActiveMenu("adventures");
                   }}
                   aria-expanded={activeMenu === "adventures"}
-                  className={`flex items-center justify-center px-6 py-2.5 transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "adventures"
-                    ? "bg-[#1A1A1A] text-white font-medium"
-                    : "text-[#3F3F42] hover:bg-[#1A1A1A] hover:text-white"
+                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "adventures"
+                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                    : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
                 >
                   <span>Adventure</span>
@@ -212,9 +231,9 @@ export default function Header() {
                     setActiveMenu("interests");
                   }}
                   aria-expanded={activeMenu === "interests"}
-                  className={`flex items-center justify-center px-6 py-2.5 transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "interests"
-                    ? "bg-[#1A1A1A] text-white font-medium"
-                    : "text-[#3F3F42] hover:bg-[#1A1A1A] hover:text-white"
+                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "interests"
+                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                    : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
                 >
                   <span>Explore by Interest</span>
@@ -226,9 +245,9 @@ export default function Header() {
                     setActiveMenu("deals");
                   }}
                   aria-expanded={activeMenu === "deals"}
-                  className={`flex items-center justify-center px-6 py-2.5 transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "deals"
-                    ? "bg-[#1A1A1A] text-white font-medium"
-                    : "text-[#3F3F42] hover:bg-[#1A1A1A] hover:text-white"
+                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "deals"
+                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                    : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
                 >
                   <span>Deals</span>
@@ -240,9 +259,9 @@ export default function Header() {
                     setActiveMenu("why-us");
                   }}
                   aria-expanded={activeMenu === "why-us"}
-                  className={`flex items-center justify-center px-6 py-2.5 transition-all font-normal text-[16px] cursor-pointer rounded-xl ${activeMenu === "why-us"
-                    ? "bg-[#1A1A1A] text-white font-medium"
-                    : "text-[#3F3F42] hover:bg-[#1A1A1A] hover:text-white"
+                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "why-us"
+                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                    : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
                 >
                   <span>Why us</span>
@@ -250,46 +269,45 @@ export default function Header() {
               </nav>
             </div>
 
-            {/* User Authentication & Action */}
-            <div className="hidden md:flex items-center justify-end space-x-4">
+            {/* User Authentication & Action: 85.21px x 23.67px (Phone 23.67px, User 23.67px, Gap ~37.87px) */}
+            <div className="hidden md:flex items-center justify-end shrink-0 w-[85.21px] gap-[37.87px]">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
-                  <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                  <div className="w-[23.67px] h-[23.67px] bg-gray-200 rounded-full"></div>
                 </div>
               ) : (
                 <>
-
                   {/* Call Icon */}
                   <a
                     href="tel:+1234567890"
-                    className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-center w-[23.67px] h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                     aria-label="Call us"
                   >
-                    <img src="/phone-nba.svg" alt="Call" className="w-6 h-6" />
+                    <img src="/phone-nba.svg" alt="Call" className="w-[23.67px] h-[23.67px]" />
                   </a>
 
                   {/* Profile Icon */}
                   {user ? (
-                    <div className="relative">
+                    <div className="relative flex items-center shrink-0">
                       <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                        className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors overflow-hidden shrink-0"
+                        className="flex items-center justify-center w-[23.67px] h-[23.67px] rounded-full overflow-hidden shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                         aria-label="User profile"
                       >
                         {user.avatar || user.photo ? (
                           <img
                             src={user.avatar || user.photo}
                             alt={user.name || "Profile"}
-                            className="w-[34px] h-[34px] object-cover rounded-full border border-black/25"
+                            className="w-[23.67px] h-[23.67px] object-cover rounded-full border border-black/25"
                           />
                         ) : (
-                          <img src="/user-nba.svg" alt="Profile" className="w-6 h-6" />
+                          <img src="/user-nba.svg" alt="Profile" className="w-[23.67px] h-[23.67px]" />
                         )}
                       </button>
 
                       {/* User Dropdown */}
                       {isUserMenuOpen && (
-                        <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-10 font-sans">
+                        <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50 font-sans">
                           <div className="px-5 py-3 border-b border-gray-100 mb-2">
                             <p className="text-sm font-bold text-[#3F3F42]">
                               {user.name}
@@ -349,29 +367,26 @@ export default function Header() {
                   ) : (
                     <Link
                       href="/auth/login"
-                      className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-center w-[23.67px] h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                       aria-label="Sign in"
                     >
-                      <img src="/user-nba.svg" alt="Profile" className="w-6 h-6" />
+                      <img src="/user-nba.svg" alt="Profile" className="w-[23.67px] h-[23.67px]" />
                     </Link>
                   )}
                 </>
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden">
+            {/* Mobile Menu Button: 35.05px x 20.62px */}
+            <div className="flex md:hidden items-center justify-center w-[35.05px] h-[20.62px] shrink-0">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-[#3F3F42] hover:text-[#3F3F42] transition-colors"
+                type="button"
+                aria-label="Menu"
+                className="w-full h-full flex flex-col justify-between items-stretch py-[1.5px] cursor-pointer focus:outline-none select-none"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  {isMenuOpen ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  )}
-                </svg>
+                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
               </button>
             </div>
           </div>

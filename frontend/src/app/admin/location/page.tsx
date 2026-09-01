@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 // --- Types ---
 interface Continent {
@@ -10,6 +11,7 @@ interface Continent {
     _id: string; // Handle both id and _id from backend
     name: string;
     slug: string;
+    icon?: string;
     image?: string;
     description?: string;
     countries: Country[];
@@ -78,6 +80,8 @@ export default function LocationPage() {
 
     // Form State
     const [newContinentName, setNewContinentName] = useState("");
+    const [newContinentIcon, setNewContinentIcon] = useState("");
+    const [showContinentIconPicker, setShowContinentIconPicker] = useState(false);
     const [newCountryData, setNewCountryData] = useState({
         name: "",
         code: "",
@@ -157,12 +161,16 @@ export default function LocationPage() {
             const res = await fetch(`${api.baseURL}/continents`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: newContinentName }),
+                body: JSON.stringify({
+                    name: newContinentName.trim(),
+                    icon: newContinentIcon.trim() || undefined,
+                }),
                 credentials: "include",
             });
             const data = await res.json();
             if (data.status === "success") {
                 setNewContinentName("");
+                setNewContinentIcon("");
                 setIsContinentModalOpen(false);
                 fetchContinents();
             } else {
@@ -446,11 +454,15 @@ export default function LocationPage() {
                                     onClick={() => toggleContinent(continent.id || continent._id)}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center flex-shrink-0">
-                                            <svg className="w-5 h-5 text-zinc-650" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" strokeWidth={2} />
-                                                <path strokeWidth={2} d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10" />
-                                            </svg>
+                                        <div className="w-10 h-10 bg-zinc-100 border border-zinc-200 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            {continent.icon ? (
+                                                <img src={continent.icon} alt={continent.name} className="w-full h-full object-contain p-1" />
+                                            ) : (
+                                                <svg className="w-5 h-5 text-zinc-650" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                                                    <path strokeWidth={2} d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10" />
+                                                </svg>
+                                            )}
                                         </div>
                                         <div>
                                             <h3 className="text-sm font-semibold text-zinc-800 flex items-center gap-2">
@@ -688,7 +700,7 @@ export default function LocationPage() {
                     <div className="bg-white rounded-md shadow-lg border border-gray-200 w-full max-w-md overflow-hidden transform transition-all scale-100">
                         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <h2 className="text-lg font-bold text-zinc-800">Add New Continent</h2>
-                            <button onClick={() => setIsContinentModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => { setIsContinentModalOpen(false); setNewContinentIcon(""); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -704,10 +716,43 @@ export default function LocationPage() {
                                     placeholder="e.g. Asia"
                                 />
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Continent Icon</label>
+                                <div className="flex items-center gap-3">
+                                    {newContinentIcon ? (
+                                        <div className="relative w-12 h-12 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 group">
+                                            <img src={newContinentIcon} alt="Icon Preview" className="w-full h-full object-contain p-1" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewContinentIcon("")}
+                                                className="absolute inset-0 bg-black/50 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ) : null}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowContinentIconPicker(true)}
+                                        className="px-3 py-2 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md transition text-xs font-medium shadow-sm cursor-pointer"
+                                    >
+                                        {newContinentIcon ? "Change Icon" : "Select / Upload Icon"}
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={newContinentIcon}
+                                    onChange={(e) => setNewContinentIcon(e.target.value)}
+                                    className="w-full mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-xs focus:outline-none focus:border-zinc-400 transition placeholder:text-gray-400 text-zinc-700"
+                                    placeholder="Or paste icon image URL..."
+                                />
+                            </div>
+
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                                 <button
                                     type="button"
-                                    onClick={() => setIsContinentModalOpen(false)}
+                                    onClick={() => { setIsContinentModalOpen(false); setNewContinentIcon(""); }}
                                     className="px-4 py-2 border border-gray-300 text-zinc-700 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm"
                                 >
                                     Cancel
@@ -748,14 +793,14 @@ export default function LocationPage() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-zinc-700 mb-1">Country Code (2 chars)</label>
+                                    <label className="block text-sm font-medium text-zinc-700 mb-1">Country Code (ISO)</label>
                                     <input
                                         type="text"
-                                        maxLength={2}
                                         value={newCountryData.code}
                                         onChange={(e) => setNewCountryData({ ...newCountryData, code: e.target.value.toUpperCase() })}
-                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm uppercase text-zinc-800"
+                                        className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:border-zinc-500 transition shadow-sm uppercase placeholder:normal-case placeholder:text-gray-400 text-zinc-800"
                                         placeholder="e.g. JP"
+                                        maxLength={3}
                                     />
                                 </div>
                             </div>

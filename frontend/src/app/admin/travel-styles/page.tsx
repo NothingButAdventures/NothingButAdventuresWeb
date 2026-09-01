@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 interface TravelStyle {
     _id: string;
@@ -25,6 +26,8 @@ export default function TravelStylesPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newStyleName, setNewStyleName] = useState("");
     const [newShortDescription, setNewShortDescription] = useState("");
+    const [newIcon, setNewIcon] = useState("");
+    const [showIconPicker, setShowIconPicker] = useState(false);
     const [newColor, setNewColor] = useState("#3B82F6");
     const [newUrl, setNewUrl] = useState("");
     const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -54,10 +57,11 @@ export default function TravelStylesPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name: newStyleName,
-                    shortDescription: newShortDescription,
+                    name: newStyleName.trim(),
+                    shortDescription: newShortDescription.trim(),
+                    icon: newIcon.trim() || undefined,
                     color: newColor,
-                    url: newUrl,
+                    url: newUrl.trim(),
                 }),
                 credentials: "include",
             });
@@ -65,6 +69,7 @@ export default function TravelStylesPage() {
             if (data.status === "success") {
                 setNewStyleName("");
                 setNewShortDescription("");
+                setNewIcon("");
                 setNewColor("#3B82F6");
                 setNewUrl("");
                 setIsModalOpen(false);
@@ -187,11 +192,11 @@ export default function TravelStylesPage() {
                     </div>
                 </div>
 
-                {/* Travel Styles List */}
+                {/* Table */}
                 {filteredStyles.length === 0 ? (
                     <div className="bg-white rounded-md border border-gray-200 p-12 text-center shadow-sm">
                         <svg
-                          className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                          className="w-12 h-12 text-gray-400 mx-auto mb-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -246,11 +251,11 @@ export default function TravelStylesPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div
-                                                        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                                                        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden"
                                                         style={{ backgroundColor: style.color || '#3B82F6' }}
                                                     >
                                                         {style.icon ? (
-                                                            <img src={style.icon} alt={style.name} className="w-5 h-5" />
+                                                            <img src={style.icon} alt={style.name} className="w-6 h-6 object-contain" />
                                                         ) : (
                                                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
@@ -308,7 +313,7 @@ export default function TravelStylesPage() {
                                                     >
                                                         {deleteLoading === style._id ? (
                                                             <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10" strokeWidth="4"></circle>
                                                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                             </svg>
                                                         ) : (
@@ -334,7 +339,7 @@ export default function TravelStylesPage() {
                     <div className="bg-white rounded-md shadow-lg w-full max-w-md overflow-hidden border border-gray-200">
                         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                             <h2 className="text-lg font-bold text-zinc-800">Add Travel Style</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => { setIsModalOpen(false); setNewIcon(""); }} className="text-gray-400 hover:text-gray-600 transition-colors">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -350,6 +355,40 @@ export default function TravelStylesPage() {
                                     placeholder="e.g. Adventure, Luxury, Cultural"
                                 />
                             </div>
+
+                            {/* Icon Field */}
+                            <div>
+                                <label className="block text-sm font-medium text-zinc-700 mb-1">Travel Style Icon</label>
+                                <div className="flex items-center gap-3">
+                                    {newIcon ? (
+                                        <div className="relative w-12 h-12 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 group">
+                                            <img src={newIcon} alt="Icon Preview" className="w-full h-full object-contain p-1" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setNewIcon("")}
+                                                className="absolute inset-0 bg-black/50 text-white text-[10px] opacity-0 group-hover:opacity-100 flex items-center justify-center transition"
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ) : null}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowIconPicker(true)}
+                                        className="px-3 py-2 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md transition text-xs font-medium shadow-sm cursor-pointer"
+                                    >
+                                        {newIcon ? "Change Icon" : "Select / Upload Icon"}
+                                    </button>
+                                </div>
+                                <input
+                                    type="text"
+                                    value={newIcon}
+                                    onChange={(e) => setNewIcon(e.target.value)}
+                                    className="w-full mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-xs focus:outline-none focus:border-zinc-400 transition placeholder:text-gray-400 text-zinc-700"
+                                    placeholder="Or paste icon image URL..."
+                                />
+                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-zinc-700 mb-1">Short Description</label>
                                 <input
@@ -391,14 +430,14 @@ export default function TravelStylesPage() {
                             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => { setIsModalOpen(false); setNewIcon(""); }}
                                     className="px-4 py-2 text-zinc-700 hover:bg-gray-100 rounded-md border border-gray-300 transition-colors font-medium text-sm shadow-sm"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-zinc-900 text-white border border-zinc-900 rounded-md hover:bg-zinc-800 transition-colors font-medium text-sm shadow-sm"
+                                    className="px-6 py-2 bg-zinc-900 text-white border border-zinc-900 rounded-md hover:bg-zinc-800 transition-colors font-medium text-sm shadow-sm"
                                 >
                                     Create Travel Style
                                 </button>
@@ -407,6 +446,17 @@ export default function TravelStylesPage() {
                     </div>
                 </div>
             )}
+
+            <ImagePickerModal
+                isOpen={showIconPicker}
+                onClose={() => setShowIconPicker(false)}
+                onSelect={(urls) => {
+                    if (urls.length > 0) setNewIcon(urls[0]);
+                    setShowIconPicker(false);
+                }}
+                multiple={false}
+                folder="travel-style-images"
+            />
         </div>
     );
 }

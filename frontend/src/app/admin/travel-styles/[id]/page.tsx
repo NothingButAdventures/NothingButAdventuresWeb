@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import ImagePickerModal from "@/components/ImagePickerModal";
 
 interface TravelStyle {
   _id: string;
   name: string;
   shortDescription?: string;
+  icon?: string;
   color?: string;
   url?: string;
 }
@@ -23,6 +25,8 @@ export default function EditTravelStylePage() {
 
   const [name, setName] = useState("");
   const [shortDescription, setShortDescription] = useState("");
+  const [icon, setIcon] = useState("");
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [color, setColor] = useState("#3B82F6");
   const [url, setUrl] = useState("");
 
@@ -43,6 +47,7 @@ export default function EditTravelStylePage() {
         const style: TravelStyle = data.data.travelStyle;
         setName(style.name || "");
         setShortDescription(style.shortDescription || "");
+        setIcon(style.icon || "");
         setColor(style.color || "#3B82F6");
         setUrl(style.url || "");
       }
@@ -70,6 +75,7 @@ export default function EditTravelStylePage() {
         body: JSON.stringify({
           name: name.trim(),
           shortDescription: shortDescription.trim(),
+          icon: icon.trim() || undefined,
           color: color.trim() || "#3B82F6",
           url: url.trim(),
         }),
@@ -141,6 +147,39 @@ export default function EditTravelStylePage() {
             />
           </div>
 
+          {/* Travel Style Icon */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-zinc-700">Travel Style Icon</label>
+            <div className="flex items-center gap-4">
+              {icon ? (
+                <div className="relative w-16 h-16 rounded-md overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center shadow-sm group">
+                  <img src={icon} alt="Icon Preview" className="w-full h-full object-contain p-1.5" />
+                  <button
+                    type="button"
+                    onClick={() => setIcon("")}
+                    className="absolute inset-0 bg-zinc-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity font-medium text-xs border-none cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setShowIconPicker(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 text-zinc-700 hover:bg-gray-50 rounded-md transition shadow-sm text-xs font-semibold cursor-pointer"
+              >
+                {icon ? "Change Icon" : "Select/Upload Icon"}
+              </button>
+            </div>
+            <input
+              type="text"
+              value={icon}
+              onChange={(e) => setIcon(e.target.value)}
+              className="w-full mt-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-xs focus:outline-none focus:border-zinc-400 transition placeholder:text-gray-400 text-zinc-700"
+              placeholder="Or paste icon image URL..."
+            />
+          </div>
+
           <div>
             <label className="mb-1 block text-sm font-medium text-zinc-700">Short Description</label>
             <input
@@ -184,6 +223,17 @@ export default function EditTravelStylePage() {
           </div>
         </form>
       </div>
+
+      <ImagePickerModal
+        isOpen={showIconPicker}
+        onClose={() => setShowIconPicker(false)}
+        onSelect={(urls) => {
+          if (urls.length > 0) setIcon(urls[0]);
+          setShowIconPicker(false);
+        }}
+        multiple={false}
+        folder="travel-style-images"
+      />
     </div>
   );
 }

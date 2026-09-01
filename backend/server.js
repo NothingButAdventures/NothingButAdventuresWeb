@@ -37,6 +37,7 @@ const installmentRoutes = require("./routes/installmentRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
 const lifetimeDepositRoutes = require("./routes/lifetimeDepositRoutes");
 const jobRoutes = require("./routes/jobRoutes");
+const affiliateRoutes = require("./routes/affiliateRoutes");
 
 
 // Load environment variables
@@ -144,6 +145,7 @@ app.use("/api/v1/installments", installmentRoutes);
 app.use("/api/v1/hotels", hotelRoutes);
 app.use("/api/v1/lifetime-deposits", lifetimeDepositRoutes);
 app.use("/api/v1/jobs", jobRoutes);
+app.use("/api/v1/affiliates", affiliateRoutes);
 
 
 // Handle undefined routes

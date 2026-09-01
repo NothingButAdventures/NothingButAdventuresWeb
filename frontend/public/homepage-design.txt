@@ -692,7 +692,7 @@ ts30:
   fontWeight: 400
   fontSize: 20
   fills:
-    - '#254B02'
+    - '#1A1A1A'
   lineHeight: 0.87em
 style_5eb94eab:
   fontFamily: Outfit
@@ -1993,10 +1993,6 @@ COMPONENTS:
   key: b606bd8f82fa4df66686f590594aba1d0bda056d
   name: Property 1=Default
   componentSetId: 4152:1440
-4668:5707:
-  id: 4668:5707
-  key: 1eb88fa938b81c04e53617eb14cd190222d533e0
-  name: Frame 1686557537
 2486:2444:
   id: 2486:2444
   key: 8f4b405fed0ba1f043c5f738ea8ae3e5fdbd40a1
@@ -2655,20 +2651,20 @@ NODES:
           [TEXT] #5091:8220 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":84.46}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":16,"lineHeight":"23.4px","letterSpacing":"-0.0286em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="“Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”"
           [TEXT] #5091:8221 layout=layout_56d3c81c fills=fill_aaa5ba5c opacity=0.5 textStyle=style_fe1e42af text="— Amir , Founder & Lead Guide"
     [IMAGE-SVG] #5091:8222 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1000.97,"y":49.5},"dimensions":{"width":5.89,"height":9.15}} strokes=fill_658ab2fa strokeWeight=2px
-  [INSTANCE] #5091:8223 layout=layout_d72b2d8e fills=fill_658ab2fa componentId=4668:5707
-    [RECTANGLE] #I5091:8223;3295:4367 layout=layout_d72b2d8e effects={"boxShadow":"0px 1px 75px 0px rgba(0, 0, 0, 0.1)"} opacity=0.8999999761581421
-    [IMAGE-SVG] #I5091:8223;3295:4372 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1160,"y":22},"dimensions":{"width":85.21,"height":23.67}}
-    [FRAME] #I5091:8223;3295:4375 layout={"mode":"row","padding":"9px 29px","alignItems":"center","gap":"48px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":370,"y":15},"dimensions":{"height":38}} fills=fill_b051ecef borderRadius=12px
-      [TEXT] #I5091:8223;3295:4376 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Destination"
-      [TEXT] #I5091:8223;3295:4377 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Adventure"
-      [TEXT] #I5091:8223;3295:4380 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Explore by Interest"
-      [TEXT] #I5091:8223;3295:4378 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Deals"
-      [TEXT] #I5091:8223;3295:4379 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Why us"
-    [GROUP] #I5091:8223;3295:4406 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":35,"y":19},"dimensions":{"width":139,"height":31}}
-      [IMAGE-SVG] #I5091:8223;3295:4369 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":30,"height":30.49}}
-      [GROUP] #I5091:8223;3295:4381 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":38,"y":0},"dimensions":{"width":101,"height":31}} borderRadius="0px 0px 0px 0px"
-        [GROUP] #I5091:8223;3295:4382 layout=layout_1c0dd505 borderRadius="0px 0px 0px 0px"
-          [TEXT] #I5091:8223;3295:4383 layout=layout_1c0dd505 fills=["#070707"] textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":17.25613784790039,"lineHeight":"0.87em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts29}Nothing but {/ts29}\\n{ts30}Adventures.{/ts30}"
+  [FRAME] #5392:397 layout=layout_d72b2d8e fills=fill_658ab2fa
+    [RECTANGLE] #5392:398 layout=layout_d72b2d8e effects={"boxShadow":"0px 1px 75px 0px rgba(0, 0, 0, 0.1)"} opacity=0.8999999761581421
+    [IMAGE-SVG] #5392:399 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1160,"y":22},"dimensions":{"width":85.21,"height":23.67}}
+    [FRAME] #5392:402 layout={"mode":"row","padding":"9px 29px","alignItems":"center","gap":"48px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":370,"y":15},"dimensions":{"height":38}} fills=fill_b051ecef borderRadius=12px
+      [TEXT] #5392:403 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Destination"
+      [TEXT] #5392:404 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Adventure"
+      [TEXT] #5392:405 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Explore by Interest"
+      [TEXT] #5392:406 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Deals"
+      [TEXT] #5392:407 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_de5fd31a text="Why us"
+    [GROUP] #5392:408 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":35,"y":19},"dimensions":{"width":139,"height":31}}
+      [IMAGE-SVG] #5392:409 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":30,"height":30.49}}
+      [GROUP] #5392:412 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":38,"y":0},"dimensions":{"width":101,"height":31}} borderRadius="0px 0px 0px 0px"
+        [GROUP] #5392:413 layout=layout_1c0dd505 borderRadius="0px 0px 0px 0px"
+          [TEXT] #5392:414 layout=layout_1c0dd505 fills=["#070707"] textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":17.25613784790039,"lineHeight":"0.87em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts29}Nothing but {/ts29}\\n{ts30}Adventures.{/ts30}"
   [FRAME] #5091:8224 layout={"mode":"row","padding":"9px 25px","justifyContent":"center","alignItems":"center","gap":"10px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":504,"y":17},"dimensions":{"height":33}} fills=fill_aaa5ba5c borderRadius=9px
     [TEXT] #5091:8225 layout=layout_177c5efc fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":16,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Adventure"
   [GROUP] #5091:8226 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":1155,"y":848},"dimensions":{"width":90,"height":62}} borderRadius="0px 0px 0px 0px"

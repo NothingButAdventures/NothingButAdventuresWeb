@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 const GOOGLE_REDIRECT_URI = `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback`;
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -30,12 +33,23 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
+    // Check for referral code in query params or localStorage
+    const code = searchParams?.get("ref") || searchParams?.get("aff") || (typeof window !== "undefined" ? localStorage.getItem("nba_aff_code") : null);
+    if (code) {
+      const clean = code.trim().toUpperCase();
+      setReferralCode(clean);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("nba_aff_code", clean);
+        document.cookie = `nba_aff_code=${clean}; path=/; max-age=2592000; SameSite=Lax`;
+      }
+    }
+
     // Redirect if already logged in
     const token = localStorage.getItem("token");
     if (token) {
       router.push(getCallbackUrl());
     }
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +63,11 @@ export default function RegisterPage() {
     }
 
     try {
+      const payload = {
+        ...formData,
+        affiliateCode: referralCode || undefined,
+      };
+
       const response = await fetch(
         `${api.baseURL}${api.endpoints.auth.register}`,
         {
@@ -56,7 +75,7 @@ export default function RegisterPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -115,6 +134,20 @@ export default function RegisterPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Create your account to start managing travels
           </p>
+
+          {referralCode && (
+            <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="text-xs">
+                <p className="font-bold text-emerald-800">Partner Referral Applied</p>
+                <p className="text-emerald-600">Code: <span className="font-mono font-semibold">{referralCode}</span></p>
+              </div>
+            </div>
+          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
@@ -306,5 +339,17 @@ export default function RegisterPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }

@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getTourPricing, fetchDiscountsMap } from "@/lib/discounts";
 
 export interface TourCardProps {
   tour: {
     _id: string;
     name: string;
+    title?: string;
     slug?: string;
     tourCode?: string;
     price?: {
@@ -28,7 +32,8 @@ export interface TourCardProps {
     summary?: string;
     startDates?: Array<{
       startDate?: string;
-      discount?: string;
+      discount?: any;
+      isActive?: boolean;
     }>;
     travelStyle?: any;
     rating?: number;
@@ -60,55 +65,44 @@ export interface TourCardProps {
 }
 
 export default function TourCard({ tour }: TourCardProps) {
+  const [discountsMap, setDiscountsMap] = useState<Record<
+    string,
+    number
+  > | null>(null);
+
+  useEffect(() => {
+    fetchDiscountsMap().then((map) => {
+      if (map && Object.keys(map).length > 0) {
+        setDiscountsMap(map);
+      }
+    });
+  }, []);
+
+  const tourName = tour.name || tour.title || "Tour Name";
   const primaryImage =
     tour.images?.find((img: any) => img.isPrimary) || tour.images?.[0];
   const cardImageUrl =
     tour.descriptionImage ||
     (typeof primaryImage === "string" ? primaryImage : primaryImage?.url) ||
     "/mountain_hikers.png";
-  const cardImageAlt = tour.name || "Tour Image";
+  const cardImageAlt = tourName;
 
-  const basePrice = tour.price?.amount || tour.pricing?.startingPrice || 2399;
-  const currency = tour.price?.currency || tour.pricing?.currency || "USD";
+  const {
+    basePrice,
+    discountedPrice,
+    effectiveDiscount,
+    hasDiscount,
+    displayDate,
+    currency,
+  } = getTourPricing(tour, discountsMap);
 
-  // Find highest start date discount
-  let maxStartDateDiscount = 0;
-  let highestDiscountStartDate = tour.nextDepartureDate || "";
-
-  (tour.startDates || []).forEach((sd) => {
-    const discountVal = sd.discount
-      ? parseFloat(sd.discount.replace(/[^0-9.]/g, ""))
-      : 0;
-    const validDiscount = isNaN(discountVal) ? 0 : discountVal;
-
-    if (
-      validDiscount > maxStartDateDiscount ||
-      (validDiscount === maxStartDateDiscount &&
-        highestDiscountStartDate === "")
-    ) {
-      maxStartDateDiscount = validDiscount;
-      if (sd.startDate) {
-        highestDiscountStartDate = sd.startDate;
-      }
-    }
-  });
-
-  const formattedStartDate = highestDiscountStartDate
-    ? new Date(highestDiscountStartDate).toLocaleDateString("en-US", {
+  const formattedStartDate = displayDate
+    ? new Date(displayDate).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
         year: "numeric",
       })
     : "Aug 29, 2026";
-
-  const effectiveDiscount = Math.max(
-    tour.price?.discountPercent || 10,
-    maxStartDateDiscount,
-  );
-  const hasDiscount = effectiveDiscount > 0;
-  const discountedPrice = hasDiscount
-    ? basePrice * (1 - effectiveDiscount / 100)
-    : basePrice;
 
   // Location text (Non-hovered: destinations count, Hovered: route e.g. Delhi to Jaipur)
   const startCity =
@@ -123,18 +117,22 @@ export default function TourCard({ tour }: TourCardProps) {
   const physicalPercent = (physicalLevel / physicalMax) * 100;
   const physicalLabels: Record<number, string> = {
     1: "Easy",
-    2: "Moderate",
-    3: "Challenging",
+    2: "Light",
+    3: "Average",
     4: "Demanding",
-    5: "Extreme",
+    5: "Challenging",
   };
-  const physicalLabel = `${physicalLevel}/${physicalMax} ${physicalLabels[physicalLevel] || "Demanding"}`;
+  const ratingName =
+    (tour.physicalRating as any)?.name ||
+    physicalLabels[physicalLevel] ||
+    "Demanding";
+  const physicalLabel = `${physicalLevel}/${physicalMax} ${ratingName}`;
 
   // Age requirement
   const ageMin = tour.ageRequirement?.min ?? 20;
   const ageMax = tour.ageRequirement?.max ?? 99;
   const ageText =
-    ageMax >= 99 ? `${ageMin}+ Years Old` : `${ageMin}-${ageMax} Years Old`;
+    ageMax >= 99 ? `${ageMin}+ Years` : `${ageMin}-${ageMax} Years`;
   const agePercent = Math.min(((ageMax - ageMin) / 80) * 100, 75);
 
   // Group size
@@ -186,7 +184,7 @@ export default function TourCard({ tour }: TourCardProps) {
         <div className="p-3.5 sm:p-4 flex flex-col grow bg-white">
           {/* Title (#5091:7509) */}
           <h3 className="text-[16px] font-medium text-[#1A1A1A] leading-[22px] line-clamp-1 mb-2 font-outfit">
-            {tour.name}
+            {tourName}
           </h3>
 
           {/* Row 1: Duration & Price (#5091:7511) */}
@@ -255,13 +253,21 @@ export default function TourCard({ tour }: TourCardProps) {
                 on {formattedStartDate}
               </span>
               <span className="hidden group-hover/card:block text-[12px]">
-                <span className="text-[#1A1A1A] font-light">Reg. Price </span>
-                <span className="line-through text-[#1A1A1A]">
-                  ${basePrice.toLocaleString()}
-                </span>
-                {hasDiscount && (
-                  <span className="text-[#FF8F5F] font-normal ml-1">
-                    -{effectiveDiscount}%
+                {hasDiscount ? (
+                  <>
+                    <span className="text-[#1A1A1A] font-light">
+                      Reg. Price{" "}
+                    </span>
+                    <span className="line-through text-[#1A1A1A]">
+                      ${Math.round(basePrice).toLocaleString()}
+                    </span>
+                    <span className="text-[#FF8F5F] font-normal ml-1">
+                      -{effectiveDiscount}%
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-[#1A1A1A] font-light">
+                    on {formattedStartDate}
                   </span>
                 )}
               </span>
@@ -380,7 +386,7 @@ export default function TourCard({ tour }: TourCardProps) {
                       ></div>
                     </div>
                     <span className="text-[8.5px] font-light text-[rgba(26,26,26,0.6)] font-outfit mt-0.5">
-                      {groupSize} People
+                      Max {groupSize} People
                     </span>
                   </div>
                 </div>

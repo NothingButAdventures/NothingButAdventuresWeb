@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 
 const tags = [
@@ -48,105 +50,187 @@ const tags = [
 
 export default function MeetLocalGuidesSection() {
     return (
-        <section className="mx-auto mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-16">
-
-            {/* Top Header Section aligned to 2-column grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-end mb-10">
-                {/* Left Side: 6 Feature Pills (Aligned over Column 1) */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl">
-                    {tags.map((tag, idx) => (
-                        <div 
-                            key={idx} 
-                            className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.75)] rounded-[110px] text-[13px] sm:text-[13.5px] font-normal font-outfit transition-colors hover:bg-[rgba(26,26,26,0.08)] whitespace-nowrap"
-                        >
-                            <span className="text-[#254B02] shrink-0">{tag.icon}</span>
-                            <span className="truncate">{tag.label}</span>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Right Side: Heading (#5091:8213) */}
-                <h2 className="text-3xl sm:text-4xl md:text-[44px] lg:text-[54px] font-normal leading-tight text-[#1A1A1A] tracking-tight font-outfit text-left">
+        <section className="w-full relative font-outfit mt-8 sm:mt-10 xl:mt-[56px] mb-12 sm:mb-20">
+            {/* Mobile View (#5640:5744, #5640:5745, #5640:5753, #5640:5754) */}
+            <div className="block lg:hidden w-full max-w-[359px] mx-auto">
+                {/* Title (#5640:5744) */}
+                <h2 className="text-[30px] font-normal leading-tight text-[#1A1A1A] tracking-normal font-outfit mb-4 text-left">
                     Meet Your <span className="font-gochi text-[#254B02]">Local Guides</span>
                 </h2>
-            </div>
 
-            {/* Cards Container */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-
-                {/* Left Card: Half-Image Half-Text */}
-                <div className="bg-[#F5F5F3] rounded-[24px] flex flex-col sm:flex-row overflow-hidden h-full min-h-[360px] sm:min-h-[380px] shadow-xs">
-                    {/* Image */}
-                    <div className="w-full sm:w-1/2 min-h-[280px] sm:min-h-full relative shrink-0">
-                        <img
-                            src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=3540&auto=format&fit=crop"
-                            alt="Guides smiling together"
-                            className="absolute inset-0 w-full h-full object-cover"
-                        />
-                    </div>
-
-                    {/* Text Content */}
-                    <div className="flex-1 p-6 sm:p-8 md:p-9 flex flex-col justify-between font-outfit">
-                        <div>
-                            <h3 className="text-lg sm:text-xl font-semibold text-[#1A1A1A] mb-3 leading-snug">
-                                Step inside a journey guided by passion and experience
-                            </h3>
-                            <p className="text-sm sm:text-base text-gray-500 font-normal leading-relaxed mb-6">
-                                Each tour is led by people who know every dune, story, and sunrise of AlUla guides who turn every route into a journey worth remembering.
-                            </p>
-                        </div>
-
-                        {/* Social Media Circular Buttons */}
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-[#E4E4E7] text-[#52525B] flex items-center justify-center text-xs hover:bg-[#D4D4D8] transition-colors cursor-pointer" aria-label="Facebook">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                            </div>
-                            <div className="w-7 h-7 rounded-full bg-[#E4E4E7] text-[#52525B] flex items-center justify-center text-xs hover:bg-[#D4D4D8] transition-colors cursor-pointer" aria-label="Instagram">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-                            </div>
-                            <div className="w-7 h-7 rounded-full bg-[#E4E4E7] text-[#52525B] flex items-center justify-center text-xs hover:bg-[#D4D4D8] transition-colors cursor-pointer" aria-label="Twitter">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                            </div>
-                            <div className="w-7 h-7 rounded-full bg-[#E4E4E7] text-[#52525B] flex items-center justify-center text-xs hover:bg-[#D4D4D8] transition-colors cursor-pointer" aria-label="YouTube">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Card: Guide Profile Card */}
-                <div className="bg-white rounded-[24px] flex flex-col sm:flex-row items-center gap-6 p-4 sm:p-0 h-full min-h-[360px] sm:min-h-[380px]">
-                    <div className="w-full sm:w-1/2 min-h-[280px] sm:min-h-full rounded-[24px] overflow-hidden relative shrink-0 bg-gray-900 group shadow-xs">
+                {/* Top Split Section: Guide Photo (Left) + Quote Block (Right) (#5640:5753 & #5640:5745) */}
+                <div className="flex items-center gap-3 w-full mb-4">
+                    {/* Guide Portrait Photo (#5640:5753, 155px x 155px, rounded: 8.25px) */}
+                    <div className="w-[155px] h-[155px] rounded-[8.25px] overflow-hidden relative shrink-0 bg-gray-900 shadow-xs">
                         <img
                             src="https://images.unsplash.com/photo-1620311488184-e9ed711c1109?q=80&w=3540&auto=format&fit=crop"
                             alt="Amir - Founder & Lead Guide"
-                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                            className="w-full h-full object-cover"
                         />
                         {/* Carousel Dots */}
-                        <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-1.5 z-10">
-                            <div className="w-6 h-1 rounded-full bg-white"></div>
-                            <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
-                            <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
-                            <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                            <div className="w-3.5 h-0.5 rounded-full bg-white"></div>
+                            <div className="w-1 h-0.5 rounded-full bg-white/50"></div>
+                            <div className="w-1 h-0.5 rounded-full bg-white/50"></div>
+                            <div className="w-1 h-0.5 rounded-full bg-white/50"></div>
                         </div>
-                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                     </div>
 
-                    <div className="flex-1 p-4 sm:p-8 md:p-9 flex flex-col justify-between font-outfit">
-                        <div>
-                            <div className="inline-block px-3.5 py-1 bg-[#3B5424] text-white rounded-full text-xs font-medium mb-3">
-                                400+ Local Guides
-                            </div>
-                            <p className="text-sm sm:text-base md:text-lg text-[#1A1A1A] font-normal leading-relaxed mb-4">
-                                &ldquo;Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.&rdquo;
-                            </p>
+                    {/* Right Quote Info (#5640:5745) */}
+                    <div className="flex flex-col justify-center flex-1">
+                        {/* 400+ Local Guides Badge (#5640:5748, bg: #254B02) */}
+                        <div className="inline-flex items-center justify-center w-fit px-2.5 py-0.5 bg-[#254B02] text-white rounded-[70px] text-[8.95px] font-normal mb-2 font-outfit">
+                            400+ Local Guides
                         </div>
-                        <div className="text-xs sm:text-sm text-gray-400 font-normal">
-                            — Amir , Founder & Lead Guide
-                        </div>
+                        {/* Quote Text (#5640:5751) */}
+                        <p className="text-[11.5px] text-[#1A1A1A] font-light leading-[14px] font-outfit mb-1.5">
+                            “Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”
+                        </p>
+                        {/* Author (#5640:5752) */}
+                        <p className="text-[10px] text-[#1A1A1A]/50 font-normal font-outfit">
+                            — Amir , Founder &amp; Lead Guide
+                        </p>
                     </div>
                 </div>
 
+                {/* Team Card (#5640:5755, width: 359px, bg: rgba(244, 236, 217, 0.25)) */}
+                <div className="w-full rounded-[16px] bg-[rgba(244,236,217,0.25)] p-[20px] flex flex-col gap-[18px]">
+                    {/* Large Team Image (#5640:5756, height: 310px, rounded: 16.5px) */}
+                    <div className="w-full h-[310px] rounded-[16.5px] overflow-hidden relative bg-gray-900 shadow-xs">
+                        <img
+                            src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=3540&auto=format&fit=crop"
+                            alt="Local Guides team in desert"
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+
+                    {/* Text Block & Socials (#5640:5759) */}
+                    <div className="flex flex-col font-outfit">
+                        <h3 className="text-[20px] font-bold text-[#1A1A1A] leading-[25px] font-sans mb-2">
+                            Step inside a journey guided by passion and experience
+                        </h3>
+                        <p className="text-[13px] text-[#404040] font-normal leading-[19px] font-outfit mb-4">
+                            Each tour is led by people who know every dune, story, and sunrise of AlUla — guides who turn every route into a journey worth remembering.
+                        </p>
+
+                        {/* Social Media Circular Buttons (#5640:5767) */}
+                        <div className="flex items-center gap-[8px]">
+                            <div className="w-[26px] h-[26px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Facebook">
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            </div>
+                            <div className="w-[26px] h-[26px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Instagram">
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                            </div>
+                            <div className="w-[26px] h-[26px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="LinkedIn">
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop View (#5091:8189, hidden lg:block) */}
+            <div className="hidden lg:block">
+                {/* Top Row: Left Pills and Right Title aligned (#5091:8189) */}
+                <div className="grid grid-cols-2 gap-6 xl:gap-[24px] items-end mb-6 sm:mb-8 xl:mb-[24px]">
+                    {/* Left Side: 6 Feature Pills (#5091:8191, width: 462px) */}
+                    <div className="grid grid-cols-3 gap-2.5 max-w-[462px]">
+                        {tags.map((tag, idx) => (
+                            <div 
+                                key={idx} 
+                                className="inline-flex items-center justify-center gap-1.5 h-[28px] px-3 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.75)] rounded-[110px] text-[13px] font-normal font-outfit transition-colors hover:bg-[rgba(26,26,26,0.08)] whitespace-nowrap"
+                            >
+                                <span className="text-[#254B02] shrink-0">{tag.icon}</span>
+                                <span className="truncate">{tag.label}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Right Side: Title (#5091:8213, 54px Outfit + Gochi Hand) */}
+                    <h2 className="text-[54px] font-normal leading-[55px] text-[#1A1A1A] tracking-normal font-outfit text-left">
+                        Meet Your <span className="font-gochi text-[#254B02]">Local Guides</span>
+                    </h2>
+                </div>
+
+                {/* Cards Row: 2 Parallel Cards (#5091:8192 & #5091:8214, height: 303px) */}
+                <div className="grid grid-cols-2 gap-6 xl:gap-[24px] items-stretch">
+                    {/* Left Card (#5091:8192, 581px x 303px, bg: rgba(181,185,177,0.2)) */}
+                    <div className="bg-[rgba(181,185,177,0.2)] rounded-[12.2px] flex flex-row overflow-hidden h-[303px] shadow-xs">
+                        {/* Left Photo (#5091:8194, 307px x 303px) */}
+                        <div className="w-[307px] h-full relative shrink-0">
+                            <img
+                                src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=3540&auto=format&fit=crop"
+                                alt="Guides smiling together"
+                                className="absolute inset-0 w-full h-full object-cover rounded-l-[12.2px]"
+                            />
+                        </div>
+
+                        {/* Right Text Content (#5091:8195, #5091:8196, #5091:8197) */}
+                        <div className="flex-1 p-[24px] pl-[26px] flex flex-col justify-between font-outfit">
+                            <div>
+                                <h3 className="text-[16px] font-medium text-[#1A1A1A] mb-2 leading-[23.4px] tracking-[-0.0286em] font-outfit">
+                                    Step inside a journey guided by passion and experience
+                                </h3>
+                                <p className="text-[12px] text-[#1A1A1A]/80 font-normal leading-[20px] tracking-[-0.0381em] font-outfit mb-4">
+                                    Each tour is led by people who know every dune, story, and sunrise of AlUla guides who turn every route into a journey worth remembering.
+                                </p>
+                            </div>
+
+                            {/* Social Media Circular Buttons */}
+                            <div className="flex items-center gap-[9px]">
+                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Facebook">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                </div>
+                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Instagram">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                </div>
+                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Twitter">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </div>
+                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="YouTube">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Card: Guide Profile Card (#5091:8214, 581px x 303px, bg: white) */}
+                    <div className="bg-white rounded-[12.2px] flex flex-row items-stretch h-[303px] border border-[rgba(26,26,26,0.06)] shadow-xs overflow-hidden">
+                        {/* Left Guide Photo */}
+                        <div className="w-[280px] h-full relative shrink-0 bg-gray-900 group">
+                            <img
+                                src="https://images.unsplash.com/photo-1620311488184-e9ed711c1109?q=80&w=3540&auto=format&fit=crop"
+                                alt="Amir - Founder & Lead Guide"
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                            />
+                            {/* Carousel Dots */}
+                            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                                <div className="w-5 h-1 rounded-full bg-white"></div>
+                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
+                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
+                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
+                            </div>
+                            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                        </div>
+
+                        {/* Right Quote Content */}
+                        <div className="flex-1 p-[24px] pl-[26px] flex flex-col justify-between font-outfit">
+                            <div>
+                                <div className="inline-flex items-center justify-center w-[152px] h-[24.4px] bg-[#254B02] text-white rounded-[111px] text-[14px] font-normal mb-3 font-outfit">
+                                    400+ Local Guides
+                                </div>
+                                <p className="text-[16px] text-[#1A1A1A] font-normal leading-[23.4px] tracking-[-0.0286em] font-outfit mb-4">
+                                    “Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[12px] text-[#1A1A1A]/50 font-normal leading-[23.4px] tracking-[-0.0381em] font-outfit">
+                                    — Amir , Founder &amp; Lead Guide
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     );

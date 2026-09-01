@@ -229,6 +229,14 @@ const createBooking = catchAsync(async (req, res, next) => {
     console.error('Failed to update abandoned checkout status:', err.message);
   }
 
+  // Attribute booking to affiliate if referral cookie is present
+  try {
+    const { attributeBookingToAffiliate } = require('../controllers/affiliateController');
+    await attributeBookingToAffiliate(req, newBooking, remainingTotalPrice || totalPrice);
+  } catch (err) {
+    console.error('Failed to attribute booking to affiliate:', err.message);
+  }
+
   res.status(201).json({
     status: 'success',
     data: {

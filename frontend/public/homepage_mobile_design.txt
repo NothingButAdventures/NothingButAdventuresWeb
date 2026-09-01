@@ -1,0 +1,2828 @@
+NAME: "Nothing but Adventures UI"
+
+GLOBAL_VARS:
+fill_658ab2fa:
+  - '#FFFFFF'
+fill_dbe29f28:
+  - rgba(255, 255, 255, 0.1)
+fill_97d170e1: []
+layout_177c5efc:
+  mode: none
+  sizing:
+    horizontal: hug
+    vertical: hug
+style_ef717568:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 42
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+ts1:
+  fontFamily: Gochi Hand
+  fontSize: 54
+style_8a20a276:
+  fontFamily: Inter
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 13.60615348815918
+  lineHeight: 17.32px
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+effect_36f4b343:
+  boxShadow: 0px 0.8478004932403564px 21.19501304626465px 0.8478004932403564px rgba(0, 0, 0, 0.1)
+style_846e085d:
+  fontFamily: Outfit
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 13.564807891845703
+  lineHeight: 25.21px
+  letterSpacing: '-0.0298em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_aaa5ba5c:
+  - '#1A1A1A'
+ts2:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 10.173605918884277
+  fills:
+    - '#1A1A1A'
+  lineHeight: 13.56px
+ts3:
+  fontFamily: Outfit
+ts4:
+  fontFamily: Outfit
+  fontStyle: Medium
+  fontWeight: 500
+style_ec997111:
+  fontFamily: Inter
+  fontStyle: Bold
+  fontWeight: 700
+  fontSize: 13.564807891845703
+  lineHeight: 13.56px
+  letterSpacing: '-0.0393em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_ff0a8e25:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.173605918884277
+  lineHeight: 18.01px
+  letterSpacing: '-0.0133em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_80c0c03b:
+  - rgba(26, 26, 26, 0.6)
+layout_ffb66770:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: -0.27
+    y: -0.18
+  dimensions:
+    width: 37.3
+    height: 11.87
+style_6631e1c0:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 10.173605918884277
+  lineHeight: 20.42px
+  letterSpacing: '-0.0151em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+layout_5422f617:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: -0.63
+    y: -0.18
+  dimensions:
+    width: 67.82
+    height: 13.56
+layout_0b12a636:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 261.97
+    height: 261.97
+layout_52333522:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 57.65
+    height: 16.96
+layout_ec90499d:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 7.84
+    y: 5.09
+  dimensions:
+    width: 8.06
+    height: 7.67
+style_7870e604:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.173605918884277
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_46563a68:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.173605918884277
+  lineHeight: 20.42px
+  letterSpacing: '-0.0151em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+ts5:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fills:
+    - '#1A1A1A'
+ts6:
+  fontFamily: Outfit
+  fills:
+    - '#1A1A1A'
+ts7:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.173605918884277
+  fills:
+    - '#1A1A1A'
+ts8:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+ts9:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fills:
+    - '#FF8F5F'
+style_2cffcadf:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 10.173605918884277
+  lineHeight: 20.42px
+  letterSpacing: '-0.0151em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_b67c7c8f:
+  - rgba(26, 26, 26, 0.05)
+style_b0832c5c:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 8.478004455566406
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_ec33f0e5:
+  - rgba(26, 26, 26, 0.7)
+style_cf430df2:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 6.782403945922852
+  lineHeight: 18.01px
+  letterSpacing: '-0.02em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_9167ab6e:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 8.478004455566406
+  lineHeight: 18.01px
+  letterSpacing: '-0.016em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_401225fc:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 261.97
+    height: 218.73
+ts10:
+  fontFamily: Outfit
+  fontStyle: SemiBold
+  fontWeight: 600
+  fontSize: 16.956008911132812
+ts11:
+  fontFamily: Outfit
+  fontSize: 16.956008911132812
+ts12:
+  fills:
+    - '#1A1A1A'
+ts13:
+  fontFamily: Gochi Hand
+  fontSize: 16
+  fills:
+    - '#254B02'
+ts14:
+  fontSize: 28
+  lineHeight: 36px
+style_d4cdfa94:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 12.64302921295166
+  textAlignHorizontal: CENTER
+  textAlignVertical: TOP
+style_9618600f:
+  fontFamily: Outfit
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 8.850120544433594
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_f70c5df6:
+  - '#F4F4F4'
+fill_d30b0c65:
+  - '#254B02'
+ts15:
+  fontFamily: Outfit
+  fontSize: 37.29693603515625
+  fills:
+    - '#FFFFFF'
+ts16:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+fill_488bcf6b:
+  - rgba(26, 26, 26, 0.55)
+ts17:
+  fontFamily: Gochi Hand
+  fills:
+    - '#254B02'
+layout_a8cb3ba2:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 238.07
+    height: 331.65
+layout_e29a4f1b:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 18.06
+    y: 281.58
+  dimensions:
+    width: 124.78
+    height: 18.06
+style_b7319ff9:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 13.134851455688477
+  lineHeight: 31.2px
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+style_b6722161:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 9.851139068603516
+  lineHeight: 31.2px
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+layout_0c745b45:
+  mode: none
+  sizing:
+    horizontal: fixed
+    vertical: fixed
+  dimensions:
+    width: 46.05
+    height: 15.35
+style_9fe871e2:
+  fontFamily: Outfit
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 8.953243255615234
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_3b036990:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 30.34326934814453
+  lineHeight: 34.74px
+  letterSpacing: 0.0078em
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+ts18:
+  fontStyle: Medium
+style_3348a064:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 16
+  lineHeight: 16.79px
+  letterSpacing: '-0.019em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_4a235dcb:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 14.924574851989746
+  lineHeight: 24.68px
+  letterSpacing: '-0.0286em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_8a5386e8:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 360.77
+    height: 376.23
+layout_f26c899f:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 360.77
+    height: 231.92
+fill_6bd82927:
+  - '#121212'
+layout_56d3c81c:
+  mode: none
+  sizing:
+    horizontal: fill
+    vertical: hug
+style_27b740bd:
+  fontFamily: Inter
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 13.70923137664795
+  lineHeight: 17.32px
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+fill_2908d49d:
+  - '#F4F5F3'
+layout_3757355f:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 46.38
+    height: 46.38
+style_9251475f:
+  fontFamily: Inter
+  fontStyle: Medium
+  fontWeight: 500
+  fontSize: 15.564616203308105
+  lineHeight: 21.44px
+  letterSpacing: '-0.0318em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+ts19:
+  fontFamily: Gochi Hand
+layout_617da2ef:
+  mode: none
+  sizing:
+    horizontal: fill
+    vertical: fill
+ts20:
+  fontFamily: Gochi Hand
+  fills:
+    - rgba(37, 75, 2, 0.8)
+ts21:
+  fontStyle: Regular
+  fills:
+    - '#1A1A1A'
+style_e11196f0:
+  fontFamily: Outfit
+  fontStyle: Light
+  fontWeight: 300
+  fontSize: 10.114422798156738
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_0977250c:
+  - rgba(26, 26, 26, 0.24)
+style_7bf183f0:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 20.228845596313477
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+style_20a959cb:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 12.64302921295166
+  lineHeight: 14.55px
+  letterSpacing: '-0.0266em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: CENTER
+style_3d98a827:
+  fontFamily: Inter
+  fontStyle: Semi Bold
+  fontWeight: 600
+  fontSize: 9.8125
+  lineHeight: 14.72px
+  letterSpacing: '-0.0195em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+fill_7dedcf86:
+  - rgba(255, 255, 255, 0.8)
+style_4a7ba6b8:
+  fontFamily: Inter
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 9.8125
+  lineHeight: 14.72px
+  letterSpacing: '-0.0195em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_f2693efa:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: -0.57
+  dimensions:
+    width: 72
+    height: 15
+style_b42a97c8:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 9.8125
+  lineHeight: 14.72px
+  letterSpacing: '-0.0195em'
+  textAlignHorizontal: LEFT
+  textAlignVertical: TOP
+layout_855934ea:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: -0.57
+  dimensions:
+    width: 45
+    height: 15
+layout_e39f873f:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: -0.57
+  dimensions:
+    width: 38
+    height: 15
+layout_18c0ca3f:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 176.01
+    height: 58
+ts22:
+  fontFamily: Outfit
+  fontStyle: SemiBold
+  fontWeight: 600
+  fontSize: 23.878814697265625
+  fills:
+    - '#FFFFFF'
+  lineHeight: 1.01em
+ts23:
+  fontFamily: Outfit
+  fontStyle: SemiBold
+  fontWeight: 600
+  fontSize: 31.838420867919922
+  fills:
+    - '#FFFFFF'
+  lineHeight: 1.01em
+ts24:
+  fontFamily: Outfit
+  fontStyle: SemiBold
+  fontWeight: 600
+  fills:
+    - '#FFFFFF'
+  lineHeight: 1.01em
+layout_4867f824:
+  mode: none
+  sizing: {}
+  locationRelativeToParent:
+    x: 0
+    y: 0
+  dimensions:
+    width: 76.62
+    height: 23.52
+ts25:
+  fontFamily: Outfit
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 9.861563682556152
+  fills:
+    - '#1A1A1A'
+  lineHeight: 0.87em
+ts26:
+  fontFamily: Gochi Hand
+  fontStyle: Regular
+  fontWeight: 400
+  fontSize: 15.171635627746582
+  fills:
+    - '#1A1A1A'
+  lineHeight: 0.87em
+
+ELEMENTS:
+EL-3b63559e:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 16.49
+      height: 16.49
+EL-6e7b525c:
+  type: FRAME
+  layout:
+    mode: column
+    alignItems: stretch
+    sizing:
+      horizontal: hug
+      vertical: hug
+EL-c01fb21e:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    padding: 0px 0px 0.8246154189109802px
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-42a11da5:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 13.82
+    dimensions:
+      width: 1103.82
+      height: 372.18
+  borderRadius: 0px 0px 0px 0px
+EL-67173862:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 2.55
+    dimensions:
+      width: 261.97
+      height: 352.68
+  borderRadius: 0px 0px 0px 0px
+EL-7184f8e4:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 249.25
+    dimensions:
+      width: 261.97
+      height: 103.43
+  borderRadius: 0px 0px 0px 0px
+EL-0e71d6c5:
+  type: FRAME
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 261.97
+      height: 103.43
+  fills: fill_658ab2fa
+  effects: effect_36f4b343
+  borderRadius: 0px 0px 10.803128242492676px 10.803128242492676px
+EL-0d6ef563:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 235.87
+      y: 3.95
+    dimensions:
+      width: 12.55
+      height: 3.2
+  fills: fill_658ab2fa
+  strokes: fill_658ab2fa
+  strokeWeight: 1.4404170513153076px
+  strokeAlign: CENTER
+EL-9afba6c8:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 10.17
+      y: 19.5
+    dimensions:
+      width: 234.84
+      height: 26
+  text: Purani Dilli Adventure Full Name
+  textStyle: style_846e085d
+  fills: fill_aaa5ba5c
+EL-2e059b19:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 157.69
+      y: 51.72
+    dimensions:
+      width: 91
+      height: 14
+  text: '{ts2}From{/ts2}{ts3} {/ts3}{ts4}$2,399 USD{/ts4}'
+  textStyle: style_ec997111
+  fills: fill_aaa5ba5c
+EL-13ee14b6:
+  type: FRAME
+  layout:
+    mode: row
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: hug
+      vertical: fixed
+    locationRelativeToParent:
+      x: 178.04
+      y: 76.3
+    dimensions:
+      height: 13.56
+EL-e490a6c4:
+  type: TEXT
+  layout: layout_177c5efc
+  text: on Aug 29, 2026
+  textStyle: style_ff0a8e25
+  fills: fill_aaa5ba5c
+EL-7de74ddf:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 11.02
+      y: 51.72
+    dimensions:
+      width: 57.65
+      height: 13.56
+EL-289f1b13:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 11.43
+      height: 11.43
+EL-44ba0fe8:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 36.46
+      height: 11.87
+EL-9aaf4e7f:
+  type: TEXT
+  layout: layout_ffb66770
+  text: 12 Days
+  textStyle: style_6631e1c0
+  fills: fill_80c0c03b
+EL-4f8978a2:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 9.33
+      y: 76.3
+    dimensions:
+      width: 84.78
+      height: 13.56
+EL-38f99657:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 13.5
+      height: 13.5
+  componentId: 20:96
+EL-0da648f3:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 66.98
+      height: 13.56
+EL-390b4a44:
+  type: TEXT
+  layout: layout_5422f617
+  text: 3 Destinations
+  textStyle: style_6631e1c0
+  fills: fill_80c0c03b
+EL-3512010b:
+  type: GROUP
+  layout: layout_0b12a636
+  borderRadius: 0px 0px 0px 0px
+EL-71182bea:
+  type: RECTANGLE
+  layout: layout_0b12a636
+  fills:
+    - rgba(26, 26, 26, 0.15)
+    - type: IMAGE
+      imageRef: eabdb8e7e4b6b8ae987d2c7d3eff37450f101faf
+      scaleMode: STRETCH
+      objectFit: fill
+      isBackground: false
+      imageDownloadArguments:
+        needsCropping: true
+        requiresImageDimensions: false
+        cropTransform:
+          - - 1
+            - 0
+            - 0
+          - - 0
+            - 0.5741029381752014
+            - 0.00021457168622873724
+        filenameSuffix: 110c75
+  borderRadius: 10.173605918884277px 10.173605918884277px 0px 0px
+EL-230d8533:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.87
+      y: 235.69
+    dimensions:
+      width: 57.65
+      height: 16.96
+  borderRadius: 34.53403091430664px
+EL-13c004db:
+  type: FRAME
+  layout: layout_52333522
+  strokes: fill_658ab2fa
+  strokeWeight: 0.8478004932403564px
+  borderRadius: 34.53403091430664px
+EL-5be4a48e:
+  type: IMAGE-SVG
+  layout: layout_ec90499d
+  fills: fill_658ab2fa
+  borderRadius: 0px 0px 0px 0px
+EL-58470c9d:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 18.65
+      y: 2.12
+    dimensions:
+      width: 32
+      height: 13
+  text: Classic
+  textStyle: style_7870e604
+  fills: fill_658ab2fa
+EL-f5249d8c:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 280.63
+      y: 2.55
+    dimensions:
+      width: 261.97
+      height: 352.68
+  borderRadius: 0px 0px 0px 0px
+EL-f5f38d52:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 235.86
+      y: 3.95
+    dimensions:
+      width: 12.55
+      height: 3.2
+  fills: fill_658ab2fa
+  strokes: fill_658ab2fa
+  strokeWeight: 1.4404170513153076px
+  strokeAlign: CENTER
+EL-473f9dd2:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 10.16
+      y: 19.5
+    dimensions:
+      width: 234.84
+      height: 26
+  text: Purani Dilli Adventure Full Name
+  textStyle: style_846e085d
+  fills: fill_aaa5ba5c
+EL-1af5a68e:
+  type: FRAME
+  layout:
+    mode: row
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: hug
+      vertical: fixed
+    locationRelativeToParent:
+      x: 178.03
+      y: 76.3
+    dimensions:
+      height: 13.56
+EL-0966f53e:
+  type: TEXT
+  layout: layout_ffb66770
+  text: 12 Days
+  textStyle: style_46563a68
+  fills: fill_80c0c03b
+EL-bb180ebf:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 9.32
+      y: 76.3
+    dimensions:
+      width: 84.78
+      height: 13.56
+EL-79cc0808:
+  type: TEXT
+  layout: layout_5422f617
+  text: 3 Destinations
+  textStyle: style_46563a68
+  fills: fill_80c0c03b
+EL-1c44642d:
+  type: RECTANGLE
+  layout: layout_0b12a636
+  fills:
+    - rgba(26, 26, 26, 0.15)
+    - type: IMAGE
+      imageRef: 68387bd18e4621f7336f6adfc3ab85bae6efc192
+      scaleMode: STRETCH
+      objectFit: fill
+      isBackground: false
+      imageDownloadArguments:
+        needsCropping: true
+        requiresImageDimensions: false
+        cropTransform:
+          - - 1
+            - 0
+            - 0
+          - - 0
+            - 0.6657534241676331
+            - 0.00014629604993388057
+        filenameSuffix: f9ad51
+  borderRadius: 10.173605918884277px 10.173605918884277px 0px 0px
+EL-4ce1795d:
+  type: IMAGE-SVG
+  layout: layout_ec90499d
+  fills: fill_658ab2fa
+  strokes: fill_658ab2fa
+  strokeWeight: 0.5934603214263916px
+  borderRadius: 0px 0px 0px 0px
+EL-101aa8ed:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 561.25
+      y: 2.55
+    dimensions:
+      width: 261.97
+      height: 352.69
+  borderRadius: 0px 0px 0px 0px
+EL-3631f33b:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 218.73
+    dimensions:
+      width: 261.97
+      height: 133.95
+  borderRadius: 0px 0px 0px 0px
+EL-a0a35b2d:
+  type: FRAME
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 261.97
+      height: 133.95
+  fills: fill_658ab2fa
+  effects: effect_36f4b343
+  borderRadius: 0px 0px 10.803128242492676px 10.803128242492676px
+EL-2ecd68bd:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 235.86
+      y: 5.11
+    dimensions:
+      width: 12.55
+      height: 4.14
+  fills: fill_658ab2fa
+  strokes: fill_658ab2fa
+  strokeWeight: 1.4404170513153076px
+  strokeAlign: CENTER
+EL-1c660105:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 10.17
+      y: 2.55
+    dimensions:
+      width: 234.84
+      height: 26
+  text: Purani Dilli Adventure Full Name
+  textStyle: style_846e085d
+  fills: fill_aaa5ba5c
+EL-98bfe88f:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 157.69
+      y: 28.83
+    dimensions:
+      width: 91
+      height: 14
+  text: '{ts2}From{/ts2}{ts3} {/ts3}{ts4}$2,399 USD{/ts4}'
+  textStyle: style_ec997111
+  fills: fill_aaa5ba5c
+EL-4f592192:
+  type: FRAME
+  layout:
+    mode: row
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: fixed
+      vertical: hug
+    locationRelativeToParent:
+      x: 169.55
+      y: 45.78
+    dimensions:
+      width: 83.08
+EL-472ea318:
+  type: TEXT
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: hug
+    dimensions:
+      width: 84.78
+  text: '{ts5}Reg. Price{/ts5}{ts6} {/ts6}{ts7}$2,399{/ts7}{ts8} {/ts8}{ts9}-10%{/ts9}'
+  textStyle:
+    fontFamily: Inter
+    fontStyle: Bold
+    fontWeight: 700
+    fontSize: 8.478004455566406
+    lineHeight: 17.97px
+    letterSpacing: '-0.0629em'
+    textAlignHorizontal: LEFT
+    textAlignVertical: TOP
+  fills: fill_aaa5ba5c
+EL-893f46cd:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 10.17
+      y: 24.59
+    dimensions:
+      width: 57.62
+      height: 20.71
+EL-b9098d90:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 20.42
+EL-727fccbf:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0.01
+      y: 0
+    dimensions:
+      width: 37
+      height: 21
+  text: 12 Days
+  textStyle: style_2cffcadf
+  fills: fill_80c0c03b
+EL-4da79c77:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 8.48
+      y: 44.93
+    dimensions:
+      width: 112.53
+      height: 20.71
+EL-fd89dc7d:
+  type: FRAME
+  layout:
+    mode: row
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: hug
+      vertical: hug
+    locationRelativeToParent:
+      x: 0.22
+      y: 0.7
+EL-7867bd6a:
+  type: TEXT
+  layout: layout_177c5efc
+  text: Delhi to Jaipur
+  textStyle: style_ff0a8e25
+  fills: fill_80c0c03b
+EL-f5fe350e:
+  type: FRAME
+  layout:
+    mode: column
+    padding: 0.8478004932403564px 6.782403945922852px 0.8478004932403564px 0.8478004932403564px
+    justifyContent: center
+    alignItems: stretch
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 10.17
+      y: 70.37
+    dimensions:
+      width: 52.52
+      height: 14.45
+  fills: fill_b67c7c8f
+  borderRadius: 14.942702293395996px
+EL-333f67f9:
+  type: TEXT
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    position: absolute
+    locationRelativeToParent:
+      x: 8.72
+      y: 1.72
+    dimensions:
+      width: 36.88
+      height: 11.29
+  text: Bestseller
+  textStyle: style_b0832c5c
+  fills: fill_ec33f0e5
+EL-3f8c5e66:
+  type: FRAME
+  layout:
+    mode: column
+    padding: 0.8478004932403564px 6.782403945922852px
+    justifyContent: center
+    alignItems: stretch
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 66.13
+      y: 70.37
+    dimensions:
+      width: 43.24
+      height: 14.41
+  fills: fill_b67c7c8f
+  borderRadius: 14.942702293395996px
+EL-0b8da18c:
+  type: TEXT
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    position: absolute
+    locationRelativeToParent:
+      x: 7.63
+      y: 1.84
+    dimensions:
+      width: 28.83
+      height: 11.02
+  text: Wildlife
+  textStyle: style_b0832c5c
+  fills: fill_ec33f0e5
+EL-851feac1:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 1.695600986480713px 6.782403945922852px
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 115.3
+      y: 70.37
+    dimensions:
+      width: 24.59
+      height: 14.41
+  fills: fill_b67c7c8f
+  borderRadius: 14.942702293395996px
+EL-422a8b22:
+  type: TEXT
+  layout: layout_177c5efc
+  text: '+4'
+  textStyle: style_b0832c5c
+  fills: fill_ec33f0e5
+EL-62f61068:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.02
+      y: 90.71
+    dimensions:
+      width: 68.68
+      height: 38.34
+EL-555e6650:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.88
+      y: 20.34
+    dimensions:
+      width: 46.63
+      height: 18
+  text: 4/5 Demanding
+  textStyle: style_cf430df2
+  fills: fill_80c0c03b
+EL-0944cc2f:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 66.8
+      height: 18
+EL-faaa1e53:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.13
+      y: 0
+    dimensions:
+      width: 55.66
+      height: 18
+  text: Physical Rating
+  textStyle: style_9167ab6e
+  fills: fill_aaa5ba5c
+EL-85861767:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 4.87
+    dimensions:
+      width: 8.56
+      height: 8.48
+EL-7c564017:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0.85
+      y: 21.2
+    dimensions:
+      width: 67.82
+      height: 0
+  borderRadius: 0px 0px 0px 0px
+EL-08c373e3:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 98.34
+      y: 90.71
+    dimensions:
+      width: 67.83
+      height: 38.34
+EL-66acde7f:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 61.63
+      height: 18
+EL-5aed8e61:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 10.77
+      y: 0
+    dimensions:
+      width: 50.87
+      height: 18
+  text: Age Req.
+  textStyle: style_9167ab6e
+  fills: fill_aaa5ba5c
+EL-e2915083:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 12.72
+      y: 20.34
+    dimensions:
+      width: 40.69
+      height: 18
+  text: 20+ Years Old
+  textStyle: style_cf430df2
+  fills: fill_80c0c03b
+EL-83f650f4:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 21.2
+    dimensions:
+      width: 67.83
+      height: 0
+  borderRadius: 0px 0px 0px 0px
+EL-26f09a8f:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 180.58
+      y: 90.71
+    dimensions:
+      width: 68.67
+      height: 38.34
+EL-9820d6fb:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 51.38
+      height: 18
+EL-227aad6b:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.13
+      y: 0
+    dimensions:
+      width: 40.25
+      height: 18
+  text: 'Group Size '
+  textStyle: style_9167ab6e
+  fills: fill_aaa5ba5c
+EL-e91c7821:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 21.19
+      y: 20.34
+    dimensions:
+      width: 27.13
+      height: 18
+  text: 12 People
+  textStyle: style_cf430df2
+  fills: fill_80c0c03b
+EL-801ad167:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0.84
+      y: 21.2
+    dimensions:
+      width: 67.82
+      height: 0
+  borderRadius: 0px 0px 0px 0px
+EL-c3018f01:
+  type: GROUP
+  layout: layout_401225fc
+  borderRadius: 0px 0px 0px 0px
+EL-b79a8140:
+  type: RECTANGLE
+  layout: layout_401225fc
+  fills:
+    - rgba(26, 26, 26, 0.15)
+    - type: IMAGE
+      imageRef: 019f35b891f4b7515b47515467e3c1382a67086f
+      scaleMode: FILL
+      objectFit: cover
+      isBackground: false
+      imageDownloadArguments:
+        needsCropping: false
+        requiresImageDimensions: false
+  borderRadius: 10.173605918884277px 10.173605918884277px 0px 0px
+EL-f62bb76f:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.02
+      y: 192.45
+    dimensions:
+      width: 57.65
+      height: 16.96
+  borderRadius: 10.792500495910645px
+EL-69e99953:
+  type: FRAME
+  layout: layout_52333522
+  strokes: fill_658ab2fa
+  strokeWeight: 0.8478004932403564px
+  borderRadius: 10.792500495910645px
+EL-a188a505:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 18.66
+      y: 2.12
+    dimensions:
+      width: 32
+      height: 13
+  text: Classic
+  textStyle: style_7870e604
+  fills: fill_658ab2fa
+EL-913ad6f5:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 841.85
+      y: 2.55
+    dimensions:
+      width: 261.97
+      height: 352.68
+  borderRadius: 0px 0px 0px 0px
+EL-f77aeaa9:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 10.17
+      y: 21.2
+    dimensions:
+      width: 234.84
+      height: 26
+  text: Purani Dilli Adventure Full Name
+  textStyle: style_846e085d
+  fills: fill_aaa5ba5c
+EL-cf894baf:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 157.7
+      y: 51.72
+    dimensions:
+      width: 90
+      height: 14
+  text: '{ts2}From{/ts2}{ts3} {/ts3}{ts4}$2,399 USD{/ts4}{ts10} {/ts10}{ts11}   {/ts11}'
+  textStyle: style_ec997111
+  fills: fill_aaa5ba5c
+EL-4248f696:
+  type: FRAME
+  layout:
+    mode: row
+    justifyContent: center
+    alignItems: center
+    gap: 8.478004455566406px
+    sizing:
+      horizontal: hug
+      vertical: fixed
+    locationRelativeToParent:
+      x: 178.04
+      y: 77.15
+    dimensions:
+      height: 13.56
+EL-a4db7826:
+  type: TEXT
+  layout: layout_177c5efc
+  text: '{ts12}on{/ts12} Aug 29, 2026'
+  textStyle: style_ff0a8e25
+  fills: fill_aaa5ba5c
+EL-f61673a2:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 10.17
+      y: 51.72
+    dimensions:
+      width: 52.56
+      height: 13.56
+EL-2d3fcd4f:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: -0.26
+      y: 3.24
+    dimensions:
+      width: 37.3
+      height: 13.56
+  text: 12 Days
+  textStyle: style_46563a68
+  fills: fill_80c0c03b
+EL-f28b8b63:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 4.083574295043945px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 10.17
+      y: 77.15
+    dimensions:
+      width: 84.78
+      height: 13.56
+EL-af2eab43:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: -0.21
+      y: -0.14
+    dimensions:
+      width: 68
+      height: 21
+  text: 3 Destinations
+  textStyle: style_2cffcadf
+  fills: fill_80c0c03b
+EL-0da605d2:
+  type: RECTANGLE
+  layout: layout_0b12a636
+  fills:
+    - rgba(26, 26, 26, 0.15)
+    - type: IMAGE
+      imageRef: 9ded64c074f8274a55a0bbc8ba201f254ce39c96
+      scaleMode: STRETCH
+      objectFit: fill
+      isBackground: false
+      imageDownloadArguments:
+        needsCropping: true
+        requiresImageDimensions: false
+        cropTransform:
+          - - 1
+            - 0
+            - -0.000006531299732159823
+          - - 0
+            - 0.5626911520957947
+            - 0.2930019199848175
+        filenameSuffix: 5f5bfb
+  borderRadius: 10.173605918884277px 10.173605918884277px 0px 0px
+EL-ee022c1a:
+  type: GROUP
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 11.88
+      y: 235.69
+    dimensions:
+      width: 57.65
+      height: 16.96
+  borderRadius: 34.53403091430664px
+EL-0743ec6c:
+  type: RECTANGLE
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 1025.84
+      y: 0
+    dimensions:
+      width: 30.52
+      height: 372.18
+  fills: fill_658ab2fa
+EL-ca9f9fab:
+  type: GROUP
+  layout: layout_a8cb3ba2
+  borderRadius: 0px 0px 0px 0px
+EL-0dc19999:
+  type: RECTANGLE
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: 232.32
+    dimensions:
+      width: 238.07
+      height: 99.33
+  fills:
+    - type: GRADIENT_LINEAR
+      gradient: linear-gradient(180deg, rgba(0, 0, 0, 0) 12%, rgba(0, 0, 0, 1) 100%)
+  borderRadius: 0px 0px 9.851139068603516px 9.851139068603516px
+EL-5ebdf8a4:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 5.895999908447266px 11.90538501739502px
+    justifyContent: center
+    alignItems: center
+    gap: 8.503846168518066px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 154.77
+      height: 45.92
+  fills: fill_aaa5ba5c
+  borderRadius: 59.526920318603516px
+EL-c868dcf8:
+  type: TEXT
+  layout: layout_177c5efc
+  text: Plan Your Trip
+  textStyle:
+    fontFamily: Outfit
+    fontStyle: Light
+    fontWeight: 300
+    fontSize: 18.55384635925293
+    textAlignHorizontal: LEFT
+    textAlignVertical: TOP
+  fills: fill_658ab2fa
+EL-78686899:
+  type: RECTANGLE
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    position: absolute
+    locationRelativeToParent:
+      x: 1.7
+      y: 1.7
+    dimensions:
+      width: 151.37
+      height: 42.52
+  strokes: fill_658ab2fa
+  strokeWeight: 0.8503845930099487px
+  borderRadius: 21.259614944458008px
+EL-959086bb:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 17.007692337036133px 12.755768775939941px
+    justifyContent: center
+    alignItems: center
+    gap: 8.503846168518066px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 45.92
+      height: 45.92
+EL-c8b6b920:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    position: absolute
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 45.92
+      height: 45.92
+  borderRadius: 59.526920318603516px
+EL-0b4e02ab:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 10.98
+      height: 12.22
+EL-95d23f57:
+  type: ELLIPSE
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    position: absolute
+    locationRelativeToParent:
+      x: 1.7
+      y: 1.7
+    dimensions:
+      width: 42.52
+      height: 42.52
+  strokes: fill_f70c5df6
+  strokeWeight: 0.8503845930099487px
+EL-e9077466:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-dba2346a:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    padding: 0px 0px 0.8246154189109802px
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-54fb655e:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    padding: 24.738460540771484px
+    justifyContent: center
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: hug
+  fills: fill_2908d49d
+  borderRadius: 24.738460540771484px
+EL-5667aaf6:
+  type: FRAME
+  layout:
+    mode: row
+    alignItems: center
+    gap: 2.0615384578704834px
+    sizing:
+      horizontal: hug
+      vertical: hug
+EL-3b1c06fe:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 14.43
+      height: 14.43
+EL-e09f0c13:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 46.38
+      height: 46.38
+  borderRadius: 51.53845977783203px
+EL-faa8df41:
+  type: FRAME
+  layout:
+    mode: column
+    justifyContent: center
+    alignItems: stretch
+    gap: 3.0923075675964355px
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-d18398d1:
+  type: FRAME
+  layout:
+    mode: column
+    alignItems: stretch
+    sizing:
+      horizontal: fixed
+      vertical: hug
+    dimensions:
+      width: 360.77
+EL-70fbfa43:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    justifyContent: center
+    gap: 24.016921997070312px
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-11a4d0f7:
+  type: FRAME
+  layout:
+    mode: row
+    alignSelf: stretch
+    padding: 0.7215384244918823px 0px
+    justifyContent: center
+    alignItems: center
+    gap: 12.369230270385742px
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-813b5777:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 224.08
+EL-aa952488:
+  type: FRAME
+  layout:
+    mode: column
+    justifyContent: center
+    alignItems: stretch
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 43.29
+      height: 43.29
+EL-85d499b8:
+  type: IMAGE-SVG
+  layout: layout_617da2ef
+  fills:
+    - '#EDEDED'
+  borderRadius: 51.53845977783203px
+EL-c211abfd:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    justifyContent: center
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: hug
+  borderRadius: 9.94724178314209px
+EL-5041b2e5:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    padding: 14.92086410522461px
+    justifyContent: center
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 31.61
+  fills:
+    - rgba(181, 185, 177, 0.12)
+  borderRadius: 7.460432052612305px
+EL-cb992c5a:
+  type: FRAME
+  layout:
+    mode: row
+    alignSelf: stretch
+    padding: 0px 0px 0.6217026114463806px
+    justifyContent: center
+    alignItems: center
+    gap: 6.217027187347412px
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 14.55
+EL-51794897:
+  type: FRAME
+  layout:
+    mode: column
+    alignItems: stretch
+    sizing:
+      horizontal: fill
+      vertical: hug
+EL-0519c604:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 11.19
+      height: 11.19
+EL-33358002:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 14.71
+EL-acd44ef0:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: -0.57
+    dimensions:
+      width: 52
+      height: 15
+  text: Contact Us
+  textStyle: style_3d98a827
+  fills: fill_658ab2fa
+EL-5a740927:
+  type: FRAME
+  layout:
+    mode: row
+    alignSelf: stretch
+    gap: 7.353896141052246px
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 14.71
+EL-d293af73:
+  type: IMAGE-SVG
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 12.27
+      height: 12.27
+EL-7e0f1131:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 81.57
+      height: 14.71
+EL-ea7d51c9:
+  type: TEXT
+  layout:
+    mode: none
+    sizing: {}
+    locationRelativeToParent:
+      x: 0
+      y: -0.57
+    dimensions:
+      width: 82
+      height: 15
+  text: +91 123 456 7890
+  textStyle: style_4a7ba6b8
+  fills: fill_7dedcf86
+EL-542d8fd8:
+  type: FRAME
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 71.48
+      height: 14.71
+EL-daa1dbc1:
+  type: TEXT
+  layout: layout_f2693efa
+  text: New Delhi, India
+  textStyle: style_4a7ba6b8
+  fills: fill_7dedcf86
+EL-c2f730f2:
+  type: FRAME
+  layout:
+    mode: column
+    gap: 8.850120544433594px
+    sizing:
+      horizontal: fixed
+      vertical: hug
+    locationRelativeToParent:
+      x: 0.62
+      y: 0
+    dimensions:
+      width: 360.77
+EL-66b49466:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 6.184615135192871px 6.32151460647583px
+    justifyContent: center
+    alignItems: center
+    gap: 6.32151460647583px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 82.46
+      height: 17.52
+  fills: fill_b67c7c8f
+  borderRadius: 69.53665924072266px
+EL-d9303564:
+  type: TEXT
+  layout: layout_177c5efc
+  text: Recently Viewed
+  textStyle: style_9618600f
+  fills: fill_488bcf6b
+EL-9085717c:
+  type: TEXT
+  layout:
+    mode: none
+    sizing:
+      horizontal: fixed
+      vertical: hug
+    dimensions:
+      width: 360.77
+  text: Still thinking about these? \n{ts17}So are we.{/ts17}
+  textStyle:
+    fontFamily: Outfit
+    fontStyle: Regular
+    fontWeight: 400
+    fontSize: 30.34326934814453
+    textAlignHorizontal: LEFT
+    textAlignVertical: TOP
+  fills: fill_aaa5ba5c
+EL-fe55424a:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 8px 17px 8px 11px
+    justifyContent: center
+    alignItems: center
+    gap: 10px
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    locationRelativeToParent:
+      x: 0
+      y: 0
+    dimensions:
+      width: 108
+      height: 30
+  fills: fill_aaa5ba5c
+  borderRadius: 40px
+EL-8fb54e68:
+  type: TEXT
+  layout: layout_177c5efc
+  text: View All Trips
+  textStyle:
+    fontFamily: Outfit
+    fontStyle: Regular
+    fontWeight: 400
+    fontSize: 14
+    lineHeight: 14.72px
+    letterSpacing: '-0.0137em'
+    textAlignHorizontal: CENTER
+    textAlignVertical: TOP
+  fills: fill_658ab2fa
+EL-83e46646:
+  type: FRAME
+  layout:
+    mode: column
+    alignSelf: stretch
+    alignItems: stretch
+    gap: 4.904777526855469px
+    sizing:
+      horizontal: fill
+      vertical: fixed
+    dimensions:
+      height: 112.81
+EL-f8a28e3d:
+  type: FRAME
+  layout:
+    mode: row
+    padding: 0px 0.006620734930038452px 0px 0px
+    justifyContent: center
+    alignItems: center
+    sizing:
+      horizontal: fixed
+      vertical: fixed
+    dimensions:
+      width: 24.53
+      height: 24.53
+  fills: fill_dbe29f28
+  borderRadius: 14214510px
+
+COMPONENTS:
+20:96:
+  id: 20:96
+  key: 414afa18bb625498dcdabc5ee3d3f7e88285ca8d
+  name: location_on
+4152:1441:
+  id: 4152:1441
+  key: b606bd8f82fa4df66686f590594aba1d0bda056d
+  name: Property 1=Default
+  componentSetId: 4152:1440
+5091:7206:
+  id: 5091:7206
+  key: 1883a63be5924b74c6b9e45675e9677acedea0f8
+  name: Play circle
+899:454:
+  id: 899:454
+  key: 2c4df8b843f2df892944d10bf1da82214379b303
+  name: keyboard_arrow_up
+
+COMPONENT_SETS:
+4152:1440:
+  id: 4152:1440
+  key: 672c549c09f90e7d28bdc9ad29373cfe45e08174
+  name: Frame 6606
+  description: ''
+
+NODES:
+[FRAME] "Landing Page Mobile Phone" #5640:5158 layout={"mode":"none","sizing":{}} fills=fill_658ab2fa
+  [RECTANGLE] "ed65027a80e9751a36aa504460ba7694-3 1" #5640:5159 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":8,"y":74},"dimensions":{"width":386,"height":669}} fills=[{"type":"GRADIENT_LINEAR","gradient":"linear-gradient(180deg, rgba(102, 102, 102, 0) 16%, rgba(0, 0, 0, 0.6) 82%)"},{"type":"IMAGE","imageRef":"34cd47f3b5381fa0f71e4bdc35bb6f14384d0f67","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.8808420300483704,0,-0.0002487541933078319],[0,0.8505187034606934,0.1498541384935379]],"filenameSuffix":"153f9c"}}] borderRadius=16px
+  [FRAME] "Variant 1" #5640:5160 layout={"mode":"row","padding":"8.246153831481934px 16.492307662963867px","justifyContent":"center","alignItems":"center","gap":"6.184615135192871px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":28.86,"y":622.71}} fills=fill_dbe29f28 borderRadius=51.53845977783203px
+    [IMAGE-SVG] "Frame" #5640:5161 template=EL-3b63559e
+    [FRAME] "Text" #5640:5165 template=EL-6e7b525c
+      [FRAME] "Container" #5640:5166 template=EL-c01fb21e
+        [TEXT] #5640:5167 layout=layout_177c5efc fills=fill_658ab2fa textStyle={"fontFamily":"Inter","fontStyle":"Medium","fontWeight":500,"fontSize":13.29692268371582,"lineHeight":"17.32px","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Private Trips"
+  [TEXT] #5640:5168 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":28.86,"y":417.57},"dimensions":{"width":289.65,"height":106}} fills=fill_658ab2fa textStyle=style_ef717568 text="See Yourself and the world "
+  [TEXT] #5640:5169 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":28.86,"y":524},"dimensions":{"width":289.65,"height":64}} fills=fill_658ab2fa textStyle=style_ef717568 text="{ts1}Differently{/ts1}."
+  [IMAGE-SVG] #5640:5170 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":29.89,"y":599.82},"dimensions":{"width":245.32,"height":1.03}} strokes=["rgba(255, 255, 255, 0.5)"] strokeWeight=1.0307692289352417px effects={"backdropFilter":"blur(2.06px)"}
+  [FRAME] "Variant 2" #5640:5171 layout={"mode":"row","padding":"8.246153831481934px 16.492307662963867px","justifyContent":"center","alignItems":"center","gap":"6.184615135192871px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":175.23,"y":622.71}} fills=fill_dbe29f28 borderRadius=51.53845977783203px
+    [IMAGE-SVG] "Frame" #5640:5172 template=EL-3b63559e
+    [FRAME] "Text" #5640:5181 template=EL-6e7b525c
+      [FRAME] "Container" #5640:5182 template=EL-c01fb21e
+        [TEXT] #5640:5183 layout=layout_177c5efc fills=fill_658ab2fa textStyle={"fontFamily":"Inter","fontStyle":"Medium","fontWeight":500,"fontSize":13.503077507019043,"lineHeight":"17.32px","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Transport Included"
+  [FRAME] "Variant 2" #5640:5184 layout={"mode":"row","padding":"8.246153831481934px 16.492307662963867px","justifyContent":"center","alignItems":"center","gap":"6.184615135192871px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":28.86,"y":668.06}} fills=fill_dbe29f28 borderRadius=51.53845977783203px
+    [IMAGE-SVG] "Frame" #5640:5185 template=EL-3b63559e
+    [FRAME] "Text" #5640:5190 template=EL-6e7b525c
+      [FRAME] "Container" #5640:5191 template=EL-c01fb21e
+        [TEXT] #5640:5192 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_8a20a276 text="Custom Route"
+  [FRAME] #5640:5193 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":987},"dimensions":{"width":360,"height":398}}
+    [GROUP] #5640:5194 template=EL-42a11da5
+      [GROUP] #5640:5195 template=EL-67173862
+        [GROUP] #5640:5196 template=EL-7184f8e4
+          [FRAME] #5640:5197 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:5198 template=EL-0d6ef563
+            [TEXT] #5640:5199 template=EL-9afba6c8
+            [TEXT] #5640:5200 template=EL-2e059b19
+            [FRAME] "Container" #5640:5201 template=EL-13ee14b6
+              [TEXT] #5640:5202 template=EL-e490a6c4
+            [FRAME] "Container" #5640:5203 template=EL-7de74ddf
+              [IMAGE-SVG] "Icon" #5640:5204 template=EL-289f1b13
+              [FRAME] "Text" #5640:5207 template=EL-44ba0fe8
+                [TEXT] #5640:5208 template=EL-9aaf4e7f
+            [FRAME] "Container" #5640:5209 template=EL-4f8978a2
+              [IMAGE-SVG] "location_on" #5640:5210 template=EL-38f99657
+              [FRAME] "Text" #5640:5211 template=EL-0da648f3
+                [TEXT] #5640:5212 template=EL-390b4a44
+        [GROUP] #5640:5213 template=EL-3512010b
+          [RECTANGLE] "6c465b6b9bfecaf069aa2aa70c30b333 1" #5640:5214 template=EL-71182bea
+        [GROUP] #5640:5215 template=EL-230d8533
+          [FRAME] #5640:5216 template=EL-13c004db
+            [IMAGE-SVG] #5640:5217 template=EL-5be4a48e
+            [TEXT] #5640:5218 template=EL-58470c9d
+      [GROUP] #5640:5219 template=EL-f5249d8c
+        [GROUP] #5640:5220 template=EL-7184f8e4
+          [FRAME] #5640:5221 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:5222 template=EL-f5f38d52
+            [TEXT] #5640:5223 template=EL-473f9dd2
+            [TEXT] #5640:5224 template=EL-2e059b19
+            [FRAME] "Container" #5640:5225 template=EL-1af5a68e
+              [TEXT] #5640:5226 template=EL-e490a6c4
+            [FRAME] "Container" #5640:5227 template=EL-7de74ddf
+              [IMAGE-SVG] "Icon" #5640:5228 template=EL-289f1b13
+              [FRAME] "Text" #5640:5231 template=EL-44ba0fe8
+                [TEXT] #5640:5232 template=EL-0966f53e
+            [FRAME] "Container" #5640:5233 template=EL-bb180ebf
+              [IMAGE-SVG] "location_on" #5640:5234 template=EL-38f99657
+              [FRAME] "Text" #5640:5235 template=EL-0da648f3
+                [TEXT] #5640:5236 template=EL-79cc0808
+        [GROUP] #5640:5237 template=EL-3512010b
+          [RECTANGLE] "5435e97b592142f9f615253d49e4fb39 1" #5640:5238 template=EL-1c44642d
+        [GROUP] #5640:5239 template=EL-230d8533
+          [FRAME] #5640:5240 template=EL-13c004db
+            [IMAGE-SVG] #5640:5241 template=EL-4ce1795d
+            [TEXT] #5640:5242 template=EL-58470c9d
+      [GROUP] #5640:5243 template=EL-101aa8ed
+        [GROUP] #5640:5244 template=EL-3631f33b
+          [FRAME] #5640:5245 template=EL-a0a35b2d
+            [IMAGE-SVG] "Icon" #5640:5246 template=EL-2ecd68bd
+            [TEXT] #5640:5247 template=EL-1c660105
+            [TEXT] #5640:5248 template=EL-98bfe88f
+            [FRAME] "Container" #5640:5249 template=EL-4f592192
+              [TEXT] #5640:5250 template=EL-472ea318
+            [FRAME] "Container" #5640:5251 template=EL-893f46cd
+              [IMAGE-SVG] "Icon" #5640:5252 template=EL-289f1b13
+              [FRAME] "Text" #5640:5255 template=EL-b9098d90
+                [TEXT] #5640:5256 template=EL-727fccbf
+            [FRAME] "Container" #5640:5257 template=EL-4da79c77
+              [IMAGE-SVG] "location_on" #5640:5258 template=EL-38f99657
+              [FRAME] "Text" #5640:5259 template=EL-b9098d90
+                [FRAME] "Container" #5640:5260 template=EL-fd89dc7d
+                  [TEXT] #5640:5261 template=EL-7867bd6a
+            [FRAME] #5640:5262 template=EL-f5fe350e
+              [TEXT] #5640:5263 template=EL-333f67f9
+            [FRAME] #5640:5264 template=EL-3f8c5e66
+              [TEXT] #5640:5265 template=EL-0b8da18c
+            [FRAME] #5640:5266 template=EL-851feac1
+              [TEXT] #5640:5267 template=EL-422a8b22
+            [GROUP] #5640:5268 template=EL-62f61068
+              [TEXT] #5640:5269 template=EL-555e6650
+              [GROUP] #5640:5270 template=EL-0944cc2f
+                [TEXT] #5640:5271 template=EL-faaa1e53
+                [IMAGE-SVG] "Icon" #5640:5272 template=EL-85861767
+              [IMAGE-SVG] #5640:5275 template=EL-7c564017
+            [GROUP] #5640:5278 template=EL-08c373e3
+              [GROUP] #5640:5279 template=EL-66acde7f
+                [IMAGE-SVG] "Icon" #5640:5280 template=EL-85861767
+                [TEXT] #5640:5283 template=EL-5aed8e61
+              [TEXT] #5640:5284 template=EL-e2915083
+              [IMAGE-SVG] #5640:5285 template=EL-83f650f4
+            [GROUP] #5640:5288 template=EL-26f09a8f
+              [GROUP] #5640:5289 template=EL-9820d6fb
+                [IMAGE-SVG] "Icon" #5640:5290 template=EL-85861767
+                [TEXT] #5640:5293 template=EL-227aad6b
+              [TEXT] #5640:5294 template=EL-e91c7821
+              [IMAGE-SVG] #5640:5295 template=EL-801ad167
+        [GROUP] #5640:5298 template=EL-c3018f01
+          [RECTANGLE] "5435e97b592142f9f615253d49e4fb39 1" #5640:5299 template=EL-b79a8140
+        [GROUP] #5640:5300 template=EL-f62bb76f
+          [FRAME] #5640:5301 template=EL-69e99953
+            [IMAGE-SVG] #5640:5302 template=EL-4ce1795d
+            [TEXT] #5640:5303 template=EL-a188a505
+      [GROUP] #5640:5304 template=EL-913ad6f5
+        [GROUP] #5640:5305 template=EL-7184f8e4
+          [FRAME] #5640:5306 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:5307 template=EL-0d6ef563
+            [TEXT] #5640:5308 template=EL-f77aeaa9
+            [TEXT] #5640:5309 template=EL-cf894baf
+            [FRAME] "Container" #5640:5310 template=EL-4248f696
+              [TEXT] #5640:5311 template=EL-a4db7826
+            [FRAME] "Container" #5640:5312 template=EL-f61673a2
+              [IMAGE-SVG] "Icon" #5640:5313 template=EL-289f1b13
+              [FRAME] "Text" #5640:5316 template=EL-b9098d90
+                [TEXT] #5640:5317 template=EL-2d3fcd4f
+            [FRAME] "Container" #5640:5318 template=EL-f28b8b63
+              [IMAGE-SVG] "location_on" #5640:5319 template=EL-38f99657
+              [FRAME] "Text" #5640:5320 template=EL-b9098d90
+                [TEXT] #5640:5321 template=EL-af2eab43
+        [GROUP] #5640:5322 template=EL-3512010b
+          [RECTANGLE] "9b93d0c48eae5f9e522a6fadea1d90c7 2" #5640:5323 template=EL-0da605d2
+        [GROUP] #5640:5324 template=EL-ee022c1a
+          [FRAME] #5640:5325 template=EL-13c004db
+            [IMAGE-SVG] #5640:5326 template=EL-4ce1795d
+            [TEXT] #5640:5327 template=EL-58470c9d
+      [RECTANGLE] #5640:5328 template=EL-0743ec6c
+  [FRAME] "Layer_1" #5640:5329 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":240.17,"y":1446.17},"dimensions":{"width":122.39,"height":101.02}} fills=fill_97d170e1
+  [GROUP] #5640:5330 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":21,"y":1450},"dimensions":{"width":359,"height":648}} borderRadius=16px
+    [RECTANGLE] #5640:5331 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":359,"height":648}} fills=["rgba(244, 236, 217, 0.25)"] borderRadius=16px
+    [IMAGE-SVG] #5640:5332 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":26.41,"y":224.46},"dimensions":{"width":0.2,"height":336.55}} borderRadius=16px
+    [TEXT] #5640:5334 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":12.95,"y":41.74},"dimensions":{"width":338.09,"height":93}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":34.13617706298828,"textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts13}Small Group Adventures {/ts13}\\n{ts14}Changing the way you see life and Yourself{/ts14}"
+    [IMAGE-SVG] "Frame" #5640:5335 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":65.59,"y":166.74},"dimensions":{"width":109.26,"height":109.26}} fills=fill_97d170e1 borderRadius=16px
+    [TEXT] #5640:5382 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":208.86,"y":205.91},"dimensions":{"width":133,"height":32}} fills=fill_aaa5ba5c textStyle=style_d4cdfa94 text="Shared adventures with like-minded people"
+    [IMAGE-SVG] "Vector" #5640:5383 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.23,"y":215.19},"dimensions":{"width":12.01,"height":12.65}} fills=fill_aaa5ba5c borderRadius=16px
+    [IMAGE-SVG] "Vector" #5640:5384 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.23,"y":386.29},"dimensions":{"width":12.01,"height":12.65}} fills=fill_aaa5ba5c borderRadius=16px
+    [IMAGE-SVG] "Vector" #5640:5385 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.23,"y":557.4},"dimensions":{"width":12.01,"height":12.65}} fills=fill_aaa5ba5c borderRadius=16px
+    [IMAGE-SVG] #5640:5386 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":219.16,"y":341.97},"dimensions":{"width":122.39,"height":101.02}} borderRadius=16px
+    [TEXT] #5640:5433 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":64.55,"y":377.02},"dimensions":{"width":123,"height":32}} fills=fill_aaa5ba5c textStyle=style_d4cdfa94 text="1000s of experiences, over 100 countries"
+    [IMAGE-SVG] #5640:5434 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":60.43,"y":501.74},"dimensions":{"width":115.83,"height":113.79}} borderRadius=16px
+    [TEXT] #5640:5528 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":204.74,"y":547.09},"dimensions":{"width":142.23,"height":32}} fills=fill_aaa5ba5c textStyle=style_d4cdfa94 text="Creating positive change around the place you visit"
+  [FRAME] #5640:5529 layout={"mode":"column","gap":"11.338461875915527px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":21,"y":2777},"dimensions":{"width":359}}
+    [FRAME] #5640:5530 layout={"mode":"row","padding":"0px 6.32151460647583px","justifyContent":"center","alignItems":"center","gap":"6.32151460647583px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":42.99,"height":15.17}} fills=["#FF0000"] borderRadius=69.53665924072266px
+      [TEXT] #5640:5531 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_9618600f text="Sale"
+    [FRAME] #5640:5532 layout={"mode":"row","alignSelf":"stretch","justifyContent":"flex-end","alignItems":"flex-end","gap":"12.64302921295166px","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [GROUP] #5640:5533 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":204,"height":63}} borderRadius="0px 0px 0px 0px"
+        [TEXT] #5640:5534 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":185,"height":49}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":20.228845596313477,"lineHeight":"24.02px","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="The Adventure Sale is On"
+        [TEXT] #5640:5535 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":53},"dimensions":{"width":204,"height":10}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":7.585817337036133,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="New to Sale Upto 50% OFF"
+      [INSTANCE] #5640:5536 layout={"mode":"row","justifyContent":"flex-end","alignItems":"flex-end","gap":"2.5286056995391846px","sizing":{"horizontal":"fill","vertical":"hug"}} componentId=4152:1441
+        [FRAME] #I5640:5536;2951:1032 layout={"mode":"row","padding":"8.217968940734863px 8.850119590759277px","justifyContent":"center","alignItems":"center","gap":"6.321514129638672px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":115.05,"height":34.14}} fills=fill_aaa5ba5c borderRadius=44.2505989074707px
+          [TEXT] #I5640:5536;2951:1033 layout=layout_177c5efc fills=fill_658ab2fa textStyle={"fontFamily":"Avenir Next","fontStyle":"Medium","fontWeight":500,"fontSize":12.643028259277344,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Start Exploring"
+          [RECTANGLE] #I5640:5536;2951:1034 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1.27,"y":1.27},"dimensions":{"width":112.52,"height":31.61}} strokes=fill_658ab2fa strokeWeight=0.6321514248847961px borderRadius=15.80378532409668px
+        [FRAME] #I5640:5536;2951:1035 layout={"mode":"row","padding":"12.643028259277344px 9.482271194458008px","justifyContent":"center","alignItems":"center","gap":"6.321514129638672px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":34.14,"height":34.14}}
+          [IMAGE-SVG] #I5640:5536;2951:1036 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":34.14,"height":34.14}} borderRadius=44.2505989074707px
+          [IMAGE-SVG] #I5640:5536;2951:1038 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":8.16,"height":9.08}}
+          [ELLIPSE] #I5640:5536;2951:1042 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1.27,"y":1.27},"dimensions":{"width":31.61,"height":31.61}} strokes=fill_f70c5df6 strokeWeight=0.6321514248847961px
+  [GROUP] #5640:5537 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":2880.74},"dimensions":{"width":359.38,"height":82.46}} borderRadius="0px 0px 0px 0px"
+    [RECTANGLE] #5640:5538 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":359.38,"height":82.46}} fills=fill_d30b0c65 borderRadius=16px
+    [GROUP] #5640:5539 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":12.38,"y":7.26},"dimensions":{"width":334.79,"height":66}}
+      [TEXT] #5640:5540 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":197,"height":66}} fills=fill_658ab2fa textStyle={"fontFamily":"Avenir Next","fontStyle":"Medium","fontWeight":500,"fontSize":18.3323917388916,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="{ts15}50% {/ts15}\\n{ts16}Discount on new tours{/ts16}"
+      [GROUP] #5640:5541 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":309.6,"y":38.21},"dimensions":{"width":25.19,"height":25.29}}
+        [FRAME] #5640:5542 layout={"mode":"row","padding":"7.96042537689209px 5.9703192710876465px","justifyContent":"center","alignItems":"center","gap":"3.980212688446045px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":1.89,"y":1.9},"dimensions":{"width":21.41,"height":21.49}}
+          [IMAGE-SVG] #5640:5543 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":21.49,"height":21.49}} borderRadius=27.861488342285156px
+          [IMAGE-SVG] #5640:5545 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":5.14,"height":5.72}}
+        [ELLIPSE] #5640:5549 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":25.19,"height":25.29}} strokes=fill_658ab2fa strokeWeight=1.2643028497695923px
+  [GROUP] #5640:5550 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":2977.59},"dimensions":{"width":359.38,"height":177.34}} borderRadius="0px 0px 0px 0px"
+    [GROUP] #5640:5551 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":359.38,"height":177.34}} borderRadius=16px
+      [RECTANGLE] "3f751a8b0cc6870522626788d2d5b4ab 1" #5640:5552 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":359.38,"height":144.74}} fills=[{"type":"IMAGE","imageRef":"ce14e3c11426fce6fdf2139cb66fe93d899722cc","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1,0,0],[0,0.5822743773460388,0.11973923444747925]],"filenameSuffix":"5ffd79"}}] borderRadius=16px
+      [TEXT] #5640:5553 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":145.34},"dimensions":{"width":267.21,"height":32}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Light","fontWeight":300,"fontSize":12.369230270385742,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Discover beautiful routes and scenic spots across \\nAsia Region. "
+    [IMAGE-SVG] #5640:5554 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":283.79,"y":11.22},"dimensions":{"width":63.72,"height":13.4}} borderRadius="0px 0px 0px 0px"
+  [GROUP] #5640:5567 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":3235},"dimensions":{"width":359.61,"height":410}} borderRadius="0px 0px 0px 0px"
+    [FRAME] #5640:5568 layout={"mode":"column","gap":"8.850120544433594px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":1,"y":0},"dimensions":{"width":278.92,"height":56.02}}
+      [FRAME] #5640:5569 layout={"mode":"row","padding":"0px 6.32151460647583px","justifyContent":"center","alignItems":"center","gap":"6.32151460647583px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":73.33,"height":15.17}} fills=fill_b67c7c8f borderRadius=69.53665924072266px
+        [TEXT] #5640:5570 layout=layout_177c5efc fills=fill_488bcf6b textStyle=style_9618600f text="Tours Snippets"
+      [TEXT] #5640:5571 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":32}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":30.34326934814453,"lineHeight":"24.02px","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Postcards in {ts17}Motion{/ts17}"
+    [FRAME] #5640:5572 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":78},"dimensions":{"width":359,"height":332}}
+      [GROUP] #5640:5573 template=EL-ca9f9fab
+        [RECTANGLE] #5640:5574 layout=layout_a8cb3ba2 fills=[{"type":"IMAGE","imageRef":"cd72069a9fe5357094efe9bd4afb74c1ff7ffe2f","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1,0,0],[0,0.8153615593910217,0.09231922775506973]],"filenameSuffix":"52879f"}}] borderRadius=9.851139068603516px
+        [RECTANGLE] #5640:5575 template=EL-0dc19999
+        [TEXT] #5640:5576 layout=layout_e29a4f1b fills=fill_658ab2fa textStyle=style_b7319ff9 text="Desert Safari"
+        [TEXT] #5640:5577 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":18.06,"y":293.07},"dimensions":{"width":122,"height":32}} fills=fill_658ab2fa opacity=0.6000000238418579 textStyle=style_b6722161 text="100+ successful planed trips"
+        [IMAGE-SVG] #5640:5578 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":6.67,"y":7.48},"dimensions":{"width":224.11,"height":0}} strokes=fill_658ab2fa strokeWeight=2.462784767150879px
+        [IMAGE-SVG] #5640:5579 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":6.67,"y":7.48},"dimensions":{"width":96.87,"height":0}} strokes=["#545454"] strokeWeight=2.462784767150879px
+      [GROUP] #5640:5580 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":253.98,"y":0},"dimensions":{"width":238.07,"height":331.65}} borderRadius="0px 0px 0px 0px"
+        [GROUP] #5640:5581 template=EL-ca9f9fab
+          [RECTANGLE] #5640:5582 layout=layout_a8cb3ba2 fills=[{"type":"IMAGE","imageRef":"c8ea746a422556e505239297ce8ef95e4c0f679e","scaleMode":"FILL","objectFit":"cover","isBackground":false,"imageDownloadArguments":{"needsCropping":false,"requiresImageDimensions":false}}] borderRadius=9.851139068603516px
+          [RECTANGLE] #5640:5583 template=EL-0dc19999
+          [TEXT] #5640:5584 layout=layout_e29a4f1b fills=fill_658ab2fa textStyle=style_b7319ff9 text="K2 Treck"
+          [TEXT] #5640:5585 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":18.06,"y":293.07},"dimensions":{"width":118,"height":32}} fills=fill_658ab2fa opacity=0.6000000238418579 textStyle=style_b6722161 text="40+ successful planed trips"
+        [ELLIPSE] #5640:5586 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":83.73,"y":122.31},"dimensions":{"width":70.6,"height":70.6}} fills=["rgba(26, 26, 26, 0.4)"]
+        [IMAGE-SVG] "Play circle" #5640:5587 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":75.52,"y":114.11},"dimensions":{"width":87.02,"height":87.02}} fills=fill_97d170e1 componentId=5091:7206
+    [IMAGE-SVG] #5640:5588 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":298.85,"y":28},"dimensions":{"width":60.76,"height":28}} borderRadius="0px 0px 0px 0px"
+  [FRAME] #5640:5600 layout={"mode":"column","gap":"10px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":22,"y":3715},"dimensions":{"width":358}}
+    [FRAME] #5640:5601 layout=layout_0c745b45
+      [FRAME] #5640:5602 layout={"mode":"row","padding":"0px 6.395174503326416px","justifyContent":"center","alignItems":"center","gap":"6.395174503326416px","sizing":{"horizontal":"hug","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"height":15.35}} fills=fill_b67c7c8f borderRadius=70.34690856933594px
+        [TEXT] #5640:5603 layout=layout_177c5efc fills=fill_488bcf6b textStyle=style_9fe871e2 text="Testimonials"
+    [FRAME] #5640:5604 layout={"mode":"column","alignSelf":"stretch","justifyContent":"flex-end","alignItems":"flex-end","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [TEXT] #5640:5605 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_3b036990 text="What travellers say about \\n{ts17}our tours{/ts17}"
+      [TEXT] #5640:5606 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"hug"},"dimensions":{"width":182.04}} fills=fill_d30b0c65 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":10.114422798156738,"lineHeight":"15.44px","letterSpacing":"-0.0286em","textAlignHorizontal":"RIGHT","textAlignVertical":"TOP"} text="Enjoy journey we organise is built on trust, safety and unforgettable views"
+  [GROUP] #5640:5607 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":3879},"dimensions":{"width":360,"height":368}} borderRadius="0px 0px 0px 0px"
+    [RECTANGLE] #5640:5608 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":360,"height":368}} fills=["rgba(181, 185, 177, 0.15)"] borderRadius=16px
+    [INSTANCE] #5640:5609 layout={"mode":"row","alignItems":"center","gap":"3.401538372039795px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":31.89,"y":281.22}} componentId=4152:1441
+      [FRAME] #I5640:5609;2951:1032 template=EL-5ebdf8a4
+        [TEXT] #I5640:5609;2951:1033 template=EL-c868dcf8
+        [RECTANGLE] #I5640:5609;2951:1034 template=EL-78686899
+      [FRAME] #I5640:5609;2951:1035 template=EL-959086bb
+        [IMAGE-SVG] #I5640:5609;2951:1036 template=EL-c8b6b920
+        [IMAGE-SVG] #I5640:5609;2951:1038 template=EL-0b4e02ab
+        [ELLIPSE] #I5640:5609;2951:1042 template=EL-95d23f57
+    [TEXT] #5640:5610 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":31.7,"y":110},"dimensions":{"width":175,"height":17}} fills=fill_aaa5ba5c opacity=0.6000000238418579 textStyle=style_3348a064 boldWeight=500 text="{ts18}**✓**{/ts18}  Verified & Trusted Trips"
+    [TEXT] #5640:5611 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":31.7,"y":141.72},"dimensions":{"width":186,"height":17}} fills=fill_aaa5ba5c opacity=0.6000000238418579 textStyle=style_3348a064 boldWeight=500 text="{ts18}**✓**{/ts18}  Flexible Booking Options"
+    [TEXT] #5640:5612 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":31.7,"y":173.43},"dimensions":{"width":221,"height":17}} fills=fill_aaa5ba5c opacity=0.6000000238418579 textStyle=style_3348a064 boldWeight=500 text="{ts18}**✓**{/ts18}  Real Experiences, Real People"
+    [TEXT] #5640:5613 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":145.51,"y":35.45},"dimensions":{"width":186.99,"height":50}} fills=fill_aaa5ba5c textStyle=style_4a235dcb text="Based on 280+ verified \\ntravlers"
+    [TEXT] #5640:5614 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":31.7,"y":211.55},"dimensions":{"width":300.36,"height":50}} fills=fill_aaa5ba5c textStyle=style_4a235dcb text="Ready to plan your own journey? Let’s get started!"
+    [TEXT] #5640:5615 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":31.42,"y":33.22},"dimensions":{"width":62,"height":55}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":44.77372360229492,"lineHeight":"54.1px","letterSpacing":"0.0083em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="4.9"
+    [TEXT] #5640:5616 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":97,"y":55.96},"dimensions":{"width":21,"height":23}} fills=fill_aaa5ba5c opacity=0.4000000059604645 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":22.38686180114746,"lineHeight":"22.36px","letterSpacing":"0.0068em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="/5"
+  [FRAME] "Main Testimonial" #5640:5617 layout={"mode":"column","padding":"24.738460540771484px 21.739999771118164px 24.738460540771484px 18.739999771118164px","justifyContent":"flex-end","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":21,"y":4271},"dimensions":{"width":360,"height":376}} borderRadius=16px
+    [FRAME] "Figure - Image (Replace Here)" #5640:5618 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":0,"y":-0.02},"dimensions":{"width":360.77,"height":376.23}}
+      [FRAME] "Traveler sitting on desert rocks during the Desert Sky tour in AlUla, smiling and holding binoculars." #5640:5619 layout=layout_8a5386e8 fills=[{"type":"IMAGE","imageRef":"8e4e57b9caf75d3694fd7f855f4f2b0ae68ebe02","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1,0,0],[0,0.8687081336975098,0.06564592570066452]],"filenameSuffix":"56045c"}}]
+      [FRAME] "Dark Overlay" #5640:5620 layout=layout_8a5386e8 fills=[{"type":"GRADIENT_LINEAR","gradient":"linear-gradient(180deg, rgba(0, 0, 0, 0) 32%, rgba(0, 0, 0, 0.32) 100%)"}] borderRadius=24.738460540771484px
+      [RECTANGLE] "image 22" #5640:5621 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-42.73},"dimensions":{"width":360.34,"height":501.98}} fills=[{"type":"IMAGE","imageRef":"8406f9f5b8c7f6cba09fbf681446e679ecd55b3b","scaleMode":"FILL","objectFit":"cover","isBackground":false,"imageDownloadArguments":{"needsCropping":false,"requiresImageDimensions":false}}]
+      [FRAME] "BG Blur:mask-group" #5640:5622 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":144.3},"dimensions":{"width":360.77,"height":231.92}}
+        [RECTANGLE] "BG Blur:mask" #5640:5623 layout=layout_f26c899f fills=[{"type":"GRADIENT_LINEAR","gradient":"linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%)"}]
+        [FRAME] "BG Blur" #5640:5624 layout=layout_f26c899f fills=fill_6bd82927 effects={"backdropFilter":"blur(5.15px)"}
+    [FRAME] "Text Block" #5640:5625 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":106.19}}
+      [FRAME] "“We expected sand and silence — we found peace, stars, and people who love what they do.”" #5640:5626 layout={"mode":"column","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":0,"y":-1.05},"dimensions":{"width":320.29}}
+        [FRAME] "Container" #5640:5627 template=EL-e9077466
+          [TEXT] #5640:5628 layout=layout_56d3c81c fills=fill_658ab2fa textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":17.93538475036621,"lineHeight":"24.12px","letterSpacing":"-0.031em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="“We expected sand and silence — we \\nfound peace, stars, and people who \\nlove what they do.”"
+      [FRAME] "Person" #5640:5629 layout={"mode":"column","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":0,"y":87.59},"dimensions":{"width":320.29}}
+        [FRAME] "Container" #5640:5630 template=EL-dba2346a
+          [TEXT] #5640:5631 layout=layout_56d3c81c fills=["rgba(250, 250, 250, 0.9)"] textStyle=style_27b740bd text="— Amir, Desert Sky tour, March 2025"
+  [FRAME] "Container" #5640:5632 layout={"mode":"none","overflowScroll":["y"],"sizing":{},"locationRelativeToParent":{"x":21,"y":4671},"dimensions":{"width":359,"height":464}} borderRadius=10.307692527770996px
+    [FRAME] "Group" #5640:5633 layout={"mode":"column","padding":"929.30029296875px 0px 0px","alignItems":"center","gap":"8.246153831481934px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":-1059.84},"dimensions":{"width":358.77,"height":2082.73}}
+      [FRAME] "Item → Variant 1" #5640:5634 template=EL-54fb655e
+        [FRAME] "Container" #5640:5635 layout={"mode":"column","alignSelf":"stretch","justifyContent":"center","gap":"24.738460540771484px","sizing":{"horizontal":"fill","vertical":"hug"}}
+          [FRAME] "Stars" #5640:5636 template=EL-5667aaf6
+            [IMAGE-SVG] "Frame" #5640:5637 template=EL-3b1c06fe
+            [IMAGE-SVG] "Frame" #5640:5641 template=EL-3b1c06fe
+            [IMAGE-SVG] "Frame" #5640:5645 template=EL-3b1c06fe
+            [IMAGE-SVG] "Frame" #5640:5649 template=EL-3b1c06fe
+            [IMAGE-SVG] "Frame" #5640:5653 template=EL-3b1c06fe
+          [FRAME] "Review Text" #5640:5657 template=EL-e9077466
+            [FRAME] "Container" #5640:5658 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":64.31}}
+          [FRAME] "Client Info" #5640:5659 layout={"mode":"row","alignSelf":"stretch","justifyContent":"center","alignItems":"center","gap":"12.369230270385742px","sizing":{"horizontal":"fill","vertical":"hug"}}
+            [FRAME] "Figure - Client Image" #5640:5660 template=EL-e09f0c13
+              [FRAME] "Traveler watching sunset views over AlUla desert during the Evening Safari tour." #5640:5661 layout=layout_3757355f fills=[{"type":"IMAGE","imageRef":"e32fae08c1bd4fe1e1959a1dadb69827bbe84169","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1,0,0],[0,1,0]],"filenameSuffix":"56586a"}}] borderRadius=51.53845977783203px
+            [FRAME] "Text Block" #5640:5662 template=EL-faa8df41
+              [FRAME] "Name" #5640:5663 template=EL-e9077466
+                [FRAME] "Container" #5640:5664 template=EL-e9077466
+                  [TEXT] #5640:5665 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":16.389230728149414,"lineHeight":"21.44px","letterSpacing":"-0.0302em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="—  Anmol"
+              [FRAME] "Description" #5640:5666 template=EL-e9077466
+                [FRAME] "Container" #5640:5667 template=EL-dba2346a
+                  [TEXT] #5640:5668 layout=layout_56d3c81c fills=fill_80c0c03b textStyle=style_8a20a276 text="Evening Safari, May 2025"
+      [FRAME] "Item → Variant 1:css-transform" #5640:5669 template=EL-d18398d1
+        [FRAME] "Item → Variant 1" #5640:5670 template=EL-54fb655e
+          [FRAME] "Container" #5640:5671 template=EL-70fbfa43
+            [FRAME] "Stars" #5640:5672 template=EL-5667aaf6
+              [IMAGE-SVG] "Frame" #5640:5673 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5677 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5681 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5685 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5689 template=EL-3b1c06fe
+            [FRAME] "Review Text" #5640:5693 template=EL-e9077466
+              [FRAME] "Container" #5640:5694 template=EL-e9077466
+                [TEXT] #5640:5695 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle=style_9251475f text="“Our guide knew every hidden spot in the \\ndesert. We saw places you’d never find on \\nyour own.”"
+            [FRAME] "Client Info" #5640:5696 template=EL-11a4d0f7
+              [FRAME] "Figure - Client Image" #5640:5697 template=EL-e09f0c13
+                [FRAME] "Woman traveler exploring the AlUla desert during the Sunset Ride tour." #5640:5698 layout=layout_3757355f fills=[{"type":"IMAGE","imageRef":"63ad2acb572108d66cc7317633769d1acc94b701","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[1,0,0],[0,0.7529296875,0.12353515625]],"filenameSuffix":"5476b8"}}] borderRadius=51.53845977783203px
+              [FRAME] "Text Block" #5640:5699 template=EL-faa8df41
+                [FRAME] "Name" #5640:5700 template=EL-e9077466
+                  [FRAME] "Container" #5640:5701 template=EL-e9077466
+                    [TEXT] #5640:5702 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":16.492307662963867,"lineHeight":"21.44px","letterSpacing":"-0.03em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="— Noura A."
+                [FRAME] "Description" #5640:5703 template=EL-e9077466
+                  [FRAME] "Container" #5640:5704 template=EL-dba2346a
+                    [TEXT] #5640:5705 layout=layout_56d3c81c fills=fill_80c0c03b textStyle=style_27b740bd text="Sunset Ride, March 2025"
+      [FRAME] "Item → Variant 1:css-transform" #5640:5706 template=EL-d18398d1
+        [FRAME] "Item → Variant 1" #5640:5707 template=EL-54fb655e
+          [FRAME] "Container" #5640:5708 template=EL-70fbfa43
+            [FRAME] "Stars" #5640:5709 template=EL-5667aaf6
+              [IMAGE-SVG] "Frame" #5640:5710 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5714 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5718 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5722 template=EL-3b1c06fe
+              [IMAGE-SVG] "Frame" #5640:5726 template=EL-3b1c06fe
+            [FRAME] "Review Text" #5640:5730 template=EL-e9077466
+              [FRAME] "Container" #5640:5731 layout={"mode":"column","alignSelf":"stretch","sizing":{"horizontal":"fill","vertical":"hug"}}
+                [TEXT] #5640:5732 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle={"fontFamily":"Inter","fontStyle":"Regular","fontWeight":400,"fontSize":15.873846054077148,"lineHeight":"21.44px","letterSpacing":"-0.0312em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="“The private trip was worth every moment \\n— calm, organized, and full of stories about \\nNothing but Adventures.”"
+            [FRAME] "Client Info" #5640:5733 template=EL-11a4d0f7
+              [FRAME] "Figure - Client Image" #5640:5734 template=EL-e09f0c13
+              [FRAME] "Text Block" #5640:5735 layout={"mode":"column","justifyContent":"center","alignItems":"stretch","gap":"4.123076915740967px","sizing":{"horizontal":"fill","vertical":"hug"}}
+                [FRAME] "Name" #5640:5736 template=EL-e9077466
+                  [FRAME] "Container" #5640:5737 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":21.44}}
+                [FRAME] "Description" #5640:5738 template=EL-e9077466
+                  [FRAME] "Container" #5640:5739 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":17.32}}
+      [FRAME] "Item:css-transform" #5640:5740 template=EL-d18398d1
+        [FRAME] "Item" #5640:5741 template=EL-813b5777
+      [FRAME] "Item:css-transform" #5640:5742 template=EL-d18398d1
+        [FRAME] "Item" #5640:5743 template=EL-813b5777
+  [TEXT] #5640:5744 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":5246},"dimensions":{"width":387.24,"height":35}} fills=fill_d30b0c65 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":34.736061096191406,"lineHeight":"34.74px","letterSpacing":"0.0068em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="{ts12}Meet Your{/ts12} {ts19}Local Guides{/ts19}"
+  [FRAME] #5640:5745 layout={"mode":"column","alignItems":"stretch","gap":"6.43260383605957px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":209.38,"y":5333.62},"dimensions":{"width":173.04}}
+    [FRAME] #5640:5746 layout={"mode":"column","alignSelf":"stretch","gap":"9.005645751953125px","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [GROUP] #5640:5747 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":95.85,"height":15.44}} borderRadius=70.34690856933594px
+        [FRAME] #5640:5748 layout={"mode":"row","padding":"0px 6.395174503326416px","justifyContent":"center","alignItems":"center","gap":"6.395174503326416px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":95.85,"height":15.44}} fills=fill_d30b0c65 borderRadius=70.34690856933594px
+          [TEXT] #5640:5749 layout=layout_177c5efc fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":8.953243255615234,"textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="400+ Local Guides"
+      [FRAME] #5640:5750 layout={"mode":"column","alignSelf":"stretch","alignItems":"stretch","gap":"2.5730416774749756px","sizing":{"horizontal":"fill","vertical":"hug"}}
+        [TEXT] #5640:5751 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Light","fontWeight":300,"fontSize":12.369230270385742,"lineHeight":"14.79px","letterSpacing":"-0.0234em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="“Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”"
+        [TEXT] #5640:5752 layout=layout_56d3c81c fills=fill_aaa5ba5c opacity=0.5 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":10.292166709899902,"lineHeight":"18.01px","letterSpacing":"-0.0281em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="— Amir , Founder & Lead Guide"
+  [RECTANGLE] #5640:5753 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":5301.66},"dimensions":{"width":170.08,"height":170.08}} fills=["#FAFAFA"] borderRadius=8.246153831481934px
+  [FRAME] "Left Content" #5640:5754 layout={"mode":"column","justifyContent":"center","alignItems":"stretch","gap":"24.738460540771484px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":21,"y":5552},"dimensions":{"width":359}}
+    [FRAME] "Team Card" #5640:5755 layout={"mode":"column","alignSelf":"stretch","padding":"24.738460540771484px","justifyContent":"center","alignItems":"stretch","gap":"24.738460540771484px","sizing":{"horizontal":"fill","vertical":"hug"}} fills=fill_2908d49d borderRadius=16px
+      [FRAME] "Image Wrapper" #5640:5756 layout={"mode":"row","alignSelf":"stretch","justifyContent":"center","alignItems":"stretch","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":337.06}} borderRadius=16.492307662963867px
+        [FRAME] "Figure - Image (Replace Here)" #5640:5757 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fill"},"dimensions":{"width":311.29}}
+          [FRAME] "Three local guides smiling during sunset in AlUla desert, representing the tour team." #5640:5758 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":311.29,"height":337.06}} fills=[{"type":"IMAGE","imageRef":"ef29401b3bc010fa90ce59b8db086e4ee98450f8","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.6926605701446533,0,0.07622018456459045],[0,1,0]],"filenameSuffix":"7b505c"}}]
+      [FRAME] "Content" #5640:5759 layout={"mode":"column","alignSelf":"stretch","alignItems":"stretch","gap":"43.29230880737305px","sizing":{"horizontal":"fill","vertical":"hug"}}
+        [FRAME] "Text Block" #5640:5760 layout={"mode":"none","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":152.55}}
+          [FRAME] "Container" #5640:5761 layout={"mode":"column","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":0,"y":-1.01},"dimensions":{"width":310.29}}
+            [FRAME] "Container" #5640:5762 layout={"mode":"column","alignSelf":"stretch","padding":"0px 0px 0.6287692189216614px","alignItems":"stretch","sizing":{"horizontal":"fill","vertical":"hug"}}
+              [TEXT] #5640:5763 layout=layout_56d3c81c fills=fill_6bd82927 textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":21.646154403686523,"lineHeight":"27.21px","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Step inside a journey guided \\nby passion and experience"
+          [FRAME] "Container" #5640:5764 layout={"mode":"column","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":0,"y":66.27},"dimensions":{"width":310.29}}
+            [FRAME] "Container" #5640:5765 template=EL-e9077466
+              [TEXT] #5640:5766 layout=layout_56d3c81c fills=["#404040"] textStyle=style_9251475f text="Each tour is led by people who know every \\ndune, story, and sunrise of AlUla — guides \\nwho turn every route into a journey worth \\nremembering."
+        [FRAME] "Social Media Icons" #5640:5767 layout={"mode":"row","alignSelf":"stretch","gap":"8.246153831481934px","sizing":{"horizontal":"fill","vertical":"hug"}}
+          [FRAME] "Container" #5640:5768 template=EL-aa952488
+            [IMAGE-SVG] "Link - Instagram" #5640:5769 template=EL-85d499b8
+          [FRAME] "Container" #5640:5776 template=EL-aa952488
+            [IMAGE-SVG] "Link - Threads" #5640:5777 template=EL-85d499b8
+          [FRAME] "Container" #5640:5782 template=EL-aa952488
+            [IMAGE-SVG] "LinkedIn" #5640:5783 template=EL-85d499b8
+  [GROUP] #5640:5792 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":21,"y":6282},"dimensions":{"width":359,"height":595}} borderRadius="0px 0px 0px 0px"
+    [RECTANGLE] #5640:5793 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":359,"height":595}} fills=["rgba(244, 236, 217, 0.2)"] borderRadius=16px
+    [GROUP] #5640:5794 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":16.11,"y":30.92},"dimensions":{"width":327.87,"height":233.24}} borderRadius="0px 0px 0px 0px"
+      [RECTANGLE] "6e26a3df764d80011d0964d02ec8d1ef 2" #5640:5795 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0.2},"dimensions":{"width":174.77,"height":233.03}} fills=[{"type":"IMAGE","imageRef":"c771842cee71cad512116c00eabe4c767b13f204","scaleMode":"FILL","objectFit":"cover","isBackground":false,"imageDownloadArguments":{"needsCropping":false,"requiresImageDimensions":false}}] borderRadius=7.326778888702393px
+      [RECTANGLE] "ad7b5ceeda4d9504aa0caf110f9edd11 2" #5640:5796 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":181.34,"y":0},"dimensions":{"width":146.54,"height":146.54}} fills=[{"type":"IMAGE","imageRef":"340ca0ea55d67d0308c9851bbf03d378534433ca","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.6612234115600586,0,0.17263467609882355],[0,0.9980730414390564,1.4066556808245423e-8]],"filenameSuffix":"2653eb"}}] borderRadius=7.326776504516602px
+    [FRAME] #5640:5797 layout={"mode":"column","gap":"8.850120544433594px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":16.11,"y":305.11},"dimensions":{"width":323.66}}
+      [FRAME] #5640:5798 layout={"mode":"row","padding":"0px 6.32151460647583px","justifyContent":"center","alignItems":"center","gap":"6.32151460647583px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":65,"height":15}} fills=fill_658ab2fa borderRadius=69.53665924072266px
+        [TEXT] #5640:5799 layout=layout_177c5efc fills=fill_488bcf6b textStyle=style_9618600f text="Newsletter"
+      [TEXT] #5640:5800 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":30.34326934814453,"textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="Subscribe to save 10% off  {ts20}on your next Adventure{/ts20}"
+    [TEXT] #5640:5801 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":16.11,"y":448.38},"dimensions":{"width":270.56,"height":35.4}} fills=["#3F3F42"] textStyle={"fontFamily":"Outfit","fontStyle":"Light","fontWeight":300,"fontSize":12.64302921295166,"lineHeight":"17.7px","letterSpacing":"-0.0225em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} boldWeight=400 text="{ts12}Share your travel dreams with us, and we'll craft a {/ts12}{ts21}**personalised itinerary**{/ts21}{ts12} just for you{/ts12}"
+    [INSTANCE] #5640:5802 layout={"mode":"row","alignItems":"center","gap":"3.401538372039795px","sizing":{"horizontal":"hug","vertical":"hug"},"locationRelativeToParent":{"x":16.11,"y":510.23}} componentId=4152:1441
+      [FRAME] #I5640:5802;2951:1032 template=EL-5ebdf8a4
+        [TEXT] #I5640:5802;2951:1033 template=EL-c868dcf8
+        [RECTANGLE] #I5640:5802;2951:1034 template=EL-78686899
+      [FRAME] #I5640:5802;2951:1035 template=EL-959086bb
+        [IMAGE-SVG] #I5640:5802;2951:1036 template=EL-c8b6b920
+        [IMAGE-SVG] #I5640:5802;2951:1038 template=EL-0b4e02ab
+        [ELLIPSE] #I5640:5802;2951:1042 template=EL-95d23f57
+  [FRAME] #5640:5803 layout={"mode":"column","gap":"9.005645751953125px","sizing":{"horizontal":"fixed","vertical":"hug"},"locationRelativeToParent":{"x":20.62,"y":6956.28},"dimensions":{"width":360.77}}
+    [GROUP] #5640:5804 layout=layout_0c745b45 borderRadius=70.34690856933594px
+      [FRAME] #5640:5805 layout={"mode":"row","padding":"0px 6.395174503326416px","justifyContent":"center","alignItems":"center","gap":"6.395174503326416px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":46.05,"height":15.35}} fills=fill_b67c7c8f borderRadius=70.34690856933594px
+        [TEXT] #5640:5806 layout=layout_177c5efc fills=fill_488bcf6b textStyle=style_9fe871e2 text="Reviews"
+    [FRAME] #5640:5807 layout={"mode":"column","alignSelf":"stretch","gap":"12px","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [TEXT] #5640:5808 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_3b036990 text="Beyond the {ts17}Map{/ts17}"
+      [INSTANCE] #5640:5809 layout={"mode":"row","justifyContent":"flex-end","alignItems":"center","gap":"2.1071712970733643px","sizing":{"horizontal":"fixed","vertical":"hug"},"dimensions":{"width":360.77}} componentId=4152:1441
+        [FRAME] #I5640:5809;2951:1032 layout={"mode":"row","padding":"6.848306655883789px 7.3750996589660645px","justifyContent":"center","alignItems":"center","gap":"5.267928123474121px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":95.88,"height":28.45}} fills=fill_aaa5ba5c borderRadius=36.87549591064453px
+          [TEXT] #I5640:5809;2951:1033 layout=layout_177c5efc fills=fill_658ab2fa textStyle=style_e11196f0 text="See All Articles"
+          [RECTANGLE] #I5640:5809;2951:1034 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1.05,"y":1.05},"dimensions":{"width":93.77,"height":26.34}} strokes=fill_658ab2fa strokeWeight=0.5267928242683411px borderRadius=13.169820785522461px
+        [FRAME] #I5640:5809;2951:1035 layout={"mode":"row","padding":"10.535856246948242px 7.901892185211182px","justifyContent":"center","alignItems":"center","gap":"5.267928123474121px","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":28.45,"height":28.45}}
+          [IMAGE-SVG] #I5640:5809;2951:1036 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":28.45,"height":28.45}} borderRadius=36.87549591064453px
+          [IMAGE-SVG] #I5640:5809;2951:1038 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":6.8,"height":7.57}}
+          [ELLIPSE] #I5640:5809;2951:1042 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"position":"absolute","locationRelativeToParent":{"x":1.05,"y":1.05},"dimensions":{"width":26.34,"height":26.34}} strokes=fill_f70c5df6 strokeWeight=0.5267928242683411px
+  [GROUP] #5640:5810 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":7082},"dimensions":{"width":359.38,"height":284.18}} borderRadius="0px 0px 0px 0px"
+    [RECTANGLE] "4d3b079a4b7c485e40a369a4219e1169 1" #5640:5811 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0.18},"dimensions":{"width":359,"height":284}} fills=[{"type":"IMAGE","imageRef":"fd6304af88e8ffdcb770ddc352c0992445749718","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.7116749286651611,0,0.14874659478664398],[0,0.8448598384857178,0.06879562884569168]],"filenameSuffix":"6b84df"}}] borderRadius=7.580258369445801px
+    [RECTANGLE] #5640:5812 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0.38,"y":0},"dimensions":{"width":359,"height":284}} fills=fill_0977250c borderRadius=7.585817337036133px
+    [TEXT] #5640:5813 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":17.7,"y":244.05},"dimensions":{"width":204,"height":25}} fills=fill_658ab2fa textStyle=style_7bf183f0 text="Best Time to Visit India"
+    [TEXT] #5640:5814 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":17.7,"y":231.41},"dimensions":{"width":54,"height":13}} fills=fill_658ab2fa textStyle=style_e11196f0 text="Dec 6, 2026"
+  [GROUP] #5640:5815 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":7392},"dimensions":{"width":360,"height":284}} borderRadius=10.850202560424805px
+    [RECTANGLE] "234bc81d41eb04871a24dc6b85c378e2 1" #5640:5816 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":358.84,"height":284}} fills=[{"type":"IMAGE","imageRef":"887507a8a45498195a6f2d3f337f2bc5b7bfacea","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.999660313129425,0,-0.00009181281347991899],[0,0.5935714244842529,0.34173983335494995]],"filenameSuffix":"14e61f"}}] borderRadius=10.850202560424805px
+    [RECTANGLE] #5640:5817 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":360,"height":284}} fills=fill_0977250c borderRadius=10.850202560424805px
+    [TEXT] #5640:5818 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":16.42,"y":243.53},"dimensions":{"width":131,"height":25}} fills=fill_658ab2fa textStyle=style_7bf183f0 text="What to Pack? "
+    [TEXT] #5640:5819 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":16.42,"y":230.89},"dimensions":{"width":54,"height":13}} fills=fill_658ab2fa textStyle=style_e11196f0 text="Dec 5, 2026"
+  [TEXT] #5640:5820 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":21,"y":7756},"dimensions":{"width":360.77,"height":155}} fills=fill_aaa5ba5c textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":30.34326934814453,"letterSpacing":"0.0078em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Everything you need to know before your\\n journey — {ts17}from booking to what to pack.{/ts17}"
+  [FRAME] "Content" #5640:5821 layout={"mode":"column","alignItems":"stretch","gap":"7.454214572906494px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":21,"y":7941.27},"dimensions":{"width":360.77,"height":141.22}}
+    [FRAME] "FAQ" #5640:5822 layout={"mode":"column","alignSelf":"stretch","justifyContent":"center","alignItems":"stretch","gap":"4.973620891571045px","sizing":{"horizontal":"fill","vertical":"hug"}}
+      [FRAME] "Container" #5640:5823 template=EL-e9077466
+        [FRAME] "Close" #5640:5824 template=EL-c211abfd
+          [FRAME] "Content" #5640:5825 template=EL-5041b2e5
+            [FRAME] "Text Block → Title" #5640:5826 template=EL-cb992c5a
+              [FRAME] "Question" #5640:5827 template=EL-51794897
+                [FRAME] "Container" #5640:5828 template=EL-e9077466
+                  [TEXT] #5640:5829 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle=style_20a959cb text="What should I bring for the tour?"
+              [IMAGE-SVG] "Frame" #5640:5830 template=EL-0519c604
+      [FRAME] "Container" #5640:5834 template=EL-e9077466
+        [FRAME] "Close" #5640:5835 template=EL-c211abfd
+          [FRAME] "Content" #5640:5836 template=EL-5041b2e5
+            [FRAME] "Text Block → Title" #5640:5837 template=EL-cb992c5a
+              [FRAME] "Question" #5640:5838 template=EL-51794897
+                [FRAME] "Container" #5640:5839 template=EL-e9077466
+                  [TEXT] #5640:5840 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle=style_20a959cb text="Is pickup and drop-off included?"
+              [IMAGE-SVG] "Frame" #5640:5841 template=EL-0519c604
+      [FRAME] "Container" #5640:5845 template=EL-e9077466
+        [FRAME] "Close" #5640:5846 template=EL-c211abfd
+          [FRAME] "Content" #5640:5847 template=EL-5041b2e5
+            [FRAME] "Text Block → Title" #5640:5848 template=EL-cb992c5a
+              [FRAME] "Question" #5640:5849 template=EL-51794897
+                [FRAME] "Container" #5640:5850 template=EL-e9077466
+                  [TEXT] #5640:5851 layout=layout_56d3c81c fills=fill_aaa5ba5c textStyle=style_20a959cb text="Are the tours suitable for children?"
+              [IMAGE-SVG] "Frame" #5640:5852 template=EL-0519c604
+      [FRAME] "Container" #5640:5856 template=EL-e9077466
+        [FRAME] "Close" #5640:5857 template=EL-c211abfd
+          [FRAME] "Content" #5640:5858 template=EL-5041b2e5
+            [FRAME] "Text Block → Title" #5640:5859 layout={"mode":"row","alignSelf":"stretch","padding":"0px 0px 0.4973621070384979px","justifyContent":"center","alignItems":"center","gap":"6.217027187347412px","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":29.1}}
+              [FRAME] "Question" #5640:5860 template=EL-51794897
+                [FRAME] "Container" #5640:5861 layout={"mode":"column","alignSelf":"stretch","padding":"0px 0px 0.37923863530158997px","sizing":{"horizontal":"fill","vertical":"hug"}}
+                  [TEXT] #5640:5862 layout=layout_177c5efc fills=fill_aaa5ba5c textStyle=style_20a959cb text="What happens in case of bad weather?"
+              [IMAGE-SVG] "Frame" #5640:5863 template=EL-0519c604
+  [FRAME] "Container" #5640:5867 layout={"mode":"column","alignItems":"stretch","gap":"9.80956745147705px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":497.16,"y":7501},"dimensions":{"width":169.27,"height":137.38}}
+    [FRAME] "Heading 4" #5640:5868 template=EL-33358002
+      [TEXT] #5640:5869 template=EL-acd44ef0
+    [FRAME] "List" #5640:5870 layout={"mode":"column","alignSelf":"stretch","alignItems":"stretch","gap":"7.353859901428223px","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":58.85}}
+      [FRAME] "List Item" #5640:5871 template=EL-5a740927
+        [IMAGE-SVG] "Icon" #5640:5872 template=EL-d293af73
+        [FRAME] "Link" #5640:5875 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":149.76,"height":14.71}}
+          [TEXT] #5640:5876 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":151,"height":15}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="hello@nothingbutadventures.com"
+      [FRAME] "List Item" #5640:5877 template=EL-5a740927
+        [IMAGE-SVG] "Icon" #5640:5878 template=EL-d293af73
+        [FRAME] "Link" #5640:5880 template=EL-7e0f1131
+          [TEXT] #5640:5881 template=EL-ea7d51c9
+      [FRAME] "List Item" #5640:5882 template=EL-5a740927
+        [IMAGE-SVG] "Icon" #5640:5883 template=EL-d293af73
+        [FRAME] "Text" #5640:5886 template=EL-542d8fd8
+          [TEXT] #5640:5887 template=EL-daa1dbc1
+  [GROUP] #5640:5888 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":823},"dimensions":{"width":361.39,"height":147.02}} borderRadius="0px 0px 0px 0px"
+    [FRAME] #5640:5889 template=EL-c2f730f2
+      [FRAME] #5640:5890 template=EL-66b49466
+        [TEXT] #5640:5891 template=EL-d9303564
+      [TEXT] #5640:5892 template=EL-9085717c
+    [GROUP] #5640:5893 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":117.02},"dimensions":{"width":361,"height":30}} borderRadius="0px 0px 0px 0px"
+      [FRAME] #5640:5894 template=EL-fe55424a
+        [TEXT] #5640:5895 template=EL-8fb54e68
+      [IMAGE-SVG] #5640:5896 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":300,"y":0.98},"dimensions":{"width":61,"height":28}} borderRadius="0px 0px 0px 0px"
+  [FRAME] #5640:5908 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":2329},"dimensions":{"width":360,"height":398}}
+    [GROUP] #5640:5909 template=EL-42a11da5
+      [GROUP] #5640:5910 template=EL-67173862
+        [GROUP] #5640:5911 template=EL-7184f8e4
+          [FRAME] #5640:5912 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:5913 template=EL-0d6ef563
+            [TEXT] #5640:5914 template=EL-9afba6c8
+            [TEXT] #5640:5915 template=EL-2e059b19
+            [FRAME] "Container" #5640:5916 template=EL-13ee14b6
+              [TEXT] #5640:5917 template=EL-e490a6c4
+            [FRAME] "Container" #5640:5918 template=EL-7de74ddf
+              [IMAGE-SVG] "Icon" #5640:5919 template=EL-289f1b13
+              [FRAME] "Text" #5640:5922 template=EL-44ba0fe8
+                [TEXT] #5640:5923 template=EL-9aaf4e7f
+            [FRAME] "Container" #5640:5924 template=EL-4f8978a2
+              [IMAGE-SVG] "location_on" #5640:5925 template=EL-38f99657
+              [FRAME] "Text" #5640:5926 template=EL-0da648f3
+                [TEXT] #5640:5927 template=EL-390b4a44
+        [GROUP] #5640:5928 template=EL-3512010b
+          [RECTANGLE] "6c465b6b9bfecaf069aa2aa70c30b333 1" #5640:5929 template=EL-71182bea
+        [GROUP] #5640:5930 template=EL-230d8533
+          [FRAME] #5640:5931 template=EL-13c004db
+            [IMAGE-SVG] #5640:5932 template=EL-5be4a48e
+            [TEXT] #5640:5933 template=EL-58470c9d
+      [GROUP] #5640:5934 template=EL-f5249d8c
+        [GROUP] #5640:5935 template=EL-7184f8e4
+          [FRAME] #5640:5936 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:5937 template=EL-f5f38d52
+            [TEXT] #5640:5938 template=EL-473f9dd2
+            [TEXT] #5640:5939 template=EL-2e059b19
+            [FRAME] "Container" #5640:5940 template=EL-1af5a68e
+              [TEXT] #5640:5941 template=EL-e490a6c4
+            [FRAME] "Container" #5640:5942 template=EL-7de74ddf
+              [IMAGE-SVG] "Icon" #5640:5943 template=EL-289f1b13
+              [FRAME] "Text" #5640:5946 template=EL-44ba0fe8
+                [TEXT] #5640:5947 template=EL-0966f53e
+            [FRAME] "Container" #5640:5948 template=EL-bb180ebf
+              [IMAGE-SVG] "location_on" #5640:5949 template=EL-38f99657
+              [FRAME] "Text" #5640:5950 template=EL-0da648f3
+                [TEXT] #5640:5951 template=EL-79cc0808
+        [GROUP] #5640:5952 template=EL-3512010b
+          [RECTANGLE] "5435e97b592142f9f615253d49e4fb39 1" #5640:5953 template=EL-1c44642d
+        [GROUP] #5640:5954 template=EL-230d8533
+          [FRAME] #5640:5955 template=EL-13c004db
+            [IMAGE-SVG] #5640:5956 template=EL-4ce1795d
+            [TEXT] #5640:5957 template=EL-58470c9d
+      [GROUP] #5640:5958 template=EL-101aa8ed
+        [GROUP] #5640:5959 template=EL-3631f33b
+          [FRAME] #5640:5960 template=EL-a0a35b2d
+            [IMAGE-SVG] "Icon" #5640:5961 template=EL-2ecd68bd
+            [TEXT] #5640:5962 template=EL-1c660105
+            [TEXT] #5640:5963 template=EL-98bfe88f
+            [FRAME] "Container" #5640:5964 template=EL-4f592192
+              [TEXT] #5640:5965 template=EL-472ea318
+            [FRAME] "Container" #5640:5966 template=EL-893f46cd
+              [IMAGE-SVG] "Icon" #5640:5967 template=EL-289f1b13
+              [FRAME] "Text" #5640:5970 template=EL-b9098d90
+                [TEXT] #5640:5971 template=EL-727fccbf
+            [FRAME] "Container" #5640:5972 template=EL-4da79c77
+              [IMAGE-SVG] "location_on" #5640:5973 template=EL-38f99657
+              [FRAME] "Text" #5640:5974 template=EL-b9098d90
+                [FRAME] "Container" #5640:5975 template=EL-fd89dc7d
+                  [TEXT] #5640:5976 template=EL-7867bd6a
+            [FRAME] #5640:5977 template=EL-f5fe350e
+              [TEXT] #5640:5978 template=EL-333f67f9
+            [FRAME] #5640:5979 template=EL-3f8c5e66
+              [TEXT] #5640:5980 template=EL-0b8da18c
+            [FRAME] #5640:5981 template=EL-851feac1
+              [TEXT] #5640:5982 template=EL-422a8b22
+            [GROUP] #5640:5983 template=EL-62f61068
+              [TEXT] #5640:5984 template=EL-555e6650
+              [GROUP] #5640:5985 template=EL-0944cc2f
+                [TEXT] #5640:5986 template=EL-faaa1e53
+                [IMAGE-SVG] "Icon" #5640:5987 template=EL-85861767
+              [IMAGE-SVG] #5640:5990 template=EL-7c564017
+            [GROUP] #5640:5993 template=EL-08c373e3
+              [GROUP] #5640:5994 template=EL-66acde7f
+                [IMAGE-SVG] "Icon" #5640:5995 template=EL-85861767
+                [TEXT] #5640:5998 template=EL-5aed8e61
+              [TEXT] #5640:5999 template=EL-e2915083
+              [IMAGE-SVG] #5640:6000 template=EL-83f650f4
+            [GROUP] #5640:6003 template=EL-26f09a8f
+              [GROUP] #5640:6004 template=EL-9820d6fb
+                [IMAGE-SVG] "Icon" #5640:6005 template=EL-85861767
+                [TEXT] #5640:6008 template=EL-227aad6b
+              [TEXT] #5640:6009 template=EL-e91c7821
+              [IMAGE-SVG] #5640:6010 template=EL-801ad167
+        [GROUP] #5640:6013 template=EL-c3018f01
+          [RECTANGLE] "5435e97b592142f9f615253d49e4fb39 1" #5640:6014 template=EL-b79a8140
+        [GROUP] #5640:6015 template=EL-f62bb76f
+          [FRAME] #5640:6016 template=EL-69e99953
+            [IMAGE-SVG] #5640:6017 template=EL-4ce1795d
+            [TEXT] #5640:6018 template=EL-a188a505
+      [GROUP] #5640:6019 template=EL-913ad6f5
+        [GROUP] #5640:6020 template=EL-7184f8e4
+          [FRAME] #5640:6021 template=EL-0e71d6c5
+            [IMAGE-SVG] "Icon" #5640:6022 template=EL-0d6ef563
+            [TEXT] #5640:6023 template=EL-f77aeaa9
+            [TEXT] #5640:6024 template=EL-cf894baf
+            [FRAME] "Container" #5640:6025 template=EL-4248f696
+              [TEXT] #5640:6026 template=EL-a4db7826
+            [FRAME] "Container" #5640:6027 template=EL-f61673a2
+              [IMAGE-SVG] "Icon" #5640:6028 template=EL-289f1b13
+              [FRAME] "Text" #5640:6031 template=EL-b9098d90
+                [TEXT] #5640:6032 template=EL-2d3fcd4f
+            [FRAME] "Container" #5640:6033 template=EL-f28b8b63
+              [IMAGE-SVG] "location_on" #5640:6034 template=EL-38f99657
+              [FRAME] "Text" #5640:6035 template=EL-b9098d90
+                [TEXT] #5640:6036 template=EL-af2eab43
+        [GROUP] #5640:6037 template=EL-3512010b
+          [RECTANGLE] "9b93d0c48eae5f9e522a6fadea1d90c7 2" #5640:6038 template=EL-0da605d2
+        [GROUP] #5640:6039 template=EL-ee022c1a
+          [FRAME] #5640:6040 template=EL-13c004db
+            [IMAGE-SVG] #5640:6041 template=EL-4ce1795d
+            [TEXT] #5640:6042 template=EL-58470c9d
+      [RECTANGLE] #5640:6043 template=EL-0743ec6c
+  [GROUP] #5640:6044 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20,"y":2164},"dimensions":{"width":361.39,"height":146.02}} borderRadius="0px 0px 0px 0px"
+    [FRAME] #5640:6045 template=EL-c2f730f2
+      [FRAME] #5640:6046 template=EL-66b49466
+        [TEXT] #5640:6047 template=EL-d9303564
+      [TEXT] #5640:6048 template=EL-9085717c
+    [GROUP] #5640:6049 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":116.02},"dimensions":{"width":360,"height":30}} borderRadius="0px 0px 0px 0px"
+      [FRAME] #5640:6050 template=EL-fe55424a
+        [TEXT] #5640:6051 template=EL-8fb54e68
+      [IMAGE-SVG] #5640:6052 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":299,"y":0.98},"dimensions":{"width":61,"height":28}} borderRadius="0px 0px 0px 0px"
+  [GROUP] #5640:6064 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":-36,"y":8161},"dimensions":{"width":438,"height":346}} borderRadius="0px 0px 0px 0px"
+    [RECTANGLE] "5dcbee12be0df512031f267ad1eceac7-2 1" #5640:6065 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":36,"y":0},"dimensions":{"width":402,"height":346}} fills=[{"type":"IMAGE","imageRef":"e925dc80a6c987baa77ad9980140b1ff6db82e44","scaleMode":"STRETCH","objectFit":"fill","isBackground":false,"imageDownloadArguments":{"needsCropping":true,"requiresImageDimensions":false,"cropTransform":[[0.505112886428833,0,0.28973424434661865],[0,0.6314860582351685,0.15511265397071838]],"filenameSuffix":"ff49bf"}}] borderRadius="34px 34px 0px 0px"
+    [IMAGE-SVG] #5640:6066 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":152.9},"dimensions":{"width":188.8,"height":191.9}}
+    [RECTANGLE] #5640:6069 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":36,"y":0},"dimensions":{"width":402,"height":345}} fills=fill_80c0c03b borderRadius="34px 34px 0px 0px"
+    [FRAME] "Container" #5640:6070 layout={"mode":"column","alignItems":"stretch","gap":"9.80956745147705px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":233.66,"y":188},"dimensions":{"width":72.83,"height":137}}
+      [FRAME] "Heading 4" #5640:6071 template=EL-33358002
+        [TEXT] #5640:6072 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":55,"height":15}} fills=fill_658ab2fa textStyle={"fontFamily":"Outfit","fontStyle":"SemiBold","fontWeight":600,"fontSize":9.8125,"lineHeight":"14.72px","letterSpacing":"-0.0195em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Destinations"
+      [FRAME] "List" #5640:6073 template=EL-83e46646
+        [FRAME] "List Item" #5640:6074 template=EL-33358002
+          [TEXT] #5640:6075 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":43,"height":15}} fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Rajasthan"
+        [FRAME] "List Item" #5640:6076 template=EL-33358002
+          [TEXT] #5640:6077 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":28,"height":15}} fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Kerala"
+        [FRAME] "List Item" #5640:6078 template=EL-33358002
+          [TEXT] #5640:6079 layout=layout_855934ea fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Himalayas"
+        [FRAME] "List Item" #5640:6080 template=EL-33358002
+          [TEXT] #5640:6081 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":67,"height":15}} fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Golden Triangle"
+        [FRAME] "List Item" #5640:6082 template=EL-33358002
+          [TEXT] #5640:6083 layout=layout_e39f873f fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Varanasi"
+        [FRAME] "List Item" #5640:6084 template=EL-33358002
+          [TEXT] #5640:6085 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":19,"height":15}} fills=fill_7dedcf86 textStyle=style_b42a97c8 text="Goa"
+    [FRAME] "Container" #5640:6086 layout={"mode":"column","alignItems":"stretch","gap":"9.80956745147705px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":343.96,"y":188},"dimensions":{"width":86.99,"height":137}}
+      [FRAME] "Heading 4" #5640:6087 template=EL-33358002
+        [TEXT] #5640:6088 layout=layout_855934ea fills=fill_658ab2fa textStyle=style_3d98a827 text="Company"
+      [FRAME] "List" #5640:6089 template=EL-83e46646
+        [FRAME] "List Item" #5640:6090 template=EL-33358002
+          [TEXT] #5640:6091 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":42,"height":15}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="About Us"
+        [FRAME] "List Item" #5640:6092 template=EL-33358002
+          [TEXT] #5640:6093 layout=layout_f2693efa fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="Why Choose Us"
+        [FRAME] "List Item" #5640:6094 template=EL-33358002
+          [TEXT] #5640:6095 layout=layout_e39f873f fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="Reviews"
+        [FRAME] "List Item" #5640:6096 template=EL-33358002
+          [TEXT] #5640:6097 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":50,"height":15}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="Travel Blog"
+        [FRAME] "List Item" #5640:6098 template=EL-33358002
+          [TEXT] #5640:6099 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":60,"height":15}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="Sustainability"
+        [FRAME] "List Item" #5640:6100 template=EL-33358002
+          [TEXT] #5640:6101 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-0.57},"dimensions":{"width":36,"height":15}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="Careers"
+    [FRAME] "Heading 4" #5640:6102 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":60.7,"y":191},"dimensions":{"width":171.22,"height":14.71}}
+      [TEXT] #5640:6103 template=EL-acd44ef0
+    [FRAME] "List" #5640:6104 layout={"mode":"column","alignItems":"stretch","gap":"7.353859901428223px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":60.7,"y":215.52},"dimensions":{"width":171.22,"height":58.85}}
+      [FRAME] "List Item" #5640:6105 layout={"mode":"row","alignSelf":"stretch","gap":"7.353896141052246px","sizing":{"horizontal":"fill","vertical":"fixed"},"dimensions":{"height":27}}
+        [IMAGE-SVG] "Icon" #5640:6106 template=EL-d293af73
+        [FRAME] "Link" #5640:6109 layout={"mode":"none","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":128,"height":27}}
+          [TEXT] #5640:6110 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0.38,"y":-0.52},"dimensions":{"width":128,"height":30}} fills=fill_7dedcf86 textStyle=style_4a7ba6b8 text="hello@nothingbutadventures.com"
+      [FRAME] "List Item" #5640:6111 template=EL-5a740927
+        [IMAGE-SVG] "Icon" #5640:6112 template=EL-d293af73
+        [FRAME] "Link" #5640:6114 template=EL-7e0f1131
+          [TEXT] #5640:6115 template=EL-ea7d51c9
+      [FRAME] "List Item" #5640:6116 template=EL-5a740927
+        [IMAGE-SVG] "Icon" #5640:6117 template=EL-d293af73
+        [FRAME] "Text" #5640:6120 template=EL-542d8fd8
+          [TEXT] #5640:6121 template=EL-daa1dbc1
+    [GROUP] #5640:6122 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":60.69,"y":29},"dimensions":{"width":176.01,"height":58}} borderRadius="0px 0px 0px 0px"
+      [GROUP] #5640:6123 layout=layout_18c0ca3f borderRadius="0px 0px 0px 0px"
+        [TEXT] #5640:6124 layout=layout_18c0ca3f fills=fill_658ab2fa textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":27.339069366455078,"lineHeight":"1.01em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="{ts22}Nothing but {/ts22}\\n{ts23}Adventures{/ts23}{ts24}.{/ts24}"
+    [IMAGE-SVG] #5640:6125 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":60.69,"y":97},"dimensions":{"width":99.26,"height":0}} strokes=fill_658ab2fa strokeWeight=1px
+    [TEXT] #5640:6126 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":60.69,"y":107},"dimensions":{"width":169.98,"height":30}} fills=fill_7dedcf86 textStyle={"fontFamily":"Outfit","fontStyle":"Regular","fontWeight":400,"fontSize":10,"lineHeight":"14.72px","letterSpacing":"-0.0192em","textAlignHorizontal":"LEFT","textAlignVertical":"TOP"} text="Curating authentic Indian experiences for discerning travelers since 2015."
+    [FRAME] "Container" #5640:6127 layout={"mode":"row","gap":"9.809566497802734px","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":60.7,"y":148.11},"dimensions":{"width":173.7,"height":24.53}}
+      [FRAME] "Link" #5640:6128 template=EL-f8a28e3d
+        [IMAGE-SVG] "Icon" #5640:6129 template=EL-d293af73
+      [FRAME] "Link" #5640:6131 template=EL-f8a28e3d
+        [IMAGE-SVG] "Icon" #5640:6132 template=EL-d293af73
+      [FRAME] "Link" #5640:6136 template=EL-f8a28e3d
+        [IMAGE-SVG] "Icon" #5640:6137 template=EL-d293af73
+      [FRAME] "Link" #5640:6139 layout={"mode":"row","padding":"0px 0.0066020190715789795px 0px 0px","justifyContent":"center","alignItems":"center","sizing":{"horizontal":"fixed","vertical":"fixed"},"dimensions":{"width":24.53,"height":24.53}} fills=fill_dbe29f28 borderRadius=14214510px
+        [IMAGE-SVG] "Icon" #5640:6140 template=EL-d293af73
+  [GROUP] #5640:6143 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":-11},"dimensions":{"width":402,"height":74}} effects={"boxShadow":"0px 1px 24px 0px rgba(0, 0, 0, 0.04)"}
+    [RECTANGLE] #5640:6144 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":402,"height":74}} fills=fill_658ab2fa
+    [FRAME] "Container" #5640:6145 layout={"mode":"column","justifyContent":"center","alignItems":"stretch","sizing":{"horizontal":"fixed","vertical":"fixed"},"locationRelativeToParent":{"x":346.34,"y":36.4},"dimensions":{"width":35.05,"height":20.62}}
+      [IMAGE-SVG] "Menu Button" #5640:6146 layout=layout_617da2ef
+    [GROUP] #5640:6150 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":20.62,"y":34.34},"dimensions":{"width":105.44,"height":23.52}}
+      [IMAGE-SVG] #5640:6151 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":0,"y":0},"dimensions":{"width":22.76,"height":23.13}}
+      [GROUP] #5640:6154 layout={"mode":"none","sizing":{},"locationRelativeToParent":{"x":28.82,"y":0},"dimensions":{"width":76.62,"height":23.52}} borderRadius="0px 0px 0px 0px"
+        [GROUP] #5640:6155 layout=layout_4867f824 borderRadius="0px 0px 0px 0px"
+          [TEXT] #5640:6156 layout=layout_4867f824 fills=["#070707"] textStyle={"fontFamily":"Inter","fontStyle":"Bold","fontWeight":700,"fontSize":13.090190887451172,"lineHeight":"0.87em","textAlignHorizontal":"LEFT","textAlignVertical":"CENTER"} text="{ts25}Nothing but {/ts25}\\n{ts26}Adventures.{/ts26}"
