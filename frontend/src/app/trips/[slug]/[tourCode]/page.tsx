@@ -1559,15 +1559,36 @@ export default function TourDetailPage() {
                     style={{ backgroundColor: "rgba(181, 185, 177, 0.2)" }}
                   >
                     {[
-                      { id: "nba", label: "NBA", icon: "/wi1.svg" },
-                      { id: "leader", label: "TOUR LEADER", icon: "/wi2.svg" },
-                      { id: "transport", label: "TRANSPORT", icon: "/wi3.svg" },
+                      {
+                        id: "nba",
+                        label: "NBA",
+                        activeIcon: "/wi1_active.svg",
+                        inactiveIcon: "/wi1_inactive.svg",
+                      },
+                      {
+                        id: "leader",
+                        label: "TOUR LEADER",
+                        activeIcon: "/wi2_active.svg",
+                        inactiveIcon: "/wi2_inactive.svg",
+                      },
+                      {
+                        id: "transport",
+                        label: "TRANSPORT",
+                        activeIcon: "/wi3_active.svg",
+                        inactiveIcon: "/wi3_inactive.svg",
+                      },
                       {
                         id: "accommodation",
                         label: "ACCOMMODATION",
-                        icon: "/sssss1.svg",
+                        activeIcon: "/sssss1_active.svg",
+                        inactiveIcon: "/sssss1_inactive.svg",
                       },
-                      { id: "meals", label: "MEALS", icon: "/wi5.svg" },
+                      {
+                        id: "meals",
+                        label: "MEALS",
+                        activeIcon: "/wi5_active.svg",
+                        inactiveIcon: "/wi5_inactive.svg",
+                      },
                     ].map((tab) => {
                       const isActive = includedTab === tab.id;
                       return (
@@ -1578,7 +1599,7 @@ export default function TourDetailPage() {
                         >
                           <div className="w-[46px] h-[46px] flex items-center justify-center transition-transform group-hover:scale-105">
                             <Image
-                              src={tab.icon}
+                              src={isActive ? tab.activeIcon : tab.inactiveIcon}
                               alt={tab.label}
                               width={46}
                               height={46}
@@ -1675,8 +1696,8 @@ export default function TourDetailPage() {
                           <div>
                             <div className="flex items-center gap-2.5 mb-2.5">
                               <img
-                                src="/tickpp.svg"
-                                alt="Included"
+                                src="/premium-i.svg"
+                                alt="Premium Inclusions"
                                 className="w-[20px] h-[20px] shrink-0"
                               />
                               <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
@@ -1696,7 +1717,7 @@ export default function TourDetailPage() {
                           <div>
                             <div className="flex items-center gap-2.5 mb-2.5">
                               <img
-                                src="/tickpp.svg"
+                                src="/add-ons-i.svg"
                                 alt="Add-on Activities"
                                 className="w-[20px] h-[20px] shrink-0"
                               />
@@ -1751,21 +1772,11 @@ export default function TourDetailPage() {
                     {includedTab === "leader" && (
                       <div>
                         <div className="flex items-center gap-2.5 mb-3">
-                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
-                            <svg
-                              className="w-3 h-3 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                              />
-                            </svg>
-                          </div>
+                          <img
+                            src="/tickpp.svg"
+                            alt="Tour Leader"
+                            className="w-[20px] h-[20px] shrink-0"
+                          />
                           <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Tour Leader &amp; Expert Guides
                           </h4>
@@ -1780,21 +1791,11 @@ export default function TourDetailPage() {
                     {includedTab === "transport" && (
                       <div>
                         <div className="flex items-center gap-2.5 mb-3">
-                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
-                            <svg
-                              className="w-3 h-3 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M8 7h8m-8 4h8m-8 4h4"
-                              />
-                            </svg>
-                          </div>
+                          <img
+                            src="/tickpp.svg"
+                            alt="Transport"
+                            className="w-[20px] h-[20px] shrink-0"
+                          />
                           <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Transport
                           </h4>
@@ -1810,21 +1811,11 @@ export default function TourDetailPage() {
                     {includedTab === "accommodation" && (
                       <div>
                         <div className="flex items-center gap-2.5 mb-3">
-                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
-                            <svg
-                              className="w-3 h-3 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                              />
-                            </svg>
-                          </div>
+                          <img
+                            src="/tickpp.svg"
+                            alt="Accommodation"
+                            className="w-[20px] h-[20px] shrink-0"
+                          />
                           <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Accommodation
                           </h4>
@@ -1839,21 +1830,11 @@ export default function TourDetailPage() {
                     {includedTab === "meals" && (
                       <div>
                         <div className="flex items-center gap-2.5 mb-3">
-                          <div className="w-[20px] h-[20px] rounded-full bg-[#254B02] text-white flex items-center justify-center shrink-0">
-                            <svg
-                              className="w-3 h-3 text-white"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                              />
-                            </svg>
-                          </div>
+                          <img
+                            src="/tickpp.svg"
+                            alt="Meals"
+                            className="w-[20px] h-[20px] shrink-0"
+                          />
                           <h4 className="text-[16px] font-medium text-[#1A1A1A] font-outfit">
                             Meals Included
                           </h4>
