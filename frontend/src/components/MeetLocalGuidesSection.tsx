@@ -50,9 +50,9 @@ const tags = [
 
 export default function MeetLocalGuidesSection() {
     return (
-        <section className="w-full relative font-outfit mt-8 sm:mt-10 xl:mt-[56px] mb-12 sm:mb-20">
+        <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20">
             {/* Mobile View (#5640:5744, #5640:5745, #5640:5753, #5640:5754) */}
-            <div className="block lg:hidden w-full max-w-[359px] mx-auto">
+            <div className="block md:hidden w-full max-w-[359px] mx-auto">
                 {/* Title (#5640:5744) */}
                 <h2 className="text-[30px] font-normal leading-tight text-[#1A1A1A] tracking-normal font-outfit mb-4 text-left">
                     Meet Your <span className="font-gochi text-[#254B02]">Local Guides</span>
@@ -129,16 +129,16 @@ export default function MeetLocalGuidesSection() {
                 </div>
             </div>
 
-            {/* Desktop View (#5091:8189, hidden lg:block) */}
-            <div className="hidden lg:block">
-                {/* Top Row: Left Pills and Right Title aligned (#5091:8189) */}
-                <div className="grid grid-cols-2 gap-6 xl:gap-[24px] items-end mb-6 sm:mb-8 xl:mb-[24px]">
-                    {/* Left Side: 6 Feature Pills (#5091:8191, width: 462px) */}
-                    <div className="grid grid-cols-3 gap-2.5 max-w-[462px]">
+            {/* Desktop View (#5640:8211 on 785px / #5091:8189 on 1280px) */}
+            <div className="hidden md:block">
+                {/* Top Row: Left Pills and Right Title aligned */}
+                <div className="grid grid-cols-2 gap-4 lg:gap-5 xl:gap-[24px] items-end mb-3.5 lg:mb-5 xl:mb-[24px]">
+                    {/* Left Side: 6 Feature Pills (#5640:8226 on 785px / #5091:8191 on 1280px) */}
+                    <div className="grid grid-cols-3 gap-1.5 lg:gap-2 xl:gap-2.5 max-w-[462px]">
                         {tags.map((tag, idx) => (
                             <div 
                                 key={idx} 
-                                className="inline-flex items-center justify-center gap-1.5 h-[28px] px-3 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.75)] rounded-[110px] text-[13px] font-normal font-outfit transition-colors hover:bg-[rgba(26,26,26,0.08)] whitespace-nowrap"
+                                className="inline-flex items-center justify-center gap-1 xl:gap-1.5 h-[17.2px] lg:h-[22px] xl:h-[28px] px-2 lg:px-2.5 xl:px-3 bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.75)] rounded-[67px] xl:rounded-[110px] text-[8px] lg:text-[10.5px] xl:text-[13px] font-normal font-outfit transition-colors hover:bg-[rgba(26,26,26,0.08)] whitespace-nowrap"
                             >
                                 <span className="text-[#254B02] shrink-0">{tag.icon}</span>
                                 <span className="truncate">{tag.label}</span>
@@ -146,85 +146,86 @@ export default function MeetLocalGuidesSection() {
                         ))}
                     </div>
 
-                    {/* Right Side: Title (#5091:8213, 54px Outfit + Gochi Hand) */}
-                    <h2 className="text-[54px] font-normal leading-[55px] text-[#1A1A1A] tracking-normal font-outfit text-left">
+                    {/* Right Side: Title (#5640:8211 on 785px: 33.7px / #5091:8213 on 1280px: 54px) */}
+                    <h2 className="text-[33.1px] lg:text-[43px] xl:text-[54px] font-normal leading-[33.7px] lg:leading-[44px] xl:leading-[55px] text-[#1A1A1A] tracking-normal font-outfit text-left">
                         Meet Your <span className="font-gochi text-[#254B02]">Local Guides</span>
                     </h2>
                 </div>
 
-                {/* Cards Row: 2 Parallel Cards (#5091:8192 & #5091:8214, height: 303px) */}
-                <div className="grid grid-cols-2 gap-6 xl:gap-[24px] items-stretch">
-                    {/* Left Card (#5091:8192, 581px x 303px, bg: rgba(181,185,177,0.2)) */}
-                    <div className="bg-[rgba(181,185,177,0.2)] rounded-[12.2px] flex flex-row overflow-hidden h-[303px] shadow-xs">
-                        {/* Left Photo (#5091:8194, 307px x 303px) */}
-                        <div className="w-[307px] h-full relative shrink-0">
+                {/* Cards Row: 2 Parallel Cards (#5640:8191 & #5640:8213 on 785px: height 185.4px, gap 14.7px / 1280px: height 303px, gap 24px) */}
+                <div className="grid grid-cols-2 gap-[14.7px] lg:gap-[19px] xl:gap-[24px] items-stretch">
+                    {/* Left Card (#5640:8191 on 785px: 356.34px x 185.35px / #5091:8192 on 1280px: 581px x 303px) */}
+                    <div className="bg-[rgba(181,185,177,0.2)] rounded-[7.5px] xl:rounded-[12.2px] flex flex-row overflow-hidden h-[185.4px] lg:h-[240px] xl:h-[303px] shadow-xs">
+                        {/* Left Photo (#5640:8192 on 785px: 188.47px x 185.97px / #5091:8194 on 1280px: 307px x 303px) */}
+                        <div className="w-[188.5px] lg:w-[245px] xl:w-[307px] h-full relative shrink-0">
                             <img
                                 src="https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=3540&auto=format&fit=crop"
                                 alt="Guides smiling together"
-                                className="absolute inset-0 w-full h-full object-cover rounded-l-[12.2px]"
+                                className="absolute inset-0 w-full h-full object-cover rounded-l-[7.5px] xl:rounded-l-[12.2px]"
                             />
                         </div>
 
-                        {/* Right Text Content (#5091:8195, #5091:8196, #5091:8197) */}
-                        <div className="flex-1 p-[24px] pl-[26px] flex flex-col justify-between font-outfit">
+                        {/* Right Text Content (#5640:8193, #5640:8194, #5640:8195) */}
+                        <div className="flex-1 p-[14px] lg:p-[19px] xl:p-[24px] pl-[16px] lg:pl-[20px] xl:pl-[26px] flex flex-col justify-between font-outfit">
                             <div>
-                                <h3 className="text-[16px] font-medium text-[#1A1A1A] mb-2 leading-[23.4px] tracking-[-0.0286em] font-outfit">
+                                <h3 className="text-[9.81px] lg:text-[13px] xl:text-[16px] font-medium text-[#1A1A1A] mb-1 xl:mb-2 leading-[14.35px] lg:leading-[18px] xl:leading-[23.4px] tracking-[-0.0286em] font-outfit">
                                     Step inside a journey guided by passion and experience
                                 </h3>
-                                <p className="text-[12px] text-[#1A1A1A]/80 font-normal leading-[20px] tracking-[-0.0381em] font-outfit mb-4">
+                                <p className="text-[7.36px] lg:text-[9.5px] xl:text-[12px] text-[#1A1A1A]/80 font-normal leading-[12.27px] lg:leading-[16px] xl:leading-[20px] tracking-[-0.0381em] font-outfit mb-2 xl:mb-4">
                                     Each tour is led by people who know every dune, story, and sunrise of AlUla guides who turn every route into a journey worth remembering.
                                 </p>
                             </div>
 
-                            {/* Social Media Circular Buttons */}
-                            <div className="flex items-center gap-[9px]">
-                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Facebook">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                            {/* Social Media Circular Buttons (#5640:8195) */}
+                            <div className="flex items-center gap-[6px] lg:gap-[7.5px] xl:gap-[9px]">
+                                <div className="w-[14px] h-[14px] lg:w-[18px] lg:h-[18px] xl:w-[23px] xl:h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Facebook">
+                                    <svg className="w-2 h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                                 </div>
-                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Instagram">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                <div className="w-[14px] h-[14px] lg:w-[18px] lg:h-[18px] xl:w-[23px] xl:h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Instagram">
+                                    <svg className="w-2 h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                                 </div>
-                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Twitter">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                <div className="w-[14px] h-[14px] lg:w-[18px] lg:h-[18px] xl:w-[23px] xl:h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="Twitter">
+                                    <svg className="w-2 h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                                 </div>
-                                <div className="w-[23px] h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="YouTube">
-                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                                <div className="w-[14px] h-[14px] lg:w-[18px] lg:h-[18px] xl:w-[23px] xl:h-[23px] rounded-full bg-black/5 hover:bg-black/10 text-[#1A1A1A] flex items-center justify-center text-xs transition-colors cursor-pointer" aria-label="YouTube">
+                                    <svg className="w-2 h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Card: Guide Profile Card (#5091:8214, 581px x 303px, bg: white) */}
-                    <div className="bg-white rounded-[12.2px] flex flex-row items-stretch h-[303px] border border-[rgba(26,26,26,0.06)] shadow-xs overflow-hidden">
-                        {/* Left Guide Photo */}
-                        <div className="w-[280px] h-full relative shrink-0 bg-gray-900 group">
+                    {/* Right Card: Guide Profile Card (#5640:8213 on 785px: 356.34px x 185.35px / #5091:8214 on 1280px: 581px x 303px) */}
+                    <div className="bg-white rounded-[7.5px] xl:rounded-[12.2px] flex flex-row items-stretch h-[185.4px] lg:h-[240px] xl:h-[303px] border border-[rgba(26,26,26,0.06)] shadow-xs overflow-hidden">
+                        {/* Left Guide Photo (#5640:8213 photo on 785px: 171.7px / 1280px: 280px) */}
+                        <div className="w-[171.7px] lg:w-[224px] xl:w-[280px] h-full relative shrink-0 bg-gray-900 group">
                             <img
                                 src="https://images.unsplash.com/photo-1620311488184-e9ed711c1109?q=80&w=3540&auto=format&fit=crop"
                                 alt="Amir - Founder & Lead Guide"
                                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
                             />
                             {/* Carousel Dots */}
-                            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
-                                <div className="w-5 h-1 rounded-full bg-white"></div>
-                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
-                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
-                                <div className="w-1.5 h-1 rounded-full bg-white/50"></div>
+                            <div className="absolute bottom-2 xl:bottom-4 left-0 right-0 flex justify-center gap-1 xl:gap-1.5 z-10">
+                                <div className="w-3 xl:w-5 h-0.5 xl:h-1 rounded-full bg-white"></div>
+                                <div className="w-1 xl:w-1.5 h-0.5 xl:h-1 rounded-full bg-white/50"></div>
+                                <div className="w-1 xl:w-1.5 h-0.5 xl:h-1 rounded-full bg-white/50"></div>
+                                <div className="w-1 xl:w-1.5 h-0.5 xl:h-1 rounded-full bg-white/50"></div>
                             </div>
-                            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                            <div className="absolute inset-x-0 bottom-0 h-12 xl:h-20 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
                         </div>
 
-                        {/* Right Quote Content */}
-                        <div className="flex-1 p-[24px] pl-[26px] flex flex-col justify-between font-outfit">
+                        {/* Right Quote Content (#5640:8217) */}
+                        <div className="flex-1 p-[14px] lg:p-[19px] xl:p-[24px] pl-[16px] lg:pl-[20px] xl:pl-[26px] flex flex-col justify-between font-outfit">
                             <div>
-                                <div className="inline-flex items-center justify-center w-[152px] h-[24.4px] bg-[#254B02] text-white rounded-[111px] text-[14px] font-normal mb-3 font-outfit">
+                                {/* 400+ Local Guides Badge (#5640:8214 on 785px: 92.98px x 14.98px / 1280px: 152px x 24.4px) */}
+                                <div className="inline-flex items-center justify-center w-[93px] lg:w-[120px] xl:w-[152px] h-[15px] lg:h-[19px] xl:h-[24.4px] bg-[#254B02] text-white rounded-[68px] xl:rounded-[111px] text-[8.69px] lg:text-[11px] xl:text-[14px] font-normal mb-1.5 xl:mb-3 font-outfit">
                                     400+ Local Guides
                                 </div>
-                                <p className="text-[16px] text-[#1A1A1A] font-normal leading-[23.4px] tracking-[-0.0286em] font-outfit mb-4">
+                                <p className="text-[9.81px] lg:text-[13px] xl:text-[16px] text-[#1A1A1A] font-normal leading-[14.35px] lg:leading-[18px] xl:leading-[23.4px] tracking-[-0.0286em] font-outfit mb-2 xl:mb-4">
                                     “Every trip is personal. We keep groups small to make sure your experience feels private, safe, and unforgettable.”
                                 </p>
                             </div>
                             <div>
-                                <p className="text-[12px] text-[#1A1A1A]/50 font-normal leading-[23.4px] tracking-[-0.0381em] font-outfit">
+                                <p className="text-[7.36px] lg:text-[9.5px] xl:text-[12px] text-[#1A1A1A]/50 font-normal leading-[14.35px] lg:leading-[18px] xl:leading-[23.4px] tracking-[-0.0381em] font-outfit">
                                     — Amir , Founder &amp; Lead Guide
                                 </p>
                             </div>

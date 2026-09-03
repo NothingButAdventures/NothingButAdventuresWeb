@@ -158,9 +158,9 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Desktop Hero Section (#5091:7209, height: 573px on 1280px width) */}
+      {/* Desktop Hero Section (#5091:7209 on 1280px / #5640:7218 on 785px) */}
       <div className="hidden md:block relative w-full mb-6 sm:mb-8 lg:mb-10">
-        <div className="relative w-full h-[480px] sm:h-[520px] md:h-[550px] xl:h-[573px] overflow-hidden bg-[#242239] group">
+        <div className="relative w-full h-[351.4px] lg:h-[460px] xl:h-[573px] overflow-hidden bg-[#242239] group">
           {/* Background Image */}
           <div
             className="absolute inset-0 z-0 transition-transform duration-[2s] ease-out group-hover:scale-[1.01]"
@@ -171,35 +171,35 @@ export default async function Home() {
             }}
           ></div>
 
-          {/* Hero Content Container (starts at x: 47px, y: 259px on 1280px) */}
-          <div className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 md:px-8 xl:px-[47px] relative h-full flex flex-col justify-start pt-[140px] sm:pt-[180px] md:pt-[220px] xl:pt-[259px] z-20">
-            {/* Main Headline Content (#5091:7219, width: 704px, height: 154px) */}
-            <div className="mb-[25px] w-full max-w-[704px]">
-              <h1 className="font-outfit text-white text-[36px] sm:text-[46px] md:text-[54px] xl:text-[64px] font-normal leading-[1.08] xl:leading-[70px] drop-shadow-sm">
+          {/* Hero Content Container (x: 28.83px, y: 158.84px on 785px / x: 47px, y: 259px on 1280px) */}
+          <div className="w-full max-w-[1280px] mx-auto px-[28.8px] lg:px-[38px] xl:px-[47px] relative h-full flex flex-col justify-start pt-[158.8px] lg:pt-[205px] xl:pt-[259px] z-20">
+            {/* Main Headline Content (#5640:7229 on 785px: 432px x 94px / #5091:7219 on 1280px: 704px x 154px) */}
+            <div className="mb-[15.3px] lg:mb-[20px] xl:mb-[25px] w-full max-w-[432px] lg:max-w-[560px] xl:max-w-[704px]">
+              <h1 className="font-outfit text-white text-[39.25px] lg:text-[50px] xl:text-[64px] font-normal leading-[42.93px] lg:leading-[55px] xl:leading-[70px] drop-shadow-sm">
                 See yourself & the World
               </h1>
-              <div className="font-gochi text-white text-[40px] sm:text-[50px] md:text-[58px] xl:text-[68px] font-normal leading-[1.08] xl:leading-[70px] drop-shadow-sm">
-                Differently<span className="font-gochi text-[48px] sm:text-[60px] md:text-[70px] xl:text-[82px] leading-[70px]">.</span>
+              <div className="font-gochi text-white text-[41.7px] lg:text-[54px] xl:text-[68px] font-normal leading-[42.93px] lg:leading-[55px] xl:leading-[70px] drop-shadow-sm">
+                Differently<span className="font-gochi text-[50.29px] lg:text-[65px] xl:text-[82px] leading-[42.93px] lg:leading-[55px] xl:leading-[70px]">.</span>
               </div>
             </div>
 
-            {/* Search Box (#5091:7213, width: 684px, height: 55px, rounded-[210px]) */}
-            <div className="w-full max-w-[684px]">
+            {/* Search Box (#5640:7223 on 785px: 419.48px x 33.73px / #5091:7213 on 1280px: 684px x 55px) */}
+            <div className="w-full max-w-[419.5px] lg:max-w-[545px] xl:max-w-[684px]">
               <form action="/search" method="GET" className="w-full">
-                <div className="relative flex items-center w-full h-[55px] bg-white rounded-[210px] pl-6 md:pl-[30px] pr-[2px] shadow-[1px_1px_10px_0px_rgba(0,0,0,0.09)]">
+                <div className="relative flex items-center w-full h-[33.73px] lg:h-[44px] xl:h-[55px] bg-white rounded-[128.8px] xl:rounded-[210px] pl-[18.4px] lg:pl-[24px] xl:pl-[30px] pr-[1.2px] xl:pr-[2px] shadow-[0.61px_0.61px_6.13px_0px_rgba(0,0,0,0.09)] xl:shadow-[1px_1px_10px_0px_rgba(0,0,0,0.09)]">
                   <input
                     type="text"
                     name="q"
                     placeholder="Search Plans"
-                    className="w-full bg-transparent border-none outline-none text-[#1A1A1A] placeholder:text-[#1A1A1A]/60 font-outfit text-base sm:text-lg md:text-[24px] font-normal"
+                    className="w-full bg-transparent border-none outline-none text-[#1A1A1A] placeholder:text-[#1A1A1A]/60 font-outfit text-[14.8px] lg:text-[19px] xl:text-[24px] font-normal"
                   />
                   <button
                     type="submit"
                     aria-label="Search"
-                    className="w-[51px] h-[51px] rounded-full bg-[#1A1A1A] hover:bg-black transition-all duration-200 flex items-center justify-center text-white shrink-0 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
+                    className="w-[31.28px] h-[31.28px] lg:w-[40px] lg:h-[40px] xl:w-[51px] xl:h-[51px] rounded-full bg-[#1A1A1A] hover:bg-black transition-all duration-200 flex items-center justify-center text-white shrink-0 cursor-pointer shadow-md hover:scale-[1.02] active:scale-95"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-[13.5px] h-[13.5px] lg:w-[17px] lg:h-[17px] xl:w-[22px] xl:h-[22px]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -217,12 +217,12 @@ export default async function Home() {
             </div>
           </div>
 
-          {/* Bottom-Right White Logo Watermark (#5091:7210, width: 269px, height: 273.41px) */}
-          <div className="absolute -bottom-10 -right-10 md:-bottom-11 md:-right-11 xl:-bottom-[45px] xl:-right-[48px] z-10 pointer-events-none overflow-hidden select-none">
+          {/* Bottom-Right White Logo Watermark (#5640:7220 on 785px: 164.97px x 167.68px / #5091:7210 on 1280px: 269px x 273.41px) */}
+          <div className="absolute -bottom-[27.6px] -right-[29.4px] lg:-bottom-[36px] lg:-right-[38px] xl:-bottom-[45px] xl:-right-[48px] z-10 pointer-events-none overflow-hidden select-none">
             <img
               src="/nba_logo1.svg"
               alt=""
-              className="w-[200px] h-[200px] md:w-[240px] md:h-[240px] xl:w-[269px] xl:h-[273.41px] opacity-95 invert brightness-0 object-contain"
+              className="w-[164.97px] h-[167.68px] lg:w-[215px] lg:h-[218px] xl:w-[269px] xl:h-[273.41px] opacity-95 invert brightness-0 object-contain"
             />
           </div>
         </div>
@@ -307,74 +307,74 @@ export default async function Home() {
           </p>
         </div>
 
-        {/* Desktop View (#5091:7989, width: 1209px, height: 558px on 1280px width) */}
-        <div className="hidden md:block bg-[rgba(244,236,217,0.25)] rounded-[12px] pt-[40px] sm:pt-[48px] xl:pt-[53px] px-6 sm:px-10 md:px-12 xl:px-[64px] pb-[40px] sm:pb-[48px] xl:pb-[50px] relative overflow-hidden">
-          {/* Subheading & Title (#5091:7991 & #5091:7992 - zero excess gap) */}
-          <div className="mb-[30px] sm:mb-[38px] xl:mb-[46px]">
-            <div className="font-gochi text-[#254B02] text-2xl sm:text-[28px] md:text-[32px] font-normal leading-[1.05em] mb-0">
+        {/* Desktop View (#5640:7987 on 785px: 741.46px x 342.21px / #5091:7989 on 1280px: 1209px x 558px) */}
+        <div className="hidden md:block bg-[rgba(244,236,217,0.25)] rounded-[7.4px] xl:rounded-[12px] pt-[32.5px] lg:pt-[42px] xl:pt-[53px] px-[39px] lg:px-[50px] xl:px-[64px] pb-[30.7px] lg:pb-[40px] xl:pb-[50px] relative overflow-hidden">
+          {/* Subheading & Title (#5640:7989 on 785px / #5091:7991 & #5091:7992 on 1280px) */}
+          <div className="mb-[28px] lg:mb-[36px] xl:mb-[46px]">
+            <div className="font-gochi text-[#254B02] text-[19.6px] lg:text-[25px] xl:text-[32px] font-normal leading-[1.05em] mb-0">
               Small Group Adventures
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-[44px] xl:text-[48px] font-normal leading-[1.15em] text-[#1A1A1A] tracking-normal font-outfit mt-0">
+            <h2 className="text-[29.4px] lg:text-[38px] xl:text-[48px] font-normal leading-[1.15em] text-[#1A1A1A] tracking-normal font-outfit mt-0">
               Changing the way you see life and Yourself
             </h2>
           </div>
 
           {/* 3-Tier Row Structure matching Figma with dashed line locked to the exact center of the NBA marker icons */}
           <div className="w-full flex flex-col">
-            {/* Row 1: Illustrations (180px height, justify-between) */}
-            <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 md:gap-0 w-full mb-4">
-              <div className="flex justify-center items-end w-full md:w-[220px] h-[150px] sm:h-[165px] md:h-[180px] shrink-0">
+            {/* Row 1: Illustrations (#5640:8038, #5640:7991, #5640:8085 on 785px: 110.39px height / 1280px: 180px height) */}
+            <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 md:gap-0 w-full mb-2 lg:mb-3 xl:mb-4">
+              <div className="flex justify-center items-end w-full md:w-[135px] lg:w-[175px] xl:w-[220px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
                 <img src="/sg_1.svg" alt="Shared adventures" className="h-full w-auto object-contain" />
               </div>
-              <div className="flex justify-center items-end w-full md:w-[220px] h-[150px] sm:h-[165px] md:h-[180px] shrink-0">
+              <div className="flex justify-center items-end w-full md:w-[135px] lg:w-[175px] xl:w-[220px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
                 <img src="/sg_2.svg" alt="1000s of experiences" className="h-full w-auto object-contain" />
               </div>
-              <div className="flex justify-center items-end w-full md:w-[225px] h-[150px] sm:h-[165px] md:h-[180px] shrink-0">
+              <div className="flex justify-center items-end w-full md:w-[138px] lg:w-[180px] xl:w-[225px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
                 <img src="/sg_3.svg" alt="Creating positive change" className="h-full w-auto object-contain" />
               </div>
             </div>
 
-            {/* Row 2: Dashed Line perfectly intersecting the exact center of NBA marker icons */}
-            <div className="relative w-full hidden md:block my-3">
+            {/* Row 2: Dashed Line (#5640:8182) perfectly intersecting the exact center of NBA marker icons */}
+            <div className="relative w-full hidden md:block my-2 xl:my-3">
               {/* Dashed line locked at vertical 50% center of the marker row */}
-              <svg className="absolute left-[110px] right-[112.5px] top-1/2 -translate-y-1/2 w-[calc(100%-222.5px)] h-[2px] pointer-events-none z-0 overflow-visible" preserveAspectRatio="none">
-                <line x1="0" y1="1" x2="100%" y2="1" stroke="rgba(26, 26, 26, 0.4)" strokeWidth="1" strokeDasharray="8 8" />
+              <svg className="absolute left-[67.5px] lg:left-[87.5px] xl:left-[110px] right-[69px] lg:right-[90px] xl:right-[112.5px] top-1/2 -translate-y-1/2 w-[calc(100%-136.5px)] lg:w-[calc(100%-177.5px)] xl:w-[calc(100%-222.5px)] h-[2px] pointer-events-none z-0 overflow-visible" preserveAspectRatio="none">
+                <line x1="0" y1="1" x2="100%" y2="1" stroke="rgba(26, 26, 26, 0.4)" strokeWidth="1" strokeDasharray="6 6" />
               </svg>
 
               {/* 3 Marker icons centered over each column */}
               <div className="flex items-center justify-between w-full relative z-10">
-                <div className="w-[220px] flex justify-center items-center shrink-0">
-                  <div className="w-[20px] h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[18px] h-[18px] object-contain" />
+                <div className="w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center items-center shrink-0">
+                  <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
+                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
                   </div>
                 </div>
-                <div className="w-[220px] flex justify-center items-center shrink-0">
-                  <div className="w-[20px] h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[18px] h-[18px] object-contain" />
+                <div className="w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center items-center shrink-0">
+                  <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
+                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
                   </div>
                 </div>
-                <div className="w-[225px] flex justify-center items-center shrink-0">
-                  <div className="w-[20px] h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[18px] h-[18px] object-contain" />
+                <div className="w-[138px] lg:w-[180px] xl:w-[225px] flex justify-center items-center shrink-0">
+                  <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
+                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Row 3: Captions (#5091:8181 - #5091:8183, text-center) */}
-            <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-0 w-full mt-2">
-              <div className="w-full md:w-[220px] flex justify-center text-center shrink-0">
-                <p className="text-[#1A1A1A] font-normal text-base sm:text-lg md:text-[20px] leading-snug text-center max-w-[210px] mx-auto font-outfit">
+            {/* Row 3: Captions (#5640:8179 - #5640:8181 on 785px: 12.27px font / #5091:8181 - #5091:8183 on 1280px: 20px font) */}
+            <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-0 w-full mt-1.5 xl:mt-2">
+              <div className="w-full md:w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center text-center shrink-0">
+                <p className="text-[#1A1A1A] font-normal text-[12.3px] lg:text-[16px] xl:text-[20px] leading-tight xl:leading-snug text-center max-w-[130px] lg:max-w-[170px] xl:max-w-[210px] mx-auto font-outfit">
                   Shared adventures with<br className="hidden sm:inline" /> like-minded people
                 </p>
               </div>
-              <div className="w-full md:w-[220px] flex justify-center text-center shrink-0">
-                <p className="text-[#1A1A1A] font-normal text-base sm:text-lg md:text-[20px] leading-snug text-center max-w-[194px] mx-auto font-outfit">
+              <div className="w-full md:w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center text-center shrink-0">
+                <p className="text-[#1A1A1A] font-normal text-[12.3px] lg:text-[16px] xl:text-[20px] leading-tight xl:leading-snug text-center max-w-[120px] lg:max-w-[160px] xl:max-w-[194px] mx-auto font-outfit">
                   1000s of experiences,<br className="hidden sm:inline" /> over 100 countries
                 </p>
               </div>
-              <div className="w-full md:w-[225px] flex justify-center text-center shrink-0">
-                <p className="text-[#1A1A1A] font-normal text-base sm:text-lg md:text-[20px] leading-snug text-center max-w-[225px] mx-auto font-outfit">
+              <div className="w-full md:w-[138px] lg:w-[180px] xl:w-[225px] flex justify-center text-center shrink-0">
+                <p className="text-[#1A1A1A] font-normal text-[12.3px] lg:text-[16px] xl:text-[20px] leading-tight xl:leading-snug text-center max-w-[140px] lg:max-w-[180px] xl:max-w-[225px] mx-auto font-outfit">
                   Creating positive change around the place you visit
                 </p>
               </div>

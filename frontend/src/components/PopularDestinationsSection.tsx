@@ -142,7 +142,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
     };
 
     return (
-        <section className="w-full relative font-outfit mt-10 sm:mt-16 md:mt-20 xl:mt-[120px] mb-12 sm:mb-20">
+        <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20">
             {/* Mobile Header Area (#5640:5568 / Curate your Destination) */}
             <div className="block md:hidden mb-5">
                 {/* Badge (width: 73.33px, height: 15.17px) */}
@@ -189,14 +189,14 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 </div>
             </div>
 
-            {/* Desktop Header Area (#5091:7556) */}
-            <div className="hidden md:flex flex-col mb-5 sm:mb-6 xl:mb-[26px]">
-                {/* Badge (EL-19bb8319, width: 116px, height: 24px) */}
-                <div className="inline-flex items-center justify-center w-[116px] h-[24px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[110px] text-[14px] font-medium tracking-normal mb-[10px] font-outfit">
+            {/* Desktop Header Area (#5640:7561 on 785px / #5091:7556 on 1280px) */}
+            <div className="hidden md:flex flex-col mb-3.5 md:mb-4 lg:mb-5 xl:mb-[26px]">
+                {/* Badge (#5640:7562 on 785px: 71px x 14.72px / 1280px: 116px x 24px) */}
+                <div className="inline-flex items-center justify-center w-[71px] lg:w-[94px] xl:w-[116px] h-[14.7px] lg:h-[19px] xl:h-[24px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[67px] xl:rounded-[110px] text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium tracking-normal mb-[6.1px] lg:mb-[8px] xl:mb-[10px] font-outfit">
                     Tours Snippets
                 </div>
-                {/* Title (#5091:7559, 48px Outfit + Gochi Hand) */}
-                <h2 className="text-[30px] sm:text-[36px] md:text-[42px] xl:text-[48px] font-normal leading-[1.1] xl:leading-[52px] text-[#1A1A1A] tracking-normal font-outfit mt-0">
+                {/* Title (#5640:7564 on 785px: 29.44px Outfit / 1280px: 48px Outfit) */}
+                <h2 className="text-[29.44px] lg:text-[38px] xl:text-[48px] font-normal leading-[32px] lg:leading-[42px] xl:leading-[52px] text-[#1A1A1A] tracking-normal font-outfit mt-0">
                     Curate your <span className="font-gochi text-[#254B02]">Destination</span>
                 </h2>
             </div>
@@ -218,10 +218,10 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 {canScrollLeft && (
                     <button
                         onClick={() => scroll("left")}
-                        className="hidden md:flex absolute -left-3 md:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 bg-white/95 text-[#1A1A1A] rounded-full items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-[0px_4px_16px_rgba(0,0,0,0.15)] cursor-pointer"
+                        className="hidden md:flex absolute -left-3 md:-left-4 xl:-left-5 top-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 lg:w-9 lg:h-9 xl:w-11 xl:h-11 bg-white/95 text-[#1A1A1A] rounded-full items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-[0px_4px_16px_rgba(0,0,0,0.15)] cursor-pointer"
                         aria-label="Scroll left"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 xl:w-5 xl:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
@@ -231,19 +231,19 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                 {canScrollRight && (
                     <button
                         onClick={() => scroll("right")}
-                        className="hidden md:flex absolute -right-3 md:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 md:w-11 md:h-11 bg-white/95 text-[#1A1A1A] rounded-full items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-[0px_4px_16px_rgba(0,0,0,0.15)] cursor-pointer"
+                        className="hidden md:flex absolute -right-3 md:-right-4 xl:-right-5 top-1/2 -translate-y-1/2 w-8 h-8 md:w-8 md:h-8 lg:w-9 lg:h-9 xl:w-11 xl:h-11 bg-white/95 text-[#1A1A1A] rounded-full items-center justify-center transition-all duration-300 z-30 hover:scale-105 shadow-[0px_4px_16px_rgba(0,0,0,0.15)] cursor-pointer"
                         aria-label="Scroll right"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 xl:w-5 xl:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
                 )}
 
-                {/* Cards Container (Mobile: 238px x 332px; Desktop: 290px x 404px) */}
+                {/* Cards Container (#5640:7565 on 785px: 177.85px x 247.77px / #5091:7560 on 1280px: 290px x 404px) */}
                 <div 
                     ref={scrollRef}
-                    className="flex gap-[12px] md:gap-[16px] overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory"
+                    className="flex gap-[12px] md:gap-[9.8px] lg:gap-[13px] xl:gap-[16px] overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory"
                 >
                     {selectedCountries.map((country, index) => {
                         const continentSlug = 
@@ -259,21 +259,21 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                             <Link
                                 key={country._id || country.slug || index}
                                 href={linkHref}
-                                className="relative w-[238px] min-w-[238px] h-[332px] md:w-[290px] md:min-w-[290px] md:h-[404px] rounded-[10px] md:rounded-[12px] overflow-hidden snap-start shrink-0 block group/card shadow-sm hover:shadow-md transition-shadow duration-300"
+                                className="relative w-[238px] min-w-[238px] h-[332px] md:w-[177.85px] md:min-w-[177.85px] md:h-[247.77px] lg:w-[234px] lg:min-w-[234px] lg:h-[326px] xl:w-[290px] xl:min-w-[290px] xl:h-[404px] rounded-[10px] md:rounded-[7.4px] xl:rounded-[12px] overflow-hidden snap-start shrink-0 block group/card shadow-sm hover:shadow-md transition-shadow duration-300"
                             >
-                                {/* Card Background Image (#5091:7562) */}
+                                {/* Card Background Image (#5640:7567 / #5091:7562) */}
                                 <img
                                     src={country.image || fallbackImage}
                                     alt={country.name}
                                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover/card:scale-105"
                                 />
 
-                                {/* Top Right Circular Arrow Pill */}
+                                {/* Top Right Circular Arrow Pill (#5640:7569) */}
                                 <div
-                                    className="absolute top-[12px] md:top-[17px] right-[12px] md:right-[17px] w-[28px] h-[28px] md:w-[34px] md:h-[34px] rounded-full bg-white flex items-center justify-center text-[#1A1A1A] z-20 shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform duration-300 group-hover/card:scale-110"
+                                    className="absolute top-[12px] md:top-[10px] lg:top-[13px] xl:top-[17px] right-[12px] md:right-[10px] lg:right-[13px] xl:right-[17px] w-[28px] h-[28px] md:w-[24.5px] md:h-[24.5px] lg:w-[28px] lg:h-[28px] xl:w-[34px] xl:h-[34px] rounded-full bg-white flex items-center justify-center text-[#1A1A1A] z-20 shadow-[0_2px_8px_rgba(0,0,0,0.12)] transition-transform duration-300 group-hover/card:scale-110"
                                 >
                                     <svg 
-                                        className="w-[13px] h-[13px] md:w-[17px] md:h-[17px] text-[#1A1A1A] transition-transform duration-300 ease-out group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5" 
+                                        className="w-[13px] h-[13px] md:w-[11px] md:h-[11px] lg:w-[14px] lg:h-[14px] xl:w-[17px] xl:h-[17px] text-[#1A1A1A] transition-transform duration-300 ease-out group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5" 
                                         viewBox="0 0 24 24" 
                                         fill="none" 
                                         stroke="currentColor" 
@@ -287,18 +287,18 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
 
                                 {/* Bottom Gradient Overlay */}
                                 <div 
-                                    className="absolute bottom-0 left-0 right-0 h-[120px] pointer-events-none z-10 rounded-b-[10px] md:rounded-b-[12px]"
+                                    className="absolute bottom-0 left-0 right-0 h-[120px] pointer-events-none z-10 rounded-b-[10px] md:rounded-b-[7.4px] xl:rounded-b-[12px]"
                                     style={{
                                         background: "linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 35%, rgba(0, 0, 0, 0.95) 100%)"
                                     }}
                                 ></div>
 
-                                {/* Text Content */}
-                                <div className="absolute bottom-[16px] md:bottom-[20px] left-[16px] md:left-[22px] right-[16px] md:right-[22px] z-20 flex flex-col justify-end pointer-events-none">
-                                    <h3 className="text-white text-[16px] md:text-[20px] font-normal leading-normal font-outfit drop-shadow-sm">
+                                {/* Text Content (#5640:7577 / #5640:7578) */}
+                                <div className="absolute bottom-[16px] md:bottom-[12px] lg:bottom-[16px] xl:bottom-[20px] left-[16px] md:left-[13.5px] lg:left-[18px] xl:left-[22px] right-[16px] md:right-[13.5px] lg:right-[18px] xl:right-[22px] z-20 flex flex-col justify-end pointer-events-none">
+                                    <h3 className="text-white text-[16px] md:text-[12.27px] lg:text-[16px] xl:text-[20px] font-normal leading-normal font-outfit drop-shadow-sm">
                                         {country.name}
                                     </h3>
-                                    <p className="text-white/60 text-[10.5px] md:text-[12px] font-normal leading-normal font-outfit tracking-normal mt-0.5 drop-shadow-xs">
+                                    <p className="text-white/60 text-[10.5px] md:text-[8px] lg:text-[10px] xl:text-[12px] font-normal leading-normal font-outfit tracking-normal mt-0.5 drop-shadow-xs">
                                         {subtitleText}
                                     </p>
                                 </div>

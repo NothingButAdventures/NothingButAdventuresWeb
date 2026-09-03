@@ -88,10 +88,10 @@ function ReviewCard({
 }) {
   return (
     <div
-      className={`rounded-[12.2px] p-5 shrink-0 bg-[rgba(181,185,177,0.12)] border border-[rgba(181,185,177,0.15)] transition-colors ${className}`}
+      className={`rounded-[7.5px] xl:rounded-[12.2px] p-3 lg:p-4 xl:p-5 shrink-0 bg-[rgba(181,185,177,0.12)] border border-[rgba(181,185,177,0.15)] transition-colors ${className}`}
     >
-      <div className="flex items-center gap-3.5 mb-3">
-        <div className="w-[48px] h-[48px] rounded-full overflow-hidden shrink-0 relative bg-gray-200">
+      <div className="flex items-center gap-2 lg:gap-2.5 xl:gap-3.5 mb-1.5 xl:mb-3">
+        <div className="w-[29.4px] lg:w-[38px] xl:w-[48px] h-[29.4px] lg:h-[38px] xl:h-[48px] rounded-full overflow-hidden shrink-0 relative bg-gray-200">
           <img
             src={review.avatar}
             alt={review.name}
@@ -99,18 +99,18 @@ function ReviewCard({
           />
         </div>
         <div>
-          <h4 className="font-medium text-[14px] text-[#1A1A1A] mb-0.5 font-outfit">
+          <h4 className="font-medium text-[9.81px] lg:text-[12px] xl:text-[14px] text-[#1A1A1A] mb-0.5 font-outfit">
             {review.name}
           </h4>
-          <div className="flex items-center gap-1.5">
-            <span className="font-normal text-[12px] text-[#1A1A1A]/70 font-outfit">
+          <div className="flex items-center gap-1 xl:gap-1.5">
+            <span className="font-normal text-[7.36px] lg:text-[10px] xl:text-[12px] text-[#1A1A1A]/70 font-outfit">
               {review.rating}
             </span>
             <div className="flex gap-0.5 text-[#254B02]">
               {[1, 2, 3, 4, 5].map((star) => (
                 <svg
                   key={star}
-                  className="w-3 h-3 text-[#254B02]"
+                  className="w-2 h-2 lg:w-2.5 lg:h-2.5 xl:w-3 xl:h-3 text-[#254B02]"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -121,7 +121,7 @@ function ReviewCard({
           </div>
         </div>
       </div>
-      <p className="text-[14px] font-normal text-[rgba(26,26,26,0.65)] leading-[22px] tracking-[-0.015em] font-outfit">
+      <p className="text-[8.59px] lg:text-[11px] xl:text-[14px] font-normal text-[rgba(26,26,26,0.65)] leading-[13.5px] lg:leading-[17px] xl:leading-[22px] tracking-[-0.015em] font-outfit">
         {review.review}
       </p>
     </div>
@@ -159,15 +159,15 @@ export default function ReviewsSection({
       )
         return;
 
-      // Only apply sticky-scroll translation on desktop screens
-      if (window.innerWidth < 1024) {
+      // Apply sticky-scroll translation on tablet and desktop screens (>= 768px)
+      if (window.innerWidth < 768) {
         setTranslateY(0);
         return;
       }
 
       const containerRect = containerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      const stickyTop = 60;
+      const stickyTop = window.innerWidth >= 1280 ? 60 : 40;
       const totalScrollDistance = containerRect.height - viewportHeight;
 
       if (totalScrollDistance <= 0) {
@@ -204,24 +204,20 @@ export default function ReviewsSection({
   return (
     <div
       ref={containerRef}
-      className="w-full relative font-outfit mt-10 sm:mt-16 md:mt-20 xl:mt-[120px] mb-10 sm:mb-14 lg:min-h-[220vh]"
+      className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20 md:min-h-[220vh]"
     >
-      {/* Mobile View (#5640:5600, #5640:5607, #5640:5617, #5640:5632) */}
-      <div className="block lg:hidden w-full max-w-[360px] mx-auto">
-        {/* Header (#5640:5600) */}
+      <div className="block md:hidden w-full max-w-[360px] mx-auto">
         <div className="mb-5">
-          {/* Badge (#5640:5602) */}
           <div className="h-[15.35px] bg-[rgba(26,26,26,0.05)] rounded-[70.35px] px-[6.4px] inline-flex items-center text-[8.85px] text-[rgba(26,26,26,0.55)] font-medium font-outfit mb-2">
             Testimonials
           </div>
 
-          {/* Headline + Subtitle Row (#5640:5604) */}
           <div className="flex items-end justify-between gap-2 w-full">
             <h2 className="text-[26px] font-normal leading-[1.15] text-[#1A1A1A] tracking-normal font-outfit">
-              What travellers say about <br />
-              <span className="font-gochi text-[#254B02]">our tours</span>
+              What travellers say <br />
+              <span className="font-gochi text-[#254B02]">about our tours</span>
             </h2>
-            <p className="text-[10.11px] text-[#254B02] font-normal leading-[14px] font-outfit text-right max-w-[160px] shrink-0 self-end">
+            <p className="text-[9.8px] text-[#254B02] font-normal leading-[13px] text-right font-outfit max-w-[120px]">
               Enjoy journey we organise is built on trust, safety and unforgettable views
             </p>
           </div>
@@ -352,33 +348,29 @@ export default function ReviewsSection({
         </div>
       </div>
 
-      {/* Desktop Sticky View (#5091:7614, hidden lg:block) */}
-      <section className="hidden lg:block w-full lg:sticky lg:top-[60px]">
-        {/* Header Area (#5091:7614, gap to cards: 40.7px) */}
-        <div className="flex flex-row items-end justify-between mb-8 sm:mb-9 xl:mb-[41px] gap-4 font-outfit">
+      <section className="hidden md:block w-full md:sticky md:top-[40px] xl:top-[60px]">
+        <div className="flex flex-row items-end justify-between mb-5 md:mb-[25px] lg:mb-[32px] xl:mb-[41px] gap-4 font-outfit">
           <div className="flex flex-col items-start">
-            {/* Reviews Pill Badge (#5091:7616, 72px x 24px) */}
             <div
-              className={`w-fit inline-flex items-center justify-center px-3 py-1 h-[24px] rounded-[110px] text-[14px] font-medium tracking-normal mb-[10px] font-outfit ${
+              className={`w-fit inline-flex items-center justify-center px-2 lg:px-2.5 xl:px-3 py-0.5 xl:py-1 h-[14.7px] lg:h-[19px] xl:h-[24px] rounded-[67px] xl:rounded-[110px] text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium tracking-normal mb-[6.1px] lg:mb-[8px] xl:mb-[10px] font-outfit ${
                 pillClasses || "bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)]"
               }`}
             >
               Reviews
             </div>
-            {/* Title (#5091:7619, 48px Outfit + Gochi Hand) */}
             {title ? (
               <h2
                 className={`font-normal tracking-normal font-outfit mt-0 ${
                   titleClassName ||
-                  "text-[48px] leading-[52px] text-[#1A1A1A]"
+                  "text-[29.44px] lg:text-[38px] xl:text-[48px] leading-[32px] lg:leading-[42px] xl:leading-[52px] text-[#1A1A1A]"
                 }`}
               >
                 {title}
               </h2>
             ) : (
               <h2
-                className={`font-normal leading-[52px] text-[#1A1A1A] tracking-normal font-outfit mt-0 ${
-                  titleClassName || "text-[48px]"
+                className={`font-normal leading-[32px] lg:leading-[42px] xl:leading-[52px] text-[#1A1A1A] tracking-normal font-outfit mt-0 ${
+                  titleClassName || "text-[29.44px] lg:text-[38px] xl:text-[48px]"
                 }`}
               >
                 What travellers say about <br />
@@ -386,60 +378,53 @@ export default function ReviewsSection({
               </h2>
             )}
           </div>
-          {/* Subtitle (#5091:7620, width: 288px, 16px Outfit, right aligned) */}
-          <div className="max-w-[288px] text-right self-end">
-            <p className="text-[16px] text-[#254B02] font-normal leading-[24.42px] tracking-[-0.0286em] font-outfit">
+          <div className="max-w-[176.6px] lg:max-w-[230px] xl:max-w-[288px] text-right self-end">
+            <p className="text-[9.81px] lg:text-[13px] xl:text-[16px] text-[#254B02] font-normal leading-[15px] lg:leading-[19px] xl:leading-[24.42px] tracking-[-0.0286em] font-outfit">
               Enjoy journey we organise is built on trust, safety and
               unforgettable views
             </p>
           </div>
         </div>
 
-        {/* 3-Column Reviews Grid (#5091:7621, gap: 16px, height: 418px) */}
-        <div className="grid grid-cols-[386fr_427fr_351fr] gap-[16px] h-[418px] items-stretch">
-          {/* Left Card: Rating & CTA (#5091:7622: width: 386px, height: 418px, bg: rgba(181,185,177,0.2)) */}
-          <div className="rounded-[12.2px] p-[32px] flex flex-col justify-between h-[418px] bg-[rgba(181,185,177,0.2)] shadow-xs">
-            {/* Rating Block (#5091:7626, #5091:7627, #5091:7624) */}
-            <div className="flex items-start gap-4">
+        <div className="grid grid-cols-[386fr_427fr_351fr] gap-[9.98px] lg:gap-[13px] xl:gap-[16px] h-[256.5px] lg:h-[335px] xl:h-[418px] items-stretch">
+          <div className="rounded-[7.5px] xl:rounded-[12.2px] p-[19.5px] lg:p-[25px] xl:p-[32px] flex flex-col justify-between h-[256.5px] lg:h-[335px] xl:h-[418px] bg-[rgba(181,185,177,0.2)] shadow-xs">
+            <div className="flex items-start gap-2.5 lg:gap-3 xl:gap-4">
               <div className="flex items-baseline font-normal text-[#1A1A1A]">
-                <span className="text-[48px] font-normal leading-[58px] tracking-[0.0083em]">
+                <span className="text-[29.44px] lg:text-[38px] xl:text-[48px] font-normal leading-[35.6px] lg:leading-[46px] xl:leading-[58px] tracking-[0.0083em]">
                   4.9
                 </span>
-                <span className="text-[24px] text-[rgba(26,26,26,0.4)] font-normal ml-1">
+                <span className="text-[14.7px] lg:text-[19px] xl:text-[24px] text-[rgba(26,26,26,0.4)] font-normal ml-0.5 xl:ml-1">
                   /5
                 </span>
               </div>
-              <p className="text-[14px] text-[#1A1A1A] font-normal leading-[20px] tracking-normal mt-2 font-outfit">
+              <p className="text-[8.59px] lg:text-[11px] xl:text-[14px] text-[#1A1A1A] font-normal leading-[12px] lg:leading-[16px] xl:leading-[20px] tracking-normal mt-1 xl:mt-2 font-outfit">
                 Based on 280+ verified <br /> travellers
               </p>
             </div>
 
-            {/* Checklist Feature Points (#5303:8916, #5303:8917, #5303:8918) */}
-            <div className="flex flex-col gap-2.5 my-2">
-              <div className="flex items-center gap-2 text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
+            <div className="flex flex-col gap-1.5 lg:gap-2 xl:gap-2.5 my-1 lg:my-1.5 xl:my-2">
+              <div className="flex items-center gap-1.5 xl:gap-2 text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
                 <span className="font-bold text-[#1A1A1A]">✓</span> Verified
                 &amp; Trusted Trips
               </div>
-              <div className="flex items-center gap-2 text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
+              <div className="flex items-center gap-1.5 xl:gap-2 text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
                 <span className="font-bold text-[#1A1A1A]">✓</span> Flexible
                 Booking Options
               </div>
-              <div className="flex items-center gap-2 text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
+              <div className="flex items-center gap-1.5 xl:gap-2 text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium text-[rgba(26,26,26,0.6)] font-outfit">
                 <span className="font-bold text-[#1A1A1A]">✓</span> Real
                 Experiences, Real People
               </div>
             </div>
 
-            {/* CTA Block (#5091:7625, #5091:7663) */}
             <div>
-              <p className="text-[14px] text-[#1A1A1A] font-normal leading-[22px] tracking-normal mb-3 max-w-[280px] font-outfit">
+              <p className="text-[8.59px] lg:text-[11px] xl:text-[14px] text-[#1A1A1A] font-normal leading-[13.5px] lg:leading-[17px] xl:leading-[22px] tracking-normal mb-2 xl:mb-3 max-w-[280px] font-outfit">
                 Ready to plan your own journey? Let’s get started!
               </p>
-              {/* Composite Action Buttons (#5091:7663) */}
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5 xl:gap-2.5">
                 <Link
                   href="/trips"
-                  className={`inline-flex items-center justify-center text-white h-[46px] px-6 rounded-full font-light text-[16px] transition-all cursor-pointer shadow-xs font-outfit ${
+                  className={`inline-flex items-center justify-center text-white h-[28.2px] lg:h-[37px] xl:h-[46px] px-3.5 lg:px-5 xl:px-6 rounded-full font-light text-[9.81px] lg:text-[13px] xl:text-[16px] transition-all cursor-pointer shadow-xs font-outfit ${
                     btnClasses || "bg-[#1A1A1A] hover:bg-black"
                   }`}
                 >
@@ -447,11 +432,11 @@ export default function ReviewsSection({
                 </Link>
                 <Link
                   href="/trips"
-                  className="inline-flex items-center justify-center border border-[rgba(26,26,26,0.25)] hover:border-[#1A1A1A] hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white w-[46px] h-[46px] rounded-full transition-all shrink-0 cursor-pointer shadow-xs group"
+                  className="inline-flex items-center justify-center border border-[rgba(26,26,26,0.25)] hover:border-[#1A1A1A] hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white w-[28.2px] lg:w-[37px] xl:w-[46px] h-[28.2px] lg:h-[37px] xl:h-[46px] rounded-full transition-all shrink-0 cursor-pointer shadow-xs group"
                   aria-label="Plan Your Trip"
                 >
                   <svg
-                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    className="w-2.5 h-2.5 lg:w-3.5 lg:h-3.5 xl:w-4 xl:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -468,8 +453,7 @@ export default function ReviewsSection({
             </div>
           </div>
 
-          {/* Middle Card: Feature Image Review (#5091:7628: width: 427px, height: 418px) */}
-          <div className="relative rounded-[12.2px] overflow-hidden h-[418px] w-full bg-gray-900 shadow-xs">
+          <div className="relative rounded-[7.5px] xl:rounded-[12.2px] overflow-hidden h-[256.5px] lg:h-[335px] xl:h-[418px] w-full bg-gray-900 shadow-xs">
             <Image
               src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?q=80&w=3540&auto=format&fit=crop"
               alt="Travellers exploring"
@@ -484,28 +468,25 @@ export default function ReviewsSection({
               }}
             />
 
-            <div className="absolute bottom-6 left-6 right-6 text-white z-10 font-outfit">
-              <p className="text-white/60 text-[14px] mb-1.5 font-normal tracking-normal font-outfit">
+            <div className="absolute bottom-3.5 lg:bottom-5 xl:bottom-6 left-3.5 lg:left-5 xl:left-6 right-3.5 lg:right-5 xl:right-6 text-white z-10 font-outfit">
+              <p className="text-white/60 text-[8.59px] lg:text-[11px] xl:text-[14px] mb-1 xl:mb-1.5 font-normal tracking-normal font-outfit">
                 Alexa, 23 March 2025
               </p>
-              <p className="text-[20px] font-normal leading-[26.46px] tracking-[-0.0225em] text-white font-outfit">
+              <p className="text-[12.27px] lg:text-[16px] xl:text-[20px] font-normal leading-[16.2px] lg:leading-[21px] xl:leading-[26.46px] tracking-[-0.0225em] text-white font-outfit">
                 “Beautiful beaches, vibrant nightlife, delicious seafood.”
               </p>
             </div>
           </div>
 
-          {/* Right Column: User Scroll-linked Testimonials (#5091:7634: width: 351px, height: 418px) */}
           <div
             ref={scrollWrapperRef}
-            className="flex flex-col overflow-hidden relative h-[418px] rounded-[12.2px]"
+            className="flex flex-col overflow-hidden relative h-[256.5px] lg:h-[335px] xl:h-[418px] rounded-[7.5px] xl:rounded-[12.2px]"
           >
-            {/* Top subtle fade gradient (#5091:7636) */}
-            <div className="absolute top-0 left-0 right-0 h-[45px] bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-20" />
+            <div className="absolute top-0 left-0 right-0 h-[28px] xl:h-[45px] bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-20" />
 
-            {/* Scrollable Track - driven smoothly by page scroll */}
             <div
               ref={trackRef}
-              className="flex flex-col gap-3.5 will-change-transform py-1"
+              className="flex flex-col gap-2 lg:gap-2.5 xl:gap-3.5 will-change-transform py-1"
               style={{
                 transform: `translate3d(0, -${translateY}px, 0)`,
                 transition: "transform 0.1s cubic-bezier(0.25, 1, 0.5, 1)",
@@ -516,8 +497,7 @@ export default function ReviewsSection({
               ))}
             </div>
 
-            {/* Bottom subtle fade gradient (#5091:7637) */}
-            <div className="absolute bottom-0 left-0 right-0 h-[70px] bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-20" />
+            <div className="absolute bottom-0 left-0 right-0 h-[43px] xl:h-[70px] bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-20" />
           </div>
         </div>
       </section>

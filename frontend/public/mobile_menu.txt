@@ -1,0 +1,51 @@
+# Mobile Menu Design Specifications (Node #5823:911)
+
+## General Dimensions & Backdrop
+- **Viewport Canvas**: 402px x 837px
+- **Backdrop Overlay**: `bg-black/30` (`rgba(0, 0, 0, 0.3)`) covering full viewport
+- **Drawer Slide-Over**:
+  - Position: Right-aligned (`right-0 top-0 h-full`)
+  - Width: `w-[282px]` (70% width on 402px viewport, max-w-[282px])
+  - Background: `bg-white` (`#FFFFFF`)
+  - Shadow: Soft backdrop and elevation
+
+## Header Bar (Sticky Top)
+- **Height**: 63px (y: 0 to 63px)
+- **Background**: `bg-white`
+- **Box Shadow**: `0px 1px 24px 0px rgba(0, 0, 0, 0.04)`
+- **Left**: Logo "Nothing but Adventures." with spiral symbol (width ~105px, height ~23.5px)
+- **Right**: Close Button (X icon, 20px x 20px, black stroke, stroke-width: 2px, rounded-full hover effect)
+
+## Navigation Menu Structure & Dimensions
+All menu items have exact row height: **34px** (`h-[34px]`), padding `px-4`, font `text-[14px]` font-outfit / font-sans font-normal, text color `#1A1A1A`, with a 0.5px subtle divider `border-b border-black/[0.08]` (`rgba(0,0,0,0.08)`).
+
+### Top Navigation Items:
+1. **Destination**
+   - Height: 34px
+   - Background (Active/Hover): `#F4F5F3`
+   - Right Icon: Chevron Right (`>`) in gray/black
+   - Link: `/destinations` or opens destination sub-accordion
+2. **Adventure**
+   - Height: 34px
+   - Link: `/trips`
+3. **Deals**
+   - Height: 34px
+   - Link: `/deals`
+4. **Why Us**
+   - Height: 34px
+   - Link: `/why-nba`
+
+### Bottom Utility Navigation Items (Aligned towards bottom):
+Divided with border line `border-t border-black/[0.08]`. Each row has height **34px**, flex items with icon (16px x 16px) + text:
+1. **Wishlist**
+   - Icon: Heart outline (`w-4 h-4 text-[#1A1A1A]`)
+   - Link: `/wishlist`
+2. **Manage bookings**
+   - Icon: User profile outline (`w-4 h-4 text-[#1A1A1A]`)
+   - Link: `/bookings` (or `/profile`)
+3. **Contact Us**
+   - Icon: Phone / handset outline (`w-4 h-4 text-[#1A1A1A]`)
+   - Link: `/contact` (or `tel:+911234567890`)
+4. **Subscribe to Emails**
+   - Icon: Mail / envelope outline (`w-4 h-4 text-[#1A1A1A]`)
+   - Action: Opens subscribe popup or navigates to `#subscribe`

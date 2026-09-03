@@ -24,6 +24,24 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDestinationOpen, setIsDestinationOpen] = useState(false);
+  const [isAdventureOpen, setIsAdventureOpen] = useState(false);
+  const [continents, setContinents] = useState<{ _id?: string; name: string; slug: string }[]>([
+    { name: "Asia", slug: "asia" },
+    { name: "Europe", slug: "europe" },
+    { name: "Africa", slug: "africa" },
+    { name: "North America", slug: "north-america" },
+    { name: "South America", slug: "south-america" },
+    { name: "Oceania & Polar", slug: "oceania" },
+  ]);
+  const [travelStyles, setTravelStyles] = useState<{ _id?: string; name: string; slug: string }[]>([
+    { name: "Classic Adventures", slug: "classic" },
+    { name: "Active & Hiking", slug: "active-hiking" },
+    { name: "Wildlife & Safari", slug: "wildlife-safari" },
+    { name: "Cultural Journeys", slug: "cultural-journeys" },
+    { name: "Family Holidays", slug: "family-holidays" },
+    { name: "Solo Travel", slug: "solo-travel" },
+  ]);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<"adventures" | "interests" | "destinations" | "why-us" | "deals" | null>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,6 +50,31 @@ export default function Header() {
   const [show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const openedAtTopRef = useRef(false);
+
+  // Fetch continents & travel styles for mobile menu
+  useEffect(() => {
+    const fetchMenuData = async () => {
+      try {
+        const [cRes, tsRes] = await Promise.all([
+          fetch(`${api.baseURL}/continents`),
+          fetch(`${api.baseURL}/travel-styles`),
+        ]);
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          const cList = cData.data?.continents || cData.data || [];
+          if (cList.length > 0) setContinents(cList);
+        }
+        if (tsRes.ok) {
+          const tsData = await tsRes.json();
+          const tsList = tsData.data?.travelStyles || tsData.data || [];
+          if (tsList.length > 0) setTravelStyles(tsList);
+        }
+      } catch (err) {
+        // use default fallback data
+      }
+    };
+    fetchMenuData();
+  }, []);
 
   useEffect(() => {
     if (activeMenu) {
@@ -90,6 +133,18 @@ export default function Header() {
     setIsUserMenuOpen(false);
     setActiveMenu(null);
   }, [pathname]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMenuOpen]);
 
   const checkAuth = async () => {
     try {
@@ -156,20 +211,20 @@ export default function Header() {
         {activeMenu && (
           <div className="absolute inset-0 bg-black/25 z-[55] pointer-events-none transition-opacity duration-300 rounded-none" />
         )}
-        <div className="w-full max-w-[1280px] mx-auto px-[20.62px] sm:px-6 md:px-8 xl:px-[35px] h-[63px] md:h-[67px]">
+        <div className="w-full max-w-[1280px] mx-auto px-[21.9px] lg:px-[28px] xl:px-[35px] h-[63px] md:h-[41.1px] lg:h-[54px] xl:h-[67px]">
           <div className="flex justify-between items-center h-full">
-            {/* Desktop Logo: 139px x 31px (Icon 30px x 30.5px, Text 101px x 31px, Gap 8px) */}
+            {/* Desktop Logo (#5640:8231 on 785px: 102.29px x 22.81px / 1280px: 139px x 31px) */}
             <div className="hidden md:flex items-center justify-start shrink-0">
-              <Link href="/" className="flex items-center gap-[8px]">
+              <Link href="/" className="flex items-center gap-[4.9px] lg:gap-[6.5px] xl:gap-[8px]">
                 <img
                   src="/nba_logo1.svg"
                   alt="Nothing But Adventures Icon"
-                  className="w-[30px] h-[30.5px] object-contain transition-all duration-300"
+                  className="w-[18.4px] h-[18.7px] lg:w-[24px] lg:h-[24.5px] xl:w-[30px] xl:h-[30.5px] object-contain transition-all duration-300"
                 />
                 <img
                   src="/new_ssss.svg"
                   alt="Nothing But Adventures"
-                  className="w-[101px] h-[31px] object-contain transition-all duration-300"
+                  className="w-[62px] h-[19px] lg:w-[81px] lg:h-[25px] xl:w-[101px] xl:h-[31px] object-contain transition-all duration-300"
                 />
               </Link>
             </div>
@@ -193,9 +248,9 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* Desktop Navigation: 38px pill with uniform 2.5px padding, matching x and y gaps, and fixed button width on hover */}
+            {/* Desktop Navigation (#5640:8226 / #5640:8238 on 785px: 23.3px height, rounded 7.36px / 1280px: 38px height, rounded 12px) */}
             <div className="hidden md:flex justify-center items-center">
-              <nav className={`relative z-[60] flex items-center h-[38px] rounded-[12px] p-[2.5px] gap-0.5 xl:gap-1 transition-colors duration-200 ${activeMenu ? "bg-white shadow-xs" : "bg-[rgba(181,185,177,0.15)]"}`}>
+              <nav className={`relative z-[60] flex items-center h-[23.3px] lg:h-[30px] xl:h-[38px] rounded-[7.4px] lg:rounded-[9.5px] xl:rounded-[12px] p-[1.5px] lg:p-[2px] xl:p-[2.5px] gap-[1px] lg:gap-0.5 xl:gap-1 transition-colors duration-200 ${activeMenu ? "bg-white shadow-xs" : "bg-[rgba(181,185,177,0.15)]"}`}>
                 <button
                   type="button"
                   onMouseEnter={() => handleMenuEnter("destinations")}
@@ -203,7 +258,7 @@ export default function Header() {
                     setActiveMenu("destinations");
                   }}
                   aria-expanded={activeMenu === "destinations"}
-                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "destinations"
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "destinations"
                     ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
                     : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
@@ -217,7 +272,7 @@ export default function Header() {
                     setActiveMenu("adventures");
                   }}
                   aria-expanded={activeMenu === "adventures"}
-                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "adventures"
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "adventures"
                     ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
                     : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
@@ -231,7 +286,7 @@ export default function Header() {
                     setActiveMenu("interests");
                   }}
                   aria-expanded={activeMenu === "interests"}
-                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "interests"
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "interests"
                     ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
                     : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
@@ -245,7 +300,7 @@ export default function Header() {
                     setActiveMenu("deals");
                   }}
                   aria-expanded={activeMenu === "deals"}
-                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "deals"
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "deals"
                     ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
                     : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
@@ -259,7 +314,7 @@ export default function Header() {
                     setActiveMenu("why-us");
                   }}
                   aria-expanded={activeMenu === "why-us"}
-                  className={`flex items-center justify-center h-[33px] px-3.5 xl:px-5 rounded-[9px] font-outfit text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "why-us"
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "why-us"
                     ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
                     : "text-[#1A1A1A] font-light hover:text-black"
                     }`}
@@ -269,21 +324,21 @@ export default function Header() {
               </nav>
             </div>
 
-            {/* User Authentication & Action: 85.21px x 23.67px (Phone 23.67px, User 23.67px, Gap ~37.87px) */}
-            <div className="hidden md:flex items-center justify-end shrink-0 w-[85.21px] gap-[37.87px]">
+            {/* User Authentication & Action (#5640:8223 on 785px: 52.26px x 14.52px / 1280px: 85.21px x 23.67px) */}
+            <div className="hidden md:flex items-center justify-end shrink-0 w-[52.3px] lg:w-[68px] xl:w-[85.21px] gap-[23.2px] lg:gap-[30px] xl:gap-[37.87px]">
               {isLoading ? (
                 <div className="flex items-center space-x-2 animate-pulse">
-                  <div className="w-[23.67px] h-[23.67px] bg-gray-200 rounded-full"></div>
+                  <div className="w-[14.5px] h-[14.5px] lg:w-[19px] lg:h-[19px] xl:w-[23.67px] xl:h-[23.67px] bg-gray-200 rounded-full"></div>
                 </div>
               ) : (
                 <>
                   {/* Call Icon */}
                   <a
                     href="tel:+1234567890"
-                    className="flex items-center justify-center w-[23.67px] h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
+                    className="flex items-center justify-center w-[14.5px] h-[14.5px] lg:w-[19px] lg:h-[19px] xl:w-[23.67px] xl:h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                     aria-label="Call us"
                   >
-                    <img src="/phone-nba.svg" alt="Call" className="w-[23.67px] h-[23.67px]" />
+                    <img src="/phone-nba.svg" alt="Call" className="w-full h-full object-contain" />
                   </a>
 
                   {/* Profile Icon */}
@@ -291,17 +346,17 @@ export default function Header() {
                     <div className="relative flex items-center shrink-0">
                       <button
                         onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                        className="flex items-center justify-center w-[23.67px] h-[23.67px] rounded-full overflow-hidden shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
+                        className="flex items-center justify-center w-[14.5px] h-[14.5px] lg:w-[19px] lg:h-[19px] xl:w-[23.67px] xl:h-[23.67px] rounded-full overflow-hidden shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                         aria-label="User profile"
                       >
                         {user.avatar || user.photo ? (
                           <img
                             src={user.avatar || user.photo}
                             alt={user.name || "Profile"}
-                            className="w-[23.67px] h-[23.67px] object-cover rounded-full border border-black/25"
+                            className="w-full h-full object-cover rounded-full border border-black/25"
                           />
                         ) : (
-                          <img src="/user-nba.svg" alt="Profile" className="w-[23.67px] h-[23.67px]" />
+                          <img src="/user-nba.svg" alt="Profile" className="w-full h-full object-contain" />
                         )}
                       </button>
 
@@ -377,51 +432,36 @@ export default function Header() {
               )}
             </div>
 
-            {/* Mobile Menu Button: 35.05px x 20.62px */}
-            <div className="flex md:hidden items-center justify-center w-[35.05px] h-[20.62px] shrink-0">
+            {/* Mobile Menu Toggle Button (Hamburger / Close matching Figma #5823:911) */}
+            <div className="flex md:hidden items-center justify-center w-[35.05px] h-[24px] shrink-0">
               <button
                 type="button"
-                aria-label="Menu"
-                className="w-full h-full flex flex-col justify-between items-stretch py-[1.5px] cursor-pointer focus:outline-none select-none"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen((prev) => !prev);
+                }}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                className="w-full h-full flex items-center justify-center cursor-pointer focus:outline-none select-none relative p-1"
               >
-                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
-                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
-                <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                {isMenuOpen ? (
+                  /* Exact Figma Close Icon (#5823:911) */
+                  <svg className="w-[19px] h-[17px] text-black" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M3.248 0L9.492 7.2493L15.736 0H19L11.211 8.5L19 17H15.736L9.492 9.9831L3.248 17H0L7.695 8.5L0 0H3.248Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                ) : (
+                  /* 3-Bar Hamburger */
+                  <div className="w-full h-[18px] flex flex-col justify-between items-stretch py-[1px]">
+                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                  </div>
+                )}
               </button>
             </div>
           </div>
-
-          {/* Mobile Navigation */}
-          {isMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-100 font-sans">
-              <div className="flex flex-col space-y-4">
-                <Link href="/" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
-                <Link href="/trips" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Trips</Link>
-                <Link href="/blogs" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-                <Link href="/destinations" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Destinations</Link>
-                <Link href="/travel-styles" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Adventures</Link>
-                <Link href="/trips" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Explore by Interest</Link>
-
-                {user ? (
-                  <>
-                    <Link href="/dashboard" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
-                    <Link href="/wallet" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>Wallet (${(user.walletBalance || 0).toLocaleString()})</Link>
-                    <Link href="/profile" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>My Profile</Link>
-                    <Link href="/wishlist" className="text-[#3F3F42] hover:text-blue-600 font-medium transition-colors" onClick={() => setIsMenuOpen(false)}>My Wishlist</Link>
-                    {user.role === "admin" && (
-                      <Link href="/guide" className="text-purple-700 font-semibold hover:text-purple-900 transition-colors" onClick={() => setIsMenuOpen(false)}>App Directory & Guide</Link>
-                    )}
-                    <button onClick={handleLogout} className="text-red-600 hover:text-red-700 font-medium text-left transition-colors">Sign Out</button>
-                  </>
-                ) : (
-                  <div className="pt-4 border-t border-gray-200 mt-4">
-                    <Link href="/auth/login" className="block text-[#3F3F42] hover:text-blue-600 font-medium mb-3 transition-colors" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
-                    <Link href="/auth/register" className="block bg-[#3F3F42] text-white font-medium py-3 px-6 rounded-xl text-center transition-colors" onClick={() => setIsMenuOpen(false)}>Plan My Trip</Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Mega Menus — sits above the dark overlay */}
@@ -438,8 +478,218 @@ export default function Header() {
           <DealsMegaMenu isHovered={activeMenu === "deals"} />
           <HeaderMegaMenu activeMenu={activeMenu} closeMenu={() => setActiveMenu(null)} />
         </div>
-
       </header>
+
+      {/* Mobile Drawer Menu Overlay (Rendered outside <header> to avoid CSS transform containing block) */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 top-[63px] z-[9999] md:hidden flex justify-end">
+          {/* Dark Backdrop (rect: width 402, height 874, fill: black, fill-opacity: 0.3) */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-[1px] transition-opacity duration-300"
+            onClick={() => setIsMenuOpen(false)}
+          />
+
+          {/* Slide-over White Drawer (rect: x 120, y 63, width 282, height 811, fill: white) */}
+          <div className="relative w-[282px] max-w-[80vw] h-full bg-white shadow-2xl flex flex-col justify-between z-10 overflow-y-auto animate-in slide-in-from-right duration-250 font-outfit border-l border-black/5">
+            {/* Top Navigation Items */}
+            <div className="flex flex-col w-full">
+              {/* 1. Destination (Accordion with Continents) */}
+              <div className="w-full border-b border-black/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDestinationOpen(!isDestinationOpen);
+                  }}
+                  className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
+                    isDestinationOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
+                  }`}
+                >
+                  <span>Destination</span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isDestinationOpen ? "rotate-90 text-black" : "text-black/60"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+
+                {/* Continents List */}
+                {isDestinationOpen && (
+                  <div className="bg-[#FAFBF9] border-t border-black/[0.04] flex flex-col animate-in slide-in-from-top-1 duration-150">
+                    {continents.map((continent) => (
+                      <Link
+                        key={continent.slug || continent.name}
+                        href={`/destinations/${continent.slug || continent.name.toLowerCase().replace(/\s+/g, "-")}`}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b border-black/[0.03] transition-colors"
+                      >
+                        <span>{continent.name}</span>
+                        <span className="text-[10px] text-black/40">Explore &rarr;</span>
+                      </Link>
+                    ))}
+                    <Link
+                      href="/destinations"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
+                    >
+                      All Destinations &rarr;
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Adventure (Accordion with Travel Styles) */}
+              <div className="w-full border-b border-black/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAdventureOpen(!isAdventureOpen);
+                  }}
+                  className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
+                    isAdventureOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
+                  }`}
+                >
+                  <span>Adventure</span>
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isAdventureOpen ? "rotate-90 text-black" : "text-black/60"
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+
+                {/* Travel Styles List */}
+                {isAdventureOpen && (
+                  <div className="bg-[#FAFBF9] border-t border-black/[0.04] flex flex-col animate-in slide-in-from-top-1 duration-150">
+                    {travelStyles.map((style) => (
+                      <Link
+                        key={style.slug || style.name}
+                        href={`/travel-styles/${style.slug || style.name.toLowerCase().replace(/\s+/g, "-")}`}
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b border-black/[0.03] transition-colors"
+                      >
+                        <span>{style.name}</span>
+                        <span className="text-[10px] text-black/40">View &rarr;</span>
+                      </Link>
+                    ))}
+                    <Link
+                      href="/trips"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
+                    >
+                      All Adventures &rarr;
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Deals */}
+              <div className="w-full border-b border-black/[0.08]">
+                <Link
+                  href="/deals"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  Deals
+                </Link>
+              </div>
+
+              {/* 4. Why Us */}
+              <div className="w-full border-b border-black/[0.08]">
+                <Link
+                  href="/why-nba"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  Why Us
+                </Link>
+              </div>
+            </div>
+
+            {/* Bottom Utility Navigation Items (Figma lines 494.75 to 630.75) */}
+            <div className="flex flex-col w-full pb-6">
+              {/* 5. Wishlist (Heart Icon, height: 34px) */}
+              <div className="w-full border-t border-b border-black/[0.08]">
+                <Link
+                  href="/wishlist"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span>Wishlist</span>
+                </Link>
+              </div>
+
+              {/* 6. Manage bookings (User Profile Icon, height: 34px) */}
+              <div className="w-full border-b border-black/[0.08]">
+                <Link
+                  href={user ? "/dashboard" : "/auth/login"}
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span>Manage bookings</span>
+                </Link>
+              </div>
+
+              {/* 7. Contact Us (Phone Icon, height: 34px) */}
+              <div className="w-full border-b border-black/[0.08]">
+                <a
+                  href="tel:+911234567890"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                  <span>Contact Us</span>
+                </a>
+              </div>
+
+              {/* 8. Subscribe to Emails (Mail Icon, height: 34px) */}
+              <div className="w-full border-b border-black/[0.08]">
+                <a
+                  href="#subscribe"
+                  onClick={(e) => {
+                    setIsMenuOpen(false);
+                    const el = document.querySelector("#subscribe");
+                    if (el) {
+                      e.preventDefault();
+                      el.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                >
+                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                  </svg>
+                  <span>Subscribe to Emails</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

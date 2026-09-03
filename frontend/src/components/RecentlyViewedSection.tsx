@@ -90,7 +90,7 @@ export default function RecentlyViewedSection() {
   if (tours.length === 0) return null;
 
   return (
-    <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-20 xl:mt-[127px] mb-12 sm:mb-20">
+    <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[127px] mb-8 md:mb-12 xl:mb-20">
       {/* Mobile Header Area (#5640:5888) */}
       <div className="block md:hidden mb-6">
         {/* Badge (#5640:5890, width: 82.46px, height: 17.52px) */}
@@ -166,33 +166,33 @@ export default function RecentlyViewedSection() {
         </div>
       </div>
 
-      {/* Desktop Header Area (#5091:7222) */}
-      <div className="hidden md:flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-9 md:mb-10">
+      {/* Desktop Header Area (#5640:7232 on 785px / #5091:7222 on 1280px) */}
+      <div className="hidden md:flex flex-col md:flex-row md:items-end justify-between mb-5 md:mb-[22px] lg:mb-[30px] xl:mb-10">
         <div>
-          {/* Badge (EL-36f1c12d, width: 130px, height: 24px) */}
-          <div className="inline-flex items-center justify-center w-[130px] h-[24px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[110px] text-[14px] font-medium tracking-normal mb-[14px] font-outfit">
+          {/* Badge (#5640:7233 on 785px: 79.73px x 14.72px, font 8.59px / 1280px: 130px x 24px, font 14px) */}
+          <div className="inline-flex items-center justify-center w-[79.7px] lg:w-[105px] xl:w-[130px] h-[14.7px] lg:h-[19px] xl:h-[24px] bg-[rgba(26,26,26,0.05)] text-[rgba(26,26,26,0.55)] rounded-[67px] xl:rounded-[110px] text-[8.59px] lg:text-[11px] xl:text-[14px] font-medium tracking-normal mb-[8.6px] lg:mb-[11px] xl:mb-[14px] font-outfit">
             Recently Viewed
           </div>
-          {/* Title (#5091:7225, 48px Outfit + Gochi Hand) */}
-          <h2 className="text-[32px] sm:text-[38px] md:text-[44px] xl:text-[48px] font-normal leading-[1.15] xl:leading-[56px] text-[#1A1A1A] tracking-normal font-outfit">
+          {/* Title (#5640:7235 on 785px: 29.44px Outfit / 1280px: 48px Outfit) */}
+          <h2 className="text-[29.44px] lg:text-[38px] xl:text-[48px] font-normal leading-[34.3px] lg:leading-[45px] xl:leading-[56px] text-[#1A1A1A] tracking-normal font-outfit">
             Still thinking about these? <br className="hidden sm:inline" />
             <span className="font-gochi text-[#254B02]">So are we.</span>
           </h2>
         </div>
 
-        {/* View All & Controls Top Right (#5091:8226) */}
-        <div className="flex flex-col items-start md:items-end gap-2.5 mt-4 md:mt-0">
+        {/* View All & Controls Top Right (#5640:8240 on 785px / #5091:8226 on 1280px) */}
+        <div className="flex flex-col items-start md:items-end gap-[6.1px] lg:gap-[8px] xl:gap-2.5 mt-4 md:mt-0">
           <Link
             href="/trips"
-            className="text-[16px] font-normal text-[#1A1A1A] underline underline-offset-4 hover:opacity-80 transition font-outfit"
+            className="text-[9.81px] lg:text-[13px] xl:text-[16px] font-normal text-[#1A1A1A] underline underline-offset-4 hover:opacity-80 transition font-outfit"
           >
             View All Trips
           </Link>
-          <div className="flex items-center gap-[5px]">
+          <div className="flex items-center gap-[3px] lg:gap-[4px] xl:gap-[5px]">
             <button
               onClick={scrollPrev}
               disabled={!canScrollLeft}
-              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-[17.17px] h-[17.17px] lg:w-[22px] lg:h-[22px] xl:w-[28px] xl:h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 canScrollLeft
                   ? "bg-[#1A1A1A] hover:bg-black text-white"
                   : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
@@ -200,7 +200,7 @@ export default function RecentlyViewedSection() {
               aria-label="Previous tours"
             >
               <svg
-                className="w-3.5 h-3.5"
+                className="w-[9px] h-[9px] lg:w-[11px] lg:h-[11px] xl:w-3.5 xl:h-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -216,7 +216,7 @@ export default function RecentlyViewedSection() {
             <button
               onClick={scrollNext}
               disabled={!canScrollRight}
-              className={`w-[28px] h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              className={`w-[17.17px] h-[17.17px] lg:w-[22px] lg:h-[22px] xl:w-[28px] xl:h-[28px] rounded-full flex items-center justify-center transition-all cursor-pointer ${
                 canScrollRight
                   ? "bg-[#1A1A1A] hover:bg-black text-white"
                   : "bg-[#B5B9B1]/60 text-white/70 cursor-not-allowed"
@@ -224,7 +224,7 @@ export default function RecentlyViewedSection() {
               aria-label="Next tours"
             >
               <svg
-                className="w-3.5 h-3.5"
+                className="w-[9px] h-[9px] lg:w-[11px] lg:h-[11px] xl:w-3.5 xl:h-3.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -241,7 +241,7 @@ export default function RecentlyViewedSection() {
         </div>
       </div>
 
-      {/* Cards Slider (#5091:7226 / #5640:5908, 262px on mobile / 309px on desktop) */}
+      {/* Cards Slider (#5640:7236 on 785px: 189.5px card width / #5091:7226 on 1280px: 309px card width) */}
       <div className="relative group">
         <style
           dangerouslySetInnerHTML={{
@@ -259,12 +259,12 @@ export default function RecentlyViewedSection() {
 
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 sm:gap-5 md:gap-[22px] overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory"
+          className="flex gap-3 sm:gap-4 md:gap-[13.5px] lg:gap-[18px] xl:gap-[22px] overflow-x-auto pb-4 hide-scroll snap-x snap-mandatory"
         >
           {tours.map((tour: any) => (
             <div
               key={tour._id}
-              className="w-[262px] sm:w-[300px] md:w-[309px] xl:w-[309px] min-w-[262px] sm:min-w-[300px] md:min-w-[309px] snap-start shrink-0"
+              className="w-[262px] md:w-[189.5px] lg:w-[250px] xl:w-[309px] min-w-[262px] md:min-w-[189.5px] lg:min-w-[250px] xl:min-w-[309px] snap-start shrink-0"
             >
               <TourCard tour={tour} />
             </div>
