@@ -40,7 +40,7 @@ export default function BeyondTheMapSection({ blogs = [] }: BeyondTheMapSectionP
     ];
 
     return (
-        <section className="w-full relative font-outfit my-8 md:my-[30px] xl:my-16">
+        <section className="w-full relative font-outfit mt-[80px] mb-0 md:my-[30px] xl:my-16">
             {/* Mobile View (#5640:5803 – #5640:5819) */}
             <div className="block md:hidden w-full max-w-[360px] mx-auto">
                 {/* Header (#5640:5803) */}

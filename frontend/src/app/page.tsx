@@ -15,7 +15,10 @@ import { api } from "@/lib/api";
 
 async function getFeaturedTours() {
   try {
-    const res = await fetch(`${api.baseURL}${api.endpoints.tours.getAll}?limit=4`, { next: { revalidate: 60 } });
+    const res = await fetch(
+      `${api.baseURL}${api.endpoints.tours.getAll}?limit=4`,
+      { next: { revalidate: 60 } },
+    );
     const data = await res.json();
     return data?.data?.tours || data?.data || [];
   } catch (error) {
@@ -26,9 +29,12 @@ async function getFeaturedTours() {
 
 async function getContinents() {
   try {
-    const res = await fetch(`${api.baseURL}${api.endpoints.continents.getAll}`, {
-      next: { revalidate: 60 },
-    });
+    const res = await fetch(
+      `${api.baseURL}${api.endpoints.continents.getAll}`,
+      {
+        next: { revalidate: 60 },
+      },
+    );
     if (!res.ok) throw new Error("Failed to fetch continents");
     const data = await res.json();
     return data?.data?.continents || [];
@@ -42,7 +48,7 @@ async function getCountries() {
   try {
     const res = await fetch(
       `${api.baseURL}${api.endpoints.countries.getAll}?limit=100&sort=-statistics.popularityScore`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     const data = await res.json();
     return data?.data?.countries || data?.data || [];
@@ -56,7 +62,7 @@ async function getBlogs() {
   try {
     const res = await fetch(
       `${api.baseURL}${api.endpoints.blogs.getAll}?limit=3&sort=-publishedAt&status=published`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 60 } },
     );
     const data = await res.json();
     return data?.data?.blogs || data?.data || [];
@@ -75,7 +81,9 @@ export default async function Home() {
   // Map country continent IDs to actual continent objects
   const countries = rawCountries.map((country: any) => {
     if (typeof country.continent === "string") {
-      const foundContinent = continents.find((c: any) => c._id === country.continent || c.id === country.continent);
+      const foundContinent = continents.find(
+        (c: any) => c._id === country.continent || c.id === country.continent,
+      );
       if (foundContinent) {
         return { ...country, continent: foundContinent };
       }
@@ -112,43 +120,81 @@ export default async function Home() {
             {/* Divider Line (#5640:5170, width: 245.32px, stroke: rgba(255,255,255,0.5)) */}
             <div className="w-[245.32px] max-w-full h-[1px] bg-white/50 backdrop-blur-[2.06px] mb-[22px]" />
 
-            {/* Feature Pills (#5640:5160, #5640:5171, #5640:5184) */}
+            {/* Feature Pills with Pure Glass Effect (#5640:5160, #5640:5171, #5640:5184) */}
             <div className="flex flex-col gap-[11.53px]">
-              <div className="flex items-center gap-[6.18px] flex-wrap">
-                {/* Pill 1: Private Trips (#5640:5160) */}
-                <div className="inline-flex items-center justify-center gap-[6.18px] bg-[rgba(255,255,255,0.1)] px-[16.49px] py-[8.25px] rounded-[51.54px] select-none">
-                  <img
-                    src="/tickpp.svg"
-                    alt=""
-                    className="w-[16.49px] h-[16.49px] object-contain shrink-0"
-                  />
-                  <span className="font-sans text-white text-[13.3px] font-medium leading-[17.32px] whitespace-nowrap">
+              <div className="flex items-center gap-[8px] flex-wrap">
+                {/* Pill 1: Private Trips */}
+                <div className="inline-flex items-center justify-center gap-[8px] bg-white/[0.1] backdrop-blur-xl shadow-lg shadow-black/10 px-[18px] py-[8.5px] rounded-full select-none hover:bg-white/[0.15] transition-all border-0">
+                  <svg
+                    className="w-[18px] h-[18px] text-white shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="M9 12l2 2 4-4" />
+                  </svg>
+                  <span className="font-sans text-white text-[15px] font-medium leading-none tracking-normal whitespace-nowrap">
                     Private Trips
                   </span>
                 </div>
 
-                {/* Pill 2: Transport Included (#5640:5171) */}
-                <div className="inline-flex items-center justify-center gap-[6.18px] bg-[rgba(255,255,255,0.1)] px-[16.49px] py-[8.25px] rounded-[51.54px] select-none">
-                  <img
-                    src="/tickpp.svg"
-                    alt=""
-                    className="w-[16.49px] h-[16.49px] object-contain shrink-0"
-                  />
-                  <span className="font-sans text-white text-[13.5px] font-medium leading-[17.32px] whitespace-nowrap">
+                {/* Pill 2: Transport Included */}
+                <div className="inline-flex items-center justify-center gap-[8px] bg-white/[0.1] backdrop-blur-xl shadow-lg shadow-black/10 px-[18px] py-[8.5px] rounded-full select-none hover:bg-white/[0.15] transition-all border-0">
+                  <svg
+                    className="w-[18px] h-[18px] text-white shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 3h6" />
+                    <path d="M5 9l2-4h10l2 4" />
+                    <rect x="3" y="9" width="18" height="9" rx="2" />
+                    <circle
+                      cx="7"
+                      cy="13.5"
+                      r="1.5"
+                      fill="currentColor"
+                      stroke="none"
+                    />
+                    <circle
+                      cx="17"
+                      cy="13.5"
+                      r="1.5"
+                      fill="currentColor"
+                      stroke="none"
+                    />
+                    <path d="M5 18v2M19 18v2" />
+                  </svg>
+                  <span className="font-sans text-white text-[15px] font-medium leading-none tracking-normal whitespace-nowrap">
                     Transport Included
                   </span>
                 </div>
               </div>
 
-              {/* Pill 3: Custom Route (#5640:5184) */}
-              <div className="flex items-center gap-[6.18px]">
-                <div className="inline-flex items-center justify-center gap-[6.18px] bg-[rgba(255,255,255,0.1)] px-[16.49px] py-[8.25px] rounded-[51.54px] select-none">
-                  <img
-                    src="/tickpp.svg"
-                    alt=""
-                    className="w-[16.49px] h-[16.49px] object-contain shrink-0"
-                  />
-                  <span className="font-sans text-white text-[13.6px] font-medium leading-[17.32px] whitespace-nowrap">
+              {/* Pill 3: Custom Route */}
+              <div className="flex items-center gap-[8px]">
+                <div className="inline-flex items-center justify-center gap-[8px] bg-white/[0.1] backdrop-blur-xl shadow-lg shadow-black/10 px-[18px] py-[8.5px] rounded-full select-none hover:bg-white/[0.15] transition-all border-0">
+                  <svg
+                    className="w-[18px] h-[18px] text-white shrink-0"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="5" cy="18" r="2.5" />
+                    <circle cx="19" cy="6" r="2.5" />
+                    <path d="M7.5 18h4.5a4 4 0 0 0 4-4v0a4 4 0 0 0-4-4H8a4 4 0 0 1-4-4v0a4 4 0 0 1 4-4h8.5" />
+                  </svg>
+                  <span className="font-sans text-white text-[15px] font-medium leading-none tracking-normal whitespace-nowrap">
                     Custom Route
                   </span>
                 </div>
@@ -179,7 +225,10 @@ export default async function Home() {
                 See yourself & the World
               </h1>
               <div className="font-gochi text-white text-[41.7px] lg:text-[54px] xl:text-[68px] font-normal leading-[42.93px] lg:leading-[55px] xl:leading-[70px] drop-shadow-sm">
-                Differently<span className="font-gochi text-[50.29px] lg:text-[65px] xl:text-[82px] leading-[42.93px] lg:leading-[55px] xl:leading-[70px]">.</span>
+                Differently
+                <span className="font-gochi text-[50.29px] lg:text-[65px] xl:text-[82px] leading-[42.93px] lg:leading-[55px] xl:leading-[70px]">
+                  .
+                </span>
               </div>
             </div>
 
@@ -233,7 +282,7 @@ export default async function Home() {
       </div>
 
       {/* Small Group Adventures Section (#5091:7989 / Mobile #5640:5330) */}
-      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-6 md:px-8 xl:px-[35px] mt-10 sm:mt-20 md:mt-24 xl:mt-[120px]">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-6 md:px-8 xl:px-[35px] mt-[65px] md:mt-24 xl:mt-[120px]">
         {/* Mobile View (#5640:5330, width: 359px, height: 648px, rounded: 16px) */}
         <div className="block md:hidden relative w-full max-w-[359px] h-[648px] mx-auto bg-[rgba(244,236,217,0.25)] rounded-[16px] overflow-hidden">
           {/* Header (#5640:5334, x: 12.95px, y: 41.74px, width: 338.09px) */}
@@ -263,11 +312,11 @@ export default async function Home() {
           <img
             src="/sg_1.svg"
             alt="Shared adventures"
-            className="absolute left-[65.59px] top-[166.74px] w-[109.26px] h-[109.26px] object-contain"
+            className="absolute left-[65.59px] top-[166.74px] w-[109.26px] max-[395px]:w-[95px] max-[375px]:w-[88px] h-[109.26px] max-[395px]:h-[95px] max-[375px]:h-[88px] object-contain"
           />
           {/* Text 1 (#5640:5382, x: 208.86px, y: 205.91px, width: 133px) */}
-          <p className="absolute left-[208.86px] top-[205.91px] w-[133px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
-            Shared adventures with<br />like-minded people
+          <p className="absolute left-[208.86px] max-[395px]:left-auto max-[395px]:right-[10px] max-[395px]:w-[125px] top-[205.91px] w-[133px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
+            Shared adventures with like minded people
           </p>
 
           {/* Row 2 */}
@@ -278,14 +327,16 @@ export default async function Home() {
             className="absolute left-[20.23px] top-[386.29px] w-[12.01px] h-[12.65px] object-contain z-10"
           />
           {/* Text 2 (#5640:5433, x: 64.55px, y: 377.02px, width: 123px) */}
-          <p className="absolute left-[64.55px] top-[377.02px] w-[123px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
-            1000s of experiences,<br />over 100 countries
+          <p className="absolute left-[64.55px] max-[395px]:left-[45px] max-[395px]:w-[115px] top-[377.02px] w-[123px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
+            1000s of experiences,
+            <br />
+            over 100 countries
           </p>
           {/* Image 2 (#5640:5386, x: 219.16px, y: 341.97px, width: 122.39px, height: 101.02px) */}
           <img
             src="/sg_2.svg"
             alt="1000s of experiences"
-            className="absolute left-[219.16px] top-[341.97px] w-[122.39px] h-[101.02px] object-contain"
+            className="absolute left-[219.16px] top-[341.97px] w-[122.39px] max-[395px]:w-[105px] max-[375px]:w-[98px] h-[101.02px] max-[395px]:h-[87px] max-[375px]:h-[81px] object-contain"
           />
 
           {/* Row 3 */}
@@ -299,10 +350,10 @@ export default async function Home() {
           <img
             src="/sg_3.svg"
             alt="Creating positive change"
-            className="absolute left-[60.43px] top-[501.74px] w-[115.83px] h-[113.79px] object-contain"
+            className="absolute left-[60.43px] top-[501.74px] w-[115.83px] max-[395px]:w-[100px] max-[375px]:w-[92px] h-[113.79px] max-[395px]:h-[98px] max-[375px]:h-[90px] object-contain"
           />
           {/* Text 3 (#5640:5528, x: 204.74px, y: 547.09px, width: 142.23px) */}
-          <p className="absolute left-[204.74px] top-[547.09px] w-[142.23px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
+          <p className="absolute left-[204.74px] max-[395px]:left-auto max-[395px]:right-[10px] max-[395px]:w-[130px] top-[547.09px] w-[142.23px] font-outfit text-[#1A1A1A] text-[12.64px] font-normal text-center leading-[16px]">
             Creating positive change around the place you visit
           </p>
         </div>
@@ -324,38 +375,73 @@ export default async function Home() {
             {/* Row 1: Illustrations (#5640:8038, #5640:7991, #5640:8085 on 785px: 110.39px height / 1280px: 180px height) */}
             <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-8 md:gap-0 w-full mb-2 lg:mb-3 xl:mb-4">
               <div className="flex justify-center items-end w-full md:w-[135px] lg:w-[175px] xl:w-[220px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
-                <img src="/sg_1.svg" alt="Shared adventures" className="h-full w-auto object-contain" />
+                <img
+                  src="/sg_1.svg"
+                  alt="Shared adventures"
+                  className="h-full w-auto object-contain"
+                />
               </div>
               <div className="flex justify-center items-end w-full md:w-[135px] lg:w-[175px] xl:w-[220px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
-                <img src="/sg_2.svg" alt="1000s of experiences" className="h-full w-auto object-contain" />
+                <img
+                  src="/sg_2.svg"
+                  alt="1000s of experiences"
+                  className="h-full w-auto object-contain"
+                />
               </div>
               <div className="flex justify-center items-end w-full md:w-[138px] lg:w-[180px] xl:w-[225px] h-[110px] lg:h-[145px] xl:h-[180px] shrink-0">
-                <img src="/sg_3.svg" alt="Creating positive change" className="h-full w-auto object-contain" />
+                <img
+                  src="/sg_3.svg"
+                  alt="Creating positive change"
+                  className="h-full w-auto object-contain"
+                />
               </div>
             </div>
 
             {/* Row 2: Dashed Line (#5640:8182) perfectly intersecting the exact center of NBA marker icons */}
             <div className="relative w-full hidden md:block my-2 xl:my-3">
               {/* Dashed line locked at vertical 50% center of the marker row */}
-              <svg className="absolute left-[67.5px] lg:left-[87.5px] xl:left-[110px] right-[69px] lg:right-[90px] xl:right-[112.5px] top-1/2 -translate-y-1/2 w-[calc(100%-136.5px)] lg:w-[calc(100%-177.5px)] xl:w-[calc(100%-222.5px)] h-[2px] pointer-events-none z-0 overflow-visible" preserveAspectRatio="none">
-                <line x1="0" y1="1" x2="100%" y2="1" stroke="rgba(26, 26, 26, 0.4)" strokeWidth="1" strokeDasharray="6 6" />
+              <svg
+                className="absolute left-[67.5px] lg:left-[87.5px] xl:left-[110px] right-[69px] lg:right-[90px] xl:right-[112.5px] top-1/2 -translate-y-1/2 w-[calc(100%-136.5px)] lg:w-[calc(100%-177.5px)] xl:w-[calc(100%-222.5px)] h-[2px] pointer-events-none z-0 overflow-visible"
+                preserveAspectRatio="none"
+              >
+                <line
+                  x1="0"
+                  y1="1"
+                  x2="100%"
+                  y2="1"
+                  stroke="rgba(26, 26, 26, 0.4)"
+                  strokeWidth="1"
+                  strokeDasharray="6 6"
+                />
               </svg>
 
               {/* 3 Marker icons centered over each column */}
               <div className="flex items-center justify-between w-full relative z-10">
                 <div className="w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center items-center shrink-0">
                   <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
+                    <img
+                      src="/nba_logo1.svg"
+                      alt="NBA Marker"
+                      className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain"
+                    />
                   </div>
                 </div>
                 <div className="w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center items-center shrink-0">
                   <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
+                    <img
+                      src="/nba_logo1.svg"
+                      alt="NBA Marker"
+                      className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain"
+                    />
                   </div>
                 </div>
                 <div className="w-[138px] lg:w-[180px] xl:w-[225px] flex justify-center items-center shrink-0">
                   <div className="w-[12.3px] h-[12.3px] lg:w-[16px] lg:h-[16px] xl:w-[20px] xl:h-[20px] bg-[#f7efe0] rounded-full flex items-center justify-center">
-                    <img src="/nba_logo1.svg" alt="NBA Marker" className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain" />
+                    <img
+                      src="/nba_logo1.svg"
+                      alt="NBA Marker"
+                      className="w-[11.6px] h-[11.6px] lg:w-[15px] lg:h-[15px] xl:w-[18px] xl:h-[18px] object-contain"
+                    />
                   </div>
                 </div>
               </div>
@@ -365,12 +451,14 @@ export default async function Home() {
             <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8 md:gap-0 w-full mt-1.5 xl:mt-2">
               <div className="w-full md:w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center text-center shrink-0">
                 <p className="text-[#1A1A1A] font-normal text-[12.3px] lg:text-[16px] xl:text-[20px] leading-tight xl:leading-snug text-center max-w-[130px] lg:max-w-[170px] xl:max-w-[210px] mx-auto font-outfit">
-                  Shared adventures with<br className="hidden sm:inline" /> like-minded people
+                  Shared adventures with
+                  <br className="hidden sm:inline" /> like-minded people
                 </p>
               </div>
               <div className="w-full md:w-[135px] lg:w-[175px] xl:w-[220px] flex justify-center text-center shrink-0">
                 <p className="text-[#1A1A1A] font-normal text-[12.3px] lg:text-[16px] xl:text-[20px] leading-tight xl:leading-snug text-center max-w-[120px] lg:max-w-[160px] xl:max-w-[194px] mx-auto font-outfit">
-                  1000s of experiences,<br className="hidden sm:inline" /> over 100 countries
+                  1000s of experiences,
+                  <br className="hidden sm:inline" /> over 100 countries
                 </p>
               </div>
               <div className="w-full md:w-[138px] lg:w-[180px] xl:w-[225px] flex justify-center text-center shrink-0">

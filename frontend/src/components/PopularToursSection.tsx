@@ -118,7 +118,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
     ];
 
     return (
-        <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[127px] mb-8 md:mb-12 xl:mb-20">
+        <section className="w-full relative font-outfit mt-[80px] md:mt-[60px] lg:mt-[90px] xl:mt-[127px] mb-0 md:mb-12 xl:mb-20">
             {/* Mobile Header Area (#5640:5193) */}
             <div className="block md:hidden mb-6">
                 {/* Badge (#5640:5190, width: 82.46px, height: 17.52px) */}
@@ -252,7 +252,7 @@ export default function PopularToursSection({ tours }: PopularToursSectionProps)
                     {displayTours.map((tour: any) => (
                         <div
                             key={tour._id || tour.id}
-                            className="w-[262px] md:w-[189.5px] lg:w-[250px] xl:w-[309px] min-w-[262px] md:min-w-[189.5px] lg:min-w-[250px] xl:min-w-[309px] snap-start shrink-0"
+                            className="w-[262px] min-w-[262px] sm:w-[280px] sm:min-w-[280px] md:w-[calc((100%-40.5px)/3.7)] md:min-w-[calc((100%-40.5px)/3.7)] lg:w-[calc((100%-54px)/3.7)] lg:min-w-[calc((100%-54px)/3.7)] xl:w-[calc((100%-66px)/3.7)] xl:min-w-[calc((100%-66px)/3.7)] snap-start shrink-0"
                         >
                             <TourCard tour={tour} />
                         </div>

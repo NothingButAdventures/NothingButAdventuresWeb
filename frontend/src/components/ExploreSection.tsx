@@ -3,7 +3,7 @@ import React from "react";
 
 export default function ExploreSection() {
     return (
-        <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20">
+        <section className="w-full relative font-outfit mt-[50px] md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-0 md:mb-12 xl:mb-20">
             {/* Mobile View (#5640:5529, #5640:5537, #5640:5550) */}
             <div className="block md:hidden w-full max-w-[359px] mx-auto">
                 {/* Header (#5640:5529) */}

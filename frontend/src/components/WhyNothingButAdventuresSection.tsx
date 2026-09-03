@@ -79,7 +79,7 @@ const row2Data: WhyCard[] = [
 export default function WhyNothingButAdventuresSection() {
   return (
     <section className="hidden md:block w-full bg-[rgba(244,236,217,0.25)] py-8 md:py-[41.7px] xl:py-[68px] my-8 md:my-[30px] xl:my-16 font-outfit">
-      <div className="w-full max-w-[742.1px] lg:max-w-[970px] xl:max-w-[1210px] mx-auto px-4 md:px-0">
+      <div className="w-full max-w-[1280px] mx-auto px-5 sm:px-6 md:px-8 xl:px-[35px]">
         {/* Header Area (#5640:7850 on 785px: gap 36.8px / #5091:7842 on 1280px: gap 60px) */}
         <div className="flex flex-row gap-4 md:gap-[36.8px] xl:gap-[60px] items-start mb-4 md:mb-[25px] xl:mb-[30px]">
           {/* Badge (#5640:7851 on 785px: 34.34px x 14.72px / 1280px: 56px x 24px) */}
@@ -93,7 +93,8 @@ export default function WhyNothingButAdventuresSection() {
             <span className="font-gochi text-[#254B02]">Adventures</span>
           </h2>
         </div>
-
+      </div>
+      <div className="w-full max-w-[742.1px] lg:max-w-[970px] xl:max-w-[1210px] mx-auto px-4 md:px-0">
         {/* Row 1: 3 Cards (offset by 36.8px on 785px / 60px on 1280px to align right side) */}
         <div className="flex justify-end w-full mb-3 md:mb-[27.6px] xl:mb-[45px]">
           <div className="grid grid-cols-3 gap-3 md:gap-[12.27px] lg:gap-[16px] xl:gap-[20px] w-full md:w-[705.27px] lg:w-[920px] xl:w-[1150px]">

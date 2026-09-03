@@ -142,7 +142,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
     };
 
     return (
-        <section className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20">
+        <section className="w-full relative font-outfit mt-[70px] md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-0 md:mb-12 xl:mb-20">
             {/* Mobile Header Area (#5640:5568 / Curate your Destination) */}
             <div className="block md:hidden mb-5">
                 {/* Badge (width: 73.33px, height: 15.17px) */}
@@ -259,7 +259,7 @@ export default function PopularDestinationsSection({ countries = [] }: PopularDe
                             <Link
                                 key={country._id || country.slug || index}
                                 href={linkHref}
-                                className="relative w-[238px] min-w-[238px] h-[332px] md:w-[177.85px] md:min-w-[177.85px] md:h-[247.77px] lg:w-[234px] lg:min-w-[234px] lg:h-[326px] xl:w-[290px] xl:min-w-[290px] xl:h-[404px] rounded-[10px] md:rounded-[7.4px] xl:rounded-[12px] overflow-hidden snap-start shrink-0 block group/card shadow-sm hover:shadow-md transition-shadow duration-300"
+                                className="relative w-[238px] min-w-[238px] h-[332px] sm:w-[260px] sm:min-w-[260px] sm:h-[362px] md:w-[calc((100%-29.4px)/4)] md:min-w-[calc((100%-29.4px)/4)] md:h-[247.8px] lg:w-[calc((100%-39px)/4)] lg:min-w-[calc((100%-39px)/4)] lg:h-[326px] xl:w-[calc((100%-48px)/4)] xl:min-w-[calc((100%-48px)/4)] xl:h-[404px] rounded-[10px] md:rounded-[7.4px] xl:rounded-[12px] overflow-hidden snap-start shrink-0 block group/card shadow-sm hover:shadow-md transition-shadow duration-300"
                             >
                                 {/* Card Background Image (#5640:7567 / #5091:7562) */}
                                 <img

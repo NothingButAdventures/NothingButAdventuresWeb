@@ -204,7 +204,7 @@ export default function ReviewsSection({
   return (
     <div
       ref={containerRef}
-      className="w-full relative font-outfit mt-8 sm:mt-16 md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-8 md:mb-12 xl:mb-20 md:min-h-[220vh]"
+      className="w-full relative font-outfit mt-[70px] md:mt-[60px] lg:mt-[90px] xl:mt-[120px] mb-0 md:mb-12 xl:mb-20 md:min-h-[220vh]"
     >
       <div className="block md:hidden w-full max-w-[360px] mx-auto">
         <div className="mb-5">

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function StartPlanningSection() {
     return (
-        <section className="w-full relative font-outfit my-8 md:my-[30px] xl:my-16">
+        <section className="w-full relative font-outfit mt-[80px] mb-0 md:my-[30px] xl:my-16">
             {/* Mobile View (#5640:5792, max-width: 359px, bg: rgba(244, 236, 217, 0.2)) */}
             <div className="block md:hidden w-full max-w-[359px] mx-auto bg-[rgba(244,236,217,0.2)] rounded-[16px] p-4 sm:p-5 flex flex-col justify-start">
                 {/* Two Top Images Row (#5640:5794, width: 327.87px, height: 233.24px) */}

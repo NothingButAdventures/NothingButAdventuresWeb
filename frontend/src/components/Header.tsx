@@ -17,7 +17,6 @@ interface User {
   walletBalance?: number;
 }
 
-
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
@@ -26,7 +25,9 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDestinationOpen, setIsDestinationOpen] = useState(false);
   const [isAdventureOpen, setIsAdventureOpen] = useState(false);
-  const [continents, setContinents] = useState<{ _id?: string; name: string; slug: string }[]>([
+  const [continents, setContinents] = useState<
+    { _id?: string; name: string; slug: string }[]
+  >([
     { name: "Asia", slug: "asia" },
     { name: "Europe", slug: "europe" },
     { name: "Africa", slug: "africa" },
@@ -34,7 +35,9 @@ export default function Header() {
     { name: "South America", slug: "south-america" },
     { name: "Oceania & Polar", slug: "oceania" },
   ]);
-  const [travelStyles, setTravelStyles] = useState<{ _id?: string; name: string; slug: string }[]>([
+  const [travelStyles, setTravelStyles] = useState<
+    { _id?: string; name: string; slug: string }[]
+  >([
     { name: "Classic Adventures", slug: "classic" },
     { name: "Active & Hiking", slug: "active-hiking" },
     { name: "Wildlife & Safari", slug: "wildlife-safari" },
@@ -43,7 +46,9 @@ export default function Header() {
     { name: "Solo Travel", slug: "solo-travel" },
   ]);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<"adventures" | "interests" | "destinations" | "why-us" | "deals" | null>(null);
+  const [activeMenu, setActiveMenu] = useState<
+    "adventures" | "interests" | "destinations" | "why-us" | "deals" | null
+  >(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Scroll reveal state
@@ -114,7 +119,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY, isUserMenuOpen, activeMenu]);
 
-  const handleMenuEnter = (menu: "adventures" | "interests" | "destinations" | "why-us" | "deals") => {
+  const handleMenuEnter = (
+    menu: "adventures" | "interests" | "destinations" | "why-us" | "deals",
+  ) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
@@ -192,9 +199,7 @@ export default function Header() {
     <>
       {/* Page-level dark overlay — z-40 covers content below the header (z-50) */}
       {activeMenu && (
-        <div
-          className="fixed inset-0 bg-black/25 z-40 pointer-events-none transition-opacity duration-300"
-        />
+        <div className="fixed inset-0 bg-black/25 z-40 pointer-events-none transition-opacity duration-300" />
       )}
       <header
         onMouseLeave={() => {
@@ -203,9 +208,11 @@ export default function Header() {
             setShow(false);
           }
         }}
-        className={`relative z-50 font-outfit transition-all duration-300 transform ${isMenuOpenAtTop ? "" : "sticky top-0"
-          } ${show ? "translate-y-0" : "-translate-y-full"
-          } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white md:bg-white/90 md:backdrop-blur-md"} shadow-[0px_1px_24px_0px_rgba(0,0,0,0.04)] md:shadow-[0px_1px_75px_0px_rgba(0,0,0,0.1)]`}
+        className={`relative z-[100] font-outfit transition-all duration-300 transform ${
+          isMenuOpenAtTop ? "" : "sticky top-0"
+        } ${
+          show ? "translate-y-0" : "-translate-y-full"
+        } ${activeMenu ? "bg-[#f3f8ff]" : "bg-white md:bg-white/90 md:backdrop-blur-md"} shadow-[0px_1px_24px_0px_rgba(0,0,0,0.04)] md:shadow-[0px_1px_75px_0px_rgba(0,0,0,0.1)]`}
       >
         {/* Header-level dark overlay — dims header bar but nav (z-[60]) and mega menu (z-[60]) sit above it */}
         {activeMenu && (
@@ -215,7 +222,10 @@ export default function Header() {
           <div className="flex justify-between items-center h-full">
             {/* Desktop Logo (#5640:8231 on 785px: 102.29px x 22.81px / 1280px: 139px x 31px) */}
             <div className="hidden md:flex items-center justify-start shrink-0">
-              <Link href="/" className="flex items-center gap-[4.9px] lg:gap-[6.5px] xl:gap-[8px]">
+              <Link
+                href="/"
+                className="flex items-center gap-[4.9px] lg:gap-[6.5px] xl:gap-[8px]"
+              >
                 <img
                   src="/nba_logo1.svg"
                   alt="Nothing But Adventures Icon"
@@ -250,7 +260,9 @@ export default function Header() {
 
             {/* Desktop Navigation (#5640:8226 / #5640:8238 on 785px: 23.3px height, rounded 7.36px / 1280px: 38px height, rounded 12px) */}
             <div className="hidden md:flex justify-center items-center">
-              <nav className={`relative z-[60] flex items-center h-[23.3px] lg:h-[30px] xl:h-[38px] rounded-[7.4px] lg:rounded-[9.5px] xl:rounded-[12px] p-[1.5px] lg:p-[2px] xl:p-[2.5px] gap-[1px] lg:gap-0.5 xl:gap-1 transition-colors duration-200 ${activeMenu ? "bg-white shadow-xs" : "bg-[rgba(181,185,177,0.15)]"}`}>
+              <nav
+                className={`relative z-[60] flex items-center h-[23.3px] lg:h-[30px] xl:h-[38px] rounded-[7.4px] lg:rounded-[9.5px] xl:rounded-[12px] p-[1.5px] lg:p-[2px] xl:p-[2.5px] gap-[1px] lg:gap-0.5 xl:gap-1 transition-colors duration-200 ${activeMenu ? "bg-white shadow-xs" : "bg-[rgba(181,185,177,0.15)]"}`}
+              >
                 <button
                   type="button"
                   onMouseEnter={() => handleMenuEnter("destinations")}
@@ -258,10 +270,11 @@ export default function Header() {
                     setActiveMenu("destinations");
                   }}
                   aria-expanded={activeMenu === "destinations"}
-                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "destinations"
-                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
-                    : "text-[#1A1A1A] font-light hover:text-black"
-                    }`}
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${
+                    activeMenu === "destinations"
+                      ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                      : "text-[#1A1A1A] font-light hover:text-black"
+                  }`}
                 >
                   <span>Destination</span>
                 </button>
@@ -272,10 +285,11 @@ export default function Header() {
                     setActiveMenu("adventures");
                   }}
                   aria-expanded={activeMenu === "adventures"}
-                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "adventures"
-                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
-                    : "text-[#1A1A1A] font-light hover:text-black"
-                    }`}
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${
+                    activeMenu === "adventures"
+                      ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                      : "text-[#1A1A1A] font-light hover:text-black"
+                  }`}
                 >
                   <span>Adventure</span>
                 </button>
@@ -286,10 +300,11 @@ export default function Header() {
                     setActiveMenu("interests");
                   }}
                   aria-expanded={activeMenu === "interests"}
-                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "interests"
-                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
-                    : "text-[#1A1A1A] font-light hover:text-black"
-                    }`}
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${
+                    activeMenu === "interests"
+                      ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                      : "text-[#1A1A1A] font-light hover:text-black"
+                  }`}
                 >
                   <span>Explore by Interest</span>
                 </button>
@@ -300,10 +315,11 @@ export default function Header() {
                     setActiveMenu("deals");
                   }}
                   aria-expanded={activeMenu === "deals"}
-                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "deals"
-                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
-                    : "text-[#1A1A1A] font-light hover:text-black"
-                    }`}
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${
+                    activeMenu === "deals"
+                      ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                      : "text-[#1A1A1A] font-light hover:text-black"
+                  }`}
                 >
                   <span>Deals</span>
                 </button>
@@ -314,10 +330,11 @@ export default function Header() {
                     setActiveMenu("why-us");
                   }}
                   aria-expanded={activeMenu === "why-us"}
-                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${activeMenu === "why-us"
-                    ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
-                    : "text-[#1A1A1A] font-light hover:text-black"
-                    }`}
+                  className={`flex items-center justify-center h-[20.2px] lg:h-[26px] xl:h-[33px] px-2 lg:px-3.5 xl:px-5 rounded-[5.5px] lg:rounded-[7px] xl:rounded-[9px] font-outfit text-[9.8px] lg:text-[13px] xl:text-[16px] leading-none cursor-pointer whitespace-nowrap transition-colors duration-150 ${
+                    activeMenu === "why-us"
+                      ? "bg-[#1A1A1A] text-white font-normal shadow-xs"
+                      : "text-[#1A1A1A] font-light hover:text-black"
+                  }`}
                 >
                   <span>Why us</span>
                 </button>
@@ -338,7 +355,11 @@ export default function Header() {
                     className="flex items-center justify-center w-[14.5px] h-[14.5px] lg:w-[19px] lg:h-[19px] xl:w-[23.67px] xl:h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                     aria-label="Call us"
                   >
-                    <img src="/phone-nba.svg" alt="Call" className="w-full h-full object-contain" />
+                    <img
+                      src="/phone-nba.svg"
+                      alt="Call"
+                      className="w-full h-full object-contain"
+                    />
                   </a>
 
                   {/* Profile Icon */}
@@ -356,7 +377,11 @@ export default function Header() {
                             className="w-full h-full object-cover rounded-full border border-black/25"
                           />
                         ) : (
-                          <img src="/user-nba.svg" alt="Profile" className="w-full h-full object-contain" />
+                          <img
+                            src="/user-nba.svg"
+                            alt="Profile"
+                            className="w-full h-full object-contain"
+                          />
                         )}
                       </button>
 
@@ -367,42 +392,79 @@ export default function Header() {
                             <p className="text-sm font-bold text-[#3F3F42]">
                               {user.name}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">{user.email}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {user.email}
+                            </p>
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-100 text-blue-800 mt-2">
                               {user.role}
                             </span>
                           </div>
 
-                          <Link href="/dashboard" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <Link
+                            href="/dashboard"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
                             <span className="font-medium">Dashboard</span>
                           </Link>
-                          <Link href="/trips" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <Link
+                            href="/trips"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
                             <span className="font-medium">Trips</span>
                           </Link>
-                          <Link href="/blogs" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <Link
+                            href="/blogs"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
                             <span className="font-medium">Blog</span>
                           </Link>
-                          <Link href="/wallet" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors" onClick={() => setIsUserMenuOpen(false)}>
-                            <span className="font-medium">Wallet (${(user.walletBalance || 0).toLocaleString()})</span>
+                          <Link
+                            href="/wallet"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 hover:text-[#3F3F42] transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <span className="font-medium">
+                              Wallet ($
+                              {(user.walletBalance || 0).toLocaleString()})
+                            </span>
                           </Link>
 
                           <div className="my-2 border-t border-gray-100"></div>
 
-                          <Link href="/profile" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <Link
+                            href="/profile"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
                             My Profile
                           </Link>
 
-                          <Link href="/wishlist" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                          <Link
+                            href="/wishlist"
+                            className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
                             My Wishlist
                           </Link>
 
                           {user.role === "admin" && (
                             <>
-                              <Link href="/guide" className="flex items-center px-5 py-2.5 text-sm text-purple-700 font-semibold hover:bg-purple-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                              <Link
+                                href="/guide"
+                                className="flex items-center px-5 py-2.5 text-sm text-purple-700 font-semibold hover:bg-purple-50 transition-colors"
+                                onClick={() => setIsUserMenuOpen(false)}
+                              >
                                 App Directory & Guide
                               </Link>
 
-                              <Link href="/admin" className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors" onClick={() => setIsUserMenuOpen(false)}>
+                              <Link
+                                href="/admin"
+                                className="flex items-center px-5 py-2.5 text-sm text-[#3F3F42] hover:bg-gray-50 transition-colors"
+                                onClick={() => setIsUserMenuOpen(false)}
+                              >
                                 Admin Panel
                               </Link>
                             </>
@@ -425,15 +487,19 @@ export default function Header() {
                       className="flex items-center justify-center w-[23.67px] h-[23.67px] shrink-0 transition-opacity hover:opacity-75 cursor-pointer"
                       aria-label="Sign in"
                     >
-                      <img src="/user-nba.svg" alt="Profile" className="w-[23.67px] h-[23.67px]" />
+                      <img
+                        src="/user-nba.svg"
+                        alt="Profile"
+                        className="w-[23.67px] h-[23.67px]"
+                      />
                     </Link>
                   )}
                 </>
               )}
             </div>
 
-            {/* Mobile Menu Toggle Button (Hamburger / Close matching Figma #5823:911) */}
-            <div className="flex md:hidden items-center justify-center w-[35.05px] h-[24px] shrink-0">
+            {/* Mobile Menu Toggle Button (Hamburger / Close matching Figma #5823:911 & Menu Button.svg) */}
+            <div className="flex md:hidden items-center justify-center w-[36px] h-[24px] shrink-0">
               <button
                 type="button"
                 onClick={(e) => {
@@ -441,24 +507,45 @@ export default function Header() {
                   setIsMenuOpen((prev) => !prev);
                 }}
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                className="w-full h-full flex items-center justify-center cursor-pointer focus:outline-none select-none relative p-1"
+                className="w-full h-full flex items-center justify-center cursor-pointer focus:outline-none select-none relative"
               >
-                {isMenuOpen ? (
-                  /* Exact Figma Close Icon (#5823:911) */
-                  <svg className="w-[19px] h-[17px] text-black" viewBox="0 0 19 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M3.248 0L9.492 7.2493L15.736 0H19L11.211 8.5L19 17H15.736L9.492 9.9831L3.248 17H0L7.695 8.5L0 0H3.248Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                ) : (
-                  /* 3-Bar Hamburger */
-                  <div className="w-full h-[18px] flex flex-col justify-between items-stretch py-[1px]">
-                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
-                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
-                    <span className="w-full h-[2.5px] bg-[#1A1A1A] rounded-full"></span>
+                <div className="relative w-[36px] h-[21px] flex items-center justify-center">
+                  {/* Close Icon */}
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                      isMenuOpen
+                        ? "opacity-100 rotate-0 scale-100"
+                        : "opacity-0 -rotate-90 scale-75 pointer-events-none"
+                    }`}
+                  >
+                    <svg
+                      className="w-[19px] h-[17px] text-[#121212]"
+                      viewBox="0 0 19 17"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M3.248 0L9.492 7.2493L15.736 0H19L11.211 8.5L19 17H15.736L9.492 9.9831L3.248 17H0L7.695 8.5L0 0H3.248Z"
+                        fill="currentColor"
+                      />
+                    </svg>
                   </div>
-                )}
+
+                  {/* Menu Button Icon */}
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                      !isMenuOpen
+                        ? "opacity-100 rotate-0 scale-100"
+                        : "opacity-0 rotate-90 scale-75 pointer-events-none"
+                    }`}
+                  >
+                    <img
+                      src="/Menu Button.svg"
+                      alt="Menu"
+                      className="w-[36px] h-[21px] object-contain"
+                    />
+                  </div>
+                </div>
               </button>
             </div>
           </div>
@@ -474,222 +561,299 @@ export default function Header() {
           }}
           onMouseLeave={handleMenuLeave}
         >
-          <WhyUsMegaMenu isHovered={activeMenu === "why-us"} closeMenu={() => setActiveMenu(null)} />
+          <WhyUsMegaMenu
+            isHovered={activeMenu === "why-us"}
+            closeMenu={() => setActiveMenu(null)}
+          />
           <DealsMegaMenu isHovered={activeMenu === "deals"} />
-          <HeaderMegaMenu activeMenu={activeMenu} closeMenu={() => setActiveMenu(null)} />
+          <HeaderMegaMenu
+            activeMenu={activeMenu}
+            closeMenu={() => setActiveMenu(null)}
+          />
         </div>
       </header>
 
-      {/* Mobile Drawer Menu Overlay (Rendered outside <header> to avoid CSS transform containing block) */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 top-[63px] z-[9999] md:hidden flex justify-end">
-          {/* Dark Backdrop (rect: width 402, height 874, fill: black, fill-opacity: 0.3) */}
+      {/* Mobile Drawer Backdrop */}
+      <div
+        className={`fixed inset-0 top-[63px] bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 ease-out z-40 md:hidden ${
+          isMenuOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsMenuOpen(false)}
+      />
+
+      {/* Slide-over White Drawer (rect: x 120, y 63, width 282, height 811, fill: white) */}
+      <div
+        className={`fixed top-[63px] right-0 bottom-0 w-[282px] max-w-[80vw] bg-white flex flex-col justify-between z-50 md:hidden overflow-y-auto font-outfit border-l border-black/[0.08] transform transition-transform duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
+        }`}
+      >
+        {/* Top Navigation Items */}
+        <div className="flex flex-col w-full">
+          {/* 1. Destination (Accordion with Continents) */}
           <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-[1px] transition-opacity duration-300"
-            onClick={() => setIsMenuOpen(false)}
-          />
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setIsDestinationOpen(!isDestinationOpen);
+              }}
+              className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
+                isDestinationOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
+              }`}
+            >
+              <span>Destination</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isDestinationOpen ? "rotate-90 text-black" : "text-[#1A1A1A]"
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
 
-          {/* Slide-over White Drawer (rect: x 120, y 63, width 282, height 811, fill: white) */}
-          <div className="relative w-[282px] max-w-[80vw] h-full bg-white shadow-2xl flex flex-col justify-between z-10 overflow-y-auto animate-in slide-in-from-right duration-250 font-outfit border-l border-black/5">
-            {/* Top Navigation Items */}
-            <div className="flex flex-col w-full">
-              {/* 1. Destination (Accordion with Continents) */}
-              <div className="w-full border-b border-black/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsDestinationOpen(!isDestinationOpen);
-                  }}
-                  className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
-                    isDestinationOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
-                  }`}
-                >
-                  <span>Destination</span>
-                  <svg
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isDestinationOpen ? "rotate-90 text-black" : "text-black/60"
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+            {/* Continents List */}
+            {isDestinationOpen && (
+              <div
+                className="bg-[#FAFBF9] border-t flex flex-col animate-in slide-in-from-top-1 duration-150"
+                style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+              >
+                {continents.map((continent) => (
+                  <Link
+                    key={continent.slug || continent.name}
+                    href={`/destinations/${continent.slug || continent.name.toLowerCase().replace(/\s+/g, "-")}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b transition-colors"
+                    style={{ borderColor: "rgba(0, 0, 0, 0.03)" }}
                   >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-
-                {/* Continents List */}
-                {isDestinationOpen && (
-                  <div className="bg-[#FAFBF9] border-t border-black/[0.04] flex flex-col animate-in slide-in-from-top-1 duration-150">
-                    {continents.map((continent) => (
-                      <Link
-                        key={continent.slug || continent.name}
-                        href={`/destinations/${continent.slug || continent.name.toLowerCase().replace(/\s+/g, "-")}`}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b border-black/[0.03] transition-colors"
-                      >
-                        <span>{continent.name}</span>
-                        <span className="text-[10px] text-black/40">Explore &rarr;</span>
-                      </Link>
-                    ))}
-                    <Link
-                      href="/destinations"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
-                    >
-                      All Destinations &rarr;
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Adventure (Accordion with Travel Styles) */}
-              <div className="w-full border-b border-black/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAdventureOpen(!isAdventureOpen);
-                  }}
-                  className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
-                    isAdventureOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
-                  }`}
+                    <span>{continent.name}</span>
+                    <span className="text-[10px] text-black/40">
+                      Explore &rarr;
+                    </span>
+                  </Link>
+                ))}
+                <Link
+                  href="/destinations"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
                 >
-                  <span>Adventure</span>
-                  <svg
-                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      isAdventureOpen ? "rotate-90 text-black" : "text-black/60"
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  All Destinations &rarr;
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* 2. Adventure (Accordion with Travel Styles) */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setIsAdventureOpen(!isAdventureOpen);
+              }}
+              className={`flex items-center justify-between h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] transition-colors w-full tracking-normal cursor-pointer ${
+                isAdventureOpen ? "bg-[#F4F5F3]" : "hover:bg-[#F4F5F3]"
+              }`}
+            >
+              <span>Adventure</span>
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  isAdventureOpen ? "rotate-90 text-black" : "text-[#1A1A1A]"
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+
+            {/* Travel Styles List */}
+            {isAdventureOpen && (
+              <div
+                className="bg-[#FAFBF9] border-t flex flex-col animate-in slide-in-from-top-1 duration-150"
+                style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+              >
+                {travelStyles.map((style) => (
+                  <Link
+                    key={style.slug || style.name}
+                    href={`/travel-styles/${style.slug || style.name.toLowerCase().replace(/\s+/g, "-")}`}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b transition-colors"
+                    style={{ borderColor: "rgba(0, 0, 0, 0.03)" }}
                   >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-
-                {/* Travel Styles List */}
-                {isAdventureOpen && (
-                  <div className="bg-[#FAFBF9] border-t border-black/[0.04] flex flex-col animate-in slide-in-from-top-1 duration-150">
-                    {travelStyles.map((style) => (
-                      <Link
-                        key={style.slug || style.name}
-                        href={`/travel-styles/${style.slug || style.name.toLowerCase().replace(/\s+/g, "-")}`}
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center justify-between pl-6 pr-4 py-2 text-[13px] text-[#1A1A1A]/85 hover:text-black hover:bg-[#F4F5F3] border-b border-black/[0.03] transition-colors"
-                      >
-                        <span>{style.name}</span>
-                        <span className="text-[10px] text-black/40">View &rarr;</span>
-                      </Link>
-                    ))}
-                    <Link
-                      href="/trips"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
-                    >
-                      All Adventures &rarr;
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. Deals */}
-              <div className="w-full border-b border-black/[0.08]">
+                    <span>{style.name}</span>
+                    <span className="text-[10px] text-black/40">
+                      View &rarr;
+                    </span>
+                  </Link>
+                ))}
                 <Link
-                  href="/deals"
+                  href="/trips"
                   onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+                  className="pl-6 pr-4 py-2 text-[12.5px] font-medium text-[#254B02] hover:bg-[#F4F5F3] transition-colors"
                 >
-                  Deals
+                  All Adventures &rarr;
                 </Link>
               </div>
+            )}
+          </div>
 
-              {/* 4. Why Us */}
-              <div className="w-full border-b border-black/[0.08]">
-                <Link
-                  href="/why-nba"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
-                >
-                  Why Us
-                </Link>
-              </div>
-            </div>
+          {/* 3. Deals */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <Link
+              href="/deals"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              Deals
+            </Link>
+          </div>
 
-            {/* Bottom Utility Navigation Items (Figma lines 494.75 to 630.75) */}
-            <div className="flex flex-col w-full pb-6">
-              {/* 5. Wishlist (Heart Icon, height: 34px) */}
-              <div className="w-full border-t border-b border-black/[0.08]">
-                <Link
-                  href="/wishlist"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
-                >
-                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
-                  <span>Wishlist</span>
-                </Link>
-              </div>
-
-              {/* 6. Manage bookings (User Profile Icon, height: 34px) */}
-              <div className="w-full border-b border-black/[0.08]">
-                <Link
-                  href={user ? "/dashboard" : "/auth/login"}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
-                >
-                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                  <span>Manage bookings</span>
-                </Link>
-              </div>
-
-              {/* 7. Contact Us (Phone Icon, height: 34px) */}
-              <div className="w-full border-b border-black/[0.08]">
-                <a
-                  href="tel:+911234567890"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
-                >
-                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                  <span>Contact Us</span>
-                </a>
-              </div>
-
-              {/* 8. Subscribe to Emails (Mail Icon, height: 34px) */}
-              <div className="w-full border-b border-black/[0.08]">
-                <a
-                  href="#subscribe"
-                  onClick={(e) => {
-                    setIsMenuOpen(false);
-                    const el = document.querySelector("#subscribe");
-                    if (el) {
-                      e.preventDefault();
-                      el.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
-                >
-                  <svg className="w-4 h-4 text-[#1A1A1A] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                    <polyline points="22,6 12,13 2,6" />
-                  </svg>
-                  <span>Subscribe to Emails</span>
-                </a>
-              </div>
-            </div>
+          {/* 4. Why Us */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <Link
+              href="/why-nba"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              Why Us
+            </Link>
           </div>
         </div>
-      )}
+
+        {/* Bottom Utility Navigation Items (Figma lines 494.75 to 630.75) */}
+        <div className="flex flex-col w-full pb-16">
+          {/* 5. Wishlist (Heart Icon, height: 34px) */}
+          <div
+            className="w-full border-t border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <Link
+              href="/wishlist"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              <svg
+                className="w-4 h-4 text-[#1A1A1A] shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span>Wishlist</span>
+            </Link>
+          </div>
+
+          {/* 6. Manage bookings (User Profile Icon, height: 34px) */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <Link
+              href={user ? "/dashboard" : "/auth/login"}
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              <svg
+                className="w-4 h-4 text-[#1A1A1A] shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span>Manage bookings</span>
+            </Link>
+          </div>
+
+          {/* 7. Contact Us (Phone Icon, height: 34px) */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <a
+              href="tel:+911234567890"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              <svg
+                className="w-4 h-4 text-[#1A1A1A] shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              <span>Contact Us</span>
+            </a>
+          </div>
+
+          {/* 8. Subscribe to Emails (Mail Icon, height: 34px) */}
+          <div
+            className="w-full border-b"
+            style={{ borderColor: "rgba(0, 0, 0, 0.04)" }}
+          >
+            <a
+              href="#subscribe"
+              onClick={(e) => {
+                setIsMenuOpen(false);
+                const el = document.querySelector("#subscribe");
+                if (el) {
+                  e.preventDefault();
+                  el.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="flex items-center gap-3 h-[34px] px-4 text-[14px] font-normal text-[#1A1A1A] hover:bg-[#F4F5F3] transition-colors w-full tracking-normal"
+            >
+              <svg
+                className="w-4 h-4 text-[#1A1A1A] shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              <span>Subscribe to Emails</span>
+            </a>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

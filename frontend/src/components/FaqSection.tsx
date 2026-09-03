@@ -37,7 +37,7 @@ export default function FaqSection() {
   };
 
   return (
-    <section className="w-full relative font-outfit my-8 md:my-[30px] xl:my-16">
+    <section className="w-full relative font-outfit mt-[80px] mb-[80px] md:my-[30px] xl:my-16">
       {/* Mobile View (#5640:5820 – #5640:5863) */}
       <div className="block md:hidden w-full max-w-[360px] mx-auto">
         {/* Title (#5640:5820, 30.34px Outfit + Gochi Hand) */}
